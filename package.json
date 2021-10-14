@@ -16,7 +16,18 @@
   },
   "dependencies": {
     "gatsby": "^3.14.2",
+    "gatsby-remark-autolink-headers": "^4.11.0",
+    "gatsby-remark-copy-linked-files": "^4.11.0",
+    "gatsby-remark-external-links": "^0.0.4",
+    "gatsby-remark-images": "^5.11.0",
+    "gatsby-remark-vscode": "^3.3.0",
+    "gatsby-source-filesystem": "^3.14.0",
+    "gatsby-transformer-remark": "^4.11.0",
+    "gatsby-transformer-sharp": "^3.14.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "rehype-mathjax": "^3.1.0",
+    "remark-math": "^4.0.0",
+    "remark-rehype": "^8.1.0"
   }
 }
