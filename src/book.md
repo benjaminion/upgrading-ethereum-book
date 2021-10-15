@@ -42,7 +42,166 @@ TODO
 
 TODO
 
-Test mathjax: $x = \frac{y}{z}$.
+[new page /part2/config]::
+## Types, Constants, and Parameters
+
+I've long thought that an interesting way into the Eth2 spec would be to take a tour of its constants and parameters. Even more than the algorithms we use, these parameters tell the story of how the design evolved, and are windows into its inner workings.
+
+The following sections are an exposition of the spec's types, constants, and parameters, presented in the order in which they appear there.
+
+[new page /part2/config/types]::
+### Custom Types
+
+[TODO: link to Altair spec]::
+
+[TODO: any updates for Altair?]::
+
+Right at the top of the spec, we find the important concepts laid out. Each of the types defined there relates to something fundamental about the construction of the Ethereum&nbsp;2.0 beacon chain. As stated there, the rationale for defining these specific Python custom types is, "for type hinting and readability": these types will be appearing frequently.
+
+Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients and is described in [a separate specification](https://github.com/ethereum/eth2.0-specs/tree/v1.0.0/ssz). Here it can be thought of as just a data type.
+
+[TODO: link instead to SSZ section]::
+
+Throughout the spec, all integers are unsigned 64 bit numbers. There was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether the spec should use signed or unsigned integers, but eventually unsigned was chosen. This means that preserving the order of operations is critical in some places to avoid inadvertantly underflowing. Early versions of the spec used other bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now standardised at 64 bits across the spec.
+
+#### Slot
+
+| Name | SSZ equivalent | Description |
+| - | - | - |
+| `Slot` | `uint64` | a slot number |
+
+Time is divided into slots of 12 seconds. Exactly one beacon chain block is supposed to be proposed per slot, by a validator randomly selected to do so. The progress of slots is the fundamental heartbeat of the beaconchain.
+
+[TODO: link to Slots chapter]::
+
+#### Epoch
+
+<a id="epoch"></a>
+||||
+|-|-|-|
+| `Epoch` | `uint64` | an epoch number |
+
+Slots are combined into epochs.
+
+Epoch boundaries are the points at which the chain can be justified and finalised (by the Casper FFG mechanism), and they are also the points at which validator balances are updated, validator committees get shuffled, and validator exits, entries, and slashings are processed. That is, the main state-transition work is performed per epoch, not per slot.
+
+[TODO: link to Epochs chapter]::
+[TODO: link to Casper FFG]::
+
+Fun fact: Epochs were originally [called Cycles](https://github.com/ethereum/consensus-specs/pull/149).
+
+#### CommitteeIndex
+
+||||
+|-|-|-|
+| `CommitteeIndex` | `uint64` | a committee index at a slot |
+
+Validators are organised into committees that collectively vote (make attestations) on blocks. Each committee is active at exactly one slot per epoch, but several committees are active at each slot. This type is an index into the list of committees active at a slot.
+
+In Phase&nbsp;0, validators are members of only one type of committee, and they are shuffled between committees every epoch. The role of the committee is to attest to the beacon block proposed by the selected member of the committee. In Phase&nbsp;1 persistent committees will be introduced that will attest to shard data blocks and are shuffled slowly.
+
+[TODO: link to Committees section]::
+
+#### ValidatorIndex
+
+||||
+|-|-|-|
+| `ValidatorIndex` | `uint64` | a validator registry index |
+
+Every validator that enters the system is consecutively assigned a unique validator index number that is permanent, remaining even after the validator exits. This is necessary as the validator's balance is associated with its index, so it needs to be preserved even if the validator exits, since there is no mechanism available yet to transfer that balance elsewhere.
+
+#### Gwei
+
+||||
+|-|-|-|
+| `Gwei` | `uint64` | an amount in Gwei |
+
+All Ether amounts are specified in units of Gwei ($\smash{10^9}$ Wei, $\smash{10^{-9}}$ Ether). This is basically a hack to avoid having to use integers wider than 64 bits ($\smash{2^{64}}$ Wei is only 18 Ether) to store balances and in calculations. Even so, in some places care needs to be taken to avoid arithmetic overflow when dealing with Ether calculations.
+
+#### Root
+
+||||
+|-|-|-|
+| `Root` | `Bytes32` | a Merkle root |
+
+Merkle roots are ubiquitous in the Eth2 protocol. They are a very succint and tamper-proof way of representing a lot of data, an example of a [cryptographic accumulator](https://en.wikipedia.org/wiki/Accumulator_(cryptography)). Blocks are summarised by their Merkle roots; state is summarised by its Merkle root; the list of Eth1 deposits is summarised by its Merkle root; the digital signature of messages is calculated from the Merkle root of the data structure contained by the message.
+
+#### Version
+
+||||
+|-|-|-|
+| `Version` | `Bytes4` | a fork version number |
+
+It is expected that the protocol will get updated/upgraded from time to time, a process commonly known as a "hard-fork". For example, the upgrade from Phase0 to Altair that took place on the 27th of October 2021. Unlike Eth1, Eth2 has an in-protocol concept of a version number. This is used, for example, to prevent votes from validators on one fork (that maybe haven't upgraded yet) being counted on a different fork.
+
+The recommended use of `Version` is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice).
+
+[TODO: Link to networking section]::
+
+#### DomainType
+
+||||
+|-|-|-|
+| `DomainType` | `Bytes4` | a domain type |
+
+`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Seven domain types are defined in Altair.
+
+[TODO: Link to domain types]::
+[TODO: check the number in Altair - it's likely changed]::
+
+#### ForkDigest
+
+||||
+|-|-|-|
+| `ForkDigest` | `Bytes4` | a digest of the current fork data |
+
+`ForkDigest` is the unique chain identifier. It is generated from information gatherd at genesis and the current fork [Version](#version). It is calculated in [`compute_fork_digest`](#compute_fork_digest). As per the comment there, "4-bytes suffices for practical separation of forks/chains".
+
+[TODO: fix up link to compute_fork_digest]::
+
+`ForkDigest` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md).
+
+[TODO: link to networking section]::
+
+#### Domain
+
+||||
+|-|-|-|
+| `Domain` | `Bytes32` | a signature domain |
+
+Domain is the concatenation of the [`DomainType`](#domaintype) and the first 28 bytes of the [fork data root](#compute_fork_data_root). It is used when verifying any messages from a validator&mdash;the message needs to have been sent with the correct domain and fork version.
+
+[TODO: fix up link to compute_fork_data_root]::
+
+#### BLSPubkey
+
+||||
+|-|-|-|
+| `BLSPubkey` | `Bytes48` | a BLS12-381 public key |
+
+BLS is the digital signature scheme used by Eth2. It has some [very nice properties](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105), in particular the ability to _aggregate_ signatures. This means that many validators can sign the same message (for example, that they support block X), and these signatures can all be efficiently aggregated into a single signature for verification. The ability to do this efficiently makes Eth2 practical as a protocol. Several other protocols have adopted or will adopt BLS, such as Zcash, Chia, Dfinity and Algorand. We are using the BLS signature scheme based on the [BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381).
+
+The `BLSPubkey` type holds a validator's public key, or the aggregation of several validators' public keys. This is used to verify messages that are claimed to have come from that validator or group of validators.
+
+In Ethereum&nbsp;2.0, BLS public keys are elliptic curve points from the BLS12-381 $\smash{G_1}$ group, thus are 48 bytes long when compressed.
+
+[TODO: link to BLS section]::
+
+#### BLSSignature
+
+||||
+|-|-|-|
+| `BLSSignature` | `Bytes96` | a BLS12-381 signature |
+
+As above, we are using BLS (Boneh-Lynn-Shacham) signatures over the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) (Barreto-Lynn-Scott) elliptic curve in order to sign messages between participants. As with all digital signature schemes, this guarantees both the identity of the sender and the integrity of the contents of any message.
+
+In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $\smash{G_2}$ group, thus are 96 bytes long when compressed.
+
+#### References
+
+ - A primer on Merkle roots: https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/
+   - See also Wikipedia: https://en.wikipedia.org/wiki/Merkle_tree
+ - For details of the BLS12-381 elliptic curve: https://hackmd.io/@benjaminion/bls12-381
 
 [new page /part2/building_blocks]::
 ## The Building Blocks
@@ -223,7 +382,7 @@ This property is important for light clients. Light clients are observers of the
  - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
  - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
 
-[new page /part3]::
+    [new page /part3]::
 # Part 3: Ethereum's future
 
 TODO
@@ -232,3 +391,4 @@ TODO
 # Appendices
 
 TODO
+

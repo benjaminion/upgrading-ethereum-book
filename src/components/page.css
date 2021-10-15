@@ -136,6 +136,22 @@ div.image span {
   font-style: italic;
 }
 
+table {
+    border-collapse: collapse;
+    margin-bottom: 1ex;
+    width: 60%;
+}
+
+td, th {
+    border: solid #999999 1px;
+    padding: 4px 8px;
+    text-align: left;
+}
+
+th:empty {
+  display: none;
+}
+
 /*
 .container {
   padding-right: 15px;
