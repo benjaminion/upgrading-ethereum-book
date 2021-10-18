@@ -7,7 +7,7 @@ BEGIN{
     head_path = ""
     head_part = ""
     head_chapter = ""
-    head_part_no = 0
+    head_part_no = -1
     head_chapter_no = 0
     head_section_no = 0
 }
@@ -31,23 +31,22 @@ BEGIN{
             head_chapter = ""
             head_section = ""
             head_part_no++
+            head_chapter_no = 0
             idx = head_part_no
         } else if ($0 ~ /^## /) {
             head_chapter = gensub("^## (.*)$", "\\1", "1", $0)
             head_section = ""
             head_chapter_no++
             head_section_no = 0
-            idx = head_part_no "." head_chapter_no
+            idx = head_part_no "," head_chapter_no
         } else {
             head_section = gensub("^### (.*)$", "\\1", "1", $0)
             head_section_no++
-            idx = head_part_no "." head_chapter_no "." head_section_no
+            idx = head_part_no "," head_chapter_no "," head_section_no
         }
         if (in_header) {
-            print "part: \"" head_part "\"" > filename
-            print "chapter: \"" head_chapter "\"" > filename
-            print "section: \"" head_section "\"" > filename
-            print "index: \"" idx "\"" > filename
+            print "titles: [\"" head_part "\",\"" head_chapter "\",\"" head_section "\"]" > filename
+            print "index: [" idx "]" > filename
             print "---\n" > filename
             in_header = 0
         }

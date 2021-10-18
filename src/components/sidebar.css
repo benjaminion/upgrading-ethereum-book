@@ -10,28 +10,44 @@ nav.sidebar {
   margin: 0px;
   overflow-y: auto;
   background: rgb(245, 247, 249);
-  border-right: 1px solid rgb(230, 236, 241);  
+  border-right: 1px solid rgb(230, 236, 241);
+  text-align: center;
 }
 
-nav.sidebar ul {
-  list-style-type: none;
+nav.sidebar #index {
   padding-left: 0px;
+  text-align: left;
 }
 
-nav.sidebar ul li ul {
-  list-style-type: none;
-  padding-left: 20px;
+nav.sidebar #index .index-item {
+  padding: 3px 0px;
+  text-indent: -2.5em;
+  
 }
 
-nav.sidebar ul a {
-  color: black;
-  line-height: 30px;
+nav.sidebar #index,
+nav.sidebar #index a:hover {
   text-decoration: none;
+  
 }
 
-nav.sidebar ul ul a:hover,
-nav.sidebar ul ul a.active {
-  color: #009bff;
+nav.sidebar #index .index-indent-0 {
+  padding-left: 2.5em;
+  font-weight: bold;
+}
+
+nav.sidebar #index .index-indent-1 {
+  padding-left: 3.5em;
+  font-weight: normal;
+}
+
+nav.sidebar #index .index-indent-2 {
+  padding-left: 4.5em;
+  font-weight: normal;
+}
+
+nav.sidebar #index .index-active {
+  color: black;
 }
 
 nav.sidebar div.sidebar-title {
@@ -42,13 +58,4 @@ nav.sidebar div.sidebar-title {
 
 nav.sidebar div.sidebar-title a:hover {
   text-decoration: none;
-}
-
-nav.sidebar ul.phase li {
-    list-style-type: none;
-    font-weight : bold;
-}
-
-nav.sidebar ul.page li {
-    font-weight : normal;
 }

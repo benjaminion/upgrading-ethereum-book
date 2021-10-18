@@ -1,7 +1,7 @@
 [new page /preface]::
-## Preface
+# Preface
 
-### What to expect
+## What to expect
 
 This is a book for those who want to understand Ethereum&nbsp;2.0 at a technical level. My main goals are to be interesting, informative, and accurate. I am aiming for a degree of completeness, at least touching on all the main areas. But this is Ethereum 2.0 Explained, not the Eth2 Encyclopedia, which would be a much longer book.
 
@@ -11,12 +11,12 @@ Although I am an Eth2 staker, and an Ethereum user, I am not writing for stakers
 
 This book is a non-commercial personal project. I offer it to the community in gratitude for the wonderful journey we have been on together, and in the hope it might inspire a few more budding protocol engineers.
 
-### Acknowledgements
+## Acknowledgements
 
 TODO
 
 [new page /part1]::
-# Part 1: Building Ethereum 2.0
+# Building Ethereum 2.0
 
 TODO - outline
 
@@ -38,7 +38,7 @@ TODO
 TODO
 
 [new page /part2]::
-# Part 2: Eth2 Technical Deep Dive
+# Eth2 Technical Deep Dive
 
 TODO
 
@@ -496,8 +496,8 @@ This property is important for light clients. Light clients are observers of the
  - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
  - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
 
-    [new page /part3]::
-# Part 3: Ethereum's future
+[new page /part3]::
+# Ethereum's future
 
 TODO
 
