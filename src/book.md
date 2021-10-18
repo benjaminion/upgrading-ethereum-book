@@ -45,24 +45,24 @@ TODO
 [new page /part2/config]::
 ## Types, Constants, and Parameters
 
-I've long thought that an interesting way into the Eth2 spec would be to take a tour of its constants and parameters. Even more than the algorithms we use, these parameters tell the story of how the design evolved, and are windows into its inner workings.
+Right at the top of the spec, we find the important concepts laid out in the form of types, constants, and configuration parameters. Each item defined there relates to something fundamental about the construction of the Ethereum&nbsp;2.0 beacon chain.
 
-The following sections are an exposition of the spec's types, constants, and parameters, presented in the order in which they appear there.
+I've long thought that an interesting way into the Eth2 spec would be to take a tour of its constants and parameters. Even more than the algorithms we use, these parameters tell the story of how the design evolved, and provide windows into its inner workings.
+
+The following sections are an exposition of the spec's types, constants, and parameters, presented as they appear in the spec for ease of reference.
 
 [new page /part2/config/types]::
 ### Custom Types
 
 [TODO: link to Altair spec]::
 
-[TODO: any updates for Altair?]::
-
-Right at the top of the spec, we find the important concepts laid out. Each of the types defined there relates to something fundamental about the construction of the Ethereum&nbsp;2.0 beacon chain. As stated there, the rationale for defining these specific Python custom types is, "for type hinting and readability": these types will be appearing frequently.
+As stated in the spec, the rationale for defining these specific Python custom types is, "for type hinting and readability". The data types defined here appear frequently throughout the spec.
 
 Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients and is described in [a separate specification](https://github.com/ethereum/eth2.0-specs/tree/v1.0.0/ssz). Here it can be thought of as just a data type.
 
 [TODO: link instead to SSZ section]::
 
-Throughout the spec, all integers are unsigned 64 bit numbers. There was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether the spec should use signed or unsigned integers, but eventually unsigned was chosen. This means that preserving the order of operations is critical in some places to avoid inadvertantly underflowing. Early versions of the spec used other bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now standardised at 64 bits across the spec.
+Throughout the spec, almost all integers are unsigned 64 bit numbers. There was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether the spec should use signed or unsigned integers, but eventually unsigned was chosen. This means that preserving the order of operations is critical in some places to avoid inadvertantly underflowing. Early versions of the spec used other bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now standardised at 64 bits across the spec, the only exception being [`ParticipationFlags`](#ParticipationFlags), introduced in the Altair fork, which has type `uint8`. It could probably have been a `bytes1` type for more consistency.
 
 #### Slot
 
@@ -197,11 +197,125 @@ As above, we are using BLS (Boneh-Lynn-Shacham) signatures over the [BLS12-381](
 
 In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $\smash{G_2}$ group, thus are 96 bytes long when compressed.
 
+#### ParticipationFlags
+
+||||
+|-|-|-|
+| `ParticipationFlags` | `uint8` | a succinct representation of 8 boolean participation flags |
+
+The `ParticipationFlags` type was introduced in the Altair upgrade as part of the accounting reforms.
+
+Prior to Altair, all attestations seen in blocks were stored in state for two epoch. At the end of an epoch, finality calculations, and reward and penalty calculations for each attesting validator would be done as a batch by processing all of the attestations for the previous epoch. This created a spike in processing at epoch boundaries, and led to a noticeable increase in late blocks and attestations during the first slots of epochs. With Altair, [participation flags](https://github.com/ethereum/consensus-specs/pull/2140) are now used to continuously track validators' attestations, reducing the processing load at the end of epochs.
+
+Three of the eight bits are [currently used](constantsn#participation-flag-indices); five are reserved for future use.
+
 #### References
 
  - A primer on Merkle roots: https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/
    - See also Wikipedia: https://en.wikipedia.org/wiki/Merkle_tree
- - For details of the BLS12-381 elliptic curve: https://hackmd.io/@benjaminion/bls12-381
+ - Details of the BLS12-381 elliptic curve: https://hackmd.io/@benjaminion/bls12-381
+
+[new page /part2/config/constants]::
+### Constants
+
+The distinction between "constants" and "configuration values" is not always clear, and things have moved back and forth between them at times. Basically "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+
+[TODO: Altair changes]::
+
+#### `GENESIS_SLOT`
+
+| Name | Value |
+| - | - |
+| `GENESIS_SLOT` | `Slot(0)` |
+
+The very first slot number for the beacon chain is zero.
+
+This might seem uncontroversial, but it actually featured heavily in the Great Integer Wars mentioned [previously](types#custom-types). The issue was that calculations on unsigned integers might have negative intermediate values, which would cause problems. A proposed work-around for this was to start the chain at a non-zero slot number. It was initially chosen to be [2^19](https://github.com/ethereum/eth2.0-specs/commit/656eae6f6ad85de5f4b9493ca0a4f8ca16d2e261#diff-51a43328a58414e132a744f3771f018cR193), then [2^63](https://github.com/ethereum/eth2.0-specs/commit/7f39f79b2e72654920b2e12127cfdfe6ad0088c6), then [2^32](https://github.com/ethereum/eth2.0-specs/commit/9b7b35bc9d18d0fac92ee142f1ea66ab289d3175), and finally [back to zero](https://github.com/ethereum/eth2.0-specs/commit/8c32128ffbda5c7e056c218cdb78ab76d856c5f5#diff-51a43328a58414e132a744f3771f018cR219).[^1]
+
+[^1]: In my view, this madness only confirms that we should have been using signed integers all along.
+
+#### `GENESIS_EPOCH`
+
+|||
+|-|-|
+| `GENESIS_EPOCH` | `Epoch(0)` |
+
+Similar to the above, but widely used in the beacon chain spec. When the chain starts, it starts at epoch zero.
+
+#### `FAR_FUTURE_EPOCH`
+
+|||
+|-|-|
+| `FAR_FUTURE_EPOCH` | `Epoch(2**64 - 1)` |
+
+A candidate for the dullest constant. It's used as a default initialiser for validators' activation and exit times before they are properly set. No epoch number is bigger than this one.
+
+#### `DEPOSIT_CONTRACT_TREE_DEPTH`
+
+|||
+|-|-|
+| `DEPOSIT_CONTRACT_TREE_DEPTH` | `uint64(2**5)` (= 32) |
+
+`DEPOSIT_CONTRACT_TREE_DEPTH` specifies the size of the (sparse) Merkle tree used by the Eth1 deposit contract to store deposits made. With a value of 32, this allows for $\smash{2^{32}}$ = 4.3 billion deposits. Given that the minimum deposit it 1 Ether, that number is clearly enough for quite a while.
+
+#### `JUSTIFICATION_BITS_LENGTH`
+
+|||
+|-|-|
+| `JUSTIFICATION_BITS_LENGTH` | `uint64(4)` |
+
+As an optimisation to Casper FFG&mdash;the process by which finality is conferred on epochs&mdash;Eth2 uses a "k-finality" rule. We will describe this properly when we look at processing justification and finalisation. For now, this constant is just the number of bits we need to store in state to implement k-finality. For k&nbsp;=&nbsp;2 we track the justification status of the last four epochs.
+
+[TODO: link to justification and finalisation]::
+
+#### `ENDIANNESS`
+
+|||
+|-|-|
+| `ENDIANNESS` | `'little'` |
+
+[Endianness](https://en.wikipedia.org/wiki/Endianness) refers to the order of bytes in the binary representation of a number: most significant byte first is big-endian; least significant byte first is little-endian. For the most part these details are hidden by compilers, and we don't need to worry about endianness. But endianness matters when converting between integers and bytes, which is relevant to shuffling and proposer selection, the RANDAO, and when serialising with SSZ.
+
+The spec began life as big-endian, but the Nimbus team from Status successfully campaigned for it to be changed to little-endian to better match processor hardware implementations, and the endianness [of WASM](https://webassembly.org/docs/portability/). SSZ was changed [first](https://github.com/ethereum/eth2.0-specs/pull/139), and then the rest of the spec [followed](https://github.com/ethereum/eth2.0-specs/pull/564).
+
+#### Participation flag indices
+
+| Name | Value |
+| - | - |
+| `TIMELY_SOURCE_FLAG_INDEX` | `0` |
+| `TIMELY_TARGET_FLAG_INDEX` | `1` |
+| `TIMELY_HEAD_FLAG_INDEX` | `2` |
+
+TODO
+
+#### Incentivization weights
+
+| Name | Value |
+| - | - |
+| `TIMELY_SOURCE_WEIGHT` | `uint64(14)` |
+| `TIMELY_TARGET_WEIGHT` | `uint64(26)` |
+| `TIMELY_HEAD_WEIGHT` | `uint64(14)` |
+| `SYNC_REWARD_WEIGHT` | `uint64(2)` |
+| `PROPOSER_WEIGHT` | `uint64(8)` |
+| `WEIGHT_DENOMINATOR` | `uint64(64)` |
+
+These weights are used to calculate the total reward received by a validator performing its duties. There are five duties in total. Three relate to making attestations, and are attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for participating in sync committees, and for proposing blocks.
+
+The calculation of rewards was overhauled in the Altair upgrade. The total reward amount remains the same, but the weights were adjusted, and the gradual inclusion delay factor was removed in favour of a cliff after which no reward is payable for that duty. Previously, ignoring the inclusion delay factor, the weights (roughly) corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for the block proposer. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
+
+Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
+
+<div class="image">
+<img src="images/weights.svg" style="width:50%" /><br />
+<span>The proportion of the total reward derived from each of the micro-rewards.</span>
+</div>
+
+#### References
+
+TODO
+
+[new page /part2/config/configuration]::
+### Configuration
 
 [new page /part2/building_blocks]::
 ## The Building Blocks
