@@ -137,15 +137,30 @@ div.image span {
 }
 
 table {
+    border: solid #999999 1px;
     border-collapse: collapse;
-    margin-bottom: 2ex;
-    width: 60%;
+    margin: 2ex 0;
 }
 
 td, th {
     border: solid #999999 1px;
     padding: 4px 8px;
     text-align: left;
+}
+
+th {
+    color: white;
+    background-color: #999999;
+    border: solid #cccccc 1px;
+    border-top-style: inherit;
+}
+
+th:first-child {
+    border-left-style: inherit;
+}
+
+th:last-child {
+    border-right-style: inherit;
 }
 
 th:empty {
