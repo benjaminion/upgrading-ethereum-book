@@ -2,25 +2,23 @@
 
 ## Installing
 
- - `cd src`
- - Run `../bin/split.awk book.md` to generate the separate markdown files
+ - Run `bin/update.sh` to generate the separate markdown files
 
 TODO - what npm magic is required?
 
 ## Updating
 
- - `cd src`
- - Edit _book.md_
- - Run `../bin/split.awk book.md` to generate the separate markdown files
+ - Edit _src/book.md_
+ - Run `bin/update.sh` to generate the separate markdown files
 
 ## How to
 
 ### Create a new page
 
-New pages are created by inserting the following before headings:
+New pages are created by appending HTML comments to headings (first three levels only):
+
 ```
-[new page /new/page/path]::
-## Heading
+## Heading <!-- /new/page/path -->
 ```
 
 ### Insert an image
