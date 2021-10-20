@@ -25,23 +25,30 @@ BEGIN{
         name = gensub("^#+ (.*) <!-- .* -->$", "\\1", "1", $0)
         h_path = gensub("^#+ .* <!-- (.*) -->$", "\\1", "1", $0)
         heading = gensub ("^(#+ .*) <!-- .* -->$", "\\1", "1", $0)
-        if ($0 ~ /^# /) {
+        switch ($0) {
+        case /^# /:
             h_part = name
             h_chapter = ""
             h_section = ""
             h_part_no++
             h_chapter_no = 0
             idx = h_part_no
-        } else if ($0 ~ /^## /) {
+            break
+        case /^## /:
             h_chapter = name
             h_section = ""
             h_chapter_no++
             h_section_no = 0
             idx = h_part_no "," h_chapter_no
-        } else {
+            break
+        case /^### /:
             h_section = name
             h_section_no++
             idx = h_part_no "," h_chapter_no "," h_section_no
+            break
+        default:
+            print "Internal error"
+            exit (1)
         }
         print "---" > filename
         print "path: " h_path > filename
