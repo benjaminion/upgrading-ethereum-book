@@ -14,39 +14,32 @@ nav.sidebar {
   text-align: center;
 }
 
-nav.sidebar #index {
-  padding-left: 0px;
+#index {
+  margin: 0 1em;
   text-align: left;
 }
 
-nav.sidebar #index .index-item {
-  padding: 3px 0px;
-  text-indent: -2.5em;
-  
+#index li {
+  text-indent: -1em;
+  list-style-type: none;
+  padding: 3px 0;
 }
 
-nav.sidebar #index,
-nav.sidebar #index a:hover {
+#index,
+#index a:hover {
   text-decoration: none;
-  
 }
 
-nav.sidebar #index .index-indent-0 {
-  padding-left: 2.5em;
+#index ul {
+  padding-left: 1em;
+}
+
+#index > ul > li {
+  padding-top: 1ex;
   font-weight: bold;
 }
 
-nav.sidebar #index .index-indent-1 {
-  padding-left: 3.5em;
-  font-weight: normal;
-}
-
-nav.sidebar #index .index-indent-2 {
-  padding-left: 4.5em;
-  font-weight: normal;
-}
-
-nav.sidebar #index .index-active {
+#index a.index-active {
   color: black;
 }
 
