@@ -21,6 +21,16 @@ New pages are created by appending HTML comments to headings (first three levels
 ## Heading <!-- /new/page/path -->
 ```
 
+### Make a page unlinkable
+
+Do this if a page has no subsections and no content yet. It will appear in the index, but not linkable.
+
+Append a `*` to the path:
+
+```
+## Heading <!-- /unlinked/page/path* -->
+```
+
 ### Insert an image
 
 Insert SVG images with

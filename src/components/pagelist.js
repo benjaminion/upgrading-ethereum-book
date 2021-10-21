@@ -1,6 +1,13 @@
 import React from "react"
 import { Link } from "gatsby"
 
+function ConditionalLink(props) {
+  const ret = props.nolink
+        ? <>{props.children}</>
+        : <Link to={props.to} activeClassName="index-active">{props.children}</Link>
+  return (ret) 
+}
+
 function NestedList(props) {
   var ret = []
   var idx = props.idx
@@ -8,7 +15,7 @@ function NestedList(props) {
     const item = props.items[idx]
     if (item.level === props.level) {
       ret.push(
-          <li key={idx}><Link to={item.page} activeClassName="index-active"><span className="index-string">{item.index}</span> {item.title}</Link></li>
+          <li key={idx}><ConditionalLink to={item.page} nolink={item.hide}><span className="index-string">{item.index}</span> {item.title}</ConditionalLink></li>
       )
       idx++
     } else if (item.level > props.level) {
@@ -38,7 +45,8 @@ const PageList = ({pages, depth}) => {
       level: p.node.frontmatter.index.length,
       index: p.node.frontmatter.index.join("."),
       title: p.node.frontmatter.titles[p.node.frontmatter.index.length - 1],
-      page: p.node.frontmatter.path
+      page: p.node.frontmatter.path,
+      hide: p.node.frontmatter.hide === true
     })})
 
   return (<NestedList items={layout} level={depth + 1} idx={0} />)

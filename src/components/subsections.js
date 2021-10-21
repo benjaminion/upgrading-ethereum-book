@@ -13,6 +13,7 @@ const Subsections = ({indexArray}) => {
         edges {
           node {
             frontmatter {
+              hide
               path
               titles
               index

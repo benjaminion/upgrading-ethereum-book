@@ -24,11 +24,11 @@ TODO - outline
 
 TODO
 
-### A Brief History of Ethereum's Future <!-- /part1/introduction/history -->
+### A Brief History of Ethereum's Future <!-- /part1/introduction/history* -->
 
 TODO
 
-### Outline <!-- /part1/introduction/outline -->
+### Outline <!-- /part1/introduction/outline* -->
 
 TODO
 
@@ -38,23 +38,29 @@ TODO
 
 ## Types, Constants, Presets, and Parameters <!-- /part2/config -->
 
-Right at the top of the spec, we find the important concepts laid out in the form of types, constants, presets, and configuration parameters. Each item defined there relates to something fundamental about the construction of the Ethereum&nbsp;2.0 beacon chain.
+Perhaps a chapter on constants, presets and parameters sounds drier than the Namib Desert. But I've long thought that these things provide an excellent way in to the ideas and mechanisms we'll be unpacking in detail in later chapters. Far from being a desert, this part of the spec bustles with life!
 
-I've long thought that an interesting way into the Eth2 spec would be to take a tour of its constants and parameters. Even more than the algorithms we use, these parameters tell the story of how the design evolved, and provide windows into its inner workings.
+The foundation is laid with a set of custom data types. As previously discussed [TODO: link], the Eth2 spec is executable in Python. The datatypes defined at the top of the spec represent the fundamental quantities that will be reappearing frequently.
 
-The following sections are an exposition of the spec's types, constants, presets, and parameters, presented as they appear in the spec for ease of reference.
+Then, with constants, presets, and parameters, we will examine the numbers that define and constrain the behaviour of the chain. Each of these quantities tells a story. Each parameter encapsulates an insight, or a concept, or a compromise. Why is it here? How has it changed over time? Where does its value come from?
+
+The following sections explore and explain these things, presented as they appear in the spec for ease of reference.
 
 ### Custom Types <!-- /part2/config/types -->
 
 [TODO: link to Altair spec]::
 
-As stated in the spec, the rationale for defining these specific Python custom types is, "for type hinting and readability". The data types defined here appear frequently throughout the spec.
+Per the spec, the rationale for defining the following specific Python custom types is, "for type hinting and readability". The data types defined here appear frequently throughout the spec; they are the building blocks for everything else.
 
-Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients and is described in [a separate specification](https://github.com/ethereum/eth2.0-specs/tree/v1.0.0/ssz). Here it can be thought of as just a data type.
+Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients, as described in a separate specification. Here it can be thought of as just a primitive data type.
 
 [TODO: link instead to SSZ section]::
 
-Throughout the spec, almost all integers are unsigned 64 bit numbers. There was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether the spec should use signed or unsigned integers, but eventually unsigned was chosen. This means that preserving the order of operations is critical in some places to avoid inadvertantly underflowing. Early versions of the spec used other bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now standardised at 64 bits across the spec, the only exception being [`ParticipationFlags`](#ParticipationFlags), introduced in the Altair fork, which has type `uint8`. It could probably have been a `bytes1` type for more consistency.
+Throughout the spec, (almost) all integers are unsigned 64 bit numbers.
+
+Regarding "unsigned", there was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether Eth2 should use signed or unsigned integers, but eventually unsigned was chosen. As a result, preserving the order of operations is critical in some places to avoid inadvertantly underflowing &ndash; negative numbers are forbidden.
+
+And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#ParticipationFlags), introduced in the Altair fork, which has type `uint8`. It could probably have been a `bytes1` type, since it is not really arithmetic,
 
 | Name | SSZ equivalent | Description |
 | - | - | - |
@@ -81,9 +87,11 @@ Time is divided into fixed length slots. Within each slot, exactly one validator
 
 #### Epoch
 
-Slots are combined into epochs.
+Slots are combined into fixed-length pochs.
 
 Epoch boundaries are the points at which the chain can be justified and finalised (by the Casper FFG mechanism), and they are also the points at which validator balances are updated, validator committees get shuffled, and validator exits, entries, and slashings are processed. That is, the main state-transition work is performed per epoch, not per slot.
+
+Epochs have always felt like a slightly uncomfortable overlay on top of the slot-by-slot progress of the beacon chain, but necessitated by Casper FFG finality. There have been past [proposals](https://ethresear.ch/t/epoch-less-casper-ffg-liveness-safety-argument/2702?u=benjaminion) that move away from epochs, and there are possible future developments that could allow us to [do away](https://ethresear.ch/t/a-model-for-cumulative-committee-based-finality/10259?u=benjaminion) with epochs entirely. But, for the time being, they remain.
 
 [TODO: link to Epochs chapter]::
 [TODO: link to Casper FFG]::
@@ -96,19 +104,29 @@ Validators are organised into committees that collectively vote (make attestatio
 
 In Phase&nbsp;0, validators are members of only one type of committee, and they are shuffled between committees every epoch. The role of the committee is to attest to the beacon block proposed by the selected member of the committee. In Phase&nbsp;1 persistent committees will be introduced that will attest to shard data blocks and are shuffled slowly.
 
+It is the use of randomly sampled committees that makes the beacon chain design practical, while maintaining security. If all validators were active all the time, there would be an overwhelming number of messages to deal with.
+
 [TODO: link to Committees section]::
 
 #### ValidatorIndex
 
-Every validator that enters the system is consecutively assigned a unique validator index number that is permanent, remaining even after the validator exits. This is necessary as the validator's balance is associated with its index, so it needs to be preserved even if the validator exits, since there is no mechanism available yet to transfer that balance elsewhere.
+Each validator making a successful deposit is consecutively assigned a unique validator index number that is permanent, remaining even after the validator exits. This is necessary as the validator's balance is associated with its index, so it needs to be preserved even if the validator exits, since there is no mechanism available yet to transfer that balance elsewhere.
 
 #### Gwei
 
-All Ether amounts are specified in units of Gwei ($\smash{10^9}$ Wei, $\smash{10^{-9}}$ Ether). This is basically a hack to avoid having to use integers wider than 64 bits ($\smash{2^{64}}$ Wei is only 18 Ether) to store balances and in calculations. Even so, in some places care needs to be taken to avoid arithmetic overflow when dealing with Ether calculations.
+All Ether amounts are specified in units of Gwei ($\smash{10^9}$ Wei, $\smash{10^{-9}}$ Ether). This is basically a hack to avoid having to use integers wider than 64 bits to store validator balances and while doing calculations, since ($\smash{2^{64}}$ Wei is only 18 Ether. Even so, in some places care needs to be taken to avoid arithmetic overflow when dealing with Ether calculations.
 
 #### Root
 
-Merkle roots are ubiquitous in the Eth2 protocol. They are a very succint and tamper-proof way of representing a lot of data, an example of a [cryptographic accumulator](https://en.wikipedia.org/wiki/Accumulator_(cryptography)). Blocks are summarised by their Merkle roots; state is summarised by its Merkle root; the list of Eth1 deposits is summarised by its Merkle root; the digital signature of messages is calculated from the Merkle root of the data structure contained by the message.
+Merkle roots are ubiquitous in the Eth2 protocol. They are a very succinct and tamper-proof way of representing a lot of data, an example of a [cryptographic accumulator](https://en.wikipedia.org/wiki/Accumulator_(cryptography)). Blocks are summarised by their Merkle roots; state is summarised by its Merkle root; the list of Eth1 deposits is summarised by its Merkle root; the digital signature of messages is calculated from the Merkle root of the data structure contained by the message.
+
+#### Hash32
+
+Merkle roots are constructed with cryptographic hash functions. In the spec, a `Hash32` type is used to represent Eth1 block roots (which are also Merkle roots).
+
+I don't know why only the Eth1 block hash has been awarded the `Hash32` type: other hashes in the spec [remain](https://github.com/ethereum/consensus-specs/pull/2689) `Bytes32`. In early versions of the spec `Hash32` was used for all cryptographic has quantities, but this was [changed](https://github.com/ethereum/consensus-specs/pull/458) to `Bytes32`.
+
+Anyway, it's worth taking a moment in appreciation of the humble [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function). The hash function is arguably the single most important algorithmic innovation underpinning blockchain technology, and in fact most of our online lives. Easily overlooked, but utterly critical in enabling our modern world.
 
 #### Version
 
@@ -120,14 +138,11 @@ The recommended use of `Version` is described in the [Ethereum 2.0 networking sp
 
 #### DomainType
 
-`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Seven domain types are defined in Altair.
-
-[TODO: Link to domain types]::
-[TODO: check the number in Altair - it's likely changed]::
+`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Altair](constants#domain-types).
 
 #### ForkDigest
 
-`ForkDigest` is the unique chain identifier. It is generated from information gatherd at genesis and the current fork [Version](#version). It is calculated in [`compute_fork_digest`](#compute_fork_digest). As per the comment there, "4-bytes suffices for practical separation of forks/chains".
+`ForkDigest` is the unique chain identifier. It is generated by combining information gathered at genesis with the current fork [Version](#version). It is calculated in [`compute_fork_digest`](#compute_fork_digest). As per the comment there, "4-bytes suffices for practical separation of forks/chains".
 
 [TODO: fix up link to compute_fork_digest]::
 
@@ -139,11 +154,12 @@ The recommended use of `Version` is described in the [Ethereum 2.0 networking sp
 
 Domain is the concatenation of the [`DomainType`](#domaintype) and the first 28 bytes of the [fork data root](#compute_fork_data_root). It is used when verifying any messages from a validator&mdash;the message needs to have been sent with the correct domain and fork version.
 
+[TODO: explain the rationale]::
 [TODO: fix up link to compute_fork_data_root]::
 
 #### BLSPubkey
 
-BLS is the digital signature scheme used by Eth2. It has some [very nice properties](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105), in particular the ability to _aggregate_ signatures. This means that many validators can sign the same message (for example, that they support block X), and these signatures can all be efficiently aggregated into a single signature for verification. The ability to do this efficiently makes Eth2 practical as a protocol. Several other protocols have adopted or will adopt BLS, such as Zcash, Chia, Dfinity and Algorand. We are using the BLS signature scheme based on the [BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381).
+BLS is the digital signature scheme used by Eth2. It has some [very nice properties](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105), in particular the ability to aggregate signatures. This means that many validators can sign the same message (for example, that they support block X), and these signatures can all be efficiently aggregated into a single signature for verification. The ability to do this efficiently makes Eth2 practical as a protocol. Several other protocols have adopted or will adopt BLS, such as Zcash, Chia, Dfinity and Algorand. We are using the BLS signature scheme based on the [BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381).
 
 The `BLSPubkey` type holds a validator's public key, or the aggregation of several validators' public keys. This is used to verify messages that are claimed to have come from that validator or group of validators.
 
@@ -173,7 +189,7 @@ Three of the eight bits are [currently used](constantsn#participation-flag-indic
 
 ### Constants <!-- /part2/config/constants -->
 
-The distinction between "constants" and "configuration values" is not always clear, and things have moved back and forth between them at times. Basically "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
 
 [TODO: Altair changes]::
 
@@ -724,7 +740,7 @@ The same applies to new validator activations, once a validator has been marked 
 
 This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](#get_validator_churn_limit) the actual number of validator exits and activations allowed per epoch. The number of exits allowed is `max(MIN_PER_EPOCH_CHURN_LIMIT, n // CHURN_LIMIT_QUOTIENT)`, where `n` is the number of active validators. The same applies to activations.
 
-## The Building Blocks <!-- /part2/building_blocks -->
+## Building Blocks <!-- /part2/building_blocks -->
 
 ### The Swap-or-Not Shuffle <!-- /part2/building_blocks/shuffling -->
 
@@ -901,11 +917,11 @@ This property is important for light clients. Light clients are observers of the
  - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
  - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
 
-# Ethereum's future <!-- /part3 -->
+# Ethereum's future <!-- /part3* -->
 
 TODO
 
-# Appendices <!-- /appendices -->
+# Appendices <!-- /appendices* -->
 
 TODO
 

@@ -51,6 +51,10 @@ BEGIN{
             exit (1)
         }
         print "---" > filename
+        if (h_path ~ /\*$/) {
+            h_path = substr(h_path, 1, length(h_path) - 1)
+            print "hide: true" > filename
+        }
         print "path: " h_path > filename
         print "titles: [\"" h_part "\",\"" h_chapter "\",\"" h_section "\"]" > filename
         print "index: [" idx "]" > filename
