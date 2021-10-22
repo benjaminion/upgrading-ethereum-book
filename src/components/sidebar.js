@@ -35,7 +35,7 @@ const Sidebar = () => {
         </Link>
       </div>
       <div id="index">
-      <PageList pages={pages} depth={0} />
+        <PageList pages={pages} depth={0} />
       </div>
     </nav>
   )

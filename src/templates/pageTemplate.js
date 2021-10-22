@@ -13,6 +13,10 @@ export default function Template({
 
   //console.log(JSON.stringify(markdownRemark, undefined, 2))
 
+  const index_array = markdownRemark.frontmatter.path !== "/contents"
+        ? markdownRemark.frontmatter.index
+        : []
+
   return (
     <Layout>
       <Sidebar />
@@ -23,7 +27,7 @@ export default function Template({
               className="section-content"
               dangerouslySetInnerHTML={{ __html: html }}
             />
-            <Subsections indexArray={markdownRemark.frontmatter.index} />
+            <Subsections indexArray={index_array} />
           </div>
         </div>
       </div>
@@ -36,6 +40,7 @@ export const pageQuery = graphql`
     markdownRemark(frontmatter: { path: { eq: $path } }) {
       frontmatter {
         index
+        path
       }
       html
     }

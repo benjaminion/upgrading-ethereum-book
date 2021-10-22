@@ -39,6 +39,10 @@ nav.sidebar {
   font-weight: bold;
 }
 
+#index > ul > li .index-string {
+  display: none;
+}
+
 #index a.index-active {
   color: black;
 }

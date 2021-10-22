@@ -29,7 +29,7 @@ const Subsections = ({indexArray}) => {
   // Find pages that are subsections of the page we are on
   const pages = data.allMarkdownRemark.edges
 
-  const indexFilterString = indexArray.join() + ","
+  const indexFilterString = indexArray.length === 0 ? "" : indexArray.join() + ","
   const filteredPages = pages.filter(p => p.node.frontmatter.index !== null && p.node.frontmatter.index.join().startsWith(indexFilterString))
 
   if (filteredPages.length > 0) {
