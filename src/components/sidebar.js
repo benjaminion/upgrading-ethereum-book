@@ -20,22 +20,30 @@ const Sidebar = () => {
           }
         }
       }
+      site {
+        siteMetadata {
+          title
+        }
+      }
     }
   `)
 
   const pages = data.allMarkdownRemark.edges
 
+  // List only parts and chapters in the sidebar
+  const filteredPages = pages.filter(p => p.node.frontmatter.index !== null && p.node.frontmatter.index.length <= 2)
+  
   return (
     <nav className="sidebar">
       <div className="sidebar-title">
         <Link
           to="/"
         >
-          Ethereum 2.0 Explained
+          {data.site.siteMetadata.title}
         </Link>
       </div>
       <div id="index">
-        <PageList pages={pages} depth={0} />
+        <PageList pages={filteredPages} depth={0} />
       </div>
     </nav>
   )

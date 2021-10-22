@@ -44,7 +44,7 @@ nav.sidebar {
 }
 
 #index a.index-active {
-  color: black;
+  text-decoration: underline;
 }
 
 nav.sidebar div.sidebar-title {
