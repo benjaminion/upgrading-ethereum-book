@@ -14,13 +14,17 @@ This book is a non-commercial personal project. I offer it to the community in g
 
 TODO
 
-# Building Ethereum 2.0 <!-- /part1 -->
+# Building Ethereum 2.0 <!-- /part1* -->
 
-TODO - outline
+TODO: intro
 
-## Introduction <!-- /part1/introduction -->
+## Introduction <!-- /part1/introduction* -->
 
 ### Why Ethereum 2.0?
+
+TODO
+
+### The Cathedral and the Bazaar <!-- /part1/introduction/catb* -->
 
 TODO
 
@@ -28,13 +32,55 @@ TODO
 
 TODO
 
-### Outline <!-- /part1/introduction/outline* -->
+### Outline of the Book <!-- /part1/introduction/outline* -->
+
+TODO
+
+## Goals <!-- /part1/goals* -->
+
+TODO: Intro
+
+### Design Goals <!-- /part1/goals/design* -->
+
+TODO
+
+### Attacks and Defences <!-- /part/goals/attacks* -->
+
+TODO
+
+## Making the Sausage <!-- /part1/making* -->
+
+TODO: Intro
+
+### The Specifications <!-- /part1/making/specs* -->
+
+TODO
+
+### The Process  <!-- /part1/making/process* -->
 
 TODO
 
 # The Technical Stuff <!-- /part2 -->
 
+TODO: Intro
+
+## The Beacon Chain <!-- /part2/beacon* -->
+
 TODO
+
+### Terminology <!-- /part2/beacon/terms* -->
+
+TODO
+
+### Design Overview <!-- /part2/beacon/overview* -->
+
+TODO
+
+### Architecture of a Node <!-- /part2/beacon/arch* -->
+
+TODO
+
+### Genesis <!-- /part2/beacon/genesis* -->
 
 ## Types, Constants, Presets, and Parameters <!-- /part2/config -->
 
@@ -740,9 +786,147 @@ The same applies to new validator activations, once a validator has been marked 
 
 This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](#get_validator_churn_limit) the actual number of validator exits and activations allowed per epoch. The number of exits allowed is `max(MIN_PER_EPOCH_CHURN_LIMIT, n // CHURN_LIMIT_QUOTIENT)`, where `n` is the number of active validators. The same applies to activations.
 
-## Building Blocks <!-- /part2/building_blocks -->
+## Data Structures <!-- /part2/datastructures* -->
 
-### The Swap-or-Not Shuffle <!-- /part2/building_blocks/shuffling -->
+TODO
+
+## Consensus <!-- /part2/consensus* -->
+
+TODO: Intro
+
+### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
+
+TODO
+
+### Fork Choice <!-- /part2/consensus/fork_choice* -->
+
+TODO
+
+### Casper FFG <!-- /part2/consensus/casper_ffg* -->
+
+TODO
+
+### Finality <!-- /part2/consensus/finality* -->
+
+TODO
+
+### Gasper <!-- /part2/consensus/gasper* -->
+
+TODO
+
+### The Inactivity Leak <!-- /part2/consensus/inactivity* -->
+
+TODO
+
+### Weak Subjectivity <!-- /part2/consensus/weak_subjectivity* -->
+
+TODO
+
+### Issues <!-- /part2/consensus/issues* -->
+
+TODO
+
+## The Progress of a Slot <!-- /part2/slot* -->
+
+TODO
+
+### Proposing <!-- /part2/slot/proposing* -->
+
+TODO
+
+### Proposing <!-- /part2/slot/attesting* -->
+
+TODO
+
+### Aggregating <!-- /part2/slot/aggregating* -->
+
+TODO
+
+### Sync Committee Participation <!-- /part2/slot/sync* -->
+
+TODO
+
+## The Progress of an Epoch <!-- /part2/epoch* -->
+
+TODO
+
+### Applying Rewards and Penalties <!-- /part2/epoch/rewards* -->
+
+TODO
+
+### Justification and Finalisation <!-- /part2/epoch/finality* -->
+
+TODO
+
+### Other State Updates <!-- /part2/epoch/finality* -->
+
+TODO
+
+## Validator Lifecycle <!-- /part2/validator* -->
+
+TODO
+
+## Deposit Handling <!-- /part2/deposits* -->
+
+TODO
+
+### The Deposit Contract <!-- /part2/deposits/contract* -->
+
+TODO
+
+### Deposit Receipts <!-- /part2/deposits/receipts* -->
+
+TODO
+
+### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting* -->
+
+TODO
+
+### Merkle Proofs <!-- /part2/deposits/voting* -->
+
+TODO
+
+### Deposit processing <!-- /part2/deposits/processing* -->
+
+TODO
+
+### Withdrawal Credentials <!-- /part2/deposits/credentials* -->
+
+TODO
+
+## Economics <!-- /part2/economics* -->
+
+TODO
+
+### Rewards and Penalties <!-- /part2/economics/rewards* -->
+
+TODO
+
+### Slashing <!-- /part2/economics/slashing* -->
+
+TODO
+
+### Inactivity <!-- /part2/economics/inactivity* -->
+
+TODO
+
+### Effective Balance <!-- /part2/economics/effective_balance* -->
+
+TODO
+
+## The Building Blocks <!-- /part2/building_blocks -->
+
+TODO
+
+### Randomness <!-- /part2/building_blocks/randomness* -->
+
+TODO
+
+### Committees <!-- /part2/building_blocks/committees* -->
+
+TODO
+
+### Shuffling <!-- /part2/building_blocks/shuffling -->
 
 Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
@@ -917,7 +1101,187 @@ This property is important for light clients. Light clients are observers of the
  - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
  - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
 
+### BLS Signatures <!-- /part2/building_blocks/signatures* -->
+
+TODO
+
+### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
+
+TODO
+
+### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz* -->
+
+TODO
+
+### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
+
+TODO
+
+## Upgrades <!-- /part2/upgrades* -->
+
+TODO
+
+### Hard Forks <!-- /part2/upgrades/forks* -->
+
+TODO
+
+### Fork Digest <!-- /part2/upgrades/fork_digest* -->
+
+TODO
+
+## Networking <!-- /part2/networking* -->
+
+TODO
+
+### Discovery <!-- /part2/networking/discovery* -->
+
+TODO
+
+### Gossip <!-- /part2/networking/gossip* -->
+
+TODO
+
+### RPC <!-- /part2/networking/rpc* -->
+
+TODO
+
+### Syncing <!-- /part2/networking/syncing* -->
+
+TODO
+
+### Message Types <!-- /part2/networking/messages* -->
+
+TODO
+
+
+
+## Implementation <!-- /part2/implementation* -->
+
+TODO
+
+### Protoarray <!-- /part2/implementation/protoarray* -->
+
+TODO
+
+### SSZ backing tree <!-- /part2/implementation/backing_tree* -->
+
+TODO
+
+### Batch signature verification <!-- /part2/implementation/batch_verification* -->
+
+TODO
+
+### Slashing protection <!-- /part2/implementation/anti_slash* -->
+
+TODO
+
+### Caching strategies? <!-- /part2/implementation/caches* -->
+
+TODO
+
+### Disk storage <!-- /part2/storage* -->
+
+TODO
+
+### Checkpoint sync <!-- /part2/checkpoint_sync* -->
+
+TODO
+
 # Ethereum's future <!-- /part3* -->
+
+TODO
+
+## The Merge <!-- /part3/the_merge* -->
+
+TODO
+
+### Rationale <!-- /part3/the_merge/rationale* -->
+
+TODO
+
+### Architecture <!-- /part3/the_merge/architecture* -->
+
+TODO
+
+### The Transition <!-- /part3/the_merge/transition* -->
+
+TODO
+
+## Secret Shared Validators <!-- /part3/ssv* -->
+
+TODO
+
+### Rationale <!-- /part3/ssv/rationale* -->
+
+TODO
+
+### Multi-party Compute <!-- /part3/ssv/mpc* -->
+
+TODO
+
+### Consensus <!-- /part3/ssv/consensus* -->
+
+TODO
+
+## Light Clients <!-- /part3/light_clients* -->
+
+TODO
+
+### Syncing <!-- /part3/light_clients/syncing* -->
+
+TODO
+
+### Protocol <!-- /part3/light_clients/protocol* -->
+
+## Sharding <!-- /part3/sharding* -->
+
+TODO
+
+### Data Availability <!-- /part3/sharding/data_availability* -->
+
+TODO
+
+### Pricing <!-- /part3/sharding/pricing* -->
+
+TODO
+
+## Active Research Topics <!-- /part3/research* -->
+
+TODO
+
+### Builder / proposer split <!-- /part3/research/builders_proposers* -->
+
+TODO
+
+### Consensus changes <!-- /part3/research/consensus* -->
+
+TODO
+
+### Executable shards <!-- /part3/research/executable_shards* -->
+
+TODO
+
+### Verkle trees <!-- /part3/research/verkle_trees* -->
+
+TODO
+
+### Statelessness <!-- /part3/research/statelessness* -->
+
+TODO
+
+### Single Secret Leader Election <!-- /part3/research/ssle* -->
+
+TODO
+
+### Verifiable Delay Function <!-- /part3/research/vdf* -->
+
+TODO
+
+### Post-quantum crypto <!-- /part3/research/post-quantum* -->
+
+TODO
+
+### S[NT]ARK-friendly state transitions <!-- /part3/research/snark* -->
 
 TODO
 
@@ -925,3 +1289,22 @@ TODO
 
 TODO
 
+## Glossary <!-- /appendices/glossary* -->
+
+TODO
+
+## Staking <!-- /appendices/staking* -->
+
+TODO
+
+### Ways to Stake <!-- /appendices/staking/ways* -->
+
+TODO
+
+### Client Diversity <!-- /appendices/staking/diversity* -->
+
+TODO
+
+### FAQ <!-- /appendices/staking/faq* -->
+
+TODO
