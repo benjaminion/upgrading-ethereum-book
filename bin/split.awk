@@ -2,8 +2,8 @@
 
 BEGIN{
     n = 0
-    file_name_format = "markdown-pages/part_%03d.md"
-    filename = sprintf(file_name_format, n)
+    filename_prefix = "markdown-pages/pages"
+    filename = ""
     h_part = ""
     h_chapter = ""
     h_part_no = -1 # Number parts from 0
@@ -18,13 +18,29 @@ BEGIN{
         if (n > 0) {
             close (filename)
         }
-        n++
-        filename = sprintf(file_name_format, n)
+        n = 1
 
-        # Generate header contents and output it
+        # Generate header contents
         name = gensub("^#+ (.*) <!-- .* -->$", "\\1", "1", $0)
         h_path = gensub("^#+ .* <!-- (.*) -->$", "\\1", "1", $0)
         heading = gensub ("^(#+ .*) <!-- .* -->$", "\\1", "1", $0)
+
+        # Is this page hidden?
+        if (h_path ~ /\*$/) {
+            h_path = substr(h_path, 1, length(h_path) - 1)
+            h_hide = "true"
+        } else {
+            h_hide = "false"
+        }
+
+        # Make filesystem path for writing the file
+        file_path = h_path
+        sub(/\/[^/]+$/, "", file_path)
+        system("mkdir -p " filename_prefix file_path " 2>/dev/null")
+        filename = filename_prefix h_path ".md"
+
+        print filename
+        
         switch ($0) {
         case /^# /:
             h_part = name
@@ -51,10 +67,7 @@ BEGIN{
             exit (1)
         }
         print "---" > filename
-        if (h_path ~ /\*$/) {
-            h_path = substr(h_path, 1, length(h_path) - 1)
-            print "hide: true" > filename
-        }
+        print "hide: " h_hide > filename
         print "path: " h_path > filename
         print "titles: [\"" h_part "\",\"" h_chapter "\",\"" h_section "\"]" > filename
         print "index: [" idx "]" > filename

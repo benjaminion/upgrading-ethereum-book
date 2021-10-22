@@ -2,4 +2,4 @@ node_modules/
 .cache/
 public/
 tmp/
-src/markdown-pages/*.md
+src/markdown-pages/pages/

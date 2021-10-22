@@ -44,7 +44,7 @@ TODO: Intro
 
 TODO
 
-### Attacks and Defences <!-- /part/goals/attacks* -->
+### Attacks and Defences <!-- /part1/goals/attacks* -->
 
 TODO
 
@@ -312,7 +312,7 @@ The calculation of rewards was overhauled in the Altair upgrade. The total rewar
 Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
 
 <div class="image">
-<img src="images/weights.svg" style="width:50%" /><br />
+<img src="../../../images/weights.svg" style="width:50%" /><br />
 <span>The proportion of the total reward derived from each of the micro-rewards.</span>
 </div>
 
@@ -999,7 +999,7 @@ First, we pick a pivot index $p$. This is pseudorandomly chosen, based on the ro
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
 <div class="image">
-<img src="images/shuffling_0.svg" /><br />
+<img src="../../../images/shuffling_0.svg" /><br />
 <span>The pivot and the first mirror index.</span>
 </div>
 
@@ -1014,7 +1014,7 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
 <div class="image">
-<img src="images/shuffling_1.svg" /><br />
+<img src="../../../images/shuffling_1.svg" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
 </div>
 
@@ -1025,7 +1025,7 @@ The decision as to whether to swap or not is based on hashing together the rando
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
 <div class="image">
-<img src="images/shuffling_2.svg" /><br />
+<img src="../../../images/shuffling_2.svg" /><br />
 <span>The second mirror index.</span>
 </div>
 
@@ -1034,7 +1034,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
 <div class="image">
-<img src="images/shuffling_3.svg" /><br />
+<img src="../../../images/shuffling_3.svg" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
 </div>
 
@@ -1045,7 +1045,7 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
 <div class="image">
-<img src="images/shuffling_4.svg" /><br />
+<img src="../../../images/shuffling_4.svg" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
 </div>
 
@@ -1179,11 +1179,11 @@ TODO
 
 TODO
 
-### Disk storage <!-- /part2/storage* -->
+### Disk storage <!-- /part2/implementation/storage* -->
 
 TODO
 
-### Checkpoint sync <!-- /part2/checkpoint_sync* -->
+### Checkpoint sync <!-- /part2/implementation/checkpoint_sync* -->
 
 TODO
 
