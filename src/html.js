@@ -11,7 +11,7 @@ export default function HTML(props) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>Ethereum 2.0 Explained</title>
+        <title>Upgrading Ethereum</title>
         <meta name="description" content="An overview of the Ethereum 2.0 protocol" />
         <meta property="og:image" content="https://benjaminion.xyz/android-icon-192x192.png" />
         <meta property="og:title" content="Ethereum 2.0 Explained" />

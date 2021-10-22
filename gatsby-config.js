@@ -1,10 +1,10 @@
 module.exports = {
   siteMetadata: {
-    title: "Ethereum 2.0 Explained",
-    description: `A deep dive into Ethereum on proof of stake`,
+    title: "Upgrading Ethereum",
+    description: `A technical handbook on Ethereum's move to proof of stake and beyond`,
     author: `Ben Edgington (@benjaminion)`,
   },
-  pathPrefix: `/eth2-explained`,
+  pathPrefix: `/`,
   plugins: [
       {
       resolve: `gatsby-source-filesystem`,
