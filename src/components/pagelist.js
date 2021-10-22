@@ -31,6 +31,13 @@ function NestedList(props) {
   return (<ul>{ret}</ul>)
 }
 
+function order_arrays(a, b) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    if (a[i] !== b[i]) return a[i] - b[i]
+  }
+  return a.length - b.length
+}
+
 // Format pages as a list according to their index data.
 // Depth is the length of prefix to ignore
 const PageList = ({pages, depth}) => {
@@ -40,8 +47,7 @@ const PageList = ({pages, depth}) => {
   if (filteredPages.length === 0) return null
 
   // Make a flat array of list level info and the data we'll be using in the list
-  const layout = filteredPages.sort((a, b) => {
-    return a.node.frontmatter.index.join().localeCompare(b.node.frontmatter.index.join())}).map(p => {return ({
+  const layout = filteredPages.sort((a, b) => order_arrays(a.node.frontmatter.index, b.node.frontmatter.index)).map(p => {return ({
       level: p.node.frontmatter.index.length,
       index: p.node.frontmatter.index.join("."),
       title: p.node.frontmatter.titles[p.node.frontmatter.index.length - 1],
