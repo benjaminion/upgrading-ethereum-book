@@ -2,7 +2,7 @@
 
 BEGIN{
     n = 0
-    filename_prefix = "markdown-pages/pages"
+    filename_prefix = "md/pages"
     filename = filename_prefix "/error.md"
     h_part = ""
     h_chapter = ""
@@ -79,10 +79,10 @@ BEGIN{
 }
 
 # Rewrite image paths to reflect the directory hierarchy
-/<img src=\"markdown-pages.*\"/ {
+/<img src=\"md.*\"/ {
     prefix = substr(h_path, 2)
     gsub(/[^/]*/, "..", prefix)
-    sub(/src=\"markdown-pages/, "src=\"" prefix, $0)
+    sub(/src=\"md/, "src=\"" prefix, $0)
     print > filename
 
     next

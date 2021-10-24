@@ -2,6 +2,6 @@
 
 cd "$(dirname "$0")/../src"
 
-rm -rf markdown-pages/pages/
+rm -rf md/pages/
 ../bin/split.awk book.md
 
