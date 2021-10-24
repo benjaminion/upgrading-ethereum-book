@@ -9,7 +9,10 @@ const Subsections = ({indexArray}) => {
 
   const data = useStaticQuery(graphql`
     {
-      allMarkdownRemark {
+      allMarkdownRemark(
+        sort: {fields: [frontmatter___sequence]}
+        filter: {frontmatter: {index: {ne: null}}}
+    ) {
         edges {
           node {
             frontmatter {
@@ -17,6 +20,7 @@ const Subsections = ({indexArray}) => {
               path
               titles
               index
+              sequence
             }
           }
         }
@@ -28,16 +32,15 @@ const Subsections = ({indexArray}) => {
   
   // Find pages that are subsections of the page we are on
   const pages = data.allMarkdownRemark.edges
-
   const indexFilterString = indexArray.length === 0 ? "" : indexArray.join() + ","
-  const filteredPages = pages.filter(p => p.node.frontmatter.index !== null && p.node.frontmatter.index.join().startsWith(indexFilterString))
+  const filteredPages = pages.filter(p => p.node.frontmatter.index.join().startsWith(indexFilterString))
 
   if (filteredPages.length > 0) {
     return (
       <div className="subsection-list">
         <h3>Subsections</h3>
         <PageList pages={filteredPages} depth={indexArray.length} />
-        </div>
+      </div>
     )
   } else {
     return null

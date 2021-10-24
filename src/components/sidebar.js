@@ -8,7 +8,10 @@ import "./sidebar.css"
 const Sidebar = () => {
   const data = useStaticQuery(graphql`
     {
-      allMarkdownRemark {
+      allMarkdownRemark(
+        sort: {fields: [frontmatter___sequence]}
+        filter: {frontmatter: {index: {ne: null}}}
+    ) {
         edges {
           node {
             frontmatter {
@@ -16,6 +19,7 @@ const Sidebar = () => {
               path
               titles
               index
+              sequence
             }
           }
         }
@@ -31,7 +35,9 @@ const Sidebar = () => {
   const pages = data.allMarkdownRemark.edges
 
   // List only parts and chapters in the sidebar
-  const filteredPages = pages.filter(p => p.node.frontmatter.index !== null && p.node.frontmatter.index.length <= 2)
+  const filteredPages = pages.filter(p => p.node.frontmatter.index.length <= 2)
+
+  // console.log(JSON.stringify(filteredPages, undefined, 2))
   
   return (
     <nav className="sidebar">
