@@ -5,7 +5,7 @@ import { useStaticQuery, graphql } from "gatsby"
 import PageList from "./pagelist"
 import "./sidebar.css"
 
-const Sidebar = () => {
+const Sidebar = (props) => {
   const data = useStaticQuery(graphql`
     {
       allMarkdownRemark(
@@ -34,8 +34,16 @@ const Sidebar = () => {
 
   const pages = data.allMarkdownRemark.edges
 
-  // List only parts and chapters in the sidebar
-  const filteredPages = pages.filter(p => p.node.frontmatter.index.length <= 2)
+  // List only parts and chapters and immediate children in the sidebar
+  const index = props.index !== null ? props.index : []
+  const filteredPages = index.length < 2
+        ? pages.filter(p => p.node.frontmatter.index.length <= 2)
+        : pages.filter(p => p.node.frontmatter.index.length <= 2
+                       || (p.node.frontmatter.index.length === 3
+                           && p.node.frontmatter.index[0] === index[0]
+                           && p.node.frontmatter.index[1] === index[1]
+                          )
+                      )
 
   // console.log(JSON.stringify(filteredPages, undefined, 2))
   
