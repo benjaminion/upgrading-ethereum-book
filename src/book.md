@@ -14,7 +14,7 @@ This book is a non-commercial personal project. I offer it to the community in g
 
 TODO
 
-# Building Ethereum 2.0 <!-- /part1* -->
+# Part 1: Building <!-- /part1* -->
 
 ## Introduction <!-- /part1/introduction* -->
 
@@ -58,7 +58,7 @@ TODO
 
 TODO
 
-# The Technical Stuff <!-- /part2 -->
+# Part 2: Technical <!-- /part2 -->
 
 ## Introduction <!-- /part2/introduction* -->
 
@@ -683,8 +683,6 @@ Some comments on the chosen values:
 
 ### Configuration <!-- /part2/config/params -->
 
-TODO
-
 #### Genesis Settings 
 
 | Name | Value |
@@ -836,7 +834,7 @@ TODO
 
 TODO
 
-### Proposing <!-- /part2/slot/attesting* -->
+### Attesting <!-- /part2/slot/attesting* -->
 
 TODO
 
@@ -860,7 +858,7 @@ TODO
 
 TODO
 
-### Other State Updates <!-- /part2/epoch/finality* -->
+### Other State Updates <!-- /part2/epoch/updates* -->
 
 TODO
 
@@ -884,7 +882,7 @@ TODO
 
 TODO
 
-### Merkle Proofs <!-- /part2/deposits/voting* -->
+### Merkle Proofs <!-- /part2/deposits/merkleproofs* -->
 
 TODO
 
@@ -917,6 +915,8 @@ TODO
 TODO
 
 ## The Building Blocks <!-- /part2/building_blocks -->
+
+### Introduction <!-- /part2/building_blocks/introduction* -->
 
 TODO
 
@@ -1189,7 +1189,7 @@ TODO
 
 TODO
 
-# Ethereum's future <!-- /part3* -->
+# Part 3: Future <!-- /part3* -->
 
 ## The Merge <!-- /part3/the_merge* -->
 

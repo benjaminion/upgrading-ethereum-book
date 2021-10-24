@@ -4,6 +4,7 @@ import { graphql } from "gatsby"
 import Layout from "../components/page"
 import Sidebar from "../components/sidebar"
 import Subsections from "../components/subsections"
+import PrevNext from "../components/prevnext"
 
 export default function Template({
   data,
@@ -19,8 +20,9 @@ export default function Template({
 
   return (
     <Layout>
-      <Sidebar />
+      <Sidebar index={markdownRemark.frontmatter.index} />
       <div className="main-content">
+        <PrevNext seq={markdownRemark.frontmatter.sequence} />
         <div className="container">
           <div className="section">
             <div
@@ -30,6 +32,7 @@ export default function Template({
             <Subsections indexArray={index_array} />
           </div>
         </div>
+        <PrevNext seq={markdownRemark.frontmatter.sequence} />
       </div>
     </Layout>
   )
@@ -41,6 +44,7 @@ export const pageQuery = graphql`
       frontmatter {
         index
         path
+        sequence
       }
       html
     }
