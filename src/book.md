@@ -16,11 +16,9 @@ TODO
 
 # Building Ethereum 2.0 <!-- /part1* -->
 
-TODO: intro
-
 ## Introduction <!-- /part1/introduction* -->
 
-### Why Ethereum 2.0?
+### Why Ethereum 2.0? <!-- /part1/introduction/whyeth2* -->
 
 TODO
 
@@ -38,7 +36,7 @@ TODO
 
 ## Goals <!-- /part1/goals* -->
 
-TODO: Intro
+### Introduction <!-- /part1/goals/introduction* -->
 
 ### Design Goals <!-- /part1/goals/design* -->
 
@@ -50,7 +48,7 @@ TODO
 
 ## Making the Sausage <!-- /part1/making* -->
 
-TODO: Intro
+### Introduction <!-- /part1/making/introduction* -->
 
 ### The Specifications <!-- /part1/making/specs* -->
 
@@ -61,6 +59,8 @@ TODO
 TODO
 
 # The Technical Stuff <!-- /part2 -->
+
+## Introduction <!-- /part2/introduction* -->
 
 TODO: Intro
 
@@ -83,6 +83,8 @@ TODO
 ### Genesis <!-- /part2/beacon/genesis* -->
 
 ## Types, Constants, Presets, and Parameters <!-- /part2/config -->
+
+### Introduction <!-- /part2/config/introduction -->
 
 Perhaps a chapter on constants, presets and parameters sounds drier than the Namib Desert. But I've long thought that these things provide an excellent way in to the ideas and mechanisms we'll be unpacking in detail in later chapters. Far from being a desert, this part of the spec bustles with life!
 
@@ -1188,8 +1190,6 @@ TODO
 TODO
 
 # Ethereum's future <!-- /part3* -->
-
-TODO
 
 ## The Merge <!-- /part3/the_merge* -->
 

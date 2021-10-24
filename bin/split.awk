@@ -73,16 +73,18 @@ BEGIN{
     print "index: [" idx "]" > filename
     print "sequence: " n > filename
     print "---" > filename
-    print heading > filename
+    print "\n# " h_part > filename
+    if (h_chapter != "") print "\n## " h_chapter > filename
+    if (h_section != "") print "\n### " h_section > filename
 
     next
 }
 
 # Rewrite image paths to reflect the directory hierarchy
-/<img src=\"md.*\"/ {
+/<img src="md.*"/ {
     prefix = substr(h_path, 2)
     gsub(/[^/]*/, "..", prefix)
-    sub(/src=\"md/, "src=\"" prefix, $0)
+    sub(/src="md/, "src=\"" prefix, $0)
     print > filename
 
     next

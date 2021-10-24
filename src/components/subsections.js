@@ -38,7 +38,6 @@ const Subsections = ({indexArray}) => {
   if (filteredPages.length > 0) {
     return (
       <div className="subsection-list">
-        <h3>Subsections</h3>
         <PageList pages={filteredPages} depth={indexArray.length} />
       </div>
     )
