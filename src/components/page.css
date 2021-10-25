@@ -196,6 +196,11 @@ span[role="img"] {
   font-family: "Apple Color Emoji";
 }
 
+/* Override the code prettifier for language "none" */
+pre[data-language="none"] {
+    background-color: inherit;
+}
+
 /*
 ul p {
   margin-bottom: 0;
