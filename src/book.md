@@ -54,11 +54,11 @@ TODO
 
 TODO
 
-### The Process  <!-- /part1/making/process* -->
+### The Process <!-- /part1/making/process* -->
 
 TODO
 
-# Part 2: Technical <!-- /part2 -->
+# Part 2: Technical Overview <!-- /part2 -->
 
 ## Introduction <!-- /part2/intro* -->
 
@@ -84,9 +84,424 @@ TODO
 
 ### Genesis <!-- /part2/beacon/genesis* -->
 
-## Types, Constants, Presets, and Parameters <!-- /part2/config -->
+## Consensus <!-- /part2/consensus* -->
 
-### Introduction <!-- /part2/config/intro -->
+### Introduction <!-- /part2/consensus/intro* -->
+
+TODO
+
+### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
+
+TODO
+
+### Fork Choice <!-- /part2/consensus/fork_choice* -->
+
+TODO
+
+### Casper FFG <!-- /part2/consensus/casper_ffg* -->
+
+TODO
+
+### Finality <!-- /part2/consensus/finality* -->
+
+TODO
+
+### Gasper <!-- /part2/consensus/gasper* -->
+
+TODO
+
+### The Inactivity Leak <!-- /part2/consensus/inactivity* -->
+
+TODO
+
+### Weak Subjectivity <!-- /part2/consensus/weak_subjectivity* -->
+
+TODO
+
+### Issues <!-- /part2/consensus/issues* -->
+
+TODO
+
+## The Progress of a Slot <!-- /part2/slot* -->
+
+### Introduction <!-- /part2/slot/intro* -->
+
+TODO
+
+### Proposing <!-- /part2/slot/proposing* -->
+
+TODO
+
+### Attesting <!-- /part2/slot/attesting* -->
+
+TODO
+
+### Aggregating <!-- /part2/slot/aggregating* -->
+
+TODO
+
+### Sync Committee Participation <!-- /part2/slot/sync* -->
+
+TODO
+
+## The Progress of an Epoch <!-- /part2/epoch* -->
+
+### Introduction <!-- /part2/epoch/intro* -->
+
+TODO
+
+### Applying Rewards and Penalties <!-- /part2/epoch/rewards* -->
+
+TODO
+
+### Justification and Finalisation <!-- /part2/epoch/finality* -->
+
+TODO
+
+### Other State Updates <!-- /part2/epoch/updates* -->
+
+TODO
+
+## Validator Lifecycle <!-- /part2/validator* -->
+
+TODO
+
+## Deposit Handling <!-- /part2/deposits* -->
+
+### Introduction <!-- /part2/deposits/intro* -->
+
+TODO
+
+### The Deposit Contract <!-- /part2/deposits/contract* -->
+
+TODO
+
+### Deposit Receipts <!-- /part2/deposits/receipts* -->
+
+TODO
+
+### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting* -->
+
+TODO
+
+### Merkle Proofs <!-- /part2/deposits/merkleproofs* -->
+
+TODO
+
+### Deposit processing <!-- /part2/deposits/processing* -->
+
+TODO
+
+### Withdrawal Credentials <!-- /part2/deposits/credentials* -->
+
+TODO
+
+## Economics <!-- /part2/economics* -->
+
+### Introduction <!-- /part2/economics/intro* -->
+
+TODO
+
+### Rewards and Penalties <!-- /part2/economics/rewards* -->
+
+TODO
+
+### Slashing <!-- /part2/economics/slashing* -->
+
+TODO
+
+### Inactivity <!-- /part2/economics/inactivity* -->
+
+TODO
+
+### Effective Balance <!-- /part2/economics/effective_balance* -->
+
+TODO
+
+## The Building Blocks <!-- /part2/building_blocks -->
+
+### Introduction <!-- /part2/building_blocks/intro* -->
+
+TODO
+
+### Randomness <!-- /part2/building_blocks/randomness* -->
+
+TODO
+
+### Committees <!-- /part2/building_blocks/committees* -->
+
+TODO
+
+### Shuffling <!-- /part2/building_blocks/shuffling -->
+
+Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
+
+Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
+
+Other shuffles rely on processing the entire list of elements to find the final ordering. We wish to spare light clients this burden. Ideally, they should deal with only the subsets of lists that they are interested in. Therefore, rather than Fisher&ndash;Yates, we are using a construction called a "swap-or-not" shuffle. The swap-or-not shuffle can tell you the destination index (or, conversely, the origin index) of a single list element, so is ideal when dealing with subsets of the whole validator set.
+
+For example, formally committees are assigned by shuffling the full validator list and then taking contiguous slices of the resulting permutation. If I only need to know the members of committee $k$, then this is very inefficient. Instead, I can run the swap-or-not shuffle backwards for only the indices in slice $k$ to find out which of the whole set of validators would be shuffled into $k$. This is much more efficient.
+
+#### Swap-or-not Specification
+
+The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
+
+```python
+def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) -> uint64:
+    """
+    Return the shuffled index corresponding to ``seed`` (and ``index_count``).
+    """
+    assert index < index_count
+
+    # Swap or not (https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf)
+    # See the 'generalized domain' algorithm on page 3
+    for current_round in range(SHUFFLE_ROUND_COUNT):
+        pivot = bytes_to_uint64(hash(seed + uint_to_bytes(uint8(current_round)))[0:8]) % index_count
+        flip = (pivot + index_count - index) % index_count
+        position = max(index, flip)
+        source = hash(
+            seed
+            + uint_to_bytes(uint8(current_round))
+            + uint_to_bytes(uint32(position // 256))
+        )
+        byte = uint8(source[(position % 256) // 8])
+        bit = (byte >> (position % 8)) % 2
+        index = flip if bit else index
+
+    return index
+```
+
+An index position in the list to be shuffled, `index`, is provided, along with the total number of indices, `index_count`, and a `seed` value. The output is the index that the initial index gets shuffled to.
+
+The hash functions used to calculate `pivot` and `source` are deterministic, and are used to generate pseudo-random output from the inputs: given the same input, they will generate the same output. So we can see that, for given values of `index`, `index_count`, and `seed`, the routine will always return the same output.
+
+The shuffling proceeds in rounds. In each round, a `pivot` index is pseudo-randomly chosen somewhere in the list, based only on the `seed` value and the round number.
+
+Next, an index `flip` is found, which is `pivot - index`, after accounting for wrap-around due to the modulo function. The important points are that, given `pivot`, every `index` maps to a unique `flip`, and that the calculation is symmetrical, so that `flip` maps to `index`.
+
+ - With `index_count = 100`, `pivot = 70`, `index = 45`, we get `flip = 25`.
+ - With `index_count = 100`, `pivot = 70`, `index = 82`, we get `flip = 88`.
+
+Finally in the round, a decision is made as to whether to keep the index as-is, or to update it to `flip`. This decision is pseudo-randomly made based on the values of `seed`, the round number, and the higher of `index` and `flip`.
+
+Note that basing the swap-or-not decision on the higher of `index` and `flip` brings a symmetry to the algorithm. Whether we are considering the element at `index` or the element at `flip`, the decision as to whether to swap the elements or not will be the same. This is the key to seeing the that full algorithm delivers a shuffling (permutation) of the original set.
+
+The algorithm proceeds with the next iteration based on the updated index.
+
+It may not be immediately obvious, but since we are deterministically calculating `flip` based only on the round number, the shuffle can be run in reverse simply by running from `SHUFFLE_ROUND_COUNT - 1` to `0`. The same swap-or-not decisions will be made in reverse. As described above, this reverse shuffle is perfect for finding which validators ended up in a particular committee.
+
+#### A full shuffle
+
+To get an intuition for how this single-index shuffle can deliver a full shuffling of a list of indices, we can consider how the algorithm is typically [implemented in clients](https://github.com/ConsenSys/teku/blob/04294427f2622c86326db68f3b88ed20d1e6cdc1/ethereum/spec/src/main/java/tech/pegasys/teku/spec/logic/common/helpers/MiscHelpers.java#L154) when shuffling an entire list at once.
+
+As an optimisation, the loop over the indices to be shuffled is brought inside the loop over rounds. This hugely reduces the amount of hashing required since the pivot is fixed for the round (it does not depend on the index) and the bits of `source` can be reused for 256 consecutive indices, since the hash has a 256-bit output.
+
+For each round, we do the following.
+
+##### 1. Choose a pivot and find the first mirror index
+
+First, we pick a pivot index $p$. This is pseudorandomly chosen, based on the round number and some other seed data. The pivot is fixed for the rest of the round.
+
+With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
+
+<div class="image">
+<img src="md/images/shuffling_0.svg" /><br />
+<span>The pivot and the first mirror index.</span>
+</div>
+
+##### 2. Traverse first mirror to pivot, swapping or not
+
+For each index between the mirror index $m_1$ and the pivot index $p$, we decide whether we are going to swap the element or not.
+
+Consider the element at index $i$. If we choose not to swap it, we just move on to consider the next index.
+
+If we do decide to swap, then we exchange the list element at $i$ with that at $i'$, its image in the mirror index. That is, $i$ is swapped with $i' = m_1 - (i - m_1)$, so that $i$ and $i'$ are equidistant from $m_1$. In practice we don't exchange the elements at this point, we just update the indices $i \rightarrow i'$, and $i' \rightarrow i$.
+
+We make the same swap-or-not decision for each index between $m_1$ and $p$.
+
+<div class="image">
+<img src="md/images/shuffling_1.svg" /><br />
+<span>Swapping or not from the first mirror up to the pivot.</span>
+</div>
+
+The decision as to whether to swap or not is based on hashing together the random seed, the round number, and some position data. A single bit is extracted from this hash for each index, and the swap is made or not according to whether this bit is one or zero.
+
+##### 3. Calculate the second mirror index
+
+After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
+
+<div class="image">
+<img src="md/images/shuffling_2.svg" /><br />
+<span>The second mirror index.</span>
+</div>
+
+##### 4. Traverse pivot to second mirror, swapping or not
+
+Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
+
+<div class="image">
+<img src="md/images/shuffling_3.svg" /><br />
+<span>Swapping or not from the pivot to the second mirror.</span>
+</div>
+
+##### Putting it all together
+
+At the end of the round, we have considered all the indices between $m_1$ and $m_2$, which, by construction, is half of the total indices. For each index considered, we have either left the element in place, or swapped the element at a distinct index in the other half. Thus, all of the indices have been considered exactly once for swapping.
+
+The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
+
+<div class="image">
+<img src="md/images/shuffling_4.svg" /><br />
+<span>The whole process running from one mirror to the other in a single round.</span>
+</div>
+
+#### Discussion
+
+##### A key insight
+
+When deciding whether to swap or not for each index, the algorithm cleverly bases its decision on the higher of the candidate index or its image in the mirror. That is, $i$ rather than $i'$ (when below the pivot), and $j'$ rather than $j$ (when above the pivot). This means that we have flexibility when running through the indices of the list: we could do $0$ to $m_1$ and $p$ to $m_2$ as two separate loops, or do it with a single loop from $m_1$ to $m_2$ as I outlined above. The result will be the same: it doesn't matter if we are considering $i$ or its image $i'$; the decision as to whether to swap or not has the same outcome.
+
+##### The number of rounds
+
+In Ethereum&nbsp;2.0 we do 90 rounds of the algorithm per shuffle, set by the constant `SHUFFLE_ROUND_COUNT` [TODO - link]. The [original paper](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf) on which this technique is based suggests that $6\lg{N}$ rounds is required "to start to see a good bound on CCA-security", where $N$ is the list length. In his [annotated spec](https://github.com/ethereum/annotated-spec/blob/master/phase0/beacon-chain.md) Vitalik says "Expert cryptographer advice told us ~$4\log_2{N}$ is sufficient for safety". The absolute maximum number of validators in Eth2, thus the maximum size of the list we would ever need to shuffle, is about $2^{22}$ (4.2 million). On Vitalik's estimate that gives us 88 rounds required, on the paper's estimate, 92 rounds (assuming that $\lg$ is the natural logarithm). So we are in the right ballpark, especially as we are very, very unlikely to end up with that many active validators.
+
+It might be interesting to make the number of rounds adaptive based on list length. But we don't do that; it's probably an optimisation too far.
+
+Fun fact: when Least Authority audited the beacon chain specification, they initially found bias in the shuffling used for selecting block proposers (see Issue F [in their report](https://leastauthority.wpengine.com/static/publications/LeastAuthority-Ethereum-2.0-Specifications-Audit-Report.pdf)). This turned out to be due to mistakenly using a configuration that had only 10 rounds of shuffling. When they increased it to the 90 we use for mainnet, the bias no longer appeared.
+
+##### (Pseudo) randomness
+
+The algorithm requires that we select a pivot point randomly in each round, and randomly choose whether to swap each element or not in each round.
+
+In Eth2, we deterministically generate the "randomness" from a seed value, such that the same seed will always generate the same shuffling.
+
+The pivot index is generated from eight bytes of a SHA256 hash of the seed concatenated with the round number, so it usually changes each round.
+
+The decision bits used to determine whether or not to swap elements are bits drawn from SHA256 hashes of the seed, the round number, and the index of the element within the list.
+
+##### Efficiency
+
+This shuffling algorithm is much slower than Fisher&ndash;Yates. That algorithm requires $N$ swaps. Our algorithm will require $90N/4$ swaps on average to shuffle $N$ elements.
+
+We should also consider  the generation of pseudo-randomness, which is the most expensive part of the algorithm. Fisher&ndash;Yates needs something like $N\log_2{N}$ bits of randomness, and we need $90(\log_2{N} + N/2)$ bits, which, for the range of $N$ we need in Eth2, is many more bits (about twice as many when $N$ is a million).
+
+#### Why swap-or-not?
+
+Why would we use such an inefficient implementation?
+
+##### Shuffling single elements
+
+The brilliance is that, if we are interested in only a few indices, we do not need to compute the shuffling of the whole list. In fact, we can apply the algorithm to a single index to find out which index it will be swapped with.
+
+So, if we want to know where the element with index 217 gets shuffled to, we can run the algorithm with only that index; we do not need to shuffle the whole list. Moreover, if we want to know the converse, which element gets shuffled into index 217, we can just run the algorithm backwards for element 217 (backwards means running the round number from high to low rather than low to high).
+
+In summary, we can compute the destination of element $i$ in $O(1)$ operations, and the source of element $i'$ (the inverse operation) also in $O(1)$, not dependent on the length of the list. Shuffles like the Fisher&ndash;Yates shuffle do not have this property and cannot work with single indices, they always need to iterate the whole list. The technical term for a shuffle having this property is that it is _oblivious_ (to all the other elements in the list).
+
+##### Keeping light clients light
+
+This property is important for light clients. Light clients are observers of the Eth2 beacon and shard chains that do not store the entire state, but do wish to be able to securely access data on the chains. As part of verifying that they have the correct data&mdash;that no-one has lied to them&mdash;it is necessary to compute the committees that attested to that data. This means shuffling, and we don't want light clients to have to hold and shuffle the entire list of validators. By using the swap-or-not shuffle, light clients need only to consider the small subset of validators that they are interested in, which is vastly more efficient overall.
+
+#### References
+
+ - The initial discussion about the search for a good shuffling algorithm: https://github.com/ethereum/eth2.0-specs/issues/323.
+ - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
+ - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
+
+### BLS Signatures <!-- /part2/building_blocks/signatures* -->
+
+TODO
+
+### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
+
+TODO
+
+### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz* -->
+
+TODO
+
+### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
+
+TODO
+
+## Upgrades <!-- /part2/upgrades* -->
+
+### Introductions <!-- /part2/upgrades/intro* -->
+
+TODO
+
+### Hard Forks <!-- /part2/upgrades/forks* -->
+
+TODO
+
+### Fork Digest <!-- /part2/upgrades/fork_digest* -->
+
+TODO
+
+## Networking <!-- /part2/networking* -->
+
+### Introduction <!-- /part2/networking/intro* -->
+
+TODO
+
+### Discovery <!-- /part2/networking/discovery* -->
+
+TODO
+
+### Gossip <!-- /part2/networking/gossip* -->
+
+TODO
+
+### RPC <!-- /part2/networking/rpc* -->
+
+TODO
+
+### Syncing <!-- /part2/networking/syncing* -->
+
+TODO
+
+### Message Types <!-- /part2/networking/messages* -->
+
+TODO
+
+## Implementation <!-- /part2/implementation* -->
+
+### Introduction <!-- /part2/implementation/intro* -->
+
+TODO
+
+### Protoarray <!-- /part2/implementation/protoarray* -->
+
+TODO
+
+### SSZ backing tree <!-- /part2/implementation/backing_tree* -->
+
+TODO
+
+### Batch signature verification <!-- /part2/implementation/batch_verification* -->
+
+TODO
+
+### Slashing protection <!-- /part2/implementation/anti_slash* -->
+
+TODO
+
+### Caching strategies? <!-- /part2/implementation/caches* -->
+
+TODO
+
+### Disk storage <!-- /part2/implementation/storage* -->
+
+TODO
+
+### Checkpoint sync <!-- /part2/implementation/checkpoint_sync* -->
+
+TODO
+
+# Part 3: Annotated Specification <!-- /part3 -->
+
+## Types, Constants, Presets, and Configuration <!-- /part3/config -->
+
+### Introduction <!-- /part3/config/intro -->
 
 A chapter on constants, presets and parameters - sounds drier than the Namib Desert, right? But I've long thought that these things provide an excellent way in to the ideas and mechanisms we'll be unpacking in detail in later chapters. Far from being a desert, this part of the spec bustles with life.
 
@@ -96,7 +511,7 @@ Then, with constants, presets, and parameters, we will examine the numbers that 
 
 The following sections are presented as they appear in the spec for ease of reference.
 
-### Custom Types <!-- /part2/config/types -->
+### Custom Types <!-- /part3/config/types -->
 
 [TODO: link to Altair spec]::
 
@@ -110,7 +525,7 @@ Throughout the spec, (almost) all integers are now unsigned 64 bit numbers, `uin
 
 Regarding "unsigned", there was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether Eth2 should use signed or unsigned integers, but eventually unsigned was chosen. As a result, preserving the order of operations is critical in some places to avoid inadvertantly underflowing - negative numbers are forbidden.
 
-And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#ParticipationFlags), introduced in the Altair fork, which has type `uint8`. It could probably have been a `bytes1` type, since it is not really arithmetic,
+And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`. It could probably have been a `bytes1` type, since it is not really arithmetic,
 
 | Name | SSZ equivalent | Description |
 | - | - | - |
@@ -192,14 +607,12 @@ The recommended use of `Version` is described in the [Ethereum 2.0 networking sp
 
 `ForkDigest` is the unique chain identifier, generated by combining information gathered at genesis with the current chain version. From [commments](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#compute_fork_digest) in the spec:
 
->    This is a digest primarily used for domain separation on the p2p layer.
->    4-bytes suffices for practical separation of forks/chains.
+```
+    This is a digest primarily used for domain separation on the p2p layer.
+    4-bytes suffices for practical separation of forks/chains.
+```
 
-Specifically, `ForkDigest` is the first four bytes of the hash tree root of the `ForkData` structure containing the current chain [`Version`](#version) and the `genesis_validators_root`.
-
-[TODO: fix up link to compute_fork_digest]::
-[TODO: link to genesis_validators_root]::
-[TODO: link to ForkData]::
+Specifically, `ForkDigest` is the first four bytes of the hash tree root of the [`ForkData`](#todo) structure containing the current chain [`Version`](#version) and the [`genesis_validators_root`](#todo). It is computed in [`compute_fork_digest()`](/part3/helper/misc#compute_fork_digest).
 
 `ForkDigest` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md).
 
@@ -242,7 +655,7 @@ Three of the eight bits are [currently used](constants#participation-flag-indice
    - See also Wikipedia: https://en.wikipedia.org/wiki/Merkle_tree
  - Details of the BLS12-381 elliptic curve: https://hackmd.io/@benjaminion/bls12-381
 
-### Constants <!-- /part2/config/constants -->
+### Constants <!-- /part3/config/constants -->
 
 The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
 
@@ -293,17 +706,17 @@ The spec began life as big-endian, but the Nimbus team from Status successfully 
 
 ##### Participation flag indices
 
-| Name | Value |
-| - | - |
-| `TIMELY_SOURCE_FLAG_INDEX` | `0` |
-| `TIMELY_TARGET_FLAG_INDEX` | `1` |
-| `TIMELY_HEAD_FLAG_INDEX` | `2` |
+| Name                       | Value |
+| -                          | -     |
+| `TIMELY_SOURCE_FLAG_INDEX` | `0`   |
+| `TIMELY_TARGET_FLAG_INDEX` | `1`   |
+| `TIMELY_HEAD_FLAG_INDEX`   | `2`   |
 
 Validators making attestions that get included on chain are rewarded for three things:
   - getting attestations included with the correct source checkpoint, within 5 slots (`integer_squareroot(SLOTS_PER_EPOCH)`);
   - getting attestations included with the correct target checkpoint, within 32 slots (`SLOTS_PER_EPOCH`); and,
   - getting attestations included with the correct head, within 1 slot (`MIN_ATTESTATION_INCLUSION_DELAY`), basically immediately.
-  
+
 These flags are temporarily recorded in the `BeaconState` when attestations are processed, then used at the ends of epochs to update finality and to calculate validator rewards for making attestations.
 
 ##### Incentivization weights
@@ -380,7 +793,7 @@ In addition, the first two domains are also used to separate the seeds for rando
 
 The last two domains [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. They are not part of the consensus-critical state-transition. In short, each slot, validators are selected to aggregate attestations from their committee. The selection is done based on the validator's signature over the slot number, mixing in `DOMAIN_SELECTION_PROOF`. Then the validator signs the whole aggregated attestation using `DOMAIN_AGGREGATE_AND_PROOF`. See the [Honest Validator](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md) spec for more on this.
 
-### Presets <!-- /part2/config/presets -->
+### Presets <!-- /part3/config/presets -->
 
 [TODO: Update for Altair]::
 [TODO: Insert headings]::
@@ -691,9 +1104,9 @@ Some comments on the chosen values:
  - At first sight there looks to be a disparity between the number of proposer slashings and the number of attester slashings that may be included in a block. But note that an attester slashing (a) can be much larger than a proposer slashing, and (b) as noted above, can result in many more validators getting slashed than a proposer slashing.
  - `MAX_ATTESTATIONS` is double the value of [`MAX_COMMITTEES_PER_SLOT`](#max_committees_per_slot). This allows there to be an empty slot (no block proposal), yet still include all the attestations for the empty slot in the next slot, since, ideally, each committee produces a single aggregate attestation.
 
-### Configuration <!-- /part2/config/params -->
+### Configuration <!-- /part3/config/configuration -->
 
-#### Genesis Settings 
+#### Genesis Settings
 
 | Name | Value |
 | - | - |
@@ -796,171 +1209,53 @@ The same applies to new validator activations, once a validator has been marked 
 
 This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](#get_validator_churn_limit) the actual number of validator exits and activations allowed per epoch. The number of exits allowed is `max(MIN_PER_EPOCH_CHURN_LIMIT, n // CHURN_LIMIT_QUOTIENT)`, where `n` is the number of active validators. The same applies to activations.
 
-## Data Structures <!-- /part2/datastructures* -->
+## Containers <!-- /part3/containers* -->
+
+### Introduction <!-- /part3/containers/intro* -->
 
 TODO
 
-## Consensus <!-- /part2/consensus* -->
-
-### Introduction <!-- /part2/consensus/intro* -->
+### Misc dependencies <!-- /part3/containers/dependencies* -->
 
 TODO
 
-### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
+### Beacon operations <!-- /part3/containers/operations* -->
 
 TODO
 
-### Fork Choice <!-- /part2/consensus/fork_choice* -->
+### Beacon blocks <!-- /part3/containers/blocks* -->
 
 TODO
 
-### Casper FFG <!-- /part2/consensus/casper_ffg* -->
+### Beacon state <!-- /part3/containers/state* -->
 
 TODO
 
-### Finality <!-- /part2/consensus/finality* -->
+### Signed envelopes <!-- /part3/containers/envelopes* -->
 
 TODO
 
-### Gasper <!-- /part2/consensus/gasper* -->
+## Helper Functions <!-- /part3/helper -->
+
+### Introduction <!-- /part3/helper/intro* -->
 
 TODO
 
-### The Inactivity Leak <!-- /part2/consensus/inactivity* -->
+### Math <!-- /part3/helper/math* -->
 
 TODO
 
-### Weak Subjectivity <!-- /part2/consensus/weak_subjectivity* -->
+### Crypto <!-- /part3/helper/crypto* -->
 
 TODO
 
-### Issues <!-- /part2/consensus/issues* -->
+### Predicates <!-- /part3/helper/predicates* -->
 
 TODO
 
-## The Progress of a Slot <!-- /part2/slot* -->
+### Misc <!-- /part3/helper/misc -->
 
-### Introduction <!-- /part2/slot/intro* -->
-
-TODO
-
-### Proposing <!-- /part2/slot/proposing* -->
-
-TODO
-
-### Attesting <!-- /part2/slot/attesting* -->
-
-TODO
-
-### Aggregating <!-- /part2/slot/aggregating* -->
-
-TODO
-
-### Sync Committee Participation <!-- /part2/slot/sync* -->
-
-TODO
-
-## The Progress of an Epoch <!-- /part2/epoch* -->
-
-### Introduction <!-- /part2/epoch/intro* -->
-
-TODO
-
-### Applying Rewards and Penalties <!-- /part2/epoch/rewards* -->
-
-TODO
-
-### Justification and Finalisation <!-- /part2/epoch/finality* -->
-
-TODO
-
-### Other State Updates <!-- /part2/epoch/updates* -->
-
-TODO
-
-## Validator Lifecycle <!-- /part2/validator* -->
-
-TODO
-
-## Deposit Handling <!-- /part2/deposits* -->
-
-### Introduction <!-- /part2/deposits/intro* -->
-
-TODO
-
-### The Deposit Contract <!-- /part2/deposits/contract* -->
-
-TODO
-
-### Deposit Receipts <!-- /part2/deposits/receipts* -->
-
-TODO
-
-### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting* -->
-
-TODO
-
-### Merkle Proofs <!-- /part2/deposits/merkleproofs* -->
-
-TODO
-
-### Deposit processing <!-- /part2/deposits/processing* -->
-
-TODO
-
-### Withdrawal Credentials <!-- /part2/deposits/credentials* -->
-
-TODO
-
-## Economics <!-- /part2/economics* -->
-
-### Introduction <!-- /part2/economics/intro* -->
-
-TODO
-
-### Rewards and Penalties <!-- /part2/economics/rewards* -->
-
-TODO
-
-### Slashing <!-- /part2/economics/slashing* -->
-
-TODO
-
-### Inactivity <!-- /part2/economics/inactivity* -->
-
-TODO
-
-### Effective Balance <!-- /part2/economics/effective_balance* -->
-
-TODO
-
-## The Building Blocks <!-- /part2/building_blocks -->
-
-### Introduction <!-- /part2/building_blocks/intro* -->
-
-TODO
-
-### Randomness <!-- /part2/building_blocks/randomness* -->
-
-TODO
-
-### Committees <!-- /part2/building_blocks/committees* -->
-
-TODO
-
-### Shuffling <!-- /part2/building_blocks/shuffling -->
-
-Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
-
-Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
-
-Other shuffles rely on processing the entire list of elements to find the final ordering. We wish to spare light clients this burden. Ideally, they should deal with only the subsets of lists that they are interested in. Therefore, rather than Fisher&ndash;Yates, we are using a construction called a "swap-or-not" shuffle. The swap-or-not shuffle can tell you the destination index (or, conversely, the origin index) of a single list element, so is ideal when dealing with subsets of the whole validator set.
-
-For example, formally committees are assigned by shuffling the full validator list and then taking contiguous slices of the resulting permutation. If I only need to know the members of committee $k$, then this is very inefficient. Instead, I can run the swap-or-not shuffle backwards for only the indices in slice $k$ to find out which of the whole set of validators would be shuffled into $k$. This is much more efficient.
-
-#### Swap-or-not Specification
-
-The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
+#### `compute_shuffled_index`
 
 ```python
 def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) -> uint64:
@@ -987,329 +1282,366 @@ def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) ->
     return index
 ```
 
-An index position in the list to be shuffled, `index`, is provided, along with the total number of indices, `index_count`, and a `seed` value. The output is the index that the initial index gets shuffled to.
+See the [section on Shuffling](/part2/building_blocks/shuffling) for a detailed exposition of this algorithm.
 
-The hash functions used to calculate `pivot` and `source` are deterministic, and are used to generate pseudo-random output from the inputs: given the same input, they will generate the same output. So we can see that, for given values of `index`, `index_count`, and `seed`, the routine will always return the same output.
+#### `compute_proposer_index`
 
-The shuffling proceeds in rounds. In each round, a `pivot` index is pseudo-randomly chosen somewhere in the list, based only on the `seed` value and the round number.
+```python
+def compute_proposer_index(state: BeaconState, indices: Sequence[ValidatorIndex], seed: Bytes32) -> ValidatorIndex:
+    """
+    Return from ``indices`` a random index sampled by effective balance.
+    """
+    assert len(indices) > 0
+    MAX_RANDOM_BYTE = 2**8 - 1
+    i = uint64(0)
+    total = uint64(len(indices))
+    while True:
+        candidate_index = indices[compute_shuffled_index(i % total, total, seed)]
+        random_byte = hash(seed + uint_to_bytes(uint64(i // 32)))[i % 32]
+        effective_balance = state.validators[candidate_index].effective_balance
+        if effective_balance * MAX_RANDOM_BYTE >= MAX_EFFECTIVE_BALANCE * random_byte:
+            return candidate_index
+        i += 1
+```
 
-Next, an index `flip` is found, which is `pivot - index`, after accounting for wrap-around due to the modulo function. The important points are that, given `pivot`, every `index` maps to a unique `flip`, and that the calculation is symmetrical, so that `flip` maps to `index`.
+There is exactly one beacon block proposer per slot, selected randomly from among all the active validators. The seed parameter is set in [`get_beacon_proposer_index`](#get_beacon_proposer_index) based on the epoch and slot. Note that there is a small but finite probability of the same validator being called on to propose a block more than once in an epoch.
 
- - With `index_count = 100`, `pivot = 70`, `index = 45`, we get `flip = 25`.
- - With `index_count = 100`, `pivot = 70`, `index = 82`, we get `flip = 88`.
-   
-Finally in the round, a decision is made as to whether to keep the index as-is, or to update it to `flip`. This decision is pseudo-randomly made based on the values of `seed`, the round number, and the higher of `index` and `flip`.
+A validator's chance of being the proposer is [weighted](https://github.com/ethereum/eth2.0-specs/pull/772) by its effective balance: a validator with a 32 Ether effective balance is twice as likely to be chosen as a validator with a 16 Ether effective balance.
 
-Note that basing the swap-or-not decision on the higher of `index` and `flip` brings a symmetry to the algorithm. Whether we are considering the element at `index` or the element at `flip`, the decision as to whether to swap the elements or not will be the same. This is the key to seeing the that full algorithm delivers a shuffling (permutation) of the original set.
+[TODO: link to Effective Balance]::
 
-The algorithm proceeds with the next iteration based on the updated index.
+To account for the need to weight by effective balance, this is implemented as a try-and-increment algorithm. A counter `i` starts at zero. This counter does double duty:
+ - First `i` is used to uniformly select a candidate proposer with probability $1/N$ where, $N$ is the number of active validators. This is done by using the [`compute_shuffled_index`](#compute_shuffled_index) routine to shuffle index `i` to a new location, which is then the `candidate_index`.
+ - Then `i` is used to generate a pseudo-random byte using the hash function as a seeded PRNG with at least 256 bits of output. The lower 5 bits of `i` select a byte in the hash function, and the upper bits salt the seed. (An obvious optimisation is that the output of the hash changes only once every 32 iterations.)
 
-It may not be immediately obvious, but since we are deterministically calculating `flip` based only on the round number, the shuffle can be run in reverse simply by running from `SHUFFLE_ROUND_COUNT - 1` to `0`. The same swap-or-not decisions will be made in reverse. As described above, this reverse shuffle is perfect for finding which validators ended up in a particular committee.
+The `if` test is where the weighting by effective balance is done. If the candidate has `MAX_EFFECTIVE_BALANCE`, it will always pass this test and be returned as the proposer. If the candidate has a fraction of `MAX_EFFECTIVE_BALANCE` then that fraction is the probability of being returned as proposer.
 
-#### A full shuffle
+If the candidate is not chosen, then `i` is incremented and we try again. Since the minimum effective balance is half of the maximum, then this ought to terminate fairly swiftly. In the worst case, all validators have 16 Ether effective balance and the chance of having to do another iteration is 50%, in which case there is a one in a million chance of having to do 20 iterations.
 
-To get an intuition for how this single-index shuffle can deliver a full shuffling of a list of indices, we can consider how the algorithm is typically [implemented in clients](https://github.com/ConsenSys/teku/blob/04294427f2622c86326db68f3b88ed20d1e6cdc1/ethereum/spec/src/main/java/tech/pegasys/teku/spec/logic/common/helpers/MiscHelpers.java#L154) when shuffling an entire list at once.
+Note that this dependence on the validators' effective balances, which are updated at the end of each epoch, means that proposer assignments are valid [only in the current epoch](https://github.com/ethereum/eth2.0-specs/pull/772#issuecomment-475574357). This is different from attestation committee assignments, which are valid with a one epoch look-ahead.
 
-As an optimisation, the loop over the indices to be shuffled is brought inside the loop over rounds. This hugely reduces the amount of hashing required since the pivot is fixed for the round (it does not depend on the index) and the bits of `source` can be reused for 256 consecutive indices, since the hash has a 256-bit output.
+#### `compute_committee`
 
-For each round, we do the following.
+```python
+def compute_committee(indices: Sequence[ValidatorIndex],
+                      seed: Bytes32,
+                      index: uint64,
+                      count: uint64) -> Sequence[ValidatorIndex]:
+    """
+    Return the committee corresponding to ``indices``, ``seed``, ``index``, and committee ``count``.
+    """
+    start = (len(indices) * index) // count
+    end = (len(indices) * uint64(index + 1)) // count
+    return [indices[compute_shuffled_index(uint64(i), uint64(len(indices)), seed)] for i in range(start, end)]
+```
 
-##### 1. Choose a pivot and find the first mirror index
+[`get_beacon_committee`](#get_beacon_committee) uses this to find the specific members of one of the committees at a slot.
 
-First, we pick a pivot index $p$. This is pseudorandomly chosen, based on the round number and some other seed data. The pivot is fixed for the rest of the round.
+Every epoch, a fresh set of committees is generated; during an epoch, the committees are stable.
 
-With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
+Looking at the parameters in reverse order:
+ - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](#get_committee_count_per_slot).
+ - `index` is the committee number within the epoch, running from `0` to `count - 1`.
+ - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](#domain_beacon_attester)).
+ - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
-<div class="image">
-<img src="md/images/shuffling_0.svg" /><br />
-<span>The pivot and the first mirror index.</span>
-</div>
+Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
 
-##### 2. Traverse first mirror to pivot, swapping or not
+It may not be immediately obvious, but not all committees returned will be the same size (can vary by one), and every validator in `indices` will be a member of exactly one committee. As we increment `index` from zero, clearly `start` for `index == j + 1` is `end` for `index == j`, so there are no gaps. In addition, the highest `index` is `count - 1`, so every validator in `indices` finds its way into a committee.
 
-For each index between the mirror index $m_1$ and the pivot index $p$, we decide whether we are going to swap the element or not.
+This method of selecting committees is light client friendly. Light clients can compute only the committees that they are interested in without needing to deal with the entire validator set. See the [section on Shuffling](/part2/building_blocks/shuffling) for explanation of how htis works.
 
-Consider the element at index $i$. If we choose not to swap it, we just move on to consider the next index.
+[TODO: where is this used for sync committees?]::
 
-If we do decide to swap, then we exchange the list element at $i$ with that at $i'$, its image in the mirror index. That is, $i$ is swapped with $i' = m_1 - (i - m_1)$, so that $i$ and $i'$ are equidistant from $m_1$. In practice we don't exchange the elements at this point, we just update the indices $i \rightarrow i'$, and $i' \rightarrow i$.
+#### `compute_epoch_at_slot`
 
-We make the same swap-or-not decision for each index between $m_1$ and $p$.
+```python
+def compute_epoch_at_slot(slot: Slot) -> Epoch:
+    """
+    Return the epoch number at ``slot``.
+    """
+    return Epoch(slot // SLOTS_PER_EPOCH)
+```
 
-<div class="image">
-<img src="md/images/shuffling_1.svg" /><br />
-<span>Swapping or not from the first mirror up to the pivot.</span>
-</div>
+This is trivial enough that I won't explain it. But note that it does rely on [`GENESIS_SLOT`](/part3/config/constants#miscellaneous) and [`GENESIS_EPOCH`](/part3/config/constants#miscellaneous) being zero. The more pernickety among us might prefer it to read,
 
-The decision as to whether to swap or not is based on hashing together the random seed, the round number, and some position data. A single bit is extracted from this hash for each index, and the swap is made or not according to whether this bit is one or zero. 
+```none
+    return Epoch(GENESIS_EPOCH + (slot - GENESIS_SLOT) // SLOTS_PER_EPOCH)
+```
 
-##### 3. Calculate the second mirror index
+#### `compute_start_slot_at_epoch`
 
-After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
+```python
+def compute_start_slot_at_epoch(epoch: Epoch) -> Slot:
+    """
+    Return the start slot of ``epoch``.
+    """
+    return Slot(epoch * SLOTS_PER_EPOCH)
+```
 
-<div class="image">
-<img src="md/images/shuffling_2.svg" /><br />
-<span>The second mirror index.</span>
-</div>
+Should really read,
 
-##### 4. Traverse pivot to second mirror, swapping or not
+```none
+    return Slot(GENESIS_SLOT + (epoch - GENESIS_EPOCH) * SLOTS_PER_EPOCH)
+```
 
-Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
+#### `compute_activation_exit_epoch`
 
-<div class="image">
-<img src="md/images/shuffling_3.svg" /><br />
-<span>Swapping or not from the pivot to the second mirror.</span>
-</div>
+```python
+def compute_activation_exit_epoch(epoch: Epoch) -> Epoch:
+    """
+    Return the epoch during which validator activations and exits initiated in ``epoch`` take effect.
+    """
+    return Epoch(epoch + 1 + MAX_SEED_LOOKAHEAD)
+```
 
-##### Putting it all together
+When queuing validators for activation or exit in [`process_registry_updates()`](#registry-updates) and [`initiate_validator_exit()`](#initiate_validator_exit) respectively, the activation or exit is delayed until the next epoch, plus [`MAX_SEED_LOOKAHEAD`](/part3/config/presets#time-parameters) epochs, currently 4.
 
-At the end of the round, we have considered all the indices between $m_1$ and $m_2$, which, by construction, is half of the total indices. For each index considered, we have either left the element in place, or swapped the element at a distinct index in the other half. Thus, all of the indices have been considered exactly once for swapping.
+See [`MAX_SEED_LOOKAHEAD`](/part3/config/presets#time-parameters) for the details, but in short it is designed to make it extremely hard for an attacker to manipulate the make up of committees via activations and exits.
 
-The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
+#### `compute_fork_data_root`
 
-<div class="image">
-<img src="md/images/shuffling_4.svg" /><br />
-<span>The whole process running from one mirror to the other in a single round.</span>
-</div>
+```python
+def compute_fork_data_root(current_version: Version, genesis_validators_root: Root) -> Root:
+    """
+    Return the 32-byte fork data root for the ``current_version`` and ``genesis_validators_root``.
+    This is used primarily in signature domains to avoid collisions across forks/chains.
+    """
+    return hash_tree_root(ForkData(
+        current_version=current_version,
+        genesis_validators_root=genesis_validators_root,
+    ))
+```
 
-#### Discussion
+The fork data root serves as a unique identifier for the chain that we are on. `genesis_validators_root` identifies our unique genesis event, and `current_version` our own hard fork subsequent to that genesis event. This is useful, for example, to differentiate between a testnet and mainnet: both might have the same fork versions, but will definitely have different genesis validator roots.
 
-##### A key insight
+It is used by [`compute_fork_digest()`](#compute_fork_digest) and [`compute_domain`](#compute_domain).
 
-When deciding whether to swap or not for each index, the algorithm cleverly bases its decision on the higher of the candidate index or its image in the mirror. That is, $i$ rather than $i'$ (when below the pivot), and $j'$ rather than $j$ (when above the pivot). This means that we have flexibility when running through the indices of the list: we could do $0$ to $m_1$ and $p$ to $m_2$ as two separate loops, or do it with a single loop from $m_1$ to $m_2$ as I outlined above. The result will be the same: it doesn't matter if we are considering $i$ or its image $i'$; the decision as to whether to swap or not has the same outcome.
+#### `compute_fork_digest`
 
-##### The number of rounds
+```python
+def compute_fork_digest(current_version: Version, genesis_validators_root: Root) -> ForkDigest:
+    """
+    Return the 4-byte fork digest for the ``current_version`` and ``genesis_validators_root``.
+    This is a digest primarily used for domain separation on the p2p layer.
+    4-bytes suffices for practical separation of forks/chains.
+    """
+    return ForkDigest(compute_fork_data_root(current_version, genesis_validators_root)[:4])
+```
 
-In Ethereum&nbsp;2.0 we do 90 rounds of the algorithm per shuffle, set by the constant `SHUFFLE_ROUND_COUNT` [TODO - link]. The [original paper](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf) on which this technique is based suggests that $6\lg{N}$ rounds is required "to start to see a good bound on CCA-security", where $N$ is the list length. In his [annotated spec](https://github.com/ethereum/annotated-spec/blob/master/phase0/beacon-chain.md) Vitalik says "Expert cryptographer advice told us ~$4\log_2{N}$ is sufficient for safety". The absolute maximum number of validators in Eth2, thus the maximum size of the list we would ever need to shuffle, is about $2^{22}$ (4.2 million). On Vitalik's estimate that gives us 88 rounds required, on the paper's estimate, 92 rounds (assuming that $\lg$ is the natural logarithm). So we are in the right ballpark, especially as we are very, very unlikely to end up with that many active validators.
+Extracts the first four bytes of the [fork data root](#compute_fork_data_root) as a [`ForkDigest`](/part3/config/types#forkdigest) type. It is primarily used for domain separation on the peer-to-peer networking layer.
 
-It might be interesting to make the number of rounds adaptive based on list length. But we don't do that; it's probably an optimisation too far.
+`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md) to distinguish between independent beacon chain networks or forks: it is vital that activity on one chain does not interfere with other chains.
 
-Fun fact: when Least Authority audited the beacon chain specification, they initially found bias in the shuffling used for selecting block proposers (see Issue F [in their report](https://leastauthority.wpengine.com/static/publications/LeastAuthority-Ethereum-2.0-Specifications-Audit-Report.pdf)). This turned out to be due to mistakenly using a configuration that had only 10 rounds of shuffling. When they increased it to the 90 we use for mainnet, the bias no longer appeared.
+[TODO: check the bit about compute_fork_digest in networking]::
 
-##### (Pseudo) randomness
+#### `compute_domain`
 
-The algorithm requires that we select a pivot point randomly in each round, and randomly choose whether to swap each element or not in each round.
+```python
+def compute_domain(domain_type: DomainType, fork_version: Version=None, genesis_validators_root: Root=None) -> Domain:
+    """
+    Return the domain for the ``domain_type`` and ``fork_version``.
+    """
+    if fork_version is None:
+        fork_version = GENESIS_FORK_VERSION
+    if genesis_validators_root is None:
+        genesis_validators_root = Root()  # all bytes zero by default
+    fork_data_root = compute_fork_data_root(fork_version, genesis_validators_root)
+    return Domain(domain_type + fork_data_root[:28])
+```
 
-In Eth2, we deterministically generate the "randomness" from a seed value, such that the same seed will always generate the same shuffling.
+When dealing with signed messages, the signature "domains" are separated according to three independent factors:
+ 1. All signatures include a [`DomainType`](#domain-types) relevant to the message's purpose, which is just some cryptographic hygiene in case the same message is to be signed for different purposes at any point.
+ 2. All but signatures on deposit messages include the fork version. This ensures that messages across different forks of the chain become invalid, and that validators won't be slashed for signing attestations on two different chains (this is allowed).
+ 3. And, [now](https://github.com/ethereum/eth2.0-specs/pull/1614), the root hash of the validator Merkle tree at Genesis is included. Along with the fork version this gives a unique identifier for our chain.
 
-The pivot index is generated from eight bytes of a SHA256 hash of the seed concatenated with the round number, so it usually changes each round.
+This function is mainly used by [`get_domain()`](#get_domain). It is also used in [deposit processing](#deposits), in which case `fork_version` and `genesis_validators_root` take their default values since deposits are valid across forks.
+>
+Fun fact: this function looks pretty simple, but [I found a subtle bug](https://github.com/ethereum/eth2.0-specs/issues/1582) in the way tests were generated in a previous implementation.
 
-The decision bits used to determine whether or not to swap elements are bits drawn from SHA256 hashes of the seed, the round number, and the index of the element within the list.
+#### `compute_signing_root`
 
-##### Efficiency
+```python
+def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
+    """
+    Return the signing root for the corresponding signing data.
+    """
+    return hash_tree_root(SigningData(
+        object_root=hash_tree_root(ssz_object),
+        domain=domain,
+    ))
+```
 
-This shuffling algorithm is much slower than Fisher&ndash;Yates. That algorithm requires $N$ swaps. Our algorithm will require $90N/4$ swaps on average to shuffle $N$ elements.
+This is a pre-processor for signing objects with BLS signatures:
+ 1. calculate the [hash tree root](#todo) of the object;
+ 2. combine the hash tree root with the [`Domain`](/part3/config/types#domain) inside a temporary [`SigningData`](#todo) object;
+ 3. return the hash tree root of that, which is the data to be signed.
 
-We should also consider  the generation of pseudo-randomness, which is the most expensive part of the algorithm. Fisher&ndash;Yates needs something like $N\log_2{N}$ bits of randomness, and we need $90(\log_2{N} + N/2)$ bits, which, for the range of $N$ we need in Eth2, is many more bits (about twice as many when $N$ is a million).
+[TODO: link to hash tree root explanation]::
 
-#### Why swap-or-not?
+The `domain` is usually the output of [`get_domain()`](#get_domain), which mixes in the [cryptographic domain](/part3/config/constants#domain-types), the fork version, and the genesis validators root to the message hash. For deposits, it is the output of [`compute_domain()`](#compute_domain), ignoring the fork version and genesis validators root.
 
-Why would we use such an inefficient implementation?
+This is exactly equivalent to adding the domain to an object and taking the hash tree root of the whole thing. Indeed, this function used to be called, as [`compute_domain_wrapper_root()`](https://github.com/ethereum/eth2.0-specs/blob/502ee295379c1f3c5c3649e12330fb5be5d7a83b/specs/core/0_beacon-chain.md#compute_domain_wrapper_root).
 
-##### Shuffling single elements
+#### `add_flag`
 
-The brilliance is that, if we are interested in only a few indices, we do not need to compute the shuffling of the whole list. In fact, we can apply the algorithm to a single index to find out which index it will be swapped with.
+```python
+def add_flag(flags: ParticipationFlags, flag_index: int) -> ParticipationFlags:
+    """
+    Return a new ``ParticipationFlags`` adding ``flag_index`` to ``flags``.
+    """
+    flag = ParticipationFlags(2**flag_index)
+    return flags | flag
+```
 
-So, if we want to know where the element with index 217 gets shuffled to, we can run the algorithm with only that index; we do not need to shuffle the whole list. Moreover, if we want to know the converse, which element gets shuffled into index 217, we can just run the algorithm backwards for element 217 (backwards means running the round number from high to low rather than low to high).
-
-In summary, we can compute the destination of element $i$ in $O(1)$ operations, and the source of element $i'$ (the inverse operation) also in $O(1)$, not dependent on the length of the list. Shuffles like the Fisher&ndash;Yates shuffle do not have this property and cannot work with single indices, they always need to iterate the whole list. The technical term for a shuffle having this property is that it is _oblivious_ (to all the other elements in the list).
-
-##### Keeping light clients light
-
-This property is important for light clients. Light clients are observers of the Eth2 beacon and shard chains that do not store the entire state, but do wish to be able to securely access data on the chains. As part of verifying that they have the correct data&mdash;that no-one has lied to them&mdash;it is necessary to compute the committees that attested to that data. This means shuffling, and we don't want light clients to have to hold and shuffle the entire list of validators. By using the swap-or-not shuffle, light clients need only to consider the small subset of validators that they are interested in, which is vastly more efficient overall.
-
-#### References
-
- - The initial discussion about the search for a good shuffling algorithm: https://github.com/ethereum/eth2.0-specs/issues/323.
- - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
- - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
-
-### BLS Signatures <!-- /part2/building_blocks/signatures* -->
+Added in Altair.
 
 TODO
 
-### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
+#### `has_flag`
+
+```python
+def has_flag(flags: ParticipationFlags, flag_index: int) -> bool:
+    """
+    Return whether ``flags`` has ``flag_index`` set.
+    """
+    flag = ParticipationFlags(2**flag_index)
+    return flags & flag == flag
+```
+
+Added in Altair.
 
 TODO
 
-### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz* -->
+### Beacon State Accessors <!-- /part3/helper/accessors* -->
 
 TODO
 
-### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
+### Beacon State Mutators <!-- /part3/helper/mutators* -->
 
 TODO
 
-## Upgrades <!-- /part2/upgrades* -->
-
-### Introductions <!-- /part2/upgrades/intro* -->
+## Genesis <!-- /part3/genesis* -->
 
 TODO
 
-### Hard Forks <!-- /part2/upgrades/forks* -->
+## Beacon Chain State Transition Function <!-- /part3/transition* -->
 
 TODO
 
-### Fork Digest <!-- /part2/upgrades/fork_digest* -->
+### Introduction <!-- /part3/transition/intro* -->
 
 TODO
 
-## Networking <!-- /part2/networking* -->
-
-### Introduction <!-- /part2/networking/intro* -->
+### Epoch processing <!-- /part3/transition/epoch* -->
 
 TODO
 
-### Discovery <!-- /part2/networking/discovery* -->
+### Block processing <!-- /part3/transition/block* -->
 
 TODO
 
-### Gossip <!-- /part2/networking/gossip* -->
+# Part 4: Future <!-- /part4* -->
+
+## The Merge <!-- /part4/the_merge* -->
+
+### Introduction <!-- /part4/the_merge/intro* -->
 
 TODO
 
-### RPC <!-- /part2/networking/rpc* -->
+### Architecture <!-- /part4/the_merge/architecture* -->
 
 TODO
 
-### Syncing <!-- /part2/networking/syncing* -->
+### The Transition <!-- /part4/the_merge/transition* -->
 
 TODO
 
-### Message Types <!-- /part2/networking/messages* -->
+## Secret Shared Validators <!-- /part4/ssv* -->
 
 TODO
 
-## Implementation <!-- /part2/implementation* -->
-
-### Introduction <!-- /part2/implementation/intro* -->
+### Introduction <!-- /part4/ssv/intro* -->
 
 TODO
 
-### Protoarray <!-- /part2/implementation/protoarray* -->
+### Multi-party Compute <!-- /part4/ssv/mpc* -->
 
 TODO
 
-### SSZ backing tree <!-- /part2/implementation/backing_tree* -->
+### Consensus <!-- /part4/ssv/consensus* -->
 
 TODO
 
-### Batch signature verification <!-- /part2/implementation/batch_verification* -->
+## Light Clients <!-- /part4/light_clients* -->
+
+### Introduction <!-- /part4/light_clients/intro* -->
 
 TODO
 
-### Slashing protection <!-- /part2/implementation/anti_slash* -->
+### Syncing <!-- /part4/light_clients/syncing* -->
 
 TODO
 
-### Caching strategies? <!-- /part2/implementation/caches* -->
+### Protocol <!-- /part4/light_clients/protocol* -->
+
+## Sharding <!-- /part4/sharding* -->
+
+### Introduction <!-- /part4/sharding/intro* -->
 
 TODO
 
-### Disk storage <!-- /part2/implementation/storage* -->
+### Data Availability <!-- /part4/sharding/data_availability* -->
 
 TODO
 
-### Checkpoint sync <!-- /part2/implementation/checkpoint_sync* -->
+### Pricing <!-- /part4/sharding/pricing* -->
 
 TODO
 
-# Part 3: Future <!-- /part3* -->
+## Active Research Topics <!-- /part4/research* -->
 
-## The Merge <!-- /part3/the_merge* -->
-
-### Introduction <!-- /part3/the_merge/intro* -->
+### Introduction <!-- /part4/research/intro* -->
 
 TODO
 
-### Architecture <!-- /part3/the_merge/architecture* -->
+### Proofs of Custody <!-- /part4/research/custody* -->
 
 TODO
 
-### The Transition <!-- /part3/the_merge/transition* -->
+### Builder / proposer split <!-- /part4/research/builders_proposers* -->
 
 TODO
 
-## Secret Shared Validators <!-- /part3/ssv* -->
+### Consensus changes <!-- /part4/research/consensus* -->
 
 TODO
 
-### Introduction <!-- /part3/ssv/intro* -->
+### Executable shards <!-- /part4/research/executable_shards* -->
 
 TODO
 
-### Multi-party Compute <!-- /part3/ssv/mpc* -->
+### Verkle trees <!-- /part4/research/verkle_trees* -->
 
 TODO
 
-### Consensus <!-- /part3/ssv/consensus* -->
+### Statelessness <!-- /part4/research/statelessness* -->
 
 TODO
 
-## Light Clients <!-- /part3/light_clients* -->
-
-### Introduction <!-- /part3/light_clients/intro* -->
+### Single Secret Leader Election <!-- /part4/research/ssle* -->
 
 TODO
 
-### Syncing <!-- /part3/light_clients/syncing* -->
+### Verifiable Delay Function <!-- /part4/research/vdf* -->
 
 TODO
 
-### Protocol <!-- /part3/light_clients/protocol* -->
-
-## Sharding <!-- /part3/sharding* -->
-
-### Introduction <!-- /part3/sharding/intro* -->
+### Post-quantum crypto <!-- /part4/research/post-quantum* -->
 
 TODO
 
-### Data Availability <!-- /part3/sharding/data_availability* -->
-
-TODO
-
-### Pricing <!-- /part3/sharding/pricing* -->
-
-TODO
-
-## Active Research Topics <!-- /part3/research* -->
-
-### Introduction <!-- /part3/research/intro* -->
-
-TODO
-
-### Builder / proposer split <!-- /part3/research/builders_proposers* -->
-
-TODO
-
-### Consensus changes <!-- /part3/research/consensus* -->
-
-TODO
-
-### Executable shards <!-- /part3/research/executable_shards* -->
-
-TODO
-
-### Verkle trees <!-- /part3/research/verkle_trees* -->
-
-TODO
-
-### Statelessness <!-- /part3/research/statelessness* -->
-
-TODO
-
-### Single Secret Leader Election <!-- /part3/research/ssle* -->
-
-TODO
-
-### Verifiable Delay Function <!-- /part3/research/vdf* -->
-
-TODO
-
-### Post-quantum crypto <!-- /part3/research/post-quantum* -->
-
-TODO
-
-### S[NT]ARK-friendly state transitions <!-- /part3/research/snark* -->
+### S[NT]ARK-friendly state transitions <!-- /part4/research/snark* -->
 
 TODO
 
