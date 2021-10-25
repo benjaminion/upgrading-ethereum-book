@@ -21,9 +21,9 @@ BEGIN{
     n++
 
     # Generate frontmatter contents
-    name = gensub("^#+ (.*) <!-- .* -->$", "\\1", "1", $0)
-    h_path = gensub("^#+ .* <!-- (.*) -->$", "\\1", "1", $0)
-    heading = gensub ("^(#+ .*) <!-- .* -->$", "\\1", "1", $0)
+    name = gensub(/^#+ (.*) <!-- .* -->$/, "\\1", "1")
+    h_path = gensub(/^#+ .* <!-- (.*) -->$/, "\\1", "1")
+    heading = gensub (/^(#+ .*) <!-- .* -->$/, "\\1", "1")
 
     # Is this page hidden?
     if (h_path ~ /\*$/) {
