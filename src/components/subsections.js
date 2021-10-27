@@ -28,7 +28,8 @@ const Subsections = ({indexArray}) => {
     }
   `)
 
-  if (indexArray === null) return null
+  // Only add the auto index for Parts, not any deeper structure
+  if (indexArray === null || indexArray.length > 1) return null
   
   // Find pages that are subsections of the page we are on
   const pages = data.allMarkdownRemark.edges
