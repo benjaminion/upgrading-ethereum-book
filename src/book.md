@@ -541,7 +541,7 @@ TODO
 
 ## Introduction <!-- /part3/intro -->
 
-### The Annotated Spec
+### Annotated Specification
 
 The following chapters present the entire beacon chain technical specification, annotated with my explanations and comments.
 
@@ -580,22 +580,22 @@ Regarding "unsigned", there was [much discussion](https://github.com/ethereum/et
 
 And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`.
 
-| Name | SSZ equivalent | Description |
-| - | - | - |
-| `Slot` | `uint64` | a slot number |
-| `Epoch` | `uint64` | an epoch number |
-| `CommitteeIndex` | `uint64` | a committee index at a slot |
-| `ValidatorIndex` | `uint64` | a validator registry index |
-| `Gwei` | `uint64` | an amount in Gwei |
-| `Root` | `Bytes32` | a Merkle root |
-| `Hash32` | `Bytes32` | a 256-bit hash |
-| `Version` | `Bytes4` | a fork version number |
-| `DomainType` | `Bytes4` | a domain type |
-| `ForkDigest` | `Bytes4` | a digest of the current fork data |
-| `Domain` | `Bytes32` | a signature domain |
-| `BLSPubkey` | `Bytes48` | a BLS12-381 public key |
-| `BLSSignature` | `Bytes96` | a BLS12-381 signature |
-| `ParticipationFlags` | `uint8` | a succinct representation of 8 boolean participation flags |
+| Name                 | SSZ equivalent | Description                                                |
+| -                    | -              | -                                                          |
+| `Slot`               | `uint64`       | a slot number                                              |
+| `Epoch`              | `uint64`       | an epoch number                                            |
+| `CommitteeIndex`     | `uint64`       | a committee index at a slot                                |
+| `ValidatorIndex`     | `uint64`       | a validator registry index                                 |
+| `Gwei`               | `uint64`       | an amount in Gwei                                          |
+| `Root`               | `Bytes32`      | a Merkle root                                              |
+| `Hash32`             | `Bytes32`      | a 256-bit hash                                             |
+| `Version`            | `Bytes4`       | a fork version number                                      |
+| `DomainType`         | `Bytes4`       | a domain type                                              |
+| `ForkDigest`         | `Bytes4`       | a digest of the current fork data                          |
+| `Domain`             | `Bytes32`      | a signature domain                                         |
+| `BLSPubkey`          | `Bytes48`      | a BLS12-381 public key                                     |
+| `BLSSignature`       | `Bytes96`      | a BLS12-381 signature                                      |
+| `ParticipationFlags` | `uint8`        | a succinct representation of 8 boolean participation flags |
 
 #### Slot
 
@@ -793,11 +793,13 @@ The mechanism for rewarding timely inclusion of attestations (thus penalising la
 | `PROPOSER_WEIGHT` | `uint64(8)` |
 | `WEIGHT_DENOMINATOR` | `uint64(64)` |
 
-These weights are used to calculate the total reward received by a validator performing its duties. There are five duties in total. Three relate to making attestations, and are attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for participating in sync committees, and for proposing blocks.
+These weights are used to calculate the reward earned by a validator for performing its duties. There are five duties in total. Three relate to making attestations: attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for proposing blocks, and for participating in sync committees. Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
 
-The calculation of rewards was overhauled in the Altair upgrade. The total reward amount remains the same, but the weights were adjusted, and the gradual inclusion delay factor was removed in favour of a cliff after which no reward is payable for that duty. Previously, ignoring the inclusion delay factor, the weights (roughly) corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for the block proposer. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
+On a long-term average, a validator can expect to earn a total amount of [`get_base_reward()`](/part3/transition/epoch#get_base_reward) per epoch, with these weights being the relative portions for each of the duties comprising that total. Proposing blocks and participating in sync committees do not happen in every epoch, but are randomly assigned, so over small periods of time validator earnings may differ from `get_base_reward()`.
 
-Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
+[TODO: link to discussion of things that can reduce rewards, a la V's annotated spec]::
+
+The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
 <div class="image">
 <img src="md/images/weights.svg" style="width:50%" /><br />
@@ -811,25 +813,29 @@ Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
 | `BLS_WITHDRAWAL_PREFIX` | `Bytes1('0x00')` |
 | `ETH1_ADDRESS_WITHDRAWAL_PREFIX` | `Bytes1('0x01')` |
 
+[TODO: link to somewhere useful for withdrawal creds]::
+
+Withdrawal prefixes relate to the withdrawal credentials provided when deposits are made for validators. The withdrawal credential is a commitment to a private key that may be used later to withdraw funds from the validator's balance on the beacon chain.
+
+Two ways to specify the withdrawal credentials are currently available, versioned with these prefixes, with others such as [`0x02`](https://github.com/ethereum/consensus-specs/pull/2454) and [`0x03`](https://ethresear.ch/t/0x03-withdrawal-credentials-simple-eth1-triggerable-withdrawals/10021?u=benjaminion) under discussion.
+
+These withdrawal credential prefixes are yet significant in the core beacon chain spec, but will become significant when withdrawals are enabled in a future upgrade. The withdrawal credentials data is not consensus-critical, and future withdrawal credential types can be added without a hardfork. There are [suggestions](https://ethresear.ch/t/withdrawal-credential-rotation-from-bls-to-eth1/8722?u=benjaminion) as to how existing credentials might be changed between methods which would be consensus critical.
+
+The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
+
+See the [Withdrawals](/part4/the_merge/withdrawals) section for discussion on what the mechanism might look like.
+
 ##### `BLS_WITHDRAWAL_PREFIX`
 
-Not actually used in this core beacon chain spec, but used in the [deposit contract spec](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/deposit-contract.md#withdrawal-credentials).
+The beacon chain launched with only BLS-style withdrawal credentials available, so all early stakers used this. The `0x00` prefix on the credential distinguishes this type from the others: it replaces the first byte of the hash of the BLS public key that corresponds to the BLS private key of the staker.
 
-Validators need to register two public/private key pairs. The signing key is used constantly for signing attestations and blocks. The withdrawal key will be used in future after a validator has exited to allow the validator's Ether balance to be transferred to an Eth2 account. The withdrawal credentials are stored in the validator's record so that, in future, the owner of the validator can lay claim to the original stake and accrued rewards. The withdrawal credentials is the 32 byte SHA256 hash of the validators withdrawal public key, with the first byte set to `BLS_WITHDRAWAL_PREFIX` as a version number, in case of future changes.
+With this type of credential, in addition to a BLS signing key, stakers need a second BLS key that they will later use for withdrawals. The credential registered in the deposit data is the 32 byte SHA256 hash of the validators withdrawal public key, with the first byte set to `BLS_WITHDRAWAL_PREFIX`.
 
 ##### `ETH1_ADDRESS_WITHDRAWAL_PREFIX`
 
-TODO
+Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.com/ethereum/consensus-specs/pull/2149) once it became clear that Ethereum&nbsp;2.0 would not be using a BLS-based address scheme for accounts at any time soon. These provide a commitment that stakers will be able to withdraw their beacon chain funds to a normal Ethereum account (possibly a contract account) at a future date.
 
 #### Domain types
-
-<a id="domain_beacon_proposer"></a>
-<a id="domain_beacon_attester"></a>
-<a id="domain_randao"></a>
-<a id="domain_deposit"></a>
-<a id="domain_voluntary_exit"></a>
-<a id="domain_selection_proof"></a>
-<a id="domain_aggregate_and_proof"></a>
 
 | Name | Value |
 | - | - |
@@ -846,16 +852,22 @@ TODO
 
 These domain types are used in two ways: for signatures and for seeds.
 
-As a cryptographic nicety, each of the protocol's five signature types is augmented with the appropriate Domain before being signed:
+When random numbers are required in-protocol, one way they are generated is by hashing the RANDAO mix with other quantities, one of them being a domain type (see [`get_seed()`](/part3/helper/accessors#get_seed)). The [original motivation](https://github.com/ethereum/eth2.0-specs/pull/1415) was to avoid occasional collisions between Phase&nbsp;0 committees and Phase&nbsp;1 persistent committees, back when they were a thing. So, when computing the beacon block proposer, `DOMAIN_BEACON_PROPOSER` is hashed into the seed, when computing attestation committees, `DOMAIN_BEACON_ATTESTER` is hashed in, and when computing sync committees, `DOMAIN_SYNC_COMMITTEE` is hashed in.
+
+In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate Domain before being signed:
  - Signed block proposals incorporate `DOMAIN_BEACON_PROPOSER`
  - Signed attestations incorporate `DOMAIN_BEACON_ATTESTER`
  - RANDAO reveals are BLS signatures, and use `DOMAIN_RANDAO`
  - Deposit data mesages from Ethereum 1 incorporate `DOMAIN_DEPOSIT`
  - Validator voluntary exit messages incorporate `DOMAIN_VOLUNTARY_EXIT`
+ - Sync aggregates incorporate `DOMAIN_SYNC_COMMITTEE`
+ - `DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF` and `DOMAIN_CONTRIBUTION_AND_PROOF` are not used directly in the beacon chain specification itself, but are used when selecting validators to aggregate the signatures from sync committees, and by the selected aggregators when signing their contributions, respectively.
+ 
+[TODO: link to validator spec for DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF?]::
 
 In each case, except for Eth1 deposits, the fork version is also incorporated before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
-In addition, the first two domains are also used to separate the seeds for random number generation. The [original motivation](https://github.com/ethereum/eth2.0-specs/pull/1415) was to avoid occasional collisions between Phase&nbsp;0 committees and Phase&nbsp;1 persistent committees. So, when computing the beacon block proposer, `DOMAIN_BEACON_PROPOSER` is hashed into the seed, and when computing committees, `DOMAIN_BEACON_ATTESTER` is hashed into the seed.
+[TODO: revise the following paragraph]::
 
 The last two domains [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. They are not part of the consensus-critical state-transition. In short, each slot, validators are selected to aggregate attestations from their committee. The selection is done based on the validator's signature over the slot number, mixing in `DOMAIN_SELECTION_PROOF`. Then the validator signs the whole aggregated attestation using `DOMAIN_AGGREGATE_AND_PROOF`. See the [Honest Validator](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md) spec for more on this.
 
@@ -1910,10 +1922,10 @@ Every epoch, a fresh set of committees is generated; during an epoch, the commit
 Looking at the parameters in reverse order:
  - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](#get_committee_count_per_slot).
  - `index` is the committee number within the epoch, running from `0` to `count - 1`.
- - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](#domain_beacon_attester)).
+ - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain-types)).
  - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
-Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
+Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
 
 It may not be immediately obvious, but not all committees returned will be the same size (can vary by one), and every validator in `indices` will be a member of exactly one committee. As we increment `index` from zero, clearly `start` for `index == j + 1` is `end` for `index == j`, so there are no gaps. In addition, the highest `index` is `count - 1`, so every validator in `indices` finds its way into a committee.
 
@@ -2019,7 +2031,7 @@ def compute_domain(domain_type: DomainType, fork_version: Version=None, genesis_
 ```
 
 When dealing with signed messages, the signature "domains" are separated according to three independent factors:
- 1. All signatures include a [`DomainType`](#domain-types) relevant to the message's purpose, which is just some cryptographic hygiene in case the same message is to be signed for different purposes at any point.
+ 1. All signatures include a [`DomainType`](/part3/config/constants#domain-types) relevant to the message's purpose, which is just some cryptographic hygiene in case the same message is to be signed for different purposes at any point.
  2. All but signatures on deposit messages include the fork version. This ensures that messages across different forks of the chain become invalid, and that validators won't be slashed for signing attestations on two different chains (this is allowed).
  3. And, [now](https://github.com/ethereum/eth2.0-specs/pull/1614), the root hash of the validator Merkle tree at Genesis is included. Along with the fork version this gives a unique identifier for our chain.
 
@@ -2627,6 +2639,8 @@ def get_base_reward_per_increment(state: BeaconState) -> Gwei:
     return Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
 ```
 
+<a id="get_base_reward"></a>
+
 ```python
 def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
     """
@@ -3154,6 +3168,10 @@ TODO
 TODO
 
 ### The Transition <!-- /part4/the_merge/transition* -->
+
+TODO
+
+### Withdrawals <!-- /part4/the_merge/withdrawals* -->
 
 TODO
 
