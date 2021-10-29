@@ -549,6 +549,8 @@ This edition of Upgrading Ethereum is based on the Altair version of the beacon 
 
 For the purposes of this exposition, I have consolidated the two specifications into one, omitting the parts that are present only in Phase&nbsp;0. For historical interest and comparison purposes, my previous [Phase&nbsp;0 annotated spec](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available.
 
+[TODO: note about incorporating the BLS spec]::
+
 #### References
 
   - The Phase&nbsp;0 beacon chain specification: https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/phase0/beacon-chain.md
@@ -850,26 +852,35 @@ Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.
 | `DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF` | `DomainType('0x08000000')` |
 | `DOMAIN_CONTRIBUTION_AND_PROOF` | `DomainType('0x09000000')` |
 
-These domain types are used in two ways: for signatures and for seeds.
+These domain types are used in three ways: for seeds, for signatures, and for selecting aggregators
+
+##### Seeds
 
 When random numbers are required in-protocol, one way they are generated is by hashing the RANDAO mix with other quantities, one of them being a domain type (see [`get_seed()`](/part3/helper/accessors#get_seed)). The [original motivation](https://github.com/ethereum/eth2.0-specs/pull/1415) was to avoid occasional collisions between Phase&nbsp;0 committees and Phase&nbsp;1 persistent committees, back when they were a thing. So, when computing the beacon block proposer, `DOMAIN_BEACON_PROPOSER` is hashed into the seed, when computing attestation committees, `DOMAIN_BEACON_ATTESTER` is hashed in, and when computing sync committees, `DOMAIN_SYNC_COMMITTEE` is hashed in.
 
-In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate Domain before being signed:
+##### Signatures
+
+In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate domain before being signed:
+
  - Signed block proposals incorporate `DOMAIN_BEACON_PROPOSER`
  - Signed attestations incorporate `DOMAIN_BEACON_ATTESTER`
  - RANDAO reveals are BLS signatures, and use `DOMAIN_RANDAO`
- - Deposit data mesages from Ethereum 1 incorporate `DOMAIN_DEPOSIT`
+ - Deposit data messages incorporate `DOMAIN_DEPOSIT`
  - Validator voluntary exit messages incorporate `DOMAIN_VOLUNTARY_EXIT`
- - Sync aggregates incorporate `DOMAIN_SYNC_COMMITTEE`
- - `DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF` and `DOMAIN_CONTRIBUTION_AND_PROOF` are not used directly in the beacon chain specification itself, but are used when selecting validators to aggregate the signatures from sync committees, and by the selected aggregators when signing their contributions, respectively.
- 
-[TODO: link to validator spec for DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF?]::
+ - Sync committee signatures incorporate `DOMAIN_SYNC_COMMITTEE`
 
-In each case, except for Eth1 deposits, the fork version is also incorporated before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
+In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
-[TODO: revise the following paragraph]::
+##### Aggregator selection
 
-The last two domains [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. They are not part of the consensus-critical state-transition. In short, each slot, validators are selected to aggregate attestations from their committee. The selection is done based on the validator's signature over the slot number, mixing in `DOMAIN_SELECTION_PROOF`. Then the validator signs the whole aggregated attestation using `DOMAIN_AGGREGATE_AND_PROOF`. See the [Honest Validator](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md) spec for more on this.
+The remaining four types, suffixed `_PROOF` are not used directly in the beacon chain specification. They [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. The technique was [extended](https://github.com/ethereum/consensus-specs/pull/2266) to sync committees with the Altair upgrade.
+
+Briefly, at each slot, validators are selected to aggregate attestations from their committees. The selection is done based on the validator's signature over the slot number, mixing in `DOMAIN_SELECTION_PROOF`. The validator then signs the whole aggregated attestation, including the previous signature as proof that it was selected to be a validator, using `DOMAIN_AGGREGATE_AND_PROOF`. And similarly for sync committees. In this way, everything is verifiable and attributable, making it hard to flood the network with fake messages.
+
+These four are not part of the consensus-critical state-transition, but are nonetheless important to the healthy functioning of the chain.
+
+[TODO: link to validator spec and p2p spec?]::
+<!-- See the [Honest Validator](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md) spec for more on this. -->
 
 #### Crypto
 
@@ -877,26 +888,24 @@ The last two domains [were introduced](https://github.com/ethereum/eth2.0-specs/
 | - | - |
 | `G2_POINT_AT_INFINITY` | `BLSSignature(b'\xc0' + b'\x00' * 95)` |
 
-TODO
+[TODO: link to BLS spec]::
+
+This is the compressed [serialisation](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization) of the "point at infinity", the identity point, of the G2 group of the BLS12-381 curve that we are using for signatures. Note that it is in big-endian format (unlike all other constants in the spec).
+
+It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS standard would reject these. There was a time when valid sync committee signatures could contain no public keys, but that is [no longer the case](https://github.com/ethereum/consensus-specs/pull/2528), so this constant is probably redundant now.
 
 ### Preset <!-- /part3/config/preset -->
 
 [TODO: Update for Altair]::
 [TODO: Insert headings]::
 
-In the normal course of things, configuration parameters might not be the most exciting part of a specification. However, to gain an understanding of these parameters is to gain a huge insight into what kind of beast we are dealing with in the beacon chain.
+The "presets" are consistent collections of configuration variables that are bundled togther. There are currently two sets of configurations available in the [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/configs), [mainnet](https://github.com/ethereum/consensus-specs/blob/dev/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml). The mainnet configuration is running on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
+
+All the values discussed below are from the mainnet configuration.
 
 You'll notice that most of these values are powers of two. There's no huge significance to this. Computer scientists think it's neat, and it ensures that things cleanly divide other things in general. There is a [view](https://github.com/ethereum/eth2.0-specs/issues/1633#issuecomment-592949297) that this practice helps to minimise [bike-shedding](https://en.wikipedia.org/wiki/Law_of_triviality) (endless arguments over trivial matters).
 
 Some of the configuaration parameters below are quite technical and perhaps obscure. I'll take the opportunity here to introduce some concepts, and give more detailed explanations when they appear in later chapters.
-
-The values of these parameters listed below are those applicable to the beacon chain mainnet. To facilitate easier initial interoperability testing and testnets, a much lighter-weight [`minimal` configuration]() has also been defined. This runs more quickly, with lower resource use (at least, with small numbers of validators) than the `mainnet` configuration here. The `minimal` configuration has fewer, smaller committees, less shuffling, six-second rather than twelve-second slots, eight-slot rather than sixty-four-slot epochs, among other changes. The available configurations can be found in the [_configs_](https://github.com/ethereum/consensus-specs/tree/dev/configs) directory of the specification.
-
-[TODO: add in the following from the spec]::
-> *Note*: The below configuration is bundled as a preset: a bundle of configuration variables which are expected to differ
-> between different modes of operation, e.g. testing, but not generally between different networks.
-> Additional preset configurations can be found in the [`configs`](../../configs) directory.
-
 
 #### Misc
 
@@ -918,9 +927,11 @@ In the beacon chain, the 64 committees active in a slot effectively act as a sin
 
 The number 64 is designed to map onto [one committee per shard](https://github.com/ethereum/eth2.0-specs/pull/1428) once Phase&nbsp;1 is deployed, since these committees will also vote on shard crosslinks.
 
+Note that sync committees are a different thing: there is only on sync committee active at any time.
+
 ##### `TARGET_COMMITTEE_SIZE`
 
-To achieve a desirable level of security, committees need to be larger than a certain size. This is to make it infeasible for an attacker to randomly end up with a majority in a committee even if they control a significant number of validators. This target is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
+To achieve a desirable level of security, committees need to be larger than a certain size. This is to make it infeasible for an attacker to randomly end up with a majority in a committee even if they control a significant number of validators. Th target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
 [TODO: rework the following]::
 
@@ -928,7 +939,7 @@ To achieve a desirable level of security, committees need to be larger than a ce
 
 Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a 2/3 majority in a randomly selected committee drawn from the full set of validators? This is what Vitalik looks at in the presentation, and where the 111 number comes from (a $\smash{2^{-40}}$ chance, one-in-a-trillion, of an attacker with 1/3 of the validators gaining by chance a 2/3 majority in any one committee).
 
-Another issue is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size (`TARGET_COMMITTEE_SIZE`) helps to defend against this. Alternatively, we could use an unbiasable source of randomness such as a verifiable delay function (VDF). Use of a VDF is _not_ currently planned for Eth2, but may be implemented in future.
+Another issue is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
 
 ##### `MAX_VALIDATORS_PER_COMMITTEE`
 
@@ -1094,16 +1105,16 @@ The maximum length of this list is `VALIDATOR_REGISTRY_LIMIT`, which is one tril
 | `BASE_REWARD_FACTOR` | `uint64(2**6)` (= 64) |
 | `WHISTLEBLOWER_REWARD_QUOTIENT` | `uint64(2**9)` (= 512) |
 | `PROPOSER_REWARD_QUOTIENT` | `uint64(2**3)` (= 8) |
+| `INACTIVITY_PENALTY_QUOTIENT` | `uint64(2**26)` (= 67,108,864) |
+| `MIN_SLASHING_PENALTY_QUOTIENT` | `uint64(2**7)` (= 128) |
+| `PROPORTIONAL_SLASHING_MULTIPLIER` | `uint64(1)` |
 | `INACTIVITY_PENALTY_QUOTIENT_ALTAIR` | `uint64(3 * 2**24)` (= 50,331,648) |
 | `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR` | `uint64(2**6)` (= 64) |
 | `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR` | `uint64(2)` |
 
-[TODO: reference the old values somewhere]::
-<!--
-| `INACTIVITY_PENALTY_QUOTIENT` | `uint64(2**26)` (= 67,108,864) |
-| `MIN_SLASHING_PENALTY_QUOTIENT` | `uint64(2**7)` (= 128) |
-| `PROPORTIONAL_SLASHING_MULTIPLIER` | `uint64(1)` |
--->
+[TODO: explain presence of the old values]::
+
+<!-- on keeping the old values: https://github.com/ethereum/consensus-specs/tree/dev/configs#forking -->
 
 ##### `BASE_REWARD_FACTOR`
 
@@ -1717,6 +1728,8 @@ def eth_aggregate_pubkeys(pubkeys: Sequence[BLSPubkey]) -> BLSPubkey:
         result += pubkey
     return result
 ```
+
+<!-- https://github.com/ethereum/consensus-specs/issues/2369 -->
 
 #### `eth_fast_aggregate_verify`
 
