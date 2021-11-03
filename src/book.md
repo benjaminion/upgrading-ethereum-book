@@ -14,7 +14,7 @@ This book is a non-commercial personal project. I offer it to the community in g
 
 TODO
 
-# Part 1: Building <!-- /part1* -->
+# Part 1: Building <!-- /part1 -->
 
 ## Introduction <!-- /part1/introduction* -->
 
@@ -60,7 +60,7 @@ TODO
 
 # Part 2: Technical Overview <!-- /part2 -->
 
-## Introduction <!-- /part2/intro* -->
+## Introduction <!-- /part2/introduction* -->
 
 TODO: Intro
 
@@ -126,7 +126,15 @@ The Genesis event (beacon chain start) was originally designed to take place at 
 
 ### Introduction
 
+We have a challenge ahead of us. My task is to explain the following:
+
+> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
+
+This is the first sentence of [a recent paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol.
+
 TODO
+
+[TODO: That paper is a great starting place for an exposition of PoS]::
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
@@ -539,7 +547,7 @@ TODO
 
 # Part 3: Annotated Specification <!-- /part3 -->
 
-## Introduction <!-- /part3/intro -->
+## Introduction <!-- /part3/introduction -->
 
 ### Annotated Specification
 
@@ -899,7 +907,7 @@ It was introduced as a convenience when verifying aggregate signatures that cont
 [TODO: Update for Altair]::
 [TODO: Insert headings]::
 
-The "presets" are consistent collections of configuration variables that are bundled togther. There are currently two sets of configurations available in the [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/configs), [mainnet](https://github.com/ethereum/consensus-specs/blob/dev/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml). The mainnet configuration is running on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
+The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/dev/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
 
 All the values discussed below are from the mainnet configuration.
 
@@ -921,25 +929,49 @@ Some of the configuaration parameters below are quite technical and perhaps obsc
 
 ##### `MAX_COMMITTEES_PER_SLOT`
 
-Validators are organised into committees to do their work. At any one time, each validator is a member of exactly one beacon chain committee, and is called on to make an attestation exactly once per epoch. (An attestation is a vote for a beacon chain block that has been proposed for a slot.)
+Validators are organised into committees to do their work. At any one time, each validator is a member of exactly one beacon chain committee, and is called on to make an attestation exactly once per epoch. An attestation is a vote for, or a statement of, the validator's view of the chain at that point in time.
 
-In the beacon chain, the 64 committees active in a slot effectively act as a single committee as far as the fork-choice rule is concerned. They all vote on the proposed block for the slot, and their votes/attestations are pooled. (In a similar way, all committees active during an epoch act effectively as a single committee as far as justification and finalisation are concerned.)
+On the beacon chain, up to 64 committees are active in a slot and effectively act as a single committee as far as the fork-choice rule is concerned. They all vote on the proposed block for the slot, and their votes/attestations are pooled. In a similar way, all committees active during an epoch (that is, the whole active validator set) act effectively as a single committee as far as justification and finalisation are concerned.
 
-The number 64 is designed to map onto [one committee per shard](https://github.com/ethereum/eth2.0-specs/pull/1428) once Phase&nbsp;1 is deployed, since these committees will also vote on shard crosslinks.
+The number 64 is intended to map to [one committee per shard](https://github.com/ethereum/eth2.0-specs/pull/1428) once data shards are deployed, since these committees will also vote on shard crosslinks.
 
 Note that sync committees are a different thing: there is only on sync committee active at any time.
 
 ##### `TARGET_COMMITTEE_SIZE`
 
-To achieve a desirable level of security, committees need to be larger than a certain size. This is to make it infeasible for an attacker to randomly end up with a majority in a committee even if they control a significant number of validators. Th target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
+To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
-[TODO: rework the following]::
+Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](http://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minumum committee size needed to maintain a $\smash{2^{-40}}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
 
-> - For the safety of committees, `TARGET_COMMITTEE_SIZE` exceeds [the recommended minimum committee size of 111](http://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf); with sufficient active validators (at least `SLOTS_PER_EPOCH * TARGET_COMMITTEE_SIZE`), the shuffling algorithm ensures committee sizes of at least `TARGET_COMMITTEE_SIZE`. (Unbiasable randomness with a Verifiable Delay Function (VDF) will improve committee robustness and lower the safe minimum committee size.)
+If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
 
-Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a 2/3 majority in a randomly selected committee drawn from the full set of validators? This is what Vitalik looks at in the presentation, and where the 111 number comes from (a $\smash{2^{-40}}$ chance, one-in-a-trillion, of an attacker with 1/3 of the validators gaining by chance a 2/3 majority in any one committee).
+$$
+\sum_{i=k}^{n} p^i(1-p)^{n-i}{n\choose i}
+$$
 
-Another issue is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
+Vitalik provides some handy Python code to evaluate this expression.
+
+```none
+def fac(n):
+    return n * fac(n-1) if n else 1
+def choose(n, k):
+    return fac(n) / fac(k) / fac(n-k)
+def prob(n, k, p):
+    return p**k * (1-p)**(n-k) * choose(n,k)
+def probge(n, k, p):
+    return sum([prob(n,i,p) for i in range(k,n+1)])
+```
+
+Using this, I find that the minimum committee size to avoid a two-thirds majority with a $\smash{2^{-40}}$ probability is actually 109 rather than 111. But never mind.
+
+```none
+>>> probge(108, 72, 1.0 / 3) < 2**-40
+False
+>>> probge(109, 73, 1.0 / 3) < 2**-40
+True
+```
+
+Another concern is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
 
 ##### `MAX_VALIDATORS_PER_COMMITTEE`
 
@@ -947,27 +979,21 @@ This is just used for sizing some data structures, and is not particularly inter
 
 ##### `SHUFFLE_ROUND_COUNT`
 
-The beacon chain implements a [rather interesting](https://github.com/ethereum/eth2.0-specs/issues/563) way of shuffling validators in order to select committees, called the "swap-or-not shuffle". This shuffle proceeds in rounds, and the degree of shuffling is determined by the number of rounds: `SHUFFLE_ROUND_COUNT`. The time taken to shuffle is linear in the number of rounds, so for light-weight, non-mainnet configurations, the number of rounds can be reduced.
+The beacon chain implements a [rather interesting](/part2/building_blocks/shuffling) way of shuffling validators in order to select committees, called the "swap-or-not shuffle". This shuffle proceeds in rounds, and the degree of shuffling is determined by the number of rounds, `SHUFFLE_ROUND_COUNT`. The time taken to shuffle is linear in the number of rounds, so for light-weight, non-mainnet configurations, the number of rounds can be reduced.
 
 The value 90 was introduced in Vitalik's [initial commit](https://github.com/ethereum/eth2.0-specs/pull/576/commits/c58410e6ce9904c6619cd925b64fbd04c00b9a89) without explanation. The [original paper](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf) describing the shuffling technique seems to suggest that a cryptographically safe number of rounds is $6\log{N}$. With 90 rounds, then, we should be good for shuffling 3.3 million validators, which is close to the maximum number possible (given the Ether supply).
 
-The main advantage of using this shuffling method is that light clients and others that are interested in only a small number of the committees at any time can compute only the committees they need without having to shuffle the entire set of active validators. This can be a big saving on computational resources. See [`compute_shuffled_index`](#compute_shuffled_index).
-
-For more on the mechanics of the swap-or-not shuffle, check out [my explainer](https://hackmd.io/@benjaminion/shuffling).
-
-[TODO: simplify and link, and backlink, to the main shuffling article]::
-
 ##### Hysteresis parameters
 
-These parameters relate to the way that effective balance is changed (see [`EFFECTIVE_BALANCE_INCREMENT`](#effective_balance_increment) below). As described there, effective balance for a validator follows changes to the actual balance in a step-wise way, with [hysteresis](https://en.wikipedia.org/wiki/Hysteresis). This is to ensure that it does not change very often.
+The parameters prefixed `HYSTERESIS_` control the way that effective balance is changed (see [`EFFECTIVE_BALANCE_INCREMENT`](#effective_balance_increment)). As described there, the effective balance of a validator follows changes to the actual balance in a step-wise way, with [hysteresis](https://en.wikipedia.org/wiki/Hysteresis) applied. This ensures that the effective balance does not change often.
 
-The original hysteresis design had an [unintended effect](https://github.com/ethereum/eth2.0-specs/issues/1609) that might have encouraged stakers to over-deposit or make multiple deposits in order to maintain a balance _above_ 32 Ether at all times. This is because, if a validator's balance were to drop below 32 Ether soon after depositing, however briefly, the effective balance would immediately drop to 31 Ether, and would take a long time to recover. This would result in a 3% reduction in rewards for a period.
+The original hysteresis design had an [unintended effect](https://github.com/ethereum/eth2.0-specs/issues/1609) that might have encouraged stakers to over-deposit or make multiple deposits in order to maintain a balance above 32 Ether at all times. If a validator's balance were to drop below 32 Ether soon after depositing, however briefly, the effective balance would have immediately dropped to 31 Ether and taken a long time to recover. This would have resulted in a 3% reduction in rewards for a period.
 
 This problem was addressed by [making the hysteresis configurable](https://github.com/ethereum/eth2.0-specs/pull/1627) via these parameters. Specifically, these settings mean:
  1. if a validators' balance falls 0.25&nbsp;Ether below its effective balance, then its effective balance is reduced by 1&nbsp;Ether
  2. if a validator's balance rises 1.25&nbsp;Ether above its effective balance, then its effective balance is increased by 1&nbsp;Ether
 
-These calculations are done in [`process_final_updates()`](#final-updates).
+These calculations are done in [`process_effective_balance_updates()`](/part3/transition/epoch#effective-balances-updates) during end of epoch processing.
 
 #### Gwei values
 
@@ -979,13 +1005,15 @@ These calculations are done in [`process_final_updates()`](#final-updates).
 
 ##### `MIN_DEPOSIT_AMOUNT`
 
-`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the Phase&nbsp;0 Beacon Chain Specification document. Where it is used is within the [deposit contract](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
+`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the Phase&nbsp;0 Beacon Chain Specification document. Rather, it is used in the [deposit contract](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
+
+Allowing stakers to make deposits smaller than a full stake is useful for topping-up a validator's balance if its effective balance has dropped below 32&nbsp;Ether, so as to maintain full productivity. However, this actually led to a [vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) for some staking pools, involving the front-running of deposits. In some circumstances, a front-running attacker could change a genuine depositor's withdrawal credentials to their own.
 
 ##### `MAX_EFFECTIVE_BALANCE`
 
-There is a concept of "effective balance" for validators: whatever a validator's actual total stake (balance), its voting power is weighted by its effective balance, even if it has much more at stake. Effective balance is also the amount on which all rewards, penalties, and slashings are calculated&mdash;it's used a lot in the protocol
+There is a concept of "effective balance" for validators: whatever a validator's total balance, its voting power is weighted by its effective balance, even if its actual balance is higher. Effective balance is also the amount on which all rewards, penalties, and slashings are calculated&mdash;it's used a lot in the protocol
 
-The `MAX_EFFECTIVE_BALANCE` is the highest effective balance that a validator can have: 32 Ether. Any balance above this is ignored. Note that this means that staking rewards _don't_ compound in the usual case (unless our balance somehow falls below 32 Ether at some point).
+The `MAX_EFFECTIVE_BALANCE` is the highest effective balance that a validator can have: 32 Ether. Any balance above this is ignored. Note that this means that staking rewards don't compound in the usual case (unless a validator's effective balance somehow falls below 32&nbsp;Ether, in which case rewards kind of compound).
 
 There is a discussion in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Why-32-ETH-validator-sizes) of why 32 Ether was chosen as the staking amount. In short, we want enough validators to keep the chain both alive and secure under attack, but not so many that the message overhead on the network becomes too high.
 
@@ -993,9 +1021,9 @@ There is a discussion in the [Design Rationale](https://notes.ethereum.org/@vbut
 
 Throughout the protocol, a quantity called "effective balance" is used instead of the validators' actual balances. Effective balance tracks the actual balance, with two differences: (1) effective balance is capped at `MAX_EFFECTIVE_BALANCE` no matter how high the actual balance of a validator is, and (2) effective balance is much more granular - it changes only in steps of `EFFECTIVE_BALANCE_INCREMENT` rather than [`Gwei`](#gwei).
 
-This discretisation of balance is designed to reduce the amount of hashing required when making state updates. As we shall see, validators' actual balances are stored as a contiguous list in BeaconState. This is easy to update. Effective balances are stored in the individual validator records and are more costly to update (more hashing required). So we try to update effective balances relatively infrequently.
+This discretisation of effective balance is intended to reduce the amount of hashing required when making state updates. The goal is to avoid having to re-calculate the hash tree root of validator records too often. Validators' actual balances, which change frequently, are stored as a contiguous list in BeaconState, outside of validators' records. Effective balances are stored inside validators' individual records, which are more costly to update (more hashing required). So we try to update effective balances relatively infrequently.
 
-Effective balance is changed according to a process with hysteresis to avoid situations where it changes frequently. See [`HYSTERESIS_QUOTIENT`](#hysteresis_quotient).
+Effective balance is changed according to a process with hysteresis to avoid situations where it might change frequently. See [`HYSTERESIS_QUOTIENT`](#hysteresis-parameters).
 
 You can read more about effective balance in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Effective-balances) and in [this article](https://www.attestant.io/posts/understanding-validator-effective-balance/).
 
@@ -1013,39 +1041,43 @@ You can read more about effective balance in the [Design Rationale](https://note
 
 ##### `MIN_ATTESTATION_INCLUSION_DELAY`
 
-A design goal of Eth2 is not to heavily disadvantage validators that are running on lower-spec systems, or, conversely, to reduce any advantage gained by running on high-spec systems.
+A design goal of Ethereum&nbsp;2.0 is not to heavily disadvantage validators that are running on lower-spec systems, or, conversely, to reduce any advantage gained by running on high-spec systems.
 
 One aspect of performance is network bandwidth. When a validator becomes the block proposer, it needs to gather attestations from the rest of its committee. On a low-bandwidth link, this takes longer, and could result in the proposer not being able to include as many past attestations as other better-connected validators might, thus receiving lower rewards.
 
 `MIN_ATTESTATION_INCLUSION_DELAY` was an attempt to "level the playing field" by setting a minimum number of slots before an attestation can be included in a beacon block. It was [originally set at 4](https://github.com/ethereum/eth2.0-specs/pull/143), with a 6 second slot time, allowing 24 seconds for attestations to propagate around the network.
 
-It was [later set to one](https://github.com/ethereum/eth2.0-specs/pull/1157)&mdash;attestations are included as early as possible&mdash;and, now we are crosslinking shards every slot, this is the only value that makes sense. So it exists today as a kind of relic of the earlier design.
+It was [later set to one](https://github.com/ethereum/eth2.0-specs/pull/1157)&mdash;attestations are included as early as possible&mdash;and, now that we plan to crosslink shards every slot, this is the only value that makes sense. So `MIN_ATTESTATION_INCLUSION_DELAY` exists today as a kind of relic of the earlier design.
 
-The current slot time of 12 seconds (see above) is assumed to allow sufficient time for attestations to propagate and be aggregated sufficently within one slot. If this proves not to be the case, then it may be lengthened later.
+The current slot time of 12 seconds is assumed to allow sufficient time for attestations to propagate and be aggregated sufficently within one slot.
 
 ##### `SLOTS_PER_EPOCH`
 
 When slots were six seconds, there were 64 slots per epoch. So the time between epoch boundaries is unchanged compared with the original design.
 
-As a reminder, epoch transitions are where the heavy beacon chain state-transition calculation occurs, so we don't want them too close together. On the other hand, they are also the targets for finalisation, so we don't want them too far apart.
+As a reminder, epoch transitions are where the comparatively heavy beacon chain state-transition calculation occurs, so we don't want them too close together. On the other hand, they are also the targets for finalisation, so we don't want them too far apart.
+
+Since every validator attests one every epoch, there is an interplay between the number of slots per epoch, the number of committees per slot, committee sizes, and the total number of validators.
 
 [TODO: why is 32 the right number?]::
 
 ##### `MIN_SEED_LOOKAHEAD`
 
-A random seed is used to select all the committees and proposers for an epoch. Every epoch, the beacon chain accumulates randomness from proposers via the RANDAO and stores it. The seed for the current epoch is based on the RANDAO output from the epoch `MIN_SEED_LOOKUP + 1` ago. With `MIN_SEED_LOOKAHEAD` set to one, the effect is that we can know the seed for the current epoch and the next epoch, but not beyond (since the next-but-one epoch depends on randomness from the current epoch that hasn't been accumulated yet).
+A random seed is used to select all the committees and proposers for an epoch. During each epoch, the beacon chain accumulates randomness from proposers via the RANDAO and stores it. The seed for the current epoch is based on the RANDAO output from the epoch `MIN_SEED_LOOKUP + 1` ago. With `MIN_SEED_LOOKAHEAD` set to one, the effect is that we can know the seed for the current epoch and the next epoch, but not beyond, since the next-but-one epoch depends on randomness from the current epoch that hasn't been accumulated yet.
 
-This mechanism is designed to allow sufficient time for committee members to find each other on the peer-to-peer network, and in Phase&nbsp;1 to sync up any data they will need. But preventing committee makeup being known too far ahead limits the opportunity for coordinated collusion between validators.
+This mechanism is designed to allow sufficient time for committee members to find each other on the peer-to-peer network, and in future to sync up any shard data they need. But preventing committee makeup being known too far ahead limits the opportunity for coordinated collusion between validators.
 
 ##### `MAX_SEED_LOOKAHEAD`
 
-The above notwithstanding, if an attacker has a large proportion of the stake, or is, for example, able to DoS block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. In which case the attacker might be able to manipulate the make up of committtees advantageously by performing judicious exits and activations of their validators.
+The above notwithstanding, if an attacker has a large proportion of the stake, or is, for example, able to DoS block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. In which case the attacker might be able to manipulate the make up of committees advantageously by performing judicious exits and activations of their validators.
 
-To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (that is, this parameter) and delay all activations and exits by this amount. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond `MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD` = 3 epochs is $\smash{0.9^{3\times32}}$, which is about 1 in 25,000.
+To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond `MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD` = 3 epochs is $\smash{0.9^{3\times32}}$, which is about 1 in 25,000.
 
 ##### `MIN_EPOCHS_TO_INACTIVITY_PENALTY`
 
-The inactivity penalty is discussed [below](#inactivity_penalty_quotient_exp). This parameter sets the time until it kicks in: if the last finalised epoch is longer ago than this, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
+[TODO: Fix up link(s)]::
+
+The inactivity penalty is discussed [below](#inactivity_penalty_quotient_exp). This parameter sets the length of time until it kicks in. If the last finalised epoch is longer ago than `MIN_EPOCHS_TO_INACTIVITY_PENALTY`, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
 
 ##### `EPOCHS_PER_ETH1_VOTING_PERIOD`
 
@@ -1053,9 +1085,11 @@ In order to safely onboard new validators, the beacon chain needs to take a view
 
 `EPOCHS_PER_ETH1_VOTING_PERIOD * SLOTS_PER_EPOCH` is the total number of votes for Eth1 blocks that are collected. As soon as half of this number of votes are for the same Eth1 block, that block is adopted by the beacon chain and deposit processing can continue.
 
-Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](#eth1_follow_distance) is the minimum depth of block that can be considered: this is very conservatively set to ensure that we never end up with some block that we've relied on subsequently being reorganised out of the Ethereum&nbsp;1 chain. For a detailed analysis of these parameters, see this [ethresear.ch post](https://ethresear.ch/t/on-the-way-to-eth1-finality/7041?u=benjaminion)
+Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
 
-This parameter [was increased](https://github.com/ethereum/eth2.0-specs/pull/2093/files) from 32 to 64 epochs for the beacon chain mainnet. This is intended to allow devs more time to respond if there were any trouble on the Eth1 chain.
+This parameter [was increased](https://github.com/ethereum/eth2.0-specs/pull/2093/files) from 32 to 64 epochs for the beacon chain mainnet. This increase is intended to allow devs more time to respond if there is any trouble on the Eth1 chain, in addition to the eight hours grace provided by `ETH1_FOLLOW_DISTANCE`.
+
+For a detailed analysis of these parameters, see this [article](https://ethresear.ch/t/on-the-way-to-eth1-finality/7041?u=benjaminion).
 
 ##### `SLOTS_PER_HISTORICAL_ROOT`
 
@@ -1063,7 +1097,7 @@ There have been several redesigns of the way the beacon chain stores its past hi
 
 #### State list lengths
 
-The following parameters set the sizes of some lists in the beacon chain state. Some lists have natural sizes, others such as the validator registry need an explicit maximum size [to help with SSZ serialisation](https://github.com/ethereum/eth2.0-specs/pull/1180).
+The following parameters set the sizes of some lists in the beacon chain state. Some lists have natural sizes, others such as the validator registry need an explicit maximum size [to guide SSZ serialisation](https://github.com/ethereum/eth2.0-specs/pull/1180).
 
 | Name | Value | Unit | Duration |
 | - | - | :-: | :-: |
@@ -1082,13 +1116,13 @@ In the epoch in which a misbehaving validator is slashed, its effective balance 
 
 At a time `EPOCHS_PER_SLASHINGS_VECTOR // 2` after being slashed, a further penalty is applied to the slashed validator, based on the total amount of value slashed during the 4096 epochs before and the 4096 epochs after it was originally slashed.
 
-The idea of this is to disproportionately punish coordinated attacks, in which many validators break the slashing conditions at the same time, while only lightly penalising validators that get slashed by making a mistake. Early designs for Eth2 would always slash a validator's entire deposit.
+The idea of this is to disproportionately punish coordinated attacks, in which many validators break the slashing conditions around the same time, while only lightly penalising validators that get slashed by making a mistake. Early designs for Eth2 would always slash a validator's entire deposit.
 
 ##### `HISTORICAL_ROOTS_LIMIT`
 
-Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots are merkleised and added to `state.historical_roots` list. This is sized so that it is possible to store these roots for the entire past history of the chain. Although this list is effectively unbounded, it grows at less than 10 KB per year.
+Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. This is sized so that it is possible to store these roots for the entire past history of the chain. Although this list is effectively unbounded, it grows at less than 10 KB per year.
 
-Storing past roots like this allows historical Merkle proofs to be constructed if required.
+Storing past roots like this allows Merkle proofs to be constructed about anything in the beacon chain's history if required.
 
 ##### `VALIDATOR_REGISTRY_LIMIT`
 
@@ -1112,69 +1146,77 @@ The maximum length of this list is `VALIDATOR_REGISTRY_LIMIT`, which is one tril
 | `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR` | `uint64(2**6)` (= 64) |
 | `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR` | `uint64(2)` |
 
-[TODO: explain presence of the old values]::
+Note that there are similar constants with different values here, one version with an `_ALTAIR` suffix. This is [explained](https://github.com/ethereum/consensus-specs/tree/79d005e6ed89cc44d233dd9320c5cc1e7ea91720/configs#forking) in the specs repo as follows:
 
-<!-- on keeping the old values: https://github.com/ethereum/consensus-specs/tree/dev/configs#forking -->
+> Variables are not replaced but extended with forks. This is to support syncing from one state to another over a fork boundary, without hot-swapping a config. Instead, for forks that introduce changes in a variable, the variable name is suffixed with the fork name.
+
+So, the unsuffixed versions are the Phase&nbsp;0 values, and the `_ALTAIR` suffixed versions are the values that apply to the current Altair fork.
 
 ##### `BASE_REWARD_FACTOR`
 
-This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward" which is calculated as,
+[TODO: check the "almost" here - which ones aren't? Whistleblower; any more?]::
 
-`effective_balance * BASE_REWARD_FACTOR // integer_squareroot(total_balance) // BASE_REWARDS_PER_EPOCH`
+This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward" which is [formulated as](/part3/transition/epoch#get_base_reward_per_increment),
 
-where `effective_balance` is the individual validator's current effective balance and `total_balance` is the sum of the effective balances of all active validators.
+```none
+EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state))
+```
 
 Thus, the total validator rewards per epoch (the Eth2 issuance rate) could in principle be tuned by increasing or decreasing `BASE_REWARD_FACTOR`.
 
 ##### `WHISTLEBLOWER_REWARD_QUOTIENT`
 
-One reward amount that is _not_ tied to the base reward is the whistleblower reward. This is a reward for providing a proof that a proposer or attestor has violated a slashing condition. The whistleblower reward is set at $\smash{\frac{1}{512}}$ of the effective balance of the slashed validator.
+[TODO: link to some explanation of WB process]::
+
+One reward that is not tied to the base reward is the whistleblower reward. This is an amount awarded to the proposer of a block containing one or more proofs that a proposer or attestor has violated a slashing condition. The whistleblower reward is set at $\smash{\frac{1}{512}}$ of the effective balance of the slashed validator.
+
+The whistleblower reward comes from new issuance of Ether on the beacon chain, but is more than offset by the Ether burned due to slashing penalties.
 
 ##### `PROPOSER_REWARD_QUOTIENT`
 
-This is mostly used to apportion rewards between attesters and proposers when including attestations in blocks. For each included attestation, 7/8 ofthe reward goes to the attester, and 1/8 to the proposer that includes it. See [`get_proposer_reward()`](#get_proposer_reward) and [`get_inclusion_delay_deltas`](#get_inclusion_delay_deltas).
-
-In addition, the above whistleblower reward can optionally be divided between the reporter of the slashing offence and the proposer that includes the report in a block. In principle, the reporter of the slashing receives 7/8 of the reward, and the block proposer 1/8. In the Phase&nbsp;0 spec, however, the whistleblower reward always gets awarded in its entirety to the block proposer, ignoring this parameter. It's quite hard to avoid whistleblowing reports being stolen by block proposers, so this makes sense, although zkProofs might help one day.
+`PROPOSER_REWARD_QUOTIENT` was removed in the Altair upgrade in favour of [`PROPOSER_WEIGHT`](/part3/config/constants#incentivization-weights). It was used to apportion rewards between attesters and proposers when including attestations in blocks.
 
 ##### `INACTIVITY_PENALTY_QUOTIENT_ALTAIR`
 
-If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `effective_balance * finality_delay // INACTIVITY_PENALTY_QUOTIENT`. The effect of this is the inactivity leak described [below](#inactivity_penalty_quotient_exp).
+This value supersedes `INACTIVITY_PENALTY_QUOTIENT`.
 
-This value [was increased](https://github.com/ethereum/eth2.0-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) from 2**24 for the beacon chain launch, with the intention of resetting it in a hardfork after a few months. The goal is to penalise validators less severely in case of non-finalisation due to implementation problems in the early days.
+If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
 
-##### `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`
+[TODO: link to explanation of individual score calculation]::
 
-When a validator is first convicted of a slashable offence, an initial penalty is applied. This is calculated as,
+The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were a global amount applied to all validators that did not participate in an epoch, regardless of their individual track record of participation. So a validator that was able to participate for a significant fraction of the time nevertheless would be quite severely penalised due to the growth of the per-epoch inactivity penalty.
 
-`validator.effective_balance // MIN_SLASHING_PENALTY_QUOTIENT`
+With regard to the effect of the leak on a validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing `INACTIVITY_PENALTY_QUOTIENT`.
 
-Thus, the initial slashing penalty is between 0.125 Ether and 0.25 Ether depending on the validator's effective balance (which is between 16 and 32 Ether; note that effective balance is denominated in Gwei).
+While the effective balance $B$ remains constant, the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\smash{\frac{dB}{dt}=-\frac{Bt}{\alpha}}$, which can be solved to give $\smash{B(t)=B_0e^{-t^2/2\alpha}}$. The actual behaviour is somewhere between these two.
 
-A further slashing penalty is applied later based on the total amount of balance slashed during a period of [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector).
+In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT` at `3 * 2**24`, this equates to around 7,000 epochs, or 31.5 days.
 
-This value [was increased](https://github.com/ethereum/eth2.0-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) from 2**5 for the beacon chain launch, with the intention of resetting it in a hardfork after a few months. The goal is to punish validators less severely in case of slashing due to implementation problems in the early days.
-
-##### `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`
-
-[TODO: rework and move to the right places]::
-
-See [below](#proportional_slashing_multiplier_exp).
-
-<a id="inactivity_penalty_quotient_exp"></a>
-
-> - The `INACTIVITY_PENALTY_QUOTIENT` equals `INVERSE_SQRT_E_DROP_TIME**2` where `INVERSE_SQRT_E_DROP_TIME := 2**13` epochs (about 36 days) is the time it takes the inactivity penalty to reduce the balance of non-participating validators to about `1/sqrt(e) ~= 60.6%`. Indeed, the balance retained by offline validators after `n` epochs is about `(1 - 1/INACTIVITY_PENALTY_QUOTIENT)**(n**2/2)`; so after `INVERSE_SQRT_E_DROP_TIME` epochs, it is roughly `(1 - 1/INACTIVITY_PENALTY_QUOTIENT)**(INACTIVITY_PENALTY_QUOTIENT/2) ~= 1/sqrt(e)`. Note this value will be upgraded to `2**24` after Phase 0 mainnet stabilizes to provide a faster recovery in the event of an inactivity leak.
-
-The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that, if a large fraction of the validator set were to go offline at the same time, it would not be possible to continue finalising checkpoints, since a 2/3 majority of the whole validator set is required for finalisation. We've seen this happen on testnets when the participation metric falls below 67%.
+The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that, if a large fraction of the validator set were to go offline at the same time, it would not be possible to continue finalising checkpoints, since a majority vote from validators representing 2/3 of the total stake is required for finalisation.
 
 In order to recover, the inactivity leak gradually reduces the stakes of validators who are not making attestations until, eventually, the remaining participating validators control 2/3 of the remaining stake. They can then begin to finalise checkpoints once again.
 
-In the calculation here, we are solving (a discrete form of) the differential equation $\smash{\frac{dB}{dt}=-\frac{Bt}{\alpha}}$, where $B$ is the balance and $\alpha$ is the value of [`INACTIVITY_PENALTY_QUOTIENT`](#inactivity_penalty_quotient), and the amount leaked at each step increases in proportion to the time $t$ since finality. The solution to this differential equation is $\smash{B(t)=B_0e^{-t^2/2\alpha}}$. From this it can be confirmed that `INVERSE_SQRT_E_DROP_TIME`, the time taken to reduce starting balances by $\smash{e^{\frac{1}{2}}}$, is $t=\sqrt{\alpha}$. The second half of the spec paragraph is just a calculus-avoiding way of expressing the same thing.
-
-With these parameters, it would take about 43 days for a validator to leak half its deposit and then be ejected for falling to the [`EJECTION_BALANCE`](#ejection_balance) threshold. (Calculated as $t = \sqrt{2\alpha\ln{2}}$ epochs for the balance to fall by half.) Note that non-particpating validators don't have to be ejected to restore finality: it is sufficient only to reduce their stakes to 2/3 of the total.
-
 This inactivity penalty mechanism is designed to protect the chain long-term in the face of catastrophic events (sometimes referred to as the ability to survive World War III). The result might be that the beacon chain could permanently split into two independent chains either side of a network partition, and this is assumed to be a reasonable outcome for any problem that can't be fixed in a few weeks. In this sense, the beacon chain technically prioritises availability over consistency. (You [can't have both](https://en.wikipedia.org/wiki/CAP_theorem).)
 
-<a id="proportional_slashing_multiplier_exp"></a>
+The value of this constant [was increased](https://github.com/ethereum/eth2.0-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from `2**24` to `2**26` for the beacon chain launch, with the intention of penalising validators less severely in case of non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the eleven months of Phase&nbsp;0 of the beacon chain.
+
+It was decreased by one quarter in the Altair upgrade from `2**26` to `3 * 2**24` as a step towards eventually setting it to its final value. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak..
+
+##### `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`
+
+When a validator is first convicted of a slashable offence, an initial penalty is applied. This is calculated as, `validator.effective_balance // MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`.
+
+Thus, the initial slashing penalty is between 0.25 Ether and 0.5 Ether depending on the validator's effective balance (which is between 16 and 32 Ether; note that effective balance is denominated in Gwei).
+
+A further slashing penalty is applied later based on the total amount of balance slashed during a period of [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector).
+
+The value of this constant [was increased](https://github.com/ethereum/eth2.0-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from `2**5` to `2**7` for the beacon chain launch to allow for a learning curve on how not to get slashed among users. During Phase&nbsp;0, 157 validators were slashed in total, all as a result of user error as far as can be determined.
+
+It was halved in the Altair upgrade from `2**7` to `2**6` as a step towards eventually setting it to its final value of `2**5`.
+
+##### `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`
+
+[TODO: revise the following]::
 
 > - The `PROPORTIONAL_SLASHING_MULTIPLIER` is set to `1` at initial mainnet launch, resulting in one-third of the minimum accountable safety margin in the event of a finality attack. After Phase 0 mainnet stablizes, this value will be upgraded to `3` to provide the maximal minimum accoutable safety margin.
 
@@ -2643,6 +2685,8 @@ def process_inactivity_updates(state: BeaconState) -> None:
 
 ##### Helpers
 
+<a id="get_base_reward_per_increment"></a>
+
 *Note*: The function `get_base_reward` is modified with the removal of `BASE_REWARDS_PER_EPOCH` and the use of increment based accounting.
 
 *Note*: On average an optimally performing validator earns one base reward per epoch.
@@ -3168,7 +3212,11 @@ def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
     return state
 ```
 
-# Part 4: Future <!-- /part4* -->
+# Part 4: Future <!-- /part4 -->
+
+## Introduction <!-- /part4/introduction* -->
+
+TODO
 
 ## The Merge <!-- /part4/the_merge* -->
 
@@ -3220,6 +3268,14 @@ TODO
 
 TODO
 
+### Data Availability <!-- /part4/sharding/design* -->
+
+TODO
+
+### Data Availability <!-- /part4/sharding/specification* -->
+
+TODO
+
 ### Data Availability <!-- /part4/sharding/data_availability* -->
 
 TODO
@@ -3254,9 +3310,14 @@ TODO
 
 TODO
 
+ - [Slides](https://docs.google.com/presentation/d/13bmmLbkKte5QGiJjqpIZLgvKxsYdravIgtytQMPBQ-M/edit#slide=id.gec85c98018_0_394)
+
 ### Statelessness <!-- /part4/research/statelessness* -->
 
 TODO
+
+ - [Roadmap](https://notes.ethereum.org/Yn_mwNa2SeeQHnKsRgekKg)
+ - [Resources](https://notes.ethereum.org/@gballet/Sy-a6T5St)
 
 ### Single Secret Leader Election <!-- /part4/research/ssle* -->
 
@@ -3278,10 +3339,6 @@ TODO
 
 TODO
 
-## Glossary <!-- /appendices/glossary* -->
-
-TODO
-
 ## Staking <!-- /appendices/staking* -->
 
 ### Introduction
@@ -3299,3 +3356,16 @@ TODO
 ### FAQ <!-- /appendices/staking/faq* -->
 
 TODO
+
+## Glossary <!-- /appendices/glossary* -->
+
+TODO
+
+ - Merkleise
+ - beacon state
+ - slashed
+ - validator
+ - effective balance
+ - Eth1
+ - Eth2
+ - Deposit contract
