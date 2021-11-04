@@ -675,9 +675,9 @@ The recommended use of `Version` is described in the [Ethereum 2.0 networking sp
     4-bytes suffices for practical separation of forks/chains.
 ```
 
-Specifically, `ForkDigest` is the first four bytes of the hash tree root of the [`ForkData`](/part3/containers/dependencies#forkdata) structure containing the current chain [`Version`](#version) and the [`genesis_validators_root`](#todo). It is computed in [`compute_fork_digest()`](/part3/helper/misc#compute_fork_digest).
+Specifically, `ForkDigest` is the first four bytes of the hash tree root of the [`ForkData`](/part3/containers/dependencies#forkdata) structure containing the current chain [`Version`](#version) and the [`genesis_validators_root`](#todo_link_to_beacon_state_genesis_validators_root). It is computed in [`compute_fork_digest()`](/part3/helper/misc#compute_fork_digest).
 
-[TODO:: link to genesis_validators_root in the Genesis section]::
+[TODO:: link to genesis_validators_root in the Beacon State section]::
 
 `ForkDigest` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md).
 
@@ -1019,7 +1019,7 @@ There is a discussion in the [Design Rationale](https://notes.ethereum.org/@vbut
 
 ##### `EFFECTIVE_BALANCE_INCREMENT`
 
-Throughout the protocol, a quantity called "effective balance" is used instead of the validators' actual balances. Effective balance tracks the actual balance, with two differences: (1) effective balance is capped at `MAX_EFFECTIVE_BALANCE` no matter how high the actual balance of a validator is, and (2) effective balance is much more granular - it changes only in steps of `EFFECTIVE_BALANCE_INCREMENT` rather than [`Gwei`](#gwei).
+Throughout the protocol, a quantity called "effective balance" is used instead of the validators' actual balances. Effective balance tracks the actual balance, with two differences: (1) effective balance is capped at `MAX_EFFECTIVE_BALANCE` no matter how high the actual balance of a validator is, and (2) effective balance is much more granular - it changes only in steps of `EFFECTIVE_BALANCE_INCREMENT` rather than [`Gwei`](/part3/config/types#gwei).
 
 This discretisation of effective balance is intended to reduce the amount of hashing required when making state updates. The goal is to avoid having to re-calculate the hash tree root of validator records too often. Validators' actual balances, which change frequently, are stored as a contiguous list in BeaconState, outside of validators' records. Effective balances are stored inside validators' individual records, which are more costly to update (more hashing required). So we try to update effective balances relatively infrequently.
 
@@ -1077,7 +1077,7 @@ To prevent this, we assume a maximum feasible lookahead that an attacker might a
 
 [TODO: Fix up link(s)]::
 
-The inactivity penalty is discussed [below](#inactivity_penalty_quotient_exp). This parameter sets the length of time until it kicks in. If the last finalised epoch is longer ago than `MIN_EPOCHS_TO_INACTIVITY_PENALTY`, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
+The inactivity penalty is discussed [below](#inactivity_penalty_quotient_altair). This parameter sets the length of time until it kicks in. If the last finalised epoch is longer ago than `MIN_EPOCHS_TO_INACTIVITY_PENALTY`, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
 
 ##### `EPOCHS_PER_ETH1_VOTING_PERIOD`
 
@@ -1108,7 +1108,7 @@ The following parameters set the sizes of some lists in the beacon chain state. 
 
 ##### `EPOCHS_PER_HISTORICAL_VECTOR`
 
-This is the number of epochs of previous RANDAO mixes that are stored (one per epoch). Having access to past randao mixes allows historical shufflings to be recalculated. Since [Validator](#validator) records keep track of the activation and exit epochs of all past validators, we can thus reconstitute past committees as far back as we have the RANDAO values. This information can be used for slashing long-past attestations, for example. It is not clear how the value of this parameter [was decided](https://github.com/ethereum/eth2.0-specs/pull/1196).
+This is the number of epochs of previous RANDAO mixes that are stored (one per epoch). Having access to past randao mixes allows historical shufflings to be recalculated. Since [Validator](/part3/containers/dependencies#validator) records keep track of the activation and exit epochs of all past validators, we can thus reconstitute past committees as far back as we have the RANDAO values. This information can be used for slashing long-past attestations, for example. It is not clear how the value of this parameter [was decided](https://github.com/ethereum/eth2.0-specs/pull/1196).
 
 ##### `EPOCHS_PER_SLASHINGS_VECTOR`
 
@@ -1245,11 +1245,11 @@ These parameters are used to size lists in the beacon block bodies for the purpo
 [TODO: calculate the sizes of things]::
 
 <!--
-With these settings, the maximum size of a beacon block (before compression) is 123,016 bytes. By far the largest object is the [AttesterSlashing](#attesterslashing), at up to 33,216 bytes. However, a single attester slashing can be used to slash many misbehaving validators at the same time (assuming that in an attack, many validators would make the same conflicting vote).
+With these settings, the maximum size of a beacon block (before compression) is 123,016 bytes. By far the largest object is the [AttesterSlashing](/part3/containers/operations#attesterslashing), at up to 33,216 bytes. However, a single attester slashing can be used to slash many misbehaving validators at the same time (assuming that in an attack, many validators would make the same conflicting vote).
 
 With some assumptions on average behaviour and compressibility, this leads to an average block size of around 36 KBytes, compressing down to 22 KBytes, in the worst case (with the maximum number of validators, and the maximum average number of possible slashings).
 
-Some calculations to support the above can be found for each of the containers in the [next section](#containers). Also on [this spreadsheet](https://docs.google.com/spreadsheets/d/19ZGbIFaIi5quIvpB3Aa3VRgurKPBG9NMrJB7LGMBwXI/edit?ts=5e497720#gid=0) (numbers are a bit out of date). Protolambda has [a script](https://gist.github.com/protolambda/db75c7faa1e94f2464787a480e5d613e) for calculating all the Eth2 container minimum and maximum sizes.
+Some calculations to support the above can be found for each of the containers in the [next section](/part3/containers). Also on [this spreadsheet](https://docs.google.com/spreadsheets/d/19ZGbIFaIi5quIvpB3Aa3VRgurKPBG9NMrJB7LGMBwXI/edit?ts=5e497720#gid=0) (numbers are a bit out of date). Protolambda has [a script](https://gist.github.com/protolambda/db75c7faa1e94f2464787a480e5d613e) for calculating all the Eth2 container minimum and maximum sizes.
 -->
 
 Some comments on the chosen values:
@@ -1325,6 +1325,8 @@ Seven days' notice was regarded as sufficient to allow client dev teams time to 
 
 #### Time parameters
 
+[HERE]::
+
 | Name | Value | Unit | Duration |
 | - | - | :-: | :-: |
 | `SECONDS_PER_SLOT` | `uint64(12)` | seconds | 12 seconds |
@@ -1351,7 +1353,7 @@ The [average Eth1 block time](https://etherscan.io/chart/blocktime) since Januar
 
 ##### `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`
 
-Once a validator has made it through the exit queue it can stop participating. However, its funds remain locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. In Phase&nbsp;0 this is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector) into the future). In Phase&nbsp;1 this delay will also allow for shard rewards to be credited and for proof of custody challenges to be mounted.
+Once a validator has made it through the exit queue it can stop participating. However, its funds remain locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. In Phase&nbsp;0 this is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) into the future). In Phase&nbsp;1 this delay will also allow for shard rewards to be credited and for proof of custody challenges to be mounted.
 
 Note that in Phases&nbsp;0 and 1 there is no mechanism to withdraw a validator's balance in any case. But being in a "withdrawable" state means that a validator has now fully exited from the protocol.
 
@@ -1361,7 +1363,7 @@ This really anticipates Phase&nbsp;1. The [idea is](https://github.com/ethereum/
 
 ##### `ETH1_FOLLOW_DISTANCE`
 
-This is the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](#genesis) process and the [processing of deposits](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
+This is the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise) process and the [processing of deposits](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
 
 The value of `ETH1_FOLLOW_DISTANCE` is not based on the expected depth of any reorgs of the Eth1 chain, which are rarely if ever more than 2-3 blocks deep. It is about providing time to respond to an incident on the Eth1 chain such as a consensus failure between clients.
 
@@ -1385,13 +1387,13 @@ Note that the dependence on effective balance means that the validator is queued
 
 Validators are allowed to exit the system and cease validating, and new validators may apply to join at any time. For [interesting reasons](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Exiting), a design decision was made to apply a rate-limit to entries (activations) and exits. Basically, it is important in proof of stake protocols that the validator set not change too quickly.
 
-In the normal case, a validator is able to exit fairly swiftly: it just needs to wait `MAX_SEED_LOOKAHEAD` (currently four) epochs. However, if there are large numbers of validators wishing to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
+In the normal case, a validator is able to exit fairly swiftly: it just needs to wait `MAX_SEED_LOOKAHEAD` (currently four) epochs. However, if there are large numbers of validators wishing to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](/part3/helper/accessors#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
 
 The same applies to new validator activations, once a validator has been marked as eligible for activation.
 
 ##### `CHURN_LIMIT_QUOTIENT`
 
-This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](#get_validator_churn_limit) the actual number of validator exits and activations allowed per epoch. The number of exits allowed is `max(MIN_PER_EPOCH_CHURN_LIMIT, n // CHURN_LIMIT_QUOTIENT)`, where `n` is the number of active validators. The same applies to activations.
+This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](/part3/helper/accessors#get_validator_churn_limit) the actual number of validator exits and activations allowed per epoch. The number of exits allowed is `max(MIN_PER_EPOCH_CHURN_LIMIT, n // CHURN_LIMIT_QUOTIENT)`, where `n` is the number of active validators. The same applies to activations.
 
 #### Inactivity penalties
 
@@ -1975,7 +1977,7 @@ def compute_proposer_index(state: BeaconState, indices: Sequence[ValidatorIndex]
         i += 1
 ```
 
-There is exactly one beacon block proposer per slot, selected randomly from among all the active validators. The seed parameter is set in [`get_beacon_proposer_index`](#get_beacon_proposer_index) based on the epoch and slot. Note that there is a small but finite probability of the same validator being called on to propose a block more than once in an epoch.
+There is exactly one beacon block proposer per slot, selected randomly from among all the active validators. The seed parameter is set in [`get_beacon_proposer_index`](/part3/helper/accessors#get_beacon_proposer_index) based on the epoch and slot. Note that there is a small but finite probability of the same validator being called on to propose a block more than once in an epoch.
 
 A validator's chance of being the proposer is [weighted](https://github.com/ethereum/eth2.0-specs/pull/772) by its effective balance: a validator with a 32 Ether effective balance is twice as likely to be chosen as a validator with a 16 Ether effective balance.
 
@@ -2006,14 +2008,14 @@ def compute_committee(indices: Sequence[ValidatorIndex],
     return [indices[compute_shuffled_index(uint64(i), uint64(len(indices)), seed)] for i in range(start, end)]
 ```
 
-[`get_beacon_committee`](#get_beacon_committee) uses this to find the specific members of one of the committees at a slot.
+[`get_beacon_committee`](/part3/helper/accessors#get_beacon_committee) uses this to find the specific members of one of the committees at a slot.
 
 Every epoch, a fresh set of committees is generated; during an epoch, the committees are stable.
 
 Looking at the parameters in reverse order:
- - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](#get_committee_count_per_slot).
+ - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot).
  - `index` is the committee number within the epoch, running from `0` to `count - 1`.
- - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain-types)).
+ - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain-types)).
  - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
 Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
@@ -2066,7 +2068,7 @@ def compute_activation_exit_epoch(epoch: Epoch) -> Epoch:
     return Epoch(epoch + 1 + MAX_SEED_LOOKAHEAD)
 ```
 
-When queuing validators for activation or exit in [`process_registry_updates()`](#registry-updates) and [`initiate_validator_exit()`](#initiate_validator_exit) respectively, the activation or exit is delayed until the next epoch, plus [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#time-parameters) epochs, currently 4.
+When queuing validators for activation or exit in [`process_registry_updates()`](/part3/transition/epoch#registry-updates) and [`initiate_validator_exit()`](/part3/helper/mutators#initiate_validator_exit) respectively, the activation or exit is delayed until the next epoch, plus [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#time-parameters) epochs, currently 4.
 
 See [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#time-parameters) for the details, but in short it is designed to make it extremely hard for an attacker to manipulate the make up of committees via activations and exits.
 
@@ -2126,8 +2128,8 @@ When dealing with signed messages, the signature "domains" are separated accordi
  2. All but signatures on deposit messages include the fork version. This ensures that messages across different forks of the chain become invalid, and that validators won't be slashed for signing attestations on two different chains (this is allowed).
  3. And, [now](https://github.com/ethereum/eth2.0-specs/pull/1614), the root hash of the validator Merkle tree at Genesis is included. Along with the fork version this gives a unique identifier for our chain.
 
-This function is mainly used by [`get_domain()`](#get_domain). It is also used in [deposit processing](#deposits), in which case `fork_version` and `genesis_validators_root` take their default values since deposits are valid across forks.
->
+This function is mainly used by [`get_domain()`](/part3/helper/accessors#get_domain). It is also used in [deposit processing](/part3/transition/block#deposits), in which case `fork_version` and `genesis_validators_root` take their default values since deposits are valid across forks.
+
 Fun fact: this function looks pretty simple, but [I found a subtle bug](https://github.com/ethereum/eth2.0-specs/issues/1582) in the way tests were generated in a previous implementation.
 
 #### `compute_signing_root`
@@ -2144,13 +2146,13 @@ def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
 ```
 
 This is a pre-processor for signing objects with BLS signatures:
- 1. calculate the [hash tree root](#todo) of the object;
- 2. combine the hash tree root with the [`Domain`](/part3/config/types#domain) inside a temporary [`SigningData`](#todo) object;
+ 1. calculate the [hash tree root](/part3/helper/crypto#hash_tree_root) of the object;
+ 2. combine the hash tree root with the [`Domain`](/part3/config/types#domain) inside a temporary [`SigningData`](/part3/containers/dependencies#signingdata) object;
  3. return the hash tree root of that, which is the data to be signed.
 
 [TODO: link to hash tree root explanation]::
 
-The `domain` is usually the output of [`get_domain()`](#get_domain), which mixes in the [cryptographic domain](/part3/config/constants#domain-types), the fork version, and the genesis validators root to the message hash. For deposits, it is the output of [`compute_domain()`](#compute_domain), ignoring the fork version and genesis validators root.
+The `domain` is usually the output of [`get_domain()`](/part3/helper/accessors#get_domain), which mixes in the [cryptographic domain](/part3/config/constants#domain-types), the fork version, and the genesis validators root to the message hash. For deposits, it is the output of [`compute_domain()`](#compute_domain), ignoring the fork version and genesis validators root.
 
 This is exactly equivalent to adding the domain to an object and taking the hash tree root of the whole thing. Indeed, this function used to be called, as [`compute_domain_wrapper_root()`](https://github.com/ethereum/eth2.0-specs/blob/502ee295379c1f3c5c3649e12330fb5be5d7a83b/specs/core/0_beacon-chain.md#compute_domain_wrapper_root).
 
