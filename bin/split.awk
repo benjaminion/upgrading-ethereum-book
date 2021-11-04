@@ -1,5 +1,22 @@
 #!/usr/bin/gawk -f
 
+# Note: run this via "update.sh" rather than directly.
+#
+# Split the master markdown file into separate files for each page.
+#
+#  - Creates a directory structure reflecting the path hierarchy of the
+#    pages.
+#  - Prepends Gatsby frontmatter to each file.
+#  - Rewrites links for image files so that the origial file can use
+#    one path and the split files another.
+#
+# Rules:
+#  - New pages can start at markdown heading levels 1, 2, or 3.
+#  - To start a new page, append " <!-- /path/to/page -->" to the heading.
+#  - The file containing the page will end up in "./md/pages/path/to/page.md"
+#  - For the page to be marked "hidden", append a "*" to the path.
+#  - Images matching /<img src="md.*"/ will have their paths naively rewritten.
+
 BEGIN{
     n = 0
     filename_prefix = "md/pages"

@@ -1,5 +1,19 @@
 #!/usr/bin/gawk -f
 
+# Finds internal links that do not point to existing anchors.
+#
+# Anchors may be
+#  1. Full page paths: /part3/introduction
+#  2. Headings or <a id="..."></a> elements: #introduction
+#  3. A combination: /part3/introduction#introduction
+#
+# Relative page paths are not supported.
+#
+# Anchors generated from headings have some rules (imposed by Gatsby):
+#  - Converted to lower case
+#  - Spaces become "-"
+#  - Special characters are omitted: ".,?:'`/[]()" and probably others
+#  - Underscores and dashes are retained.
 #
 # Remember to pass the target file twice:
 #
@@ -25,9 +39,9 @@ FNR == NR {
         } else {
             name = gensub(/^#+ (.*)$/, "\\1", "1")
         }
-        gsub(/ /, "-", name)
-        gsub(/[.,?:'`/[\]()]/, "", name)
         name = tolower(name)
+        gsub(/ /, "-", name)
+        gsub(/[^a-z0-9_-]/, "", name)
         
         anchors[path "#" name] = 1
         # print path "#" name
@@ -50,7 +64,7 @@ FNR == NR {
     # This mess matches non-greedy [foo](#bar) and [foo](/a/b/c#xyz) etc.
     while (match($0, /\[[^]]+\]\([#/][^)]+\)/)) {
 
-        # Workaround for awk's greediness. Otherwise we just get the last match per line.
+        # Workaround awk's greediness, otherwise we just get the last match per line.
         partial = substr($0, RSTART, RLENGTH)
         name = gensub(/\[[^]]+\]\(([#/][^)]+)\)/,  "\\1", "1", partial)
 
