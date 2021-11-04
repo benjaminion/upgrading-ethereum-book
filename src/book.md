@@ -88,8 +88,10 @@ TODO
 
 [TODO: include Phase 0 params and spec section]::
 <!--
-| Name | Value | Unit | Duration |
-| - | - | - | - |
+| Name | Value |
+| - | - |
+| `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` | `uint64(2**14)` (= 16,384) |
+| `MIN_GENESIS_TIME` | `uint64(1606824000)` (Dec 1, 2020, 12pm UTC) |
 | `GENESIS_FORK_VERSION` | `Version('0x00000000')` |
 | `GENESIS_DELAY` | `uint64(604800)` (7 days) |
 
@@ -1280,28 +1282,46 @@ With 262,144 validators ($\smash{2^{18}}$), the expected time between being sele
 
 #### Genesis Settings
 
-Since, with Altair, beacon chain genesis is long behind us, most of the genesis handling has been removed from the spec. However, some parts remain useful for [setting up testnets](/part3/initialise). For historical interest, I've documented the original genesis process [elsewhere](/part2/beacon/genesis).
+With Altair, beacon chain genesis is long behind us. Nevertheless, the ability to spin-up testnets is useful in all sorts of scenarios, so the Altair spec retains genesis functionality, now called [initialisation](/part3/initialise).
+
+The following parameters refer to the actual mainnet beacon chain genesis and I'll explain them in that context. When starting up new testnets, these will of course be changed. For example, see the configuration file for the [Prater testnet](https://github.com/eth2-clients/eth2-networks/blob/274e71c7af8fb26f65b47016ffa6169079315e2c/shared/prater/config.yaml).
 
 | Name | Value |
 | - | - |
+| `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` | `uint64(2**14)` (= 16,384) |
+| `MIN_GENESIS_TIME` | `uint64(1606824000)` (Dec 1, 2020, 12pm UTC) |
 | `GENESIS_FORK_VERSION` | `Version('0x00000000')` |
 | `GENESIS_DELAY` | `uint64(604800)` (7 days) |
 
+##### `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`
+
+`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` is the minimum number of full validator stakes that must have been deposited before the beacon chain can start producing blocks. The number is chosen to ensure a degree of security. It allows for four 128 member committees per slot, rather than the 64 committees per slot eventually desired to support fully operational data shards. Fewer validators means higher rewards per validator, so it is designed to attract early participants to get things bootstrapped.
+
+`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` used to be much higher (65,536 = 2 million Ether staked), but was reduced when `MIN_GENESIS_TIME`, below, was added.
+
+In the actual event of beacon chain genesis, there were 21,063 particpating validators, comfortably exceeding the minimum necessary count.
+
+##### `MIN_GENESIS_TIME`
+
+`MIN_GENESIS_TIME` is the earliest date that the beacon chain can start.
+
+Having a `MIN_GENESIS_TIME` allows us to start the chain with fewer validators than was previously thought necessary. The previous plan was to start the chain as soon as there were `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` validators staked. But there were concerns that with a lowish initial validator count, a single entity could form the majority of them and then act to prevent other validators from entering (a "[gatekeeper attack](https://github.com/ethereum/eth2.0-specs/pull/1467)"). A minimum genesis time allows time for all those who wish to make deposits to do so before they could be excluded by a gatekeeper attack.
+
+The beacon chain actually started at 12:00:23 UTC on the 1st of December 2020. The extra 23 seconds comes from the timestamp of the first Eth1 block to meet the [genesis criteria](/part3/initialise#genesis-state), [block 11320899](https://etherscan.io/block/11320899). I like to think of this as a little remnant of proof of work forever embedded in the beacon chain's history.
+
 ##### `GENESIS_FORK_VERSION`
 
-Forks/upgrades are expected, if only when we move to Phase&nbsp;1. This is the fork version the beacon chain starts with at its "Genesis" event: the point at which the chain first starts producing blocks. In Altair, it is only used when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages, which are valid across all forks.
+Unlike Ethereum&nbsp;1.0, the beacon chain gives in-protocol versions to its forks. See the [Version custom type](/part3/config/types#version) for more explanation.
+
+`GENESIS_FORK_VERSION` is the fork version the beacon chain starts with at its "genesis" event: the point at which the chain first starts producing blocks. In Altair, this value is used only when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages, which are valid across all forks.
 
 `ALTAIR_FORK_VERSION` is defined [elsewhere](/part3/altair-fork#configuration).
 
 ##### `GENESIS_DELAY`
 
-[HERE]::
+The `GENESIS_DELAY` is a grace period to allow nodes and node operators time to prepare for the genesis event. The genesis event cannot occur before [`MIN_GENESIS_TIME`](#min_genesis_time). If there are not [`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`](#min_genesis_active_validator_count) registered validators sufficiently in advance of `MIN_GENESIS_TIME`, then Genesis will occur `GENESIS_DELAY` seconds after enough validators have been registered.
 
-[TODO: rework and link to the new launching section for Altair]::
-
-The `GENESIS_DELAY` is a grace period to allow nodes and node operators time to prepare for the Genesis event. The Genesis event cannot occur before [`MIN_GENESIS_TIME`](#min_genesis_time). If there are not [`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`](#min_genesis_active_validator_count) registered validators sufficiently in advance of `MIN_GENESIS_TIME`, then Genesis will occur `GENESIS_DELAY` seconds after enough validators have been registered.
-
-The Genesis event (beacon chain start) was originally designed to take place at midnight UTC, even for testnets, which was not always convenient. This has now been [changed](https://github.com/ethereum/eth2.0-specs/pull/1866). Once we're past `MIN_GENESIS_TIME - GENESIS_DELAY`, Genesis could end up being at any time of the day, depending on when the last depost needed comes in. In the event, genesis occurred at 12:00:23 UTC on the 1st of December 2020, according to the timestamp of Ethereum block number [11320899](https://etherscan.io/block/11320899) plus `GENESIS_DELAY`.
+Seven days' notice was regarded as sufficient to allow client dev teams time to make a release once the genesis parameters were known, and for node operators to upgrade to that release. And, of course, to organise some parties. It was increased from 2 days over time due to lessons learned on some of the pre-genesis testnets.
 
 #### Time parameters
 
@@ -3181,6 +3201,22 @@ TODO
 
 ## Initialise State <!-- /part3/initialise -->
 
+### Introduction
+
+TODO: rework and synthesis - this text is from the original Genesis
+
+Before the Ethereum beacon chain genesis has been triggered, and for every Ethereum proof-of-work block, let `candidate_state = initialize_beacon_state_from_eth1(eth1_block_hash, eth1_timestamp, deposits)` where:
+
+- `eth1_block_hash` is the hash of the Ethereum proof-of-work block
+- `eth1_timestamp` is the Unix timestamp corresponding to `eth1_block_hash`
+- `deposits` is the sequence of all deposits, ordered chronologically, up to (and including) the block with hash `eth1_block_hash`
+
+Proof-of-work blocks must only be considered once they are at least `SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE` seconds old (i.e. `eth1_timestamp + SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE <= current_unix_time`). Due to this constraint, if `GENESIS_DELAY < SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE`, then the `genesis_time` can happen before the time/state is first known. Values should be configured to avoid this case.
+
+### Initialisation
+
+Aka genesis.
+
 This helper function is only for initializing the state for pure Altair testnets and tests.
 
 *Note*: The function `initialize_beacon_state_from_eth1` is modified: (1) using `ALTAIR_FORK_VERSION` as the current fork version, (2) utilizing the Altair `BeaconBlockBody` when constructing the initial `latest_block_header`, and (3) adding initial sync committees.
@@ -3227,6 +3263,23 @@ def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
 
     return state
 ```
+
+### Genesis state
+
+Let `genesis_state = candidate_state` whenever `is_valid_genesis_state(candidate_state) is True` for the first time.
+
+```python
+def is_valid_genesis_state(state: BeaconState) -> bool:
+    if state.genesis_time < MIN_GENESIS_TIME:
+        return False
+    if len(get_active_validator_indices(state, GENESIS_EPOCH)) < MIN_GENESIS_ACTIVE_VALIDATOR_COUNT:
+        return False
+    return True
+```
+
+### Genesis block
+
+Let `genesis_block = BeaconBlock(state_root=hash_tree_root(genesis_state))`.
 
 ## Altair Fork Logic <!-- /part3/altair-fork* -->
 
