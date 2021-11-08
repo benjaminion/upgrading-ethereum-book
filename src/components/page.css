@@ -1,27 +1,33 @@
+@import url(https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;1,400&family=Inter:wght@400;500;600&display=swap);
+
 html, body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   margin: 0;
   padding: 0;
   color: #24292e;
+  text-rendering: optimizeLegibility;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";  
 }
 
 main {
   display: flex;
-  flex: 1 1 0%;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: row;
+  flex-wrap: no-wrap;
   margin: 0px;
   padding: 0px;
-  align-items: stretch;
+  overflow: hidden;
 }
 
 div.main-content {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
+  box-sizing: border-box;
   margin: 0px;
-  max-width: 800px;
-  min-width: 0px;
-  padding: 0px 32px 64px;
-  overflow-y: scroll;
+  width: 60vw;
+  max-width: 1400px;
+  min-width: 800px;
+  padding: 0px 64px 0 96px;
+  overflow-y: auto;
 }
 
 code, pre, tt {
@@ -57,20 +63,7 @@ a[target=_blank]:hover::after {
 }
 
 code {
-  position: relative;
-  bottom: 2px;
-  padding: 0.2em 0.4em;
-  margin: 0;
-  font-size: 85%;
-  background-color: rgba(27, 31, 35, 0.05);
-  border-radius: 3px;
-  line-height: 1.5;
-}
-
-h4 code {font-size: inherit; }
-
-p code {
-  bottom: 0;
+  font-size: 95%;
 }
 
 pre {
@@ -122,13 +115,19 @@ h6 + p {
   margin-top: 1ex;
 }
 
+h4 code {font-size: inherit; }
+
+h5 code {
+  font-size: 110%;
+}
+
 div.image {
   text-align: center;
   padding: 3ex 0;
 }
 
 div.image img {
-  width: 96%;
+  width: 80%;
 }
 
 div.image span {
