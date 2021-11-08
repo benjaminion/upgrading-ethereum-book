@@ -1180,13 +1180,13 @@ The whistleblower reward comes from new issuance of Ether on the beacon chain, b
 
 This value supersedes `INACTIVITY_PENALTY_QUOTIENT`.
 
-If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
+If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
 
-[TODO: link to explanation of individual score calculation]::
+In Altair, `inactivity_score` is a per-validator quantity, whereas previously validators were penalised by a globally calculated amount when they missed a duty during a leak. See [inactivity penalties](#inactivity-penalties) for more on the rationale for this and how this score is calculated per validator.
 
-The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were a global amount applied to all validators that did not participate in an epoch, regardless of their individual track record of participation. So a validator that was able to participate for a significant fraction of the time nevertheless would be quite severely penalised due to the growth of the per-epoch inactivity penalty.
+During a leak, no validators receive rewards, and they continue to accrue the normal penalties when they fail to fulfil duties. In addition, for epochs in which validators do not make a correct, timely target vote, they receive a leak penalty.
 
-With regard to the effect of the leak on a validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing `INACTIVITY_PENALTY_QUOTIENT`.
+To examine the effect of the leak on a single validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing `INACTIVITY_PENALTY_QUOTIENT`.
 
 The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\smash{\frac{dB}{dt}=-\frac{Bt}{\alpha}}$, which can be solved to give $\smash{B(t)=B_0e^{-t^2/2\alpha}}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
 
@@ -1325,8 +1325,6 @@ Seven days' notice was regarded as sufficient to allow client dev teams time to 
 
 #### Time parameters
 
-[HERE]::
-
 | Name | Value | Unit | Duration |
 | - | - | :-: | :-: |
 | `SECONDS_PER_SLOT` | `uint64(12)` | seconds | 12 seconds |
@@ -1337,33 +1335,41 @@ Seven days' notice was regarded as sufficient to allow client dev teams time to 
 
 ##### `SECONDS_PER_SLOT`
 
-This was originally six seconds, but [is now twelve](https://github.com/ethereum/eth2.0-specs/pull/1428#issue-327424983), and has previously been [other values](https://github.com/ethereum/eth2.0-specs/pull/143/files#diff-51a43328a58414e132a744f3771f018cL42). The main limiting factors in shortening this are the time necessary for block proposals to propagate among committees, and the time needed for validators to communicate and aggregate their votes for the block.
+This was originally six seconds, but [is now twelve](https://github.com/ethereum/eth2.0-specs/pull/1428#issue-327424983), and has been [other values](https://github.com/ethereum/eth2.0-specs/pull/143/files#diff-51a43328a58414e132a744f3771f018cL42) in between.
 
-This slot length has to account for shard blocks as well in later phases. There was some discussion around having the beacon chain and shards on differing cadences, but the latest Phase&nbsp;1 design tightly couples the beacon chain with the shards. Shard blocks under the new proposal are much larger, which led to the lengthening of the slot to 12 seconds.
+Network delays are the main limiting factor in shortening the slot length. Three communication activities need to be accomplished within a slot, and it is supposed that four seconds is enough for the vast majority of nodes to have participated in each:
 
-There is a general intention to shorten this in future, perhaps to [8 seconds](https://github.com/ethereum/eth2.0-specs/issues/1890#issue-638024803, if it proves possible to do this in practice.
+1. Blocks are proposed at the start of a slot and should have propagated to most of the network within the first four seconds.
+1. At four seconds into a slot, committee members create and broadcast attestations, including attesting to this slot's block. During the next four seconds, these attestations are collected by aggregators in each committee.
+1. At eight seconds into the slot, the aggregators broadcast their aggregate attestations which then have four seconds to reach the validator who is proposing the next block.
 
-[TODO: also reference Vitalik's builder/proposer split that makes this 16 seconds]::
+[TODO: find this discussion and link to it]::
+
+This slot length has to account for shard blocks as well in later phases. There was some discussion around having the beacon chain and shards on differing cadences, but the latest sharding design tightly couples the beacon chain with the shards. Shard blocks under this design will be much larger, which led to the extension of the slot to 12 seconds.
+
+There is a general intention to shorten the slot time in future, perhaps to [8 seconds](https://github.com/ethereum/eth2.0-specs/issues/1890#issue-638024803, if it proves possible to do this in practice. Or perhaps to lengthen it to [16 seconds](https://ethresear.ch/t/two-slot-proposer-builder-separation/10980?u=benjaminion).
 
 ##### `SECONDS_PER_ETH1_BLOCK`
 
-The assumed block interval on the Eth1 chain, used when calculating how long we will wait before trusting that an Eth1 block will not be reorganised.
+The assumed block interval on the Eth1 chain, used in conjuction with [`ETH1_FOLLOW_DISTANCE`](#eth1_follow_distance) when considering blocks on the Eth1 chain, either at genesis, or when voting on the deposit contract state.
 
 The [average Eth1 block time](https://etherscan.io/chart/blocktime) since January 2020 has actually been nearer 13 seconds, but never mind. The net effect is that we will be going a little deeper back in the Eth1 chain than [`ETH1_FOLLOW_DISTANCE`](#eth1_follow_distance) would suggest, which ought to be safer.
 
 ##### `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`
 
-Once a validator has made it through the exit queue it can stop participating. However, its funds remain locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. In Phase&nbsp;0 this is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) into the future). In Phase&nbsp;1 this delay will also allow for shard rewards to be credited and for proof of custody challenges to be mounted.
+A validator can stop participating once it has made it through the exit queue. However, its funds remain locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. Initially, this is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) into the future). When data shards are introduced this delay will also allow for shard rewards to be credited and for proof of custody challenges to be mounted.
 
-Note that in Phases&nbsp;0 and 1 there is no mechanism to withdraw a validator's balance in any case. But being in a "withdrawable" state means that a validator has now fully exited from the protocol.
+Note that, for the time being, there is no mechanism to withdraw a validator's balance in any case. Nonetheless, being in a "withdrawable" state means that a validator has now fully exited from the protocol.
 
 ##### `SHARD_COMMITTEE_PERIOD`
 
-This really anticipates Phase&nbsp;1. The [idea is](https://github.com/ethereum/eth2.0-specs/issues/675#issuecomment-468159678) that it's bad for the stability of longer-lived shard committees if validators can appear and disappear very rapidly. Therefore, a validator cannot initiate a voluntary exit until `SHARD_COMMITTEE_PERIOD` epochs after it is activated. Note that it could still be ejected by slashing before this time.
+This really anticipates the implementation of data shards. The [idea is](https://github.com/ethereum/eth2.0-specs/issues/675#issuecomment-468159678) that it's bad for the stability of longer-lived committees if validators can appear and disappear very rapidly. Therefore, a validator cannot initiate a voluntary exit until `SHARD_COMMITTEE_PERIOD` epochs after it is activated. Note that it could still be ejected by slashing before this time.
 
 ##### `ETH1_FOLLOW_DISTANCE`
 
-This is the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise) process and the [processing of deposits](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
+[TODO: Update link to process deposits]::
+
+This is used to calculate the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise) process and the [processing of deposits](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
 
 The value of `ETH1_FOLLOW_DISTANCE` is not based on the expected depth of any reorgs of the Eth1 chain, which are rarely if ever more than 2-3 blocks deep. It is about providing time to respond to an incident on the Eth1 chain such as a consensus failure between clients.
 
@@ -1379,7 +1385,7 @@ This parameter [was increased](https://github.com/ethereum/eth2.0-specs/pull/209
 
 ##### `EJECTION_BALANCE`
 
-If a validator's effective balance falls to 16 Ether or below then it is exited from the system (kicked out of the active validator set). This is most likely to happen as a result of the "inactivity leak" which gradually reduces the balances of inactive validators in order to maintain the liveness of the beacon chain.
+If a validator's effective balance falls to 16 Ether or below then it is exited from the system. This is most likely to happen as a result of the ["inactivity leak"](#inactivity_penalty_quotient_altair), which gradually reduces the balances of inactive validators in order to maintain the liveness of the beacon chain.
 
 Note that the dependence on effective balance means that the validator is queued for ejection as soon as its actual balance falls to 16.75 Ether.
 
@@ -1402,7 +1408,44 @@ This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](/par
 | `INACTIVITY_SCORE_BIAS` | `uint64(2**2)` (= 4) | score points per inactive epoch |
 | `INACTIVITY_SCORE_RECOVERY_RATE` | `uint64(2**4)` (= 16) | score points per leak-free epoch |
 
-TODO
+##### `INACTIVITY_SCORE_BIAS`
+
+If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
+
+The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time nevertheless could be quite severely penalised due to the growth of the per-epoch inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully online validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair."
+
+In addition, if many validators are able to participate intermittently, it indicates that whatever event has befallen the chain is potentially recoverable (unlike a permanent network partition, or a super-majority network fork, for example). The inactivity leak is intended to bring finality to irrecoverable situations, so prolonging the time to finality if it's not irrecoverable is likely a good thing.
+
+With Altair, each validator has an individual inactivity score in the beacon state which is updated by [`process_inactivity_updates()`](/part3/transition/epoch#process_inactivity_updates) as follows.
+  - Every epoch, irrespective of the inactivity leak,
+    - decrease the score by one when the validator makes a correct timely target vote, and
+    - increase the score by `INACTIVITY_SCORE_BIAS` otherwise.
+  - When _not_ in an inactivity leak
+    - decrease every validator's score by `INACTIVITY_SCORE_RECOVERY_RATE`.
+
+There is a floor of zero on the score. So, outside a leak, validators' scores will rapidly return to zero and stay there, since `INACTIVITY_SCORE_RECOVERY_RATE` is greater than `INACTIVITY_SCORE_BIAS`.
+
+When in a leak, if $p$ is the participation rate between $0$ and $1$, and $\lambda$ is `INACTIVITY_SCORE_BIAS`, then the expected score after $N$ epochs is $\max (0, N((1-p)\lambda - p))$. For $\lambda = 4$ this is $\max (0, N(4 - 5p))$. So a validator that is participating 80% of the time or more can maintain a score that is bounded near zero. With less than 80% average participation, its score will increase unboundedly.
+
+##### `INACTIVITY_SCORE_RECOVERY_RATE`
+
+When not in an inactivity leak, validators' inactivity scores are reduced by `INACTIVITY_SCORE_RECOVERY_RATE + 1` per epoch when they make a timely head vote, and by `INACTIVITY_SCORE_RECOVERY_RATE - INACTIVITY_SCORE_BIAS` when they don't. So, even for non-performing validators, scores decrease three times faster than they increase.
+
+The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
+
+Vitalik illustrates some scenarios for individual validators in his [annotated Altair spec](https://github.com/ethereum/annotated-spec/blob/master/altair/beacon-chain.md):
+
+<div class="image">
+<img src="md/images/inactivity_0.png" /><br />
+<span>Inactivity scores per validator in different scenarios. With the x-axis in epochs, the y-axis is the inactivity score.</span>
+</div>
+
+<div class="image">
+<img src="md/images/inactivity_1.png" /><br />
+<span>Balances per validator in different scenarios. The x-axis is in epochs. It's not clear what the y-axis is, but it is not percentage.</span>
+</div>
+
+TODO: re-do graph with better y-axis.
 
 ## Containers <!-- /part3/containers -->
 
@@ -2701,6 +2744,8 @@ def weigh_justification_and_finalization(state: BeaconState,
 #### Inactivity scores
 
 *Note*: The function `process_inactivity_updates` is new.
+
+<a id="process_inactivity_updates"></a>
 
 ```python
 def process_inactivity_updates(state: BeaconState) -> None:
