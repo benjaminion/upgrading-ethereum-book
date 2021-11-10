@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;1,400&family=Inter:wght@400;500;600&display=swap);
+@import "custom.css";
 
 html, body {
   margin: 0;
@@ -23,9 +23,11 @@ main {
 div.main-content {
   box-sizing: border-box;
   margin: 0px;
-  width: 60vw;
-  max-width: 1400px;
-  min-width: 800px;
+  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
+  /* margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(700px,30vw));*/
+  width: var(--main-width);
+  max-width: var(--main-max-width);
+  min-width: var(--main-min-width);
   padding: 0px 64px 0 96px;
   overflow-y: auto;
 }

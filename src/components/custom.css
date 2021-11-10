@@ -1,0 +1,8 @@
+:root {
+  --sidebar-width: 20vw;
+  --sidebar-max-width: 400px;
+  --sidebar-min-width: 240px;
+  --main-width: 60vw;
+  --main-max-width: 1400px;
+  --main-min-width: 800px;
+}
