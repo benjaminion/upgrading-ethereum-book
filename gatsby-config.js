@@ -28,9 +28,9 @@ module.exports = {
             }
           },
           {
-            resolve: `gatsby-remark-vscode`,
+            resolve: `gatsby-remark-prismjs`,
             options: {
-              theme: `Quiet Light`,
+              noInlineHighlight: true,
             },
           },
           {

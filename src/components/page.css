@@ -14,7 +14,6 @@ main {
   width: 100vw;
   height: 100vh;
   flex-direction: row;
-  flex-wrap: no-wrap;
   margin: 0px;
   padding: 0px;
   overflow: hidden;
@@ -34,11 +33,6 @@ div.main-content {
 
 code, pre, tt {
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-}
-
-hr {
-  margin: 18x 0;
-  border-top: 1px solid #cccccc
 }
 
 p {
@@ -198,8 +192,13 @@ span[role="img"] {
 }
 
 /* Override the code prettifier for language "none" */
-pre[data-language="none"] {
-    background-color: inherit;
+pre.language-none {
+  background-color: inherit;
+  color: inherit;
+}
+
+code.language-none {
+  color: inherit;
 }
 
 div.footer {
