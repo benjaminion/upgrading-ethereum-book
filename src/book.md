@@ -809,7 +809,7 @@ The mechanism for rewarding timely inclusion of attestations (thus penalising la
 
 These weights are used to calculate the reward earned by a validator for performing its duties. There are five duties in total. Three relate to making attestations: attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for proposing blocks, and for participating in sync committees. Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
 
-On a long-term average, a validator can expect to earn a total amount of [`get_base_reward()`](/part3/transition/epoch#get_base_reward) per epoch, with these weights being the relative portions for each of the duties comprising that total. Proposing blocks and participating in sync committees do not happen in every epoch, but are randomly assigned, so over small periods of time validator earnings may differ from `get_base_reward()`.
+On a long-term average, a validator can expect to earn a total amount of [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward) per epoch, with these weights being the relative portions for each of the duties comprising that total. Proposing blocks and participating in sync committees do not happen in every epoch, but are randomly assigned, so over small periods of time validator earnings may differ from `get_base_reward()`.
 
 [TODO: link to discussion of things that can reduce rewards, a la V's annotated spec]::
 
@@ -1420,7 +1420,7 @@ The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inac
 
 In addition, if many validators are able to participate intermittently, it indicates that whatever event has befallen the chain is potentially recoverable (unlike a permanent network partition, or a super-majority network fork, for example). The inactivity leak is intended to bring finality to irrecoverable situations, so prolonging the time to finality if it's not irrecoverable is likely a good thing.
 
-With Altair, each validator has an individual inactivity score in the beacon state which is updated by [`process_inactivity_updates()`](/part3/transition/epoch#process_inactivity_updates) as follows.
+With Altair, each validator has an individual inactivity score in the beacon state which is updated by [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates) as follows.
   - Every epoch, irrespective of the inactivity leak,
     - decrease the score by one when the validator makes a correct timely target vote, and
     - increase the score by `INACTIVITY_SCORE_BIAS` otherwise.
@@ -1645,7 +1645,7 @@ class HistoricalBatch(Container):
     state_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
 ```
 
-This is used to implement part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571) for the past history of the chain. Once [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) block roots and the same number of state roots have been accumulated in the beacon state, they are put in a `HistoricalBatch` object and the hash tree root of that is appended to the `historical_roots` list in beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period. See [`process_historical_roots_update()`](/part3/transition/epoch#process_historical_roots_update).
+This is used to implement part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571) for the past history of the chain. Once [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) block roots and the same number of state roots have been accumulated in the beacon state, they are put in a `HistoricalBatch` object and the hash tree root of that is appended to the `historical_roots` list in beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period. See [`process_historical_roots_update()`](/part3/transition/epoch#def_process_historical_roots_update).
 
 #### `DepositMessage`
 
@@ -1865,6 +1865,8 @@ TODO
 
 #### `integer_squareroot`
 
+<a id="def_integer_squareroot"></a>
+
 ```python
 def integer_squareroot(n: uint64) -> uint64:
     """
@@ -1880,6 +1882,8 @@ def integer_squareroot(n: uint64) -> uint64:
 
 #### `xor`
 
+<a id="def_xor"></a>
+
 ```python
 def xor(bytes_1: Bytes32, bytes_2: Bytes32) -> Bytes32:
     """
@@ -1893,6 +1897,8 @@ def xor(bytes_1: Bytes32, bytes_2: Bytes32) -> Bytes32:
 `def uint_to_bytes(n: uint) -> bytes` is a function for serializing the `uint` type object to bytes in ``ENDIANNESS``-endian. The expected length of the output is the byte-length of the `uint` type.
 
 #### `bytes_to_uint64`
+
+<a id="def_bytes_to_uint64"></a>
 
 ```python
 def bytes_to_uint64(data: bytes) -> uint64:
@@ -1929,6 +1935,8 @@ The above functions are accessed through the `bls` module, e.g. `bls.Verify`.
 
 #### `eth_aggregate_pubkeys`
 
+<a id="def_eth_aggregate_pubkeys"></a>
+
 ```python
 def eth_aggregate_pubkeys(pubkeys: Sequence[BLSPubkey]) -> BLSPubkey:
     """
@@ -1953,6 +1961,8 @@ def eth_aggregate_pubkeys(pubkeys: Sequence[BLSPubkey]) -> BLSPubkey:
 
 #### `eth_fast_aggregate_verify`
 
+<a id="def_eth_fast_aggregate_verify"></a>
+
 ```python
 def eth_fast_aggregate_verify(pubkeys: Sequence[BLSPubkey], message: Bytes32, signature: BLSSignature) -> bool:
     """
@@ -1969,6 +1979,8 @@ TODO
 
 #### `is_active_validator`
 
+<a id="def_is_active_validator"></a>
+
 ```python
 def is_active_validator(validator: Validator, epoch: Epoch) -> bool:
     """
@@ -1978,6 +1990,8 @@ def is_active_validator(validator: Validator, epoch: Epoch) -> bool:
 ```
 
 #### `is_eligible_for_activation_queue`
+
+<a id="def_is_eligible_for_activation_queue"></a>
 
 ```python
 def is_eligible_for_activation_queue(validator: Validator) -> bool:
@@ -1991,6 +2005,8 @@ def is_eligible_for_activation_queue(validator: Validator) -> bool:
 ```
 
 #### `is_eligible_for_activation`
+
+<a id="def_is_eligible_for_activation"></a>
 
 ```python
 def is_eligible_for_activation(state: BeaconState, validator: Validator) -> bool:
@@ -2007,6 +2023,8 @@ def is_eligible_for_activation(state: BeaconState, validator: Validator) -> bool
 
 #### `is_slashable_validator`
 
+<a id="def_is_slashable_validator"></a>
+
 ```python
 def is_slashable_validator(validator: Validator, epoch: Epoch) -> bool:
     """
@@ -2016,6 +2034,8 @@ def is_slashable_validator(validator: Validator, epoch: Epoch) -> bool:
 ```
 
 #### `is_slashable_attestation_data`
+
+<a id="def_is_slashable_attestation_data"></a>
 
 ```python
 def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationData) -> bool:
@@ -2031,6 +2051,8 @@ def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationDa
 ```
 
 #### `is_valid_indexed_attestation`
+
+<a id="def_is_valid_indexed_attestation"></a>
 
 ```python
 def is_valid_indexed_attestation(state: BeaconState, indexed_attestation: IndexedAttestation) -> bool:
@@ -2049,6 +2071,8 @@ def is_valid_indexed_attestation(state: BeaconState, indexed_attestation: Indexe
 ```
 
 #### `is_valid_merkle_branch`
+
+<a id="def_is_valid_merkle_branch"></a>
 
 ```python
 def is_valid_merkle_branch(leaf: Bytes32, branch: Sequence[Bytes32], depth: uint64, index: uint64, root: Root) -> bool:
@@ -2069,6 +2093,8 @@ TODO
 ### Misc <!-- /part3/helper/misc -->
 
 #### `compute_shuffled_index`
+
+<a id="def_compute_shuffled_index"></a>
 
 ```python
 def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) -> uint64:
@@ -2098,6 +2124,8 @@ def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) ->
 See the [section on Shuffling](/part2/building_blocks/shuffling) for a detailed exposition of this algorithm.
 
 #### `compute_proposer_index`
+
+<a id="def_compute_proposer_index"></a>
 
 ```python
 def compute_proposer_index(state: BeaconState, indices: Sequence[ValidatorIndex], seed: Bytes32) -> ValidatorIndex:
@@ -2135,6 +2163,8 @@ Note that this dependence on the validators' effective balances, which are updat
 
 #### `compute_committee`
 
+<a id="def_compute_committee"></a>
+
 ```python
 def compute_committee(indices: Sequence[ValidatorIndex],
                       seed: Bytes32,
@@ -2168,6 +2198,8 @@ This method of selecting committees is light client friendly. Light clients can 
 
 #### `compute_epoch_at_slot`
 
+<a id="def_compute_epoch_at_slot"></a>
+
 ```python
 def compute_epoch_at_slot(slot: Slot) -> Epoch:
     """
@@ -2183,6 +2215,8 @@ This is trivial enough that I won't explain it. But note that it does rely on [`
 ```
 
 #### `compute_start_slot_at_epoch`
+
+<a id="def_compute_start_slot_at_epoch"></a>
 
 ```python
 def compute_start_slot_at_epoch(epoch: Epoch) -> Slot:
@@ -2200,6 +2234,8 @@ Should really read,
 
 #### `compute_activation_exit_epoch`
 
+<a id="def_compute_activation_exit_epoch"></a>
+
 ```python
 def compute_activation_exit_epoch(epoch: Epoch) -> Epoch:
     """
@@ -2213,6 +2249,8 @@ When queuing validators for activation or exit in [`process_registry_updates()`]
 See [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#time-parameters) for the details, but in short it is designed to make it extremely hard for an attacker to manipulate the make up of committees via activations and exits.
 
 #### `compute_fork_data_root`
+
+<a id="def_compute_fork_data_root"></a>
 
 ```python
 def compute_fork_data_root(current_version: Version, genesis_validators_root: Root) -> Root:
@@ -2232,6 +2270,8 @@ It is used by [`compute_fork_digest()`](#compute_fork_digest) and [`compute_doma
 
 #### `compute_fork_digest`
 
+<a id="def_compute_fork_digest"></a>
+
 ```python
 def compute_fork_digest(current_version: Version, genesis_validators_root: Root) -> ForkDigest:
     """
@@ -2249,6 +2289,8 @@ Extracts the first four bytes of the [fork data root](#compute_fork_data_root) a
 [TODO: check the bit about compute_fork_digest in networking]::
 
 #### `compute_domain`
+
+<a id="def_compute_domain"></a>
 
 ```python
 def compute_domain(domain_type: DomainType, fork_version: Version=None, genesis_validators_root: Root=None) -> Domain:
@@ -2273,6 +2315,8 @@ This function is mainly used by [`get_domain()`](/part3/helper/accessors#get_dom
 Fun fact: this function looks pretty simple, but [I found a subtle bug](https://github.com/ethereum/eth2.0-specs/issues/1582) in the way tests were generated in a previous implementation.
 
 #### `compute_signing_root`
+
+<a id="def_compute_signing_root"></a>
 
 ```python
 def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
@@ -2300,6 +2344,8 @@ This is exactly equivalent to adding the domain to an object and taking the hash
 
 #### `add_flag`
 
+<a id="def_add_flag"></a>
+
 ```python
 def add_flag(flags: ParticipationFlags, flag_index: int) -> ParticipationFlags:
     """
@@ -2314,6 +2360,8 @@ Added in Altair.
 TODO
 
 #### `has_flag`
+
+<a id="def_has_flag"></a>
 
 ```python
 def has_flag(flags: ParticipationFlags, flag_index: int) -> bool:
@@ -2332,6 +2380,8 @@ TODO
 
 #### `get_current_epoch`
 
+<a id="def_get_current_epoch"></a>
+
 ```python
 def get_current_epoch(state: BeaconState) -> Epoch:
     """
@@ -2341,6 +2391,8 @@ def get_current_epoch(state: BeaconState) -> Epoch:
 ```
 
 #### `get_previous_epoch`
+
+<a id="def_get_previous_epoch"></a>
 
 ```python
 def get_previous_epoch(state: BeaconState) -> Epoch:
@@ -2353,6 +2405,8 @@ def get_previous_epoch(state: BeaconState) -> Epoch:
 
 #### `get_block_root`
 
+<a id="def_get_block_root"></a>
+
 ```python
 def get_block_root(state: BeaconState, epoch: Epoch) -> Root:
     """
@@ -2362,6 +2416,8 @@ def get_block_root(state: BeaconState, epoch: Epoch) -> Root:
 ```
 
 #### `get_block_root_at_slot`
+
+<a id="def_get_block_root_at_slot"></a>
 
 ```python
 def get_block_root_at_slot(state: BeaconState, slot: Slot) -> Root:
@@ -2374,6 +2430,8 @@ def get_block_root_at_slot(state: BeaconState, slot: Slot) -> Root:
 
 #### `get_randao_mix`
 
+<a id="def_get_randao_mix"></a>
+
 ```python
 def get_randao_mix(state: BeaconState, epoch: Epoch) -> Bytes32:
     """
@@ -2384,6 +2442,8 @@ def get_randao_mix(state: BeaconState, epoch: Epoch) -> Bytes32:
 
 #### `get_active_validator_indices`
 
+<a id="def_get_active_validator_indices"></a>
+
 ```python
 def get_active_validator_indices(state: BeaconState, epoch: Epoch) -> Sequence[ValidatorIndex]:
     """
@@ -2393,6 +2453,8 @@ def get_active_validator_indices(state: BeaconState, epoch: Epoch) -> Sequence[V
 ```
 
 #### `get_validator_churn_limit`
+
+<a id="def_get_validator_churn_limit"></a>
 
 ```python
 def get_validator_churn_limit(state: BeaconState) -> uint64:
@@ -2405,6 +2467,8 @@ def get_validator_churn_limit(state: BeaconState) -> uint64:
 
 #### `get_seed`
 
+<a id="def_get_seed"></a>
+
 ```python
 def get_seed(state: BeaconState, epoch: Epoch, domain_type: DomainType) -> Bytes32:
     """
@@ -2415,6 +2479,8 @@ def get_seed(state: BeaconState, epoch: Epoch, domain_type: DomainType) -> Bytes
 ```
 
 #### `get_committee_count_per_slot`
+
+<a id="def_get_committee_count_per_slot"></a>
 
 ```python
 def get_committee_count_per_slot(state: BeaconState, epoch: Epoch) -> uint64:
@@ -2428,6 +2494,8 @@ def get_committee_count_per_slot(state: BeaconState, epoch: Epoch) -> uint64:
 ```
 
 #### `get_beacon_committee`
+
+<a id="def_get_beacon_committee"></a>
 
 ```python
 def get_beacon_committee(state: BeaconState, slot: Slot, index: CommitteeIndex) -> Sequence[ValidatorIndex]:
@@ -2446,6 +2514,8 @@ def get_beacon_committee(state: BeaconState, slot: Slot, index: CommitteeIndex) 
 
 #### `get_beacon_proposer_index`
 
+<a id="def_get_beacon_proposer_index"></a>
+
 ```python
 def get_beacon_proposer_index(state: BeaconState) -> ValidatorIndex:
     """
@@ -2459,6 +2529,8 @@ def get_beacon_proposer_index(state: BeaconState) -> ValidatorIndex:
 
 #### `get_total_balance`
 
+<a id="def_get_total_balance"></a>
+
 ```python
 def get_total_balance(state: BeaconState, indices: Set[ValidatorIndex]) -> Gwei:
     """
@@ -2471,6 +2543,8 @@ def get_total_balance(state: BeaconState, indices: Set[ValidatorIndex]) -> Gwei:
 
 #### `get_total_active_balance`
 
+<a id="def_get_total_active_balance"></a>
+
 ```python
 def get_total_active_balance(state: BeaconState) -> Gwei:
     """
@@ -2481,6 +2555,8 @@ def get_total_active_balance(state: BeaconState) -> Gwei:
 ```
 
 #### `get_domain`
+
+<a id="def_get_domain"></a>
 
 ```python
 def get_domain(state: BeaconState, domain_type: DomainType, epoch: Epoch=None) -> Domain:
@@ -2493,6 +2569,8 @@ def get_domain(state: BeaconState, domain_type: DomainType, epoch: Epoch=None) -
 ```
 
 #### `get_indexed_attestation`
+
+<a id="def_get_indexed_attestation"></a>
 
 ```python
 def get_indexed_attestation(state: BeaconState, attestation: Attestation) -> IndexedAttestation:
@@ -2510,6 +2588,8 @@ def get_indexed_attestation(state: BeaconState, attestation: Attestation) -> Ind
 
 #### `get_attesting_indices`
 
+<a id="def_get_attesting_indices"></a>
+
 ```python
 def get_attesting_indices(state: BeaconState,
                           data: AttestationData,
@@ -2522,6 +2602,8 @@ def get_attesting_indices(state: BeaconState,
 ```
 
 #### `get_next_sync_committee_indices`
+
+<a id="def_get_next_sync_committee_indices"></a>
 
 ```python
 def get_next_sync_committee_indices(state: BeaconState) -> Sequence[ValidatorIndex]:
@@ -2551,6 +2633,8 @@ def get_next_sync_committee_indices(state: BeaconState) -> Sequence[ValidatorInd
 
 *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](./fork.md#upgrading-the-state).
 
+<a id="def_get_next_sync_committee"></a>
+
 ```python
 def get_next_sync_committee(state: BeaconState) -> SyncCommittee:
     """
@@ -2563,6 +2647,8 @@ def get_next_sync_committee(state: BeaconState) -> SyncCommittee:
 ```
 
 #### `get_unslashed_participating_indices`
+
+<a id="def_get_unslashed_participating_indices"></a>
 
 ```python
 def get_unslashed_participating_indices(state: BeaconState, flag_index: int, epoch: Epoch) -> Set[ValidatorIndex]:
@@ -2580,6 +2666,8 @@ def get_unslashed_participating_indices(state: BeaconState, flag_index: int, epo
 ```
 
 #### `get_attestation_participation_flag_indices`
+
+<a id="def_get_attestation_participation_flag_indices"></a>
 
 ```python
 def get_attestation_participation_flag_indices(state: BeaconState,
@@ -2612,6 +2700,8 @@ def get_attestation_participation_flag_indices(state: BeaconState,
 
 #### `get_flag_index_deltas`
 
+<a id="def_get_flag_index_deltas"></a>
+
 ```python
 def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence[Gwei], Sequence[Gwei]]:
     """
@@ -2640,6 +2730,8 @@ def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence
 
 #### `increase_balance`
 
+<a id="def_increase_balance"></a>
+
 ```python
 def increase_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> None:
     """
@@ -2650,6 +2742,8 @@ def increase_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> 
 
 #### `decrease_balance`
 
+<a id="def_decrease_balance"></a>
+
 ```python
 def decrease_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> None:
     """
@@ -2659,6 +2753,8 @@ def decrease_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> 
 ```
 
 #### `initiate_validator_exit`
+
+<a id="def_initiate_validator_exit"></a>
 
 ```python
 def initiate_validator_exit(state: BeaconState, index: ValidatorIndex) -> None:
@@ -2683,6 +2779,8 @@ def initiate_validator_exit(state: BeaconState, index: ValidatorIndex) -> None:
 ```
 
 #### `slash_validator`
+
+<a id="def_slash_validator"></a>
 
 ```python
 def slash_validator(state: BeaconState,
@@ -2715,6 +2813,8 @@ def slash_validator(state: BeaconState,
 
 The post-state corresponding to a pre-state `state` and a signed block `signed_block` is defined as `state_transition(state, signed_block)`. State transitions that trigger an unhandled exception (e.g. a failed `assert` or an out-of-range list access) are considered invalid. State transitions that cause a `uint64` overflow or underflow are also considered invalid.
 
+<a id="def_state_transition"></a>
+
 ```python
 def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, validate_result: bool=True) -> None:
     block = signed_block.message
@@ -2730,12 +2830,16 @@ def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, valida
         assert block.state_root == hash_tree_root(state)
 ```
 
+<a id="def_verify_block_signature"></a>
+
 ```python
 def verify_block_signature(state: BeaconState, signed_block: SignedBeaconBlock) -> bool:
     proposer = state.validators[signed_block.message.proposer_index]
     signing_root = compute_signing_root(signed_block.message, get_domain(state, DOMAIN_BEACON_PROPOSER))
     return bls.Verify(proposer.pubkey, signing_root, signed_block.signature)
 ```
+
+<a id="def_process_slots"></a>
 
 ```python
 def process_slots(state: BeaconState, slot: Slot) -> None:
@@ -2747,6 +2851,8 @@ def process_slots(state: BeaconState, slot: Slot) -> None:
             process_epoch(state)
         state.slot = Slot(state.slot + 1)
 ```
+
+<a id="def_process_slot"></a>
 
 ```python
 def process_slot(state: BeaconState) -> None:
@@ -2764,6 +2870,8 @@ def process_slot(state: BeaconState) -> None:
 TODO
 
 ### Epoch processing <!-- /part3/transition/epoch -->
+
+<a id="def_process_epoch"></a>
 
 ```python
 def process_epoch(state: BeaconState) -> None:
@@ -2785,6 +2893,8 @@ def process_epoch(state: BeaconState) -> None:
 
 *Note*: The function `process_justification_and_finalization` is modified to adapt to the new participation records.
 
+<a id="def_process_justification_and_finalization"></a>
+
 ```python
 def process_justification_and_finalization(state: BeaconState) -> None:
     # Initial FFG checkpoint values have a `0x00` stub for `root`.
@@ -2798,6 +2908,8 @@ def process_justification_and_finalization(state: BeaconState) -> None:
     current_target_balance = get_total_balance(state, current_indices)
     weigh_justification_and_finalization(state, total_active_balance, previous_target_balance, current_target_balance)
 ```
+
+<a id="def_weigh_justification_and_finalization"></a>
 
 ```python
 def weigh_justification_and_finalization(state: BeaconState,
@@ -2842,7 +2954,7 @@ def weigh_justification_and_finalization(state: BeaconState,
 
 *Note*: The function `process_inactivity_updates` is new.
 
-<a id="process_inactivity_updates"></a>
+<a id="def_process_inactivity_updates"></a>
 
 ```python
 def process_inactivity_updates(state: BeaconState) -> None:
@@ -2871,12 +2983,14 @@ def process_inactivity_updates(state: BeaconState) -> None:
 
 *Note*: On average an optimally performing validator earns one base reward per epoch.
 
+<a id="def_get_base_reward_per_increment"></a>
+
 ```python
 def get_base_reward_per_increment(state: BeaconState) -> Gwei:
     return Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
 ```
 
-<a id="get_base_reward"></a>
+<a id="def_get_base_reward"></a>
 
 ```python
 def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
@@ -2887,17 +3001,21 @@ def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
     return Gwei(increments * get_base_reward_per_increment(state))
 ```
 
+<a id="def_get_finality_delay"></a>
+
 ```python
 def get_finality_delay(state: BeaconState) -> uint64:
     return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 ```
 
+<a id="def_is_in_inactivity_leak"></a>
 
 ```python
 def is_in_inactivity_leak(state: BeaconState) -> bool:
     return get_finality_delay(state) > MIN_EPOCHS_TO_INACTIVITY_PENALTY
 ```
 
+<a id="def_get_eligible_validator_indices"></a>
 
 ```python
 def get_eligible_validator_indices(state: BeaconState) -> Sequence[ValidatorIndex]:
@@ -2909,6 +3027,8 @@ def get_eligible_validator_indices(state: BeaconState) -> Sequence[ValidatorInde
 ```
 
 ##### Inactivity penalty deltas
+
+<a id="def_get_inactivity_penalty_deltas"></a>
 
 ```python
 def get_inactivity_penalty_deltas(state: BeaconState) -> Tuple[Sequence[Gwei], Sequence[Gwei]]:
@@ -2931,6 +3051,8 @@ def get_inactivity_penalty_deltas(state: BeaconState) -> Tuple[Sequence[Gwei], S
 
 *Note*: The function `process_rewards_and_penalties` is modified to support the incentive accounting reforms.
 
+<a id="def_process_rewards_and_penalties"></a>
+
 ```python
 def process_rewards_and_penalties(state: BeaconState) -> None:
     # No rewards are applied at the end of `GENESIS_EPOCH` because rewards are for work done in the previous epoch
@@ -2946,6 +3068,8 @@ def process_rewards_and_penalties(state: BeaconState) -> None:
 ```
 
 #### Registry updates
+
+<a id="def_process_registry_updates"></a>
 
 ```python
 def process_registry_updates(state: BeaconState) -> None:
@@ -2976,6 +3100,8 @@ def process_registry_updates(state: BeaconState) -> None:
 
 *Note*: The function `process_slashings` is modified to use `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`.
 
+<a id="def_process_slashings"></a>
+
 ```python
 def process_slashings(state: BeaconState) -> None:
     epoch = get_current_epoch(state)
@@ -2990,6 +3116,9 @@ def process_slashings(state: BeaconState) -> None:
 ```
 
 #### Eth1 data votes updates
+
+<a id="def_process_eth1_data_reset"></a>
+
 ```python
 def process_eth1_data_reset(state: BeaconState) -> None:
     next_epoch = Epoch(get_current_epoch(state) + 1)
@@ -2999,6 +3128,8 @@ def process_eth1_data_reset(state: BeaconState) -> None:
 ```
 
 #### Effective balances updates
+
+<a id="def_process_effective_balance_updates"></a>
 
 ```python
 def process_effective_balance_updates(state: BeaconState) -> None:
@@ -3017,6 +3148,8 @@ def process_effective_balance_updates(state: BeaconState) -> None:
 
 #### Slashings balances updates
 
+<a id="def_process_slashings_reset"></a>
+
 ```python
 def process_slashings_reset(state: BeaconState) -> None:
     next_epoch = Epoch(get_current_epoch(state) + 1)
@@ -3025,6 +3158,8 @@ def process_slashings_reset(state: BeaconState) -> None:
 ```
 
 #### Randao mixes updates
+
+<a id="def_process_randao_mixes_reset"></a>
 
 ```python
 def process_randao_mixes_reset(state: BeaconState) -> None:
@@ -3036,7 +3171,7 @@ def process_randao_mixes_reset(state: BeaconState) -> None:
 
 #### Historical roots updates
 
-<a id="process_historical_roots_update"></a>
+<a id="def_process_historical_roots_update"></a>
 
 ```python
 def process_historical_roots_update(state: BeaconState) -> None:
@@ -3051,6 +3186,8 @@ def process_historical_roots_update(state: BeaconState) -> None:
 
 *Note*: The function `process_participation_flag_updates` is new.
 
+<a id="def_process_participation_flag_updates"></a>
+
 ```python
 def process_participation_flag_updates(state: BeaconState) -> None:
     state.previous_epoch_participation = state.current_epoch_participation
@@ -3060,6 +3197,8 @@ def process_participation_flag_updates(state: BeaconState) -> None:
 #### Sync committee updates
 
 *Note*: The function `process_sync_committee_updates` is new.
+
+<a id="def_process_sync_committee_updates"></a>
 
 ```python
 def process_sync_committee_updates(state: BeaconState) -> None:
@@ -3071,6 +3210,8 @@ def process_sync_committee_updates(state: BeaconState) -> None:
 
 ### Block processing <!-- /part3/transition/block -->
 
+<a id="def_process_block"></a>
+
 ```python
 def process_block(state: BeaconState, block: BeaconBlock) -> None:
     process_block_header(state, block)
@@ -3081,6 +3222,8 @@ def process_block(state: BeaconState, block: BeaconBlock) -> None:
 ```
 
 #### Block header
+
+<a id="def_process_block_header"></a>
 
 ```python
 def process_block_header(state: BeaconState, block: BeaconBlock) -> None:
@@ -3108,6 +3251,8 @@ def process_block_header(state: BeaconState, block: BeaconBlock) -> None:
 
 #### RANDAO
 
+<a id="def_process_randao"></a>
+
 ```python
 def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     epoch = get_current_epoch(state)
@@ -3122,6 +3267,8 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
 
 #### Eth1 data
 
+<a id="def_process_eth1_data"></a>
+
 ```python
 def process_eth1_data(state: BeaconState, body: BeaconBlockBody) -> None:
     state.eth1_data_votes.append(body.eth1_data)
@@ -3130,6 +3277,8 @@ def process_eth1_data(state: BeaconState, body: BeaconBlockBody) -> None:
 ```
 
 #### Operations
+
+<a id="def_process_operations"></a>
 
 ```python
 def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
@@ -3148,6 +3297,8 @@ def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
 ```
 
 ##### Proposer slashings
+
+<a id="def_process_proposer_slashing"></a>
 
 ```python
 def process_proposer_slashing(state: BeaconState, proposer_slashing: ProposerSlashing) -> None:
@@ -3174,6 +3325,8 @@ def process_proposer_slashing(state: BeaconState, proposer_slashing: ProposerSla
 
 ##### Attester slashings
 
+<a id="def_process_attester_slashing"></a>
+
 ```python
 def process_attester_slashing(state: BeaconState, attester_slashing: AttesterSlashing) -> None:
     attestation_1 = attester_slashing.attestation_1
@@ -3194,6 +3347,8 @@ def process_attester_slashing(state: BeaconState, attester_slashing: AttesterSla
 ##### Attestations
 
 *Note*: The function `process_attestation` is modified to do incentive accounting with epoch participation flags.
+
+<a id="def_process_attestation"></a>
 
 ```python
 def process_attestation(state: BeaconState, attestation: Attestation) -> None:
@@ -3233,6 +3388,8 @@ def process_attestation(state: BeaconState, attestation: Attestation) -> None:
 
 ##### Deposits
 
+<a id="def_get_validator_from_deposit"></a>
+
 ```python
 def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validator:
     amount = deposit.data.amount
@@ -3250,6 +3407,8 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
 ```
 
 *Note*: The function `process_deposit` is modified to initialize `inactivity_scores`, `previous_epoch_participation`, and `current_epoch_participation`.
+
+<a id="def_process_deposit"></a>
 
 ```python
 def process_deposit(state: BeaconState, deposit: Deposit) -> None:
@@ -3292,6 +3451,8 @@ def process_deposit(state: BeaconState, deposit: Deposit) -> None:
 
 ##### Voluntary exits
 
+<a id="def_process_voluntary_exit"></a>
+
 ```python
 def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVoluntaryExit) -> None:
     voluntary_exit = signed_voluntary_exit.message
@@ -3315,6 +3476,8 @@ def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVolu
 ##### Sync aggregate processing
 
 *Note*: The function `process_sync_aggregate` is new.
+
+<a id="def_process_sync_aggregate"></a>
 
 ```python
 def process_sync_aggregate(state: BeaconState, sync_aggregate: SyncAggregate) -> None:
@@ -3368,6 +3531,8 @@ This helper function is only for initializing the state for pure Altair testnets
 
 *Note*: The function `initialize_beacon_state_from_eth1` is modified: (1) using `ALTAIR_FORK_VERSION` as the current fork version, (2) utilizing the Altair `BeaconBlockBody` when constructing the initial `latest_block_header`, and (3) adding initial sync committees.
 
+<a id="def_initialize_beacon_state_from_eth1"></a>
+
 ```python
 def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
                                       eth1_timestamp: uint64,
@@ -3415,6 +3580,8 @@ def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
 
 Let `genesis_state = candidate_state` whenever `is_valid_genesis_state(candidate_state) is True` for the first time.
 
+<a id="def_is_valid_genesis_state"></a>
+
 ```python
 def is_valid_genesis_state(state: BeaconState) -> bool:
     if state.genesis_time < MIN_GENESIS_TIME:
@@ -3461,6 +3628,8 @@ The upgrade occurs after the completion of the inner loop of `process_slots` tha
 Care must be taken when transitioning through the fork boundary as implementations will need a modified [state transition function](../phase0/beacon-chain.md#beacon-chain-state-transition-function) that deviates from the Phase 0 document.
 In particular, the outer `state_transition` function defined in the Phase 0 document will not expose the precise fork slot to execute the upgrade in the presence of skipped slots at the fork boundary. Instead the logic must be within `process_slots`.
 
+<a id="def_translate_participation"></a>
+
 ```python
 def translate_participation(state: BeaconState, pending_attestations: Sequence[phase0.PendingAttestation]) -> None:
     for attestation in pending_attestations:
@@ -3474,8 +3643,11 @@ def translate_participation(state: BeaconState, pending_attestations: Sequence[p
         for index in get_attesting_indices(state, data, attestation.aggregation_bits):
             for flag_index in participation_flag_indices:
                 epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
+```
 
+<a id="def_upgrade_to_altair"></a>
 
+```python
 def upgrade_to_altair(pre: phase0.BeaconState) -> BeaconState:
     epoch = phase0.get_current_epoch(pre)
     post = BeaconState(
