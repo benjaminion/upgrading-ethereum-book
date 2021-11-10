@@ -668,7 +668,7 @@ The recommended use of `Version` is described in the [Ethereum 2.0 networking sp
 
 #### DomainType
 
-`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Altair](constants#domain-types).
+`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Altair](/part3/config/constants#domain-types).
 
 #### ForkDigest
 
@@ -715,7 +715,7 @@ The `ParticipationFlags` type was introduced in the Altair upgrade as part of th
 
 Prior to Altair, all attestations seen in blocks were stored in state for two epochs. At the end of an epoch, finality calculations, and reward and penalty calculations for each active validator, would be done by processing all of the attestations for the previous epoch as a batch. This created a spike in processing at epoch boundaries, and led to a noticeable increase in late blocks and attestations during the first slots of epochs. With Altair, [participation flags](https://github.com/ethereum/consensus-specs/pull/2140) are now used to continuously track validators' attestations, reducing the processing load at the end of epochs.
 
-Three of the eight bits are [currently used](constants#participation-flag-indices); five are reserved for future use.
+Three of the eight bits are [currently used](/part3/config/constants#participation-flag-indices); five are reserved for future use.
 
 As an aside, it might have been more intuitive if `ParticipationFlags` were a `Bytes1` type, rather than introducing a weird `uint8` into the spec. After all, it is not used as an arithmetic integer. However, `Bytes1` is a composite type in SSZ, really an alias for `Vector[uint8, 1]`, whereas `uint8` is a basic type. When computing the hash tree root of a `List` type, multiple basic types can be packed into a single leaf, while composite types take a leaf each. This would result in 32 times as many hashing operations for a list of `Bytes1`. For similar reasons the type of `ParticipationFlags` [was changed](https://github.com/ethereum/consensus-specs/pull/2176#pullrequestreview-566879992) from `bitlist` to `uint8`.
 
@@ -851,6 +851,17 @@ Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.
 
 #### Domain types
 
+<a id="domain_beacon_proposer"></a>
+<a id="domain_beacon_attester"></a>
+<a id="domain_randao"></a>
+<a id="domain_deposit"></a>
+<a id="domain_voluntary_exit"></a>
+<a id="domain_selection_proof"></a>
+<a id="domain_aggregate_and_proof"></a>
+<a id="domain_sync_committee"></a>
+<a id="domain_sync_committee_selection_proof"></a>
+<a id="domain_contribution_and_proof"></a>
+
 | Name | Value |
 | - | - |
 | `DOMAIN_BEACON_PROPOSER` | `DomainType('0x00000000')` |
@@ -864,13 +875,13 @@ Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.
 | `DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF` | `DomainType('0x08000000')` |
 | `DOMAIN_CONTRIBUTION_AND_PROOF` | `DomainType('0x09000000')` |
 
-These domain types are used in three ways: for seeds, for signatures, and for selecting aggregators
+These domain types are used in three ways: for seeds, for signatures, and for selecting aggregators.
 
-##### Seeds
+##### As seeds
 
 When random numbers are required in-protocol, one way they are generated is by hashing the RANDAO mix with other quantities, one of them being a domain type (see [`get_seed()`](/part3/helper/accessors#get_seed)). The [original motivation](https://github.com/ethereum/eth2.0-specs/pull/1415) was to avoid occasional collisions between Phase&nbsp;0 committees and Phase&nbsp;1 persistent committees, back when they were a thing. So, when computing the beacon block proposer, `DOMAIN_BEACON_PROPOSER` is hashed into the seed, when computing attestation committees, `DOMAIN_BEACON_ATTESTER` is hashed in, and when computing sync committees, `DOMAIN_SYNC_COMMITTEE` is hashed in.
 
-##### Signatures
+##### As signatures
 
 In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate domain before being signed:
 
@@ -883,7 +894,7 @@ In addition, as a cryptographic nicety, each of the protocol's signature types i
 
 In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
-##### Aggregator selection
+##### For aggregator selection
 
 The remaining four types, suffixed `_PROOF` are not used directly in the beacon chain specification. They [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. The technique was [extended](https://github.com/ethereum/consensus-specs/pull/2266) to sync committees with the Altair upgrade.
 
@@ -939,7 +950,7 @@ On the beacon chain, up to 64 committees are active in a slot and effectively ac
 
 The number 64 is intended to map to [one committee per shard](https://github.com/ethereum/eth2.0-specs/pull/1428) once data shards are deployed, since these committees will also vote on shard crosslinks.
 
-Note that sync committees are a different thing: there is only on sync committee active at any time.
+Note that sync committees are a different thing: there is only one sync committee active at any time.
 
 ##### `TARGET_COMMITTEE_SIZE`
 
@@ -1263,6 +1274,9 @@ Some comments on the chosen values:
 
 #### Sync committee
 
+<a id="sync_committee_size"></a>
+<a id="epochs_per_sync_committee_period"></a>
+
 | Name | Value | Unit | Duration |
 | - | - | - | - |
 | `SYNC_COMMITTEE_SIZE` | `uint64(2**9)` (= 512) | Validators | |
@@ -1490,7 +1504,7 @@ class ForkData(Container):
     genesis_validators_root: Root
 ```
 
-`ForkData` is used only in [`compute_fork_data_root()`](/part3/helper/misc#compute_fork_data_root). This is used when distinguishing between chains for the purpose of [peer-to-peer gossip](https://github.com/ethereum/eth2.0-specs/pull/1652), and for [domain separation](#domain-types). By including both the current fork version and the genesis validators root, we can cleanly distinguish between, say, mainnet and a testnet. Even if they have the same fork history, the genesis validators roots will differ.
+`ForkData` is used only in [`compute_fork_data_root()`](/part3/helper/misc#compute_fork_data_root). This is used when distinguishing between chains for the purpose of [peer-to-peer gossip](https://github.com/ethereum/eth2.0-specs/pull/1652), and for [domain separation](/part3/config/constants#domain-types). By including both the current fork version and the genesis validators root, we can cleanly distinguish between, say, mainnet and a testnet. Even if they have the same fork history, the genesis validators roots will differ.
 
 [`Version`](/part3/config/types#version) is the datatype for a fork version number.
 
@@ -1504,7 +1518,7 @@ class Checkpoint(Container):
 
 `Checkpoint`s are the points of justification and finalisation used by the [Casper FFG protocol](https://arxiv.org/pdf/1710.09437.pdf). Validators use them to create [`AttestationData`](#attestationdata) votes, and the status of recent checkpoints is recorded in [`BeaconState`](/part3/containers/state).
 
-As per the Casper paper, checkpoints contain a height, and a block root. In this implementation of Casper FFG, checkpoints occur whenever the slot number is a multiple of [`SLOTS_PER_EPOCH`](#slots_per_epoch), thus they correspond to `epoch` numbers. In particular, checkpoint $N$ is the first slot of epoch $N$. The [genesis block](#genesis-block) is checkpoint 0, and starts off both justified and finalised.
+As per the Casper paper, checkpoints contain a height, and a block root. In this implementation of Casper FFG, checkpoints occur whenever the slot number is a multiple of [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch), thus they correspond to `epoch` numbers. In particular, checkpoint $N$ is the first slot of epoch $N$. The [genesis block](/part3/initialise#genesis-block) is checkpoint 0, and starts off both justified and finalised.
 
 Thus, the `root` element here is the block root of the first block in the `epoch`. (This might be the block root of an earlier block if some slots have been skipped, that is, if there are no blocks for those slots.).
 
@@ -1582,7 +1596,7 @@ This container is the fundamental unit of attestation data. It provides the foll
 
 This `AttestationData` structure gets wrapped up into several other similar but distinct structures:
   - [`Attestation`](/part3/containers/operations#attestation) is the form in which attestations normally make their way around the network. It is signed and aggregatable, and the list of validators making this attestation is compressed into a bitlist.
-  - [`IndexedAttestation`](#indexedattestation) is used primarily for [attester slashing](#attesterslashing). It is signed and aggregated, with the list of attesting validators being an uncompressed list of indices.
+  - [`IndexedAttestation`](#indexedattestation) is used primarily for [attester slashing](/part3/containers/operations#attesterslashing). It is signed and aggregated, with the list of attesting validators being an uncompressed list of indices.
   - [`PendingAttestation`](#pendingattestation). In Phase&nbsp;0, after having their validity checked during block processing, `PendingAttestation`s were stored in the beacon state pending processing at the end of the epoch. This was reworked in the Altair upgrade and `PendingAttestation`s are no longer used.
 
 #### `IndexedAttestation`
@@ -1596,7 +1610,7 @@ class IndexedAttestation(Container):
 
 This is one of the forms in which aggregated attestations&mdash;combined identical attestations from multiple validators in the same committee&mdash;are handled.
 
-[`Attestation`](/part3/containers/operations#attestation#attestation)s and `IndexedAttestation`s contain essentially the same information. The difference being that the list of attesting validators is stored uncompressed in `IndexedAttestation`s. That is, each attesting validator is referenced by its global validator index, and non-attesting validators are not included. To be [valid](/part3/helper/predicates#is_valid_indexed_attestation), the validator indices must be unique and sorted, and the signature must be an aggregate signature from exactly the listed set of validators.
+[`Attestation`](/part3/containers/operations#attestation)s and `IndexedAttestation`s contain essentially the same information. The difference being that the list of attesting validators is stored uncompressed in `IndexedAttestation`s. That is, each attesting validator is referenced by its global validator index, and non-attesting validators are not included. To be [valid](/part3/helper/predicates#is_valid_indexed_attestation), the validator indices must be unique and sorted, and the signature must be an aggregate signature from exactly the listed set of validators.
 
 `IndexedAttestation`s are primarily used when reporting [attester slashing](/part3/containers/operations#attesterslashing). An `Attestation` can be converted to an `IndexedAttestation` using [`get_indexed_attestation()`](/part3/helper/accessors#get_indexed_attestation).
 
@@ -1614,7 +1628,7 @@ class PendingAttestation(Container):
 
 Prior to Altair, `Attestation`s received in blocks were verified then temporarily stored in beacon state in the form of `PendingAttestation`s, pending further processing at the end of the epoch.
 
-A `PendingAttestation` is an [`Attestation`](#attestation) minus the signature, plus a couple of fields related to reward calculation:
+A `PendingAttestation` is an [`Attestation`](/part3/containers/operations#attestation) minus the signature, plus a couple of fields related to reward calculation:
  - `inclusion_delay` is the number of slots between the attestation having been made and it being included in a beacon block by the block proposer. Validators are rewarded for getting their attestations included in blocks, but the reward used to decline in inverse proportion to the inclusion delay. This incentivised swift attesting and communicating by validators.
  - `proposer_index` is the block proposer that included the attestation. The block proposer gets a micro reward for every validator's attestation it includes, not just for the aggregate attestation as a whole. This incentivises efficient finding and packing of aggregations, since the number of aggregate attestations per block is capped.
 
@@ -1656,6 +1670,16 @@ class DepositMessage(Container):
     amount: Gwei
 ```
 
+The basic information necessary to either add a validator to the registry, or to top up an existing validator's stake.
+
+`pubkey` is the unique public key of the validator. If it is already present in the registry (the list of validators in beacon state) then `amount` is added to its balance. Otherwise a new [`Validator`](#validator) entry is appended to the list and credited with `amount`.
+
+See the [`Validator`](#validator) container for more on `withdrawal_credentials`.
+
+There are two protections that `DepositMessages` get at different points.
+   1. [`DepositData`](#depositdata) is included in beacon blocks as a [`Deposit`](/part3/containers/operations#deposit), which adds a Merkle proof that the data has been registered with the Eth1 deposit contract.
+   2. When the containing beacon block is processed, deposit messages are stored, pending processing at the end of the epoch, in the beacon state as [`DepositData`](#depositdata). This includes the pending validator's BLS signature so that the authenticity of the `DepositMessage` can be verified before a validator is added.
+
 #### `DepositData`
 
 ```python
@@ -1665,6 +1689,8 @@ class DepositData(Container):
     amount: Gwei
     signature: BLSSignature  # Signing over DepositMessage
 ```
+
+A signed [`DepositMessage`](#depositmessage). The comment says that the signing is done over `DepositMessage`. What actually happens is that a `DepositMessage` is constructed from the first three fields; the root of that is combined with [`DOMAIN_DEPOSIT`](/part3/config/constants#domain_deposit) in a [`SigningData`](#signingdata) object; finally the root of this is signed and included in `DepositData`.
 
 #### `BeaconBlockHeader`
 
@@ -1677,6 +1703,24 @@ class BeaconBlockHeader(Container):
     body_root: Root
 ```
 
+A standalone version of a beacon block header: [`BeaconBlock`](/part3/containers/blocks#beaconblock)s contain their own header. It is identical to [`BeaconBlock`](/part3/containers/blocks#beaconblock), except that `body` is replaced by `body_root`. It is `BeaconBlock`-lite.
+
+`BeaconBlockHeader` is stored in beacon state to record the last processed block header. This is used to ensure that we proceed along a continuous chain of blocks that always point to their predecessor (it's a blockchain, yo!). See [`process_block_header()`](/part3/transition/block#def_process_block_header).
+
+The [signed version](/part3/containers/envelopes#signedbeaconblockheader) is used in [proposer slashings](/part3/containers/operations#proposerslashing).
+
+#### `SyncCommittee`
+
+```python
+class SyncCommittee(Container):
+    pubkeys: Vector[BLSPubkey, SYNC_COMMITTEE_SIZE]
+    aggregate_pubkey: BLSPubkey
+```
+
+Sync committees were introduced in the Altair upgrade to support light clients to the beacon chain protocol. The list of committee members for each of the current and next sync committees is stored in the beacon state. Members are updated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#epochs_per_sync_committee_period) epochs by [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee).
+
+See also [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size).
+
 #### `SigningData`
 
 ```python
@@ -1685,9 +1729,23 @@ class SigningData(Container):
     domain: Domain
 ```
 
-TODO
+This is just a convenience container, used only in [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root) to calculate the hash tree root of an object along with a domain. The resulting root is the message data that gets signed with a BLS signature. The `SigningData` object itself is never stored or transmitted.
 
 ### Beacon operations <!-- /part3/containers/operations -->
+
+The following are the various protocol messages that can be transmitted in a [block`](/part3/containers/blocks#beaconblockbody) on the beacon chain. 
+
+For most of these, the proposer is rewarded either explicitly or implicitly for including the object in a block.
+
+The proposer receives explicitly rewards in-protocol for including
+  - `ProposerSlashing`s,
+  - `AttesterSlashing`s,
+  - `Attestation`s, and
+  - `SyncAggregate`s.
+
+Including `Deposit` objects is only implicitly rewarded, in that, if there are pending deposits that the block proposer does not include then the block is invalid, so the proposer receives no reward.
+
+There is no direct connection between including `VoluntaryExit` objects. However, for each validator exited, rewards for the remaining validators increase very slightly, so it's as well for proposers not to ignore `VoluntaryExit`s.
 
 #### `ProposerSlashing`
 
@@ -1697,6 +1755,10 @@ class ProposerSlashing(Container):
     signed_header_2: SignedBeaconBlockHeader
 ```
 
+`ProposerSlashing`s may be included in blocks to prove that a validator has broken the rules and ought to be slashed. Proposers receive a reward for correctly submitting these.
+
+In this case, the rule is that a validator may not propose two different blocks at the same height, and the payload is the signed headers of the two [blocks](/part3/containers/dependencies#beaconblockheader) that evidence the crime. The signatures on the [`SignedBeaconBlockHeader`](/part3/containers/envelopes#signedbeaconblockheader)s are checked to verify that they were both signed by the accused validator.
+
 #### `AttesterSlashing`
 
 ```python
@@ -1704,6 +1766,12 @@ class AttesterSlashing(Container):
     attestation_1: IndexedAttestation
     attestation_2: IndexedAttestation
 ```
+
+`AttesterSlashing`s may be included in blocks to prove that one or more validators in a committee has broken the rules and ought to be slashed. Proposers receive a reward for correctly submitting these.
+
+The contents of the [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s are checked against the attester slashing conditions in [`is_slashable_attestation_data()`](/part3/helper/predicates#def_is_slashable_attestation_data). If there is a violation, then any validator that attested to both `attestation_1` and `attestation_2` is slashed, see [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing).
+
+`AttesterSlashing`s can be very large since they could in principle list the indices of all the validators in a committee. However, in contrast to proposer slashings, many validators can be slashed as a result of a single report.
 
 #### `Attestation`
 
@@ -1714,6 +1782,10 @@ class Attestation(Container):
     signature: BLSSignature
 ```
 
+This is the form in which attestations make their way around the network. It is designed to be easily aggregatable: `Attestations` containing identical `AttestationData` can be combined into a single attestation by aggregating the signatures.
+
+`Attestation`s contain the same information as [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s, but use knowledge of the validator committees at slots to compress the list of attesting validators down to a bitlist. Thus, `Attestation`s are at least 5 times smaller than `IndexedAttestation`s, and up to 35 times smaller (with 128 or 2048 validators per committee, respectively).
+
 #### `Deposit`
 
 ```python
@@ -1721,6 +1793,12 @@ class Deposit(Container):
     proof: Vector[Bytes32, DEPOSIT_CONTRACT_TREE_DEPTH + 1]  # Merkle path to deposit root
     data: DepositData
 ```
+
+This container is used to include deposit data from prospective validators in beacon blocks so that they can be processed into beacon state.
+
+The `proof` is a Merkle proof constructed by the block proposer that the [`DepositData`](/part3/containers/dependencies#depositdata) corresponds to the previously agreed deposit root of the Eth1 contract's deposit tree. It is verified in [`process_deposit()`](/part3/transition/block#def_process_deposit) by [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch).
+
+[TODO: link to Eth1 data voting]::
 
 #### `VoluntaryExit`
 
@@ -1730,7 +1808,23 @@ class VoluntaryExit(Container):
     validator_index: ValidatorIndex
 ```
 
-TODO
+Voluntary exit messages are how a validator signals that it wants to cease being a validator. Blocks containg `VoluntaryExit` data for an epoch later than the current epoch are invalid, so nodes should buffer or ignore any future-dated exits they see.
+
+`VoluntaryExit` objects are never used naked; they are always wrapped up into a [`SignedVoluntaryExit`](/part3/containers/envelopes#signedvoluntaryexit) object.
+
+#### `SyncAggregate`
+
+```python
+class SyncAggregate(Container):
+    sync_committee_bits: Bitvector[SYNC_COMMITTEE_SIZE]
+    sync_committee_signature: BLSSignature
+```
+
+The prevailing sync committee is stored in the beacon state, so the `SyncAggregate`s included in blocks need only use a bit vector to indicate which committee members signed off on the message.
+
+The `sync_committee_signature` is the aggregate signature of all the validators referenced in the bit vector over the block root of the previous slot.
+
+`SyncAggregate`s are handled by [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
 
 ### Beacon blocks <!-- /part3/containers/blocks -->
 
@@ -1834,24 +1928,6 @@ class SignedBeaconBlockHeader(Container):
 ```
 
 TODO
-
-### Sync Committee
-
-#### `SyncAggregate`
-
-```python
-class SyncAggregate(Container):
-    sync_committee_bits: Bitvector[SYNC_COMMITTEE_SIZE]
-    sync_committee_signature: BLSSignature
-```
-
-#### `SyncCommittee`
-
-```python
-class SyncCommittee(Container):
-    pubkeys: Vector[BLSPubkey, SYNC_COMMITTEE_SIZE]
-    aggregate_pubkey: BLSPubkey
-```
 
 ## Helper Functions <!-- /part3/helper -->
 
@@ -2185,7 +2261,7 @@ Every epoch, a fresh set of committees is generated; during an epoch, the commit
 Looking at the parameters in reverse order:
  - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot).
  - `index` is the committee number within the epoch, running from `0` to `count - 1`.
- - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain-types)).
+ - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain_beacon_attester)).
  - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
 Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
@@ -3866,3 +3942,10 @@ TODO
  - Eth1
  - Eth2
  - Deposit contract
+ - Phase&nbsp;0
+ - Altair
+ - Fork
+ - Light client
+ - Sync committee
+ - Aggregate signature
+ 
