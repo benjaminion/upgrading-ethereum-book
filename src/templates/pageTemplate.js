@@ -5,6 +5,7 @@ import Layout from "../components/page"
 import Sidebar from "../components/sidebar"
 import Subsections from "../components/subsections"
 import PrevNext from "../components/prevnext"
+import Footer from "../components/footer"
 
 export default function Template({
   data,
@@ -32,6 +33,7 @@ export default function Template({
             <Subsections indexArray={index_array} />
           </div>
         </div>
+        <Footer />
         <PrevNext seq={markdownRemark.frontmatter.sequence} />
       </div>
     </Layout>
