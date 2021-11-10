@@ -38,6 +38,8 @@ TODO
 
 ### Introduction
 
+TODO
+
 ### Design Goals <!-- /part1/goals/design* -->
 
 TODO
@@ -49,6 +51,8 @@ TODO
 ## Making the Sausage <!-- /part1/making* -->
 
 ### Introduction
+
+TODO
 
 ### The Specifications <!-- /part1/making/specs* -->
 
@@ -973,6 +977,8 @@ True
 
 Another concern is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
 
+Note that, currently, a single committee being compromised by an attacker would have no impact since many committees act at each slot to progress consensus. However, these committees will at some future stage become individual shard committees, at which time protecting them from takeover is vital.
+
 ##### `MAX_VALIDATORS_PER_COMMITTEE`
 
 This is just used for sizing some data structures, and is not particularly interesting. Reaching this limit would imply over 4 million active validators, staked with a total of 128 million Ether, which exceeds the [total supply](https://etherscan.io/stat/supply) today.
@@ -1449,13 +1455,17 @@ TODO: re-do graph with better y-axis.
 
 ### Preamble
 
-The following types are [SimpleSerialize (SSZ)](../../ssz/simple-serialize.md) containers.
+We are about to see our first Python code in the executable spec. For specification purposes, these Container data structures are just Python data classes that are derived from the base SSZ `Container` class.
 
-*Note*: The definitions are ordered topologically to facilitate execution of the spec.
+[TODO: link to SSZ]::
 
-*Note*: Fields missing in container instantiations default to their zero value.
+SSZ is the serialisation and merkleisation format used everywhere in Ethereum&nbsp;2.0. It is not self-describing, so you need to know ahead of time what you are unpacking when deserialising. SSZ deals with basic types and composite types. Classes like the below are handled as SSZ containers, a composite type defined as an "ordered heterogeneous collection of values".
 
-TODO
+Client implementations in different languages will obviously use their own paradigms to represent these data structures.
+
+Two notes directly from the spec:
+ - The definitions are ordered topologically to facilitate execution of the spec.
+ - Fields missing in container instantiations default to their [zero value](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md#default-values).
 
 ### Misc dependencies <!-- /part3/containers/dependencies -->
 
@@ -1468,6 +1478,10 @@ class Fork(Container):
     epoch: Epoch  # Epoch of latest fork
 ```
 
+Fork data is stored in the [BeaconState](/part3/containers/state) to indicate the current and previous fork versions. The fork version gets incorporated into the cryptographic domain in order to invalidate messages from validators on other forks. The previous fork version and the epoch of the change are stored so that pre-fork messages can still be validated (at least until the next fork). This ensures continuity of attestations across fork boundaries.
+
+Note that this is all about planned protocol forks (upgrades), and nothing to do with the fork-choice rule, or inadvertant forks due to errors in the state transition.
+
 #### `ForkData`
 
 ```python
@@ -1476,6 +1490,10 @@ class ForkData(Container):
     genesis_validators_root: Root
 ```
 
+`ForkData` is used only in [`compute_fork_data_root()`](/part3/helper/misc#compute_fork_data_root). This is used when distinguishing between chains for the purpose of [peer-to-peer gossip](https://github.com/ethereum/eth2.0-specs/pull/1652), and for [domain separation](#domain-types). By including both the current fork version and the genesis validators root, we can cleanly distinguish between, say, mainnet and a testnet. Even if they have the same fork history, the genesis validators roots will differ.
+
+[`Version`](/part3/config/types#version) is the datatype for a fork version number.
+
 #### `Checkpoint`
 
 ```python
@@ -1483,6 +1501,16 @@ class Checkpoint(Container):
     epoch: Epoch
     root: Root
 ```
+
+`Checkpoint`s are the points of justification and finalisation used by the [Casper FFG protocol](https://arxiv.org/pdf/1710.09437.pdf). Validators use them to create [`AttestationData`](#attestationdata) votes, and the status of recent checkpoints is recorded in [`BeaconState`](/part3/containers/state).
+
+As per the Casper paper, checkpoints contain a height, and a block root. In this implementation of Casper FFG, checkpoints occur whenever the slot number is a multiple of [`SLOTS_PER_EPOCH`](#slots_per_epoch), thus they correspond to `epoch` numbers. In particular, checkpoint $N$ is the first slot of epoch $N$. The [genesis block](#genesis-block) is checkpoint 0, and starts off both justified and finalised.
+
+Thus, the `root` element here is the block root of the first block in the `epoch`. (This might be the block root of an earlier block if some slots have been skipped, that is, if there are no blocks for those slots.).
+
+It is very common to talk about justifying and finalising epochs. This is not strictly correct: checkpoints are justified and finalised.
+
+Once a checkpoint has been finalised, the slot it points to and all prior slots will never be reverted.
 
 #### `Validator`
 
@@ -1499,6 +1527,37 @@ class Validator(Container):
     withdrawable_epoch: Epoch  # When validator can withdraw funds
 ```
 
+This is the datastructure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
+
+[TODO: link to effective balance]::
+
+Validators' actual balances are stored separately in the `BeaconState` structure, and only the slowly changing "effective balance" is stored here. This is because actual balances are liable to change quite frequently (every epoch): the merkleisation process used to calculate state roots means that only the parts that change need to be recalculated; the roots of unchanged parts can be cached. Separating out the validator balances potentially means that only 1/15th (8/121) as much data needs to be rehashed every epoch compared to storing them here, which is an important optimisation.
+
+For similar reasons, validators' inactivity scores are stored outside validator records aswell, as they are also updated every epoch.
+
+A validator's record is created when its deposit is first processed. Sending multiple deposits does not create multiple validator records: deposits with the same public key are aggregated in one record. Validator records never expire; they are stored permanently, even after the validator has exited the system. Thus there is a 1:1 mapping between a validator's index in the list and the identity of the validator (validator records are only ever appended to the list).
+
+Also stored in `Validator`:
+ - `pubkey` serves as both the unique identity of the validator and the means of cryptographically verifying messages purporting to have been signed by it. The public key is stored raw, unlike in Eth1, where it is hashed to form the account address. This allows public keys to be aggregated for verifying aggregated attestations.
+ - Validators actually have two private/public key pairs, the one above used for signing protocol messages, and a separate "withdrawal key". `withdrawal_credentials` is a commitment generated from the validator's withdrawal key so that, at some time in the future, a validator can prove it owns the funds and will be able to withdraw them. There are two types of [withdrawal credential](/part3/config/constants#withdrawal-prefixes) currently defined, one corresponding to BLS keys, and one corresponding to standard Ethereum ECDSA keys.
+ - `effective_balance` is a topic of its own that we've [touched upon already](/part3/config/preset#max_effective_balance), and will discuss more fully when we look at [effective balances updates](/part3/transition/epoch#effective-balances-updates).
+ - `slashed` indicates that a validator has been slashed, that is, punished for violating the slashing conditions. A validator can be slashed only once.
+ - The remaining values are the epochs in which the validator changed, or is due to change state.
+
+[TODO: link to validator lifecycle chapter]::
+
+A detailed explanation of the stages in a validator's lifecycle is [here](https://notes.ethereum.org/@hww/lifecycle), and we'll be covering it in detail as we work through the beacon chain logic. But, in simplified form, progress is as follows:
+  1. A 32 ETH deposit has been made on the Ethereum&nbsp;1 chain. No validator record exists yet.
+  2. The deposit is processed by the beacon chain at some slot. A validator record is created with all epoch fields set to `FAR_FUTURE_EPOCH`.
+  3. At the end of the current epoch, the `activation_eligibility_epoch` is set to the next epoch.
+  4. After the epoch `activation_eligibility_epoch` has been finalised, the validator is added to the activation queue by setting its `activation_epoch` appropriately, taking into account the per-epoch [churn limit](/part3/config/configuration#min_per_epoch_churn_limit) and [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead).
+  5. On reaching `activation_epoch` the validator becomes active, and should carry out its duties.
+  6. At any time after [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs have passed, a validator may request a voluntary exit. `exit_epoch` is set according to the validator's position in the exit queue and [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead), and `withdrawable_epoch` is set [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after that.
+  7. From `exit_epoch` onwards the validator is no longer active. There is no mechanism for exited validators to rejoin: exiting is permanent.
+  8. After `withdrawable_epoch`, the validator's balance can in principle be withdrawn, although there is no mechanism for doing this for the time being.
+
+The above does not account for slashing or forced exits due to low balance.
+
 #### `AttestationData`
 
 ```python
@@ -1512,6 +1571,20 @@ class AttestationData(Container):
     target: Checkpoint
 ```
 
+The beacon chain relies on a combination of two different consensus mechanisms: LMD GHOST keeps the chain moving, and Casper FFG brings finalisation. These are documented in the [Gasper paper](https://arxiv.org/abs/2003.03052). Attestations from (committees of) validators are used to provide votes simultaneously for each of these consensus mechanisms.
+
+This container is the fundamental unit of attestation data. It provides the following elements.
+  - `slot`: each active validator should be making exactly one attestation per epoch. Validators have an assigned slot for their attestation, and it is recorded here for validation purposes.
+  - `index`: there can be several committees active in a single slot. This is the number of the committee that the validator belongs to in that slot. It can be used to reconstruct the committee to check that the attesting validator is a member. Ideally, all (or the majority at least) of the attestations in a slot from a single committee will be identical, and can therefore be aggregated into a single aggregate attestation.
+  - `beacon_block_root` is the validator's vote on the head block for that slot after locally running the LMD GHOST fork-choice rule. It may be the root of a block from a previous slot if the validator believes that the current slot is empty.
+  - `source` is the validator's opinion of the best currently justified checkpoint for the Casper FFG finalisation process.
+  - `target` is the validator's opinion of the block at the start of the current epoch, also for Casper FFG finalisation.
+
+This `AttestationData` structure gets wrapped up into several other similar but distinct structures:
+  - [`Attestation`](/part3/containers/operations#attestation) is the form in which attestations normally make their way around the network. It is signed and aggregatable, and the list of validators making this attestation is compressed into a bitlist.
+  - [`IndexedAttestation`](#indexedattestation) is used primarily for [attester slashing](#attesterslashing). It is signed and aggregated, with the list of attesting validators being an uncompressed list of indices.
+  - [`PendingAttestation`](#pendingattestation). In Phase&nbsp;0, after having their validity checked during block processing, `PendingAttestation`s were stored in the beacon state pending processing at the end of the epoch. This was reworked in the Altair upgrade and `PendingAttestation`s are no longer used.
+
 #### `IndexedAttestation`
 
 ```python
@@ -1520,6 +1593,12 @@ class IndexedAttestation(Container):
     data: AttestationData
     signature: BLSSignature
 ```
+
+This is one of the forms in which aggregated attestations&mdash;combined identical attestations from multiple validators in the same committee&mdash;are handled.
+
+[`Attestation`](/part3/containers/operations#attestation#attestation)s and `IndexedAttestation`s contain essentially the same information. The difference being that the list of attesting validators is stored uncompressed in `IndexedAttestation`s. That is, each attesting validator is referenced by its global validator index, and non-attesting validators are not included. To be [valid](/part3/helper/predicates#is_valid_indexed_attestation), the validator indices must be unique and sorted, and the signature must be an aggregate signature from exactly the listed set of validators.
+
+`IndexedAttestation`s are primarily used when reporting [attester slashing](/part3/containers/operations#attesterslashing). An `Attestation` can be converted to an `IndexedAttestation` using [`get_indexed_attestation()`](/part3/helper/accessors#get_indexed_attestation).
 
 #### `PendingAttestation`
 
@@ -1531,6 +1610,18 @@ class PendingAttestation(Container):
     proposer_index: ValidatorIndex
 ```
 
+`PendingAttestation`s were removed in the Altair upgrade and now appear only in the process for [upgrading the state](/part3/altair-fork#upgrading-the-state) during the fork. The following is provided for historical reference.
+
+Prior to Altair, `Attestation`s received in blocks were verified then temporarily stored in beacon state in the form of `PendingAttestation`s, pending further processing at the end of the epoch.
+
+A `PendingAttestation` is an [`Attestation`](#attestation) minus the signature, plus a couple of fields related to reward calculation:
+ - `inclusion_delay` is the number of slots between the attestation having been made and it being included in a beacon block by the block proposer. Validators are rewarded for getting their attestations included in blocks, but the reward used to decline in inverse proportion to the inclusion delay. This incentivised swift attesting and communicating by validators.
+ - `proposer_index` is the block proposer that included the attestation. The block proposer gets a micro reward for every validator's attestation it includes, not just for the aggregate attestation as a whole. This incentivises efficient finding and packing of aggregations, since the number of aggregate attestations per block is capped.
+
+Taken together, these rewards are designed to incentivise the whole network to collaborate to do efficient attestation aggregation (proposers want to include only well-aggregated attestations; validators want to get their attestations included, so will ensure that they get well aggregated).
+
+With Altair, this whole mechanism has been replaced by [`ParticipationFlags`](/part3/config/types#participationflags).
+
 #### `Eth1Data`
 
 ```python
@@ -1540,6 +1631,12 @@ class Eth1Data(Container):
     block_hash: Hash32
 ```
 
+Proposers include their view of the Ethereum&nbsp;1 chain in blocks, and this is how they do it. The beacon chain stores these votes up in the [beacon state](/part3/containers/state) until there is a simple majority consensus, then the winner is committed to beacon state. This is to allow the [processing](/part3/transition/block#deposits) of Eth1 deposits, and creates a simple "honest-majority" one-way bridge from Eth1 to Eth2. The 1/2 majority assumption for this (rather than 2/3 for committees) is considered safe as the number of validators voting each time is large: [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) * [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) = 64 * 32 = 2048.
+
+  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on&mdash;it's the root of the (sparse) Merkle tree of deposits.
+  - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
+  - `block_hash` is the hash of the Eth1 block being voted for. This doesn't have any current use within the Eth2 protocol, but is "too potentially useful to not throw in there", to quote Danny Ryan.
+
 #### `HistoricalBatch`
 
 ```python
@@ -1547,6 +1644,8 @@ class HistoricalBatch(Container):
     block_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
     state_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
 ```
+
+This is used to implement part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571) for the past history of the chain. Once [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) block roots and the same number of state roots have been accumulated in the beacon state, they are put in a `HistoricalBatch` object and the hash tree root of that is appended to the `historical_roots` list in beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period. See [`process_historical_roots_update()`](/part3/transition/epoch#process_historical_roots_update).
 
 #### `DepositMessage`
 
@@ -2936,6 +3035,9 @@ def process_randao_mixes_reset(state: BeaconState) -> None:
 ```
 
 #### Historical roots updates
+
+<a id="process_historical_roots_update"></a>
+
 ```python
 def process_historical_roots_update(state: BeaconState) -> None:
     # Set historical root accumulator
@@ -3568,11 +3670,23 @@ TODO
 
 TODO
 
+## Reference <!-- /appendices/reference* -->
+
+TODO
+
+### Running the spec <!-- /appendices/running* -->
+
+TODO
+
+### Sizes of containers <!-- /appendices/reference/sizes* -->
+
+TODO
+
 ## Glossary <!-- /appendices/glossary* -->
 
 TODO
 
- - Merkleise
+ - Merkleise/ize
  - beacon state
  - slashed
  - validator
