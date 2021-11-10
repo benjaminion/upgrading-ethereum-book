@@ -202,17 +202,22 @@ pre[data-language="none"] {
     background-color: inherit;
 }
 
-/*
-ul p {
-  margin-bottom: 0;
-}
-
-p.next {
-  text-align: right;
-}
-*/
-
 div.footer {
   padding-top: 6px;
   border-top: 1px solid #eaecef;
+}
+
+/* Title page format */
+
+div.title-page {
+  display: flex;
+  margin:6ex 20%;
+  height: 80vh;
+  text-align:center;
+  flex-direction: column;
+}
+
+div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
+  border: none;
+  flex: 1;
 }
