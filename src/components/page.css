@@ -215,9 +215,11 @@ div.title-page {
   height: 80vh;
   text-align:center;
   flex-direction: column;
+  justify-content: space-around;
 }
 
 div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
   border: none;
-  flex: 1;
+  padding: 0;
+  margin: 0;
 }
