@@ -137,6 +137,13 @@ div.section li {
   padding-bottom: 3px;
 }
 
+blockquote {
+  margin-left: 0;
+  padding-left: 2em;
+  border-left: solid #ccc 4px;
+  font-style: italic;
+}
+
 /*** Title page format ***/
 
 div.title-page {
@@ -156,12 +163,12 @@ div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
 
 /*** Code prettifier ***/
 
-pre.language-none {
+pre.language-text {
   background-color: inherit;
   color: inherit;
 }
 
-code.language-none {
+code.language-text {
   color: inherit;
 }
 
