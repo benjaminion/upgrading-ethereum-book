@@ -13,7 +13,7 @@ function PrevNextLink(props) {
   if (f.titles[2] !== "") title += " > " + f.titles[2]
 
   return(
-      <Link to={f.path} title={title}>{props.children}</Link>
+      <Link to={f.path} title={title} rel={props.rel}>{props.children}</Link>
   )
 }
 
@@ -46,10 +46,10 @@ const PrevNext = (props) => {
   return (
       <div className="prevnext">
         <span className="prev">
-          <PrevNextLink page={prevPage}>Back</PrevNextLink>
+          <PrevNextLink page={prevPage} rel="prev">Back</PrevNextLink>
         </span>
         <span className="next">
-          <PrevNextLink page={nextPage}>Next</PrevNextLink>
+          <PrevNextLink page={nextPage} rel="next">Next</PrevNextLink>
         </span>
       </div>
   )

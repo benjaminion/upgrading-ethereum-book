@@ -1,12 +1,11 @@
 import React from "react"
-import { Link } from "gatsby"
 
 import "./footer.css"
 
 const Footer = () => {
   return (
     <footer>
-      <p>Created by Ben Edgington. © Copyright 2021 ConsenSys. Licensed under <Link to="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</Link>.</p>
+      <p>Created by Ben Edgington. © Copyright 2021 ConsenSys. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noreferrer" target="_blank">CC BY-SA 4.0</a>.</p>
     </footer>
   )
 }
