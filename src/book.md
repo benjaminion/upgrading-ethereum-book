@@ -1128,7 +1128,8 @@ The idea of this is to disproportionately punish coordinated attacks, in which m
 
 ##### `HISTORICAL_ROOTS_LIMIT`
 
-Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. This is sized so that it is possible to store these roots for the entire past history of the chain. Although this list is effectively unbounded, it grows at less than 10 KB per year.
+Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size
+`HISTORICAL_ROOTS_LIMIT` will be fine for the next few millennia, after which it will be somebody else's problem. The list grows at less than 10 KB per year.
 
 Storing past roots like this allows Merkle proofs to be constructed about anything in the beacon chain's history if required.
 
@@ -1961,30 +1962,30 @@ The `fork` object is manually updated as part of beacon chain upgrades, also cal
 
 `latest_block_header` is only used to make sure that the next block we process is a direct descendent of the previous block. It's a blockchain thing.
 
-Past `block_roots` and `state_roots` are stored in lists here until the lists are full. Once they are full, the Merkle root is taken of both the lists together and [appended](#final-updates) to `historical_roots`. `historical_roots` effectively grows without bound ([`HISTORICAL_ROOTS_LIMIT`](#historical_roots_limit) is _large_), but only at a rate of 10KB per year. Keeping this data is useful for light clients, and also allows Merkle proofs to be created against past states, for example [historical deposit data](https://github.com/ethereum/eth2.0-specs/issues/1343#issuecomment-521453223).
+Past `block_roots` and `state_roots` are stored in lists here until the lists are full. Once they are full, the Merkle root is taken of both the lists together and [appended](/part3/transition/epoch#def_process_historical_roots_update) to `historical_roots`. `historical_roots` effectively grows without bound ([`HISTORICAL_ROOTS_LIMIT`](/part3/config/preset#historical_roots_limit) is _large_), but at a rate of only 10KB per year. Keeping this data is useful for light clients, and also allows Merkle proofs to be created against past states, for example [historical deposit data](https://github.com/ethereum/eth2.0-specs/issues/1343#issuecomment-521453223).
 
     # Eth1
     eth1_data: Eth1Data
     eth1_data_votes: List[Eth1Data, EPOCHS_PER_ETH1_VOTING_PERIOD * SLOTS_PER_EPOCH]
     eth1_deposit_index: uint64
 
-`eth1_data` is the latest agreed upon state of the Eth1 chain and deposit contract. `eth1_data_votes` accumulates [`Eth1Data`](#eth1data) from blocks until there is an overall majority in favour of one Eth1 state. If a majority is not achieved by the time the list is full then it is cleared down and starts again. `eth1_deposit_index` is the total number of deposits that have been processed by the beacon chain (which is greater than or equal to the number of validators, as a deposit can top-up the balance of an existing validator).
+`eth1_data` is the latest agreed upon state of the Eth1 chain and deposit contract. `eth1_data_votes` accumulates [`Eth1Data`](/part3/containers/dependencies#eth1data) from blocks until there is an overall majority in favour of one Eth1 state. If a majority is not achieved by the time the list is full then it is cleared down and starts again. `eth1_deposit_index` is the total number of deposits that have been processed by the beacon chain (which is greater than or equal to the number of validators, as a deposit can top-up the balance of an existing validator).
 
     # Registry
     validators: List[Validator, VALIDATOR_REGISTRY_LIMIT]
     balances: List[Gwei, VALIDATOR_REGISTRY_LIMIT]
 
-The registry of [`Validator`](#validator)s and their balances. The `balances` list is separated out as it changes relatively more broadly more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with SSZ tree hashing, this results in a big saving in the amount of data to be rehashed on registry updates.
+The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes relatively more broadly more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with SSZ tree hashing, this results in a big saving in the amount of data to be rehashed on registry updates.
 
     # Randomness
     randao_mixes: Vector[Bytes32, EPOCHS_PER_HISTORICAL_VECTOR]
 
-Past randao mixes are stored in a fixed-size circular list for [`EPOCHS_PER_HISTORICAL_VECTOR`](#epochs_per_historical_vector) epochs (~290 days). These can be used to recalculate past committees, which allows slashing of historical attestations. See [`EPOCHS_PER_HISTORICAL_VECTOR`](#epochs_per_historical_vector) for more information.
+Past randao mixes are stored in a fixed-size circular list for [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) epochs (~290 days). These can be used to recalculate past committees, which allows slashing of historical attestations. See [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) for more information.
 
     # Slashings
     slashings: Vector[Gwei, EPOCHS_PER_SLASHINGS_VECTOR]
 
-A fixed-size circular list of past slashed amounts. Each epoch, the total effective balance of all validators slashed in that epoch is stored as an entry in this list. When the final slashing penalty for a slashed validator is calculated, it is [weighted](#slashings) with the sum of this list. This is intended to more heavily penalise mass slashings during a window of time, which is more likely to be a coordinated attack.
+A fixed-size circular list of past slashed amounts. Each epoch, the total effective balance of all validators slashed in that epoch is stored as an entry in this list. When the final slashing penalty for a slashed validator is calculated, it is [weighted](/part3/transition/epoch#slashings) with the sum of this list. This is intended to more heavily penalise mass slashings during a window of time, which is more likely to be a coordinated attack.
 
     # Participation
     previous_epoch_participation: List[ParticipationFlags, VALIDATOR_REGISTRY_LIMIT]  # [Modified in Altair]
@@ -1992,7 +1993,7 @@ A fixed-size circular list of past slashed amounts. Each epoch, the total effect
 
 TODO revise this for Altair:
 
-These are pending attestations accumulated from blocks, but not yet processed by the beacon chain at the end of an epoch. `current_epoch_attestations` have a target that is the epoch we are currently in. These are just stored. All [rewards](#rewards-and-penalties) and [finality](#justification-and-finalization) calculations are based on `previous_epoch_attestations`, which are last epoch's `current_epoch_attestations` plus any new ones received that target the previous epoch.
+These are pending attestations accumulated from blocks, but not yet processed by the beacon chain at the end of an epoch. `current_epoch_attestations` have a target that is the epoch we are currently in. These are just stored. All [rewards](/part3/transition/epoch#rewards-and-penalties) and [finality](/part3/transition/epoch#justification-and-finalization) calculations are based on `previous_epoch_attestations`, which are last epoch's `current_epoch_attestations` plus any new ones received that target the previous epoch.
 
     # Finality
     justification_bits: Bitvector[JUSTIFICATION_BITS_LENGTH]
@@ -2002,7 +2003,7 @@ These are pending attestations accumulated from blocks, but not yet processed by
 
 Eth2 uses the [Casper FFG](https://arxiv.org/pdf/1710.09437.pdf) finality mechanism, with a [k-finality](https://docs.google.com/presentation/d/1MZ-E6TVwomt4rqz-P2Bd_X3DFUW9fWDQkxUP_QJhkyw/edit#slide=id.g621d74a5e7_0_159) optimisation, where k&nbsp;=&nbsp;2. These are the data that need to be tracked in order to apply the finality rules.
 
- - `justification_bits` is only four bits long. It tracks the justification status of the last four epochs: 1 if justified, 0 if not. This is used when [calculating](#justification-and-finalization) whether we can finalise an epoch.
+ - `justification_bits` is only four bits long. It tracks the justification status of the last four epochs: 1 if justified, 0 if not. This is used when [calculating](/part3/transition/epoch#justification-and-finalization) whether we can finalise an epoch.
  - Outside of the finality calculations, `previous_justified_checkpoint` and `current_justified_checkpoint` are only used to filter attestations being added into attestations lists discussed above: attestations need to have the matching source parameter.
  - `finalized_checkpoint`: the network has agreed that the beacon chain state at or before that epoch will never be reverted. So, for one thing, the fork choice rule doesn't need to go back any further than this. The Casper FFG mechanism is specifically constructed so that two conflicting finalized checkpoints cannot be created without at least one third of validators being slashed.
 
