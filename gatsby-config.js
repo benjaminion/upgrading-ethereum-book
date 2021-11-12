@@ -19,6 +19,7 @@ module.exports = {
         gfm: true,
         plugins: [
           `gatsby-remark-autolink-headers`,
+          'gatsby-remark-numbered-footnotes',
           `gatsby-remark-mathjax3`,
           {
             resolve: "gatsby-remark-external-links",

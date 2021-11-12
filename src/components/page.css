@@ -191,3 +191,15 @@ pre[class^="language-"] code {
 div.math-display {
   font-size: 1.3em;
 }
+
+/*** Footnotes ***/
+
+div.footnotes hr {
+  margin-top: 6ex;
+  border: 0;
+  border-top: solid 1px #ccc;
+}
+
+div.footnotes {
+  font-size: 85%;
+}
