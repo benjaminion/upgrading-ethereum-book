@@ -20,6 +20,11 @@
 #   ../bin/links.awk book.md book.md
 #
 
+BEGIN {
+    # /contents is OK as a page, but will not be picked up automatically
+    anchors["/contents"] = 1
+}
+
 # Path needs to be set on both passes
 /(^# |^## |^### ).* <!-- .* -->$/ {
     path = gensub(/^#+ .* <!-- ([^*]+).? -->$/, "\\1", "1")
