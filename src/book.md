@@ -2,7 +2,7 @@
 
 ## Work in progress!
 
-This is a teaser, a placeholder. Only one part is reasonably complete, the [Annotated Specification](/part3), but the rest is on its way.
+This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3), but the rest is on its way.
 
 When building a house, it's good to start from the ground up. Similarly, the Annotated Spec is the foundation for everything else. All the wiring and the plumbing of the beacon chain's innards are on display. It may not be easily accessible to the general reader, but with the foundation is in place the rest of the book can build on it.
 
@@ -35,6 +35,8 @@ The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 pro
 I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except where it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
 It's a chunky list of exclusions, but that still leaves [plenty to talk about](/contents).
+
+Please note that I am British. I unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
 
 ## Altair
 
@@ -2136,6 +2138,12 @@ def integer_squareroot(n: uint64) -> uint64:
     return x
 ```
 
+Validator rewards scale with the reciprocal of the square root of the total active balance of all validators. This is calculated in [`get_base_reward_per_increment()`](/part3/transition/epoch#def_get_base_reward_per_increment).
+
+In principle `integer_squareroot` is also used in [`get_attestation_participation_flag_indices`](/part3/helper/accessors#def_get_attestation_participation_flag_indices), to specify the maximum delay for source votes to receive a reward. But this is just the constant, `integer_squareroot(SLOTS_PER_EPOCH)`, which is `5`.
+
+[Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) is used which has pretty good convergence properties, but implementations may use any method that gives identical results.
+
 #### `xor`
 
 <a id="def_xor"></a>
@@ -2148,9 +2156,28 @@ def xor(bytes_1: Bytes32, bytes_2: Bytes32) -> Bytes32:
     return Bytes32(a ^ b for a, b in zip(bytes_1, bytes_2))
 ```
 
+The bitwise `xor` of two 32-byte quantities is defined here in Python terms.
+
+This is used only in [`process_randao`](/part3/transition/block#def_process_randao) when mixing in the new randao reveal.
+
+Fun fact: if you `xor` two `byte` types in Java, the result is a 32 bit (signed) integer. This is one reason  we need to define the "obvious" here. But mainly, because the spec is executable, we need to tell Python what it doesn't already know.
+
 #### `uint_to_bytes`
 
-`def uint_to_bytes(n: uint) -> bytes` is a function for serializing the `uint` type object to bytes in ``ENDIANNESS``-endian. The expected length of the output is the byte-length of the `uint` type.
+> `def uint_to_bytes(n: uint) -> bytes` is a function for serializing the `uint` type object to bytes in ``ENDIANNESS``-endian. The expected length of the output is the byte-length of the `uint` type.
+
+For the most part, integers are integers and bytes are bytes, and they don't mix much. But there are a few places where we need to convert from integers to bytes:
+ - several times in the [`compute_shuffled_index()`](/part3/helper/misc#def_compute_shuffled_index) algorithm;
+ - in [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) for selecting a proposer weighted by stake;
+ - in [`get_seed()`](/part3/helper/accessors#def_get_seed) to mix the epoch number into the randao mix;
+ - in [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index) to mix the slot number into the per-epoch randao seed; and
+ - in [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices).
+ 
+You'll note that in every case, the purpose of the conversion is for the integer to form part of a byte string that is hashed to create (pseudo-) randomness.
+
+The result of this conversion is dependent on our arbitrary choice of endianness, that is, how we choose to represent integers as strings of bytes. For Eth2, we have chosen little-endian: see the discussion of [`ENDIANNESS`](/part3/config/constants#endianness) for more background.
+
+The `uint_to_bytes()` function is not given an explicit implementation in the specification, which is unusual. This [to avoid](https://github.com/ethereum/consensus-specs/pull/1935) exposing the innards of the Python SSZ implementation (of `uint`) to the rest of the spec. When running the spec as an executable, it uses the definition in the [SSZ utilities](https://github.com/ethereum/consensus-specs/blob/fb34e162ef3476f2dd5d7dc6ebfc51c626608ffa/tests/core/pyspec/eth2spec/utils/ssz/ssz_impl.py#L16).
 
 #### `bytes_to_uint64`
 
@@ -2164,17 +2191,33 @@ def bytes_to_uint64(data: bytes) -> uint64:
     return uint64(int.from_bytes(data, ENDIANNESS))
 ```
 
-TODO
+`bytes_to_uint64()` is the inverse of [`uint_to_bytes()`](#uint_to_bytes), and is used by the [shuffling algorithm](/part3/helper/misc#compute_shuffled_index) to create a random index from the output of a hash.
+
+It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/validator.md#aggregation-selection).
 
 ### Crypto <!-- /part3/helper/crypto -->
 
 #### `hash`
 
-`def hash(data: bytes) -> Bytes32` is SHA256.
+> `def hash(data: bytes) -> Bytes32` is SHA256.
+
+SHA256 was [chosen](https://github.com/ethereum/eth2.0-specs/pull/779) as the protocol's base hash algorithm for easier cross-chain interoperability: many other chains use SHA256, and Eth1 has a SHA256 precompile.
+
+There was a lot of [discussion](https://github.com/ethereum/eth2.0-specs/issues/612) about this choice early in the design process. The [original plan](https://github.com/ethereum/eth2.0-specs/pull/11) had been to use the BLAKE2b-512 hash function &ndash; that being a modern hash function that's faster than SHA3 &ndash; and to move to a STARK/SNARK friendly hash function at some point (such as [MiMC](https://ethresear.ch/t/hash-based-vdfs-mimc-and-starks/2337)). However, to keep interoperability with Eth1, in particular for the implementation of the deposit contract, the hash function was [changed to Keccak256](https://github.com/ethereum/eth2.0-specs/issues/151). Finally, we [settled on SHA256](https://github.com/ethereum/eth2.0-specs/pull/779) as having even broader compatibility.
 
 #### `hash_tree_root`
 
-`def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](../../ssz/simple-serialize.md#merkleization).
+> `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](../../ssz/simple-serialize.md#merkleization).
+
+The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
+
+The naive way to create a digest of a datastructure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
+
+At first sight, this all looks quite inefficient. Twice as much data needs to be hashed when tree hashing, and actual speeds are [4-6 times slower](https://github.com/ethereum/eth2.0-specs/pull/120) compared with the linear hash. However, it is good for [supporting light clients](https://github.com/ethereum/eth2.0-specs/issues/54), because it allows Merkle proofs to be constructed easily for subsets of the full state.
+
+The breakthrough insight was realising that much of the re-hashing work can be cached: if part of the state data structure has not changed, that part does not need to be re-hashed: the whole subtree can be replaced with its cached hash. This turns out to be a huge efficiency boost, allowing the previous design, with cumbersome separate crystallised and active state, to be [simplified](https://github.com/ethereum/eth2.0-specs/pull/122) into a single state object.
+
+Merkleization, the process of calculating the `hash_tree_root()` of an object, is defined in the [SSZ specification](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md), and explained further in the [section on SSZ](/part2/building_blocks/ssz).
 
 #### BLS signatures
 
