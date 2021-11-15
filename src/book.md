@@ -1,18 +1,54 @@
 # Preface <!-- /preface -->
 
+## Work in progress!
+
+This is a teaser, a placeholder. Only one part is reasonably complete, the [Annotated Specification](/part3), but the rest is on its way.
+
+When building a house, it's good to start from the ground up. Similarly, the Annotated Spec is the foundation for everything else. All the wiring and the plumbing of the beacon chain's innards are on display. It may not be easily accessible to the general reader, but with the foundation is in place the rest of the book can build on it.
+
+My rough plan is as follows:
+
+  - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I aim to have done the following:
+    - Completed [Part 1: Building](/part1)
+    - Completed [Part 2: Technical Overview](/part2)
+    - Made a start on [Part 4: Future](/part4)
+  - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_ with all sections complete.
+  - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing will keep me busy for a while.
+
+Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search capability, providing downloadable PDFs, maybe even making a dead tree version, perhaps NFTs... who knows?
+
+**Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
+
 ## What to expect
 
-This is a book for those who want to understand Ethereum&nbsp;2.0 at a technical level. My main goals are to be interesting, informative, and accurate. I am aiming for a degree of completeness, at least touching on all the main areas. But this is Ethereum 2.0 Explained, not the Eth2 Encyclopedia, which would be a much longer book.
+This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on prooof of stake &ndash; at a technical level. I hope to be interesting, informative, and accurate. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
 
-Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know why things are the way they are.
+Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
-Although I am an Eth2 staker, and an Ethereum user, I am not writing for stakers or users here. Some of the [FAQ](TODO) may be relevant, but for practical purposes you will find better help in places like the excellent [Ethstaker](TODO) community.
+Although I am an Eth2 staker, and an Ethereum user, I am not writing for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but for practical purposes you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
 
-This book is a non-commercial personal project. I offer it to the community in gratitude for the wonderful journey we have been on together, and in the hope it might inspire a few more budding protocol engineers.
+The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
+  - all things proof of stake and the beacon chain,
+  - The Merge: moving Ethereum&nbsp;1.0 to proof of stake, and
+  - in-protocol data sharding.
+
+I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except where it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
+
+It's a chunky list of exclusions, but that still leaves [plenty to talk about](/contents).
+
+## Altair
+
+This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021.
 
 ## Acknowledgements
 
-TODO
+First and foremost, my gratitude to my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
+
+[TODO: link to jobs board]::
+
+So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics.
+
+
 
 # Part 1: Building <!-- /part1 -->
 
@@ -478,6 +514,12 @@ TODO
 ## Upgrades <!-- /part2/upgrades* -->
 
 ### Introduction
+
+TODO
+
+### History of upgrades <!-- /part2/upgrades/history* -->
+
+## Altair
 
 TODO
 
@@ -1126,6 +1168,8 @@ At a time `EPOCHS_PER_SLASHINGS_VECTOR // 2` after being slashed, a further pena
 
 The idea of this is to disproportionately punish coordinated attacks, in which many validators break the slashing conditions around the same time, while only lightly penalising validators that get slashed by making a mistake. Early designs for Eth2 would always slash a validator's entire deposit.
 
+See also [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](#proportional_slashing_multiplier_altair).
+
 ##### `HISTORICAL_ROOTS_LIMIT`
 
 Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size
@@ -1731,15 +1775,15 @@ The following are the various protocol messages that can be transmitted in a [bl
 
 For most of these, the proposer is rewarded either explicitly or implicitly for including the object in a block.
 
-The proposer receives explicitly rewards in-protocol for including
+The proposer receives explicit in-protocol rewards for including the following in blocks:
   - `ProposerSlashing`s,
   - `AttesterSlashing`s,
   - `Attestation`s, and
   - `SyncAggregate`s.
 
-Including `Deposit` objects is only implicitly rewarded, in that, if there are pending deposits that the block proposer does not include then the block is invalid, so the proposer receives no reward.
+Including `Deposit` objects in blocks is only implicitly rewarded, in that, if there are pending deposits that the block proposer does not include then the block is invalid, so the proposer receives no reward.
 
-There is no direct connection between including `VoluntaryExit` objects. However, for each validator exited, rewards for the remaining validators increase very slightly, so it's as well for proposers not to ignore `VoluntaryExit`s.
+There is no direct reward for including `VoluntaryExit` objects. However, for each validator exited, rewards for the remaining validators increase very slightly, so it's as well for proposers not to ignore `VoluntaryExit`s.
 
 #### `ProposerSlashing`
 
@@ -1926,8 +1970,6 @@ class BeaconState(Container):
     next_sync_committee: SyncCommittee  # [New in Altair]
 ```
 
-[HERE]::
-
 All roads lead to the `BeaconState`. Maintaining this data structure is the sole purpose of all the apparatus in all of the spec documents. This state is the focus of consensus among the beacon nodes; it is what everybody, eventually, must agree on.
 
 The beacon chain's state is monolithic: everything is bundled into a single state object (sometimes referred to as the "[God object](https://github.com/ethereum/eth2.0-specs/issues/582#issuecomment-461591281)"). Some [have argued](https://github.com/ethereum/eth2.0-specs/issues/582) for more granular approaches that might be more efficient, but at least the current approach is simple.
@@ -1969,13 +2011,15 @@ Past `block_roots` and `state_roots` are stored in lists here until the lists ar
     eth1_data_votes: List[Eth1Data, EPOCHS_PER_ETH1_VOTING_PERIOD * SLOTS_PER_EPOCH]
     eth1_deposit_index: uint64
 
-`eth1_data` is the latest agreed upon state of the Eth1 chain and deposit contract. `eth1_data_votes` accumulates [`Eth1Data`](/part3/containers/dependencies#eth1data) from blocks until there is an overall majority in favour of one Eth1 state. If a majority is not achieved by the time the list is full then it is cleared down and starts again. `eth1_deposit_index` is the total number of deposits that have been processed by the beacon chain (which is greater than or equal to the number of validators, as a deposit can top-up the balance of an existing validator).
+`eth1_data` is the latest agreed upon state of the Eth1 chain and deposit contract. `eth1_data_votes` accumulates [`Eth1Data`](/part3/containers/dependencies#eth1data) from blocks until there is an overall majority in favour of one Eth1 state. If a majority is not achieved by the time the list is full then it is cleared down and voting starts again from scratch. `eth1_deposit_index` is the total number of deposits that have been processed by the beacon chain (which is greater than or equal to the number of validators, as a deposit can top-up the balance of an existing validator).
+
+<a id="registry"></a>
 
     # Registry
     validators: List[Validator, VALIDATOR_REGISTRY_LIMIT]
     balances: List[Gwei, VALIDATOR_REGISTRY_LIMIT]
 
-The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes relatively more broadly more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with SSZ tree hashing, this results in a big saving in the amount of data to be rehashed on registry updates.
+The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes much more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with SSZ tree hashing, this results in a big saving in the amount of data to be rehashed on registry updates. See also validator inactivity scores under [Inactivity](#inactivity) which we treat similarly.
 
     # Randomness
     randao_mixes: Vector[Bytes32, EPOCHS_PER_HISTORICAL_VECTOR]
@@ -1985,15 +2029,15 @@ Past randao mixes are stored in a fixed-size circular list for [`EPOCHS_PER_HIST
     # Slashings
     slashings: Vector[Gwei, EPOCHS_PER_SLASHINGS_VECTOR]
 
-A fixed-size circular list of past slashed amounts. Each epoch, the total effective balance of all validators slashed in that epoch is stored as an entry in this list. When the final slashing penalty for a slashed validator is calculated, it is [weighted](/part3/transition/epoch#slashings) with the sum of this list. This is intended to more heavily penalise mass slashings during a window of time, which is more likely to be a coordinated attack.
+A fixed-size circular list of past slashed amounts. Each epoch, the total effective balance of all validators slashed in that epoch is stored as an entry in this list. When the final slashing penalty for a slashed validator is calculated, it is [weighted](/part3/transition/epoch#slashings) with the sum of this list. This mechanism is designed to less heavily penalise one-off sliashings that are most likely accidental, and more heavily penalise mass slashings during a window of time, which are more likely to be a coordinated attack.
 
     # Participation
     previous_epoch_participation: List[ParticipationFlags, VALIDATOR_REGISTRY_LIMIT]  # [Modified in Altair]
     current_epoch_participation: List[ParticipationFlags, VALIDATOR_REGISTRY_LIMIT]  # [Modified in Altair]
 
-TODO revise this for Altair:
+These lists record which validators participated in attesting during the current and previous epochs by recording [flags](/part3/config/constants#participation-flag-indices) for timely votes for the correct source, the correct target and the correct head. We store two epochs' worth since Validators have up to 32 slots to include a correct target vote. The flags are used to calculate finality and to assign rewards at the end of epochs.
 
-These are pending attestations accumulated from blocks, but not yet processed by the beacon chain at the end of an epoch. `current_epoch_attestations` have a target that is the epoch we are currently in. These are just stored. All [rewards](/part3/transition/epoch#rewards-and-penalties) and [finality](/part3/transition/epoch#justification-and-finalization) calculations are based on `previous_epoch_attestations`, which are last epoch's `current_epoch_attestations` plus any new ones received that target the previous epoch.
+Previously, during Phase&nbsp;0, we stored two epochs' worth of actual attestations in the state and processed them en masse at the end of epochs. This was slow, and was thought to be contributing to observed late block production in the first slots of epochs. The change to the new scheme was implemented in the Altair upgrade under the title of [Accounting Reforms](https://github.com/ethereum/consensus-specs/pull/2176).
 
     # Finality
     justification_bits: Bitvector[JUSTIFICATION_BITS_LENGTH]
@@ -2001,26 +2045,33 @@ These are pending attestations accumulated from blocks, but not yet processed by
     current_justified_checkpoint: Checkpoint
     finalized_checkpoint: Checkpoint
 
-Eth2 uses the [Casper FFG](https://arxiv.org/pdf/1710.09437.pdf) finality mechanism, with a [k-finality](https://docs.google.com/presentation/d/1MZ-E6TVwomt4rqz-P2Bd_X3DFUW9fWDQkxUP_QJhkyw/edit#slide=id.g621d74a5e7_0_159) optimisation, where k&nbsp;=&nbsp;2. These are the data that need to be tracked in order to apply the finality rules.
+Ethereum&nbsp;2.0 uses the [Casper FFG](https://arxiv.org/pdf/1710.09437.pdf) finality mechanism, with a [k-finality](https://docs.google.com/presentation/d/1MZ-E6TVwomt4rqz-P2Bd_X3DFUW9fWDQkxUP_QJhkyw/edit#slide=id.g621d74a5e7_0_159) optimisation, where k&nbsp;=&nbsp;2. The above objects in the state are the data that need to be tracked in order to apply the finality rules.
 
  - `justification_bits` is only four bits long. It tracks the justification status of the last four epochs: 1 if justified, 0 if not. This is used when [calculating](/part3/transition/epoch#justification-and-finalization) whether we can finalise an epoch.
- - Outside of the finality calculations, `previous_justified_checkpoint` and `current_justified_checkpoint` are only used to filter attestations being added into attestations lists discussed above: attestations need to have the matching source parameter.
+ - Outside of the finality calculations, `previous_justified_checkpoint` and `current_justified_checkpoint` are used to [filter](/part3/helper/accessors#get_attestation_participation_flag_indices) attestations: valid blocks include only attestations with a source checkpoint that matches the justified checkpoint in the state for the attestation's epoch.
  - `finalized_checkpoint`: the network has agreed that the beacon chain state at or before that epoch will never be reverted. So, for one thing, the fork choice rule doesn't need to go back any further than this. The Casper FFG mechanism is specifically constructed so that two conflicting finalized checkpoints cannot be created without at least one third of validators being slashed.
+
+<a id="inactivity"></a>
 
     # Inactivity
     inactivity_scores: List[uint64, VALIDATOR_REGISTRY_LIMIT]  # [New in Altair]
 
-TODO - this should probably be under Registry.
+This is logically part of "Registry", above, and would be better placed there. It is a per-validator record of [inactivity scores](/part3/config/configuration#inactivity-penalties) that is updated every epoch. This list is stored outside the main list of Validator objects since it is updated very frequently. See the [Registry](#registry) for more explanation.
 
     # Sync
     current_sync_committee: SyncCommittee  # [New in Altair]
     next_sync_committee: SyncCommittee  # [New in Altair]
 
-TODO
+Sync committees were introduced in the Altair upgrade. The next sync committee is calculated and stored so that participating validators can prepare in advance by subscribing to the required p2p subnets.
 
-Fun fact: there was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of SSZ tree hashing, this was [no longer necessary](https://github.com/ethereum/eth2.0-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances into a different structure.
+#### Historical Note
+
+There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of SSZ tree hashing, this was [no longer necessary](https://github.com/ethereum/eth2.0-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
 
 ### Signed envelopes <!-- /part3/containers/envelopes -->
+
+The following are just wrappers for more basic types, with an added signature.
+
 
 #### `SignedVoluntaryExit`
 
@@ -2030,6 +2081,10 @@ class SignedVoluntaryExit(Container):
     signature: BLSSignature
 ```
 
+A voluntary exit is currently signed with the validator's online signing key.
+
+There has been some discussion about [changing this](https://github.com/ethereum/eth2.0-specs/issues/1578) to also allow signing of a voluntary exit with the validator's offline withdrawal key. The introduction of multiple types of [withdrawal credential](/part3/config/constants#withdrawal-prefixes) makes this more complex, however, and it is no longer likely to be practical.
+
 #### `SignedBeaconBlock`
 
 ```python
@@ -2037,6 +2092,10 @@ class SignedBeaconBlock(Container):
     message: BeaconBlock
     signature: BLSSignature
 ```
+
+`BeaconBlock`s are signed by the block proposer and unwrapped for block processing.
+
+This signature is what makes proposing a block "accountable". If two correctly signed conflicting blocks turn up, the signatures guarantee that the same proposer produced them both, and is thus subject to being slashed. This is also why stakers need to closely guard their signing keys.
 
 #### `SignedBeaconBlockHeader`
 
@@ -2046,7 +2105,9 @@ class SignedBeaconBlockHeader(Container):
     signature: BLSSignature
 ```
 
-TODO
+This is used only when reporting proposer slashing, within a [`ProposerSlashing`](/part3/containers/operations#proposerslashing) object.
+
+Through the magic of SSZ hash tree roots, a valid signature for a `SignedBeaconBlock` is also a valid signature for a `SignedBeaconBlockHeader`. Proposer slashing makes use of this to save space in slashing reports.
 
 ## Helper Functions <!-- /part3/helper -->
 
