@@ -15,7 +15,7 @@ My rough plan is as follows:
   - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_ with all sections complete.
   - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing will keep me busy for a while.
 
-Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search capability, providing downloadable PDFs, maybe even making a dead tree version, perhaps NFTs... who knows?
+Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search and rich information, providing downloadable PDFs, maybe even making a dead tree version, perhaps NFTs... who knows?
 
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
 
@@ -44,7 +44,7 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 The "Ethereum 2.0" terminology is out of favour in some circles, but I've never been one for following fashions. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
-Also, please note that I am British. I unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
+Also, please note that I will be unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
 
 ## Acknowledgements
 
