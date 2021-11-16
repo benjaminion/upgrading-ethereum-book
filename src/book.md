@@ -36,21 +36,23 @@ I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except wh
 
 It's a chunky list of exclusions, but that still leaves [plenty to talk about](/contents).
 
-Please note that I am British. I unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
-
 ## Altair
 
 This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021.
 
+## A note on Terminology
+
+The "Ethereum 2.0" terminology is out of favour in some circles, but I've never been one for following fashions. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
+
+Also, please note that I am British. I unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
+
 ## Acknowledgements
 
-First and foremost, my gratitude to my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, my gratitude to my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 [TODO: link to jobs board]::
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics.
-
-
 
 # Part 1: Building <!-- /part1 -->
 
@@ -65,6 +67,10 @@ TODO
 TODO
 
 ### A Brief History of Ethereum's Future <!-- /part1/introduction/history* -->
+
+TODO
+
+### Who's who <!-- /part1/introduction/who* -->
 
 TODO
 
@@ -948,6 +954,8 @@ These four are not part of the consensus-critical state-transition, but are none
 
 #### Crypto
 
+<a id="g2_point_at_infinity"></a>
+
 | Name | Value |
 | - | - |
 | `G2_POINT_AT_INFINITY` | `BLSSignature(b'\xc0' + b'\x00' * 95)` |
@@ -956,12 +964,9 @@ These four are not part of the consensus-critical state-transition, but are none
 
 This is the compressed [serialisation](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization) of the "point at infinity", the identity point, of the G2 group of the BLS12-381 curve that we are using for signatures. Note that it is in big-endian format (unlike all other constants in the spec).
 
-It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS standard would reject these. There was a time when valid sync committee signatures could contain no public keys, but that is [no longer the case](https://github.com/ethereum/consensus-specs/pull/2528), so this constant is probably redundant now.
+It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS standard would reject these.
 
 ### Preset <!-- /part3/config/preset -->
-
-[TODO: Update for Altair]::
-[TODO: Insert headings]::
 
 The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/dev/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
 
@@ -1759,6 +1764,8 @@ class SyncCommittee(Container):
 
 Sync committees were introduced in the Altair upgrade to support light clients to the beacon chain protocol. The list of committee members for each of the current and next sync committees is stored in the beacon state. Members are updated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#epochs_per_sync_committee_period) epochs by [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee).
 
+The `aggregate_pubkey` of the sync committee is an [optimisation](https://github.com/ethereum/consensus-specs/commit/9c3d5982cfbe9a52b02e2bd028a873c9226a34c9) intended to save light clients some work when verifying the sync committee's signature. All the public keys of the committee members (including any duplicates) are aggregated into this single public key. If any signatures are missing from the [`SyncAggregate`](/part3/containers/operations#syncaggregate), the light client can "de-aggregate" them by performing elliptic curve subtraction. As long as more than half of the committee contributed to the signature, then this will be faster than constructing the aggregate of participating members from scratch.
+
 See also [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size).
 
 #### `SigningData`
@@ -1986,7 +1993,7 @@ Let's break this thing down.
     slot: Slot
     fork: Fork
 
-How do we know which chain we're on, and where we are on it? The information here ought to be sufficient. A continuous path back to the [genesis block]() would also suffice.
+How do we know which chain we're on, and where we are on it? The information here ought to be sufficient. A continuous path back to the genesis block would also suffice.
 
 `genesis_validators_root` is calculated at [Genesis time](/part3/initialise#initialisation) (when the chain starts) and is fixed for the life of the chain. This, combined with the `fork` identifier, should serve to uniquely identify the chain that we are on.
 
@@ -2115,9 +2122,9 @@ Through the magic of SSZ hash tree roots, a valid signature for a `SignedBeaconB
 
 ### Preamble
 
-*Note*: The definitions below are for specification purposes and are not necessarily optimal implementations.
+> *Note*: The definitions below are for specification purposes and are not necessarily optimal implementations.
 
-TODO
+This note in the spec is super important for implementers! There are many, many optimisations of the below routines that are being used in practice; a naive implementation would be impractically slow for mainnet configurations. As long as the optimised code produces identical results to the code here, then all is fine.
 
 ### Math <!-- /part3/helper/math -->
 
@@ -2221,16 +2228,20 @@ Merkleization, the process of calculating the `hash_tree_root()` of an object, i
 
 #### BLS signatures
 
-The [IETF BLS signature draft standard v4](https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-04) with ciphersuite `BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_` defines the following functions:
+> The [IETF BLS signature draft standard v4](https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-04) with ciphersuite `BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_` defines the following functions:
+>
+> - `def Sign(privkey: int, message: Bytes) -> BLSSignature`
+> - `def Verify(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
+> - `def Aggregate(signatures: Sequence[BLSSignature]) -> BLSSignature`
+> - `def FastAggregateVerify(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool`
+> - `def AggregateVerify(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
+> - `def KeyValidate(pubkey: BLSPubkey) -> bool`
+>
+> The above functions are accessed through the `bls` module, e.g. `bls.Verify`.
 
-- `def Sign(privkey: int, message: Bytes) -> BLSSignature`
-- `def Verify(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
-- `def Aggregate(signatures: Sequence[BLSSignature]) -> BLSSignature`
-- `def FastAggregateVerify(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool`
-- `def AggregateVerify(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
-- `def KeyValidate(pubkey: BLSPubkey) -> bool`
+The detailed specification of the cryptographic functions underlying Ethereum&nbsp;2.0's BLS signing scheme is delegated to the draft IETF standard as described in the spec. This includes specifying the elliptic curve BLS12-381 as our domain of choice.
 
-The above functions are accessed through the `bls` module, e.g. `bls.Verify`.
+Our intention in conforming to the in-progress standard is to provide for maximal interoperability with other chains, applications, and cryptographic libraries. Ethereum Foundation researchers and Eth2 developers had input to the [development](https://github.com/cfrg/draft-irtf-cfrg-bls-signature) of the standard. Nevertheless, there were some challenges involved in trying to keep up as the standard evolved. For example, the [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09) standard was still changing [rather late](https://hackmd.io/@benjaminion/BkdbG45II#Multiclient-testnet-discussion) in the beacon chain testing phase. In the end, everything worked out fine.
 
 #### `eth_aggregate_pubkeys`
 
@@ -2256,7 +2267,9 @@ def eth_aggregate_pubkeys(pubkeys: Sequence[BLSPubkey]) -> BLSPubkey:
     return result
 ```
 
-<!-- https://github.com/ethereum/consensus-specs/issues/2369 -->
+Stand-alone aggregation of public keys is not defined by the BLS signature standard. In the standard, public keys are aggregated only in the context of performing an aggregate signature verification via `AggregateVerify()` or `FastAggregateVerify()`.
+
+The `eth_aggregate_pubkeys()` function was added in the Altair upgrade to implement an [optimisation](/part3/containers/dependencies#synccommittee) for light clients when verifying the signatures on `SyncAggregate`s.
 
 #### `eth_fast_aggregate_verify`
 
@@ -2272,7 +2285,11 @@ def eth_fast_aggregate_verify(pubkeys: Sequence[BLSPubkey], message: Bytes32, si
     return bls.FastAggregateVerify(pubkeys, message, signature)
 ```
 
-TODO
+The specification of `FastAggregateVerify()` [in the BLS signature standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) returns `INVALID` if there are zero public keys given.
+
+This function was introduced in Altair to handle [`SyncAggregate`](/part3/containers/operations#syncaggregate)s that no sync committee member had signed off on, in which case the [`G2_POINT_AT_INFINITY`](/part3/config/constants#g2_point_at_infinity) can be considered a "correct" signature (in our case, but not according to the standard).
+
+The networking and validator specs were later clarified to require that `SyncAggregates` have [at least one signature](https://github.com/ethereum/consensus-specs/pull/2528). But this requirement is not enforced in the consensus layer (in [`process_sync_aggregate`](/part3/transition/block#def_process_sync_aggregate)), so we need to retain this `eth_fast_aggregate_verify()` wrapper to allow the empty signature to be valid.
 
 ### Predicates <!-- /part3/helper/predicates -->
 
@@ -2288,6 +2305,12 @@ def is_active_validator(validator: Validator, epoch: Epoch) -> bool:
     return validator.activation_epoch <= epoch < validator.exit_epoch
 ```
 
+Validators don't explicitly track their own state (eligible for activation, active, exited, withdrawable - the sole exception being whether they have been slashed or not). Instead, a validator's state is calculated by looking at the fields in the [`Validator`](/part3/containers/dependencies#validator) record that store the epoch numbers of state transitions.
+
+In this case, if the validator was activated in the past and has not yet exited, then it is active.
+
+This is used a few times in the spec, most notably in [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices) which returns a list of all active validators at an epoch.
+
 #### `is_eligible_for_activation_queue`
 
 <a id="def_is_eligible_for_activation_queue"></a>
@@ -2302,6 +2325,12 @@ def is_eligible_for_activation_queue(validator: Validator) -> bool:
         and validator.effective_balance == MAX_EFFECTIVE_BALANCE
     )
 ```
+
+When a deposit is been [processed](/part3/transition/block#deposits) with a previously unseen public key, a new [`Validator`](/part3/containers/dependencies#validator) record is created with all the state-transition fields set to the default value of [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch).
+
+It is possible to deposit any amount over [`MIN_DEPOSIT_AMOUNT`](/part3/config/preset#min_deposit_amount) (currently 1 Ether) into the deposit contract. However, validators do not become eligible for activation until their effective balance is equal to [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance), which corresponds to an actual balance of 32 Ether or more.
+
+This predicate [is used](/part3/transition/epoch#registry-updates) during epoch processing to find validators that have acquired the minimum necessary balance, but have not yet been added to the queue for activation. These validators are then marked as eligible for activation by setting the `validator.activation_eligibility_epoch` to the next epoch.
 
 #### `is_eligible_for_activation`
 
@@ -2320,6 +2349,10 @@ def is_eligible_for_activation(state: BeaconState, validator: Validator) -> bool
     )
 ```
 
+A validator that [`is_eligible_for_activation_queue()`](#is_eligible_for_activation_queue) has had its `activation_eligibility_epoch` [set](/part3/transition/epoch#registry-updates), but its `activation_epoch` is not yet set.
+
+To avoid any ambiguity or confusion on the validator side about its state, we wait until its eligibility activation epoch has been finalised before [adding it to the activation queue](/part3/transition/epoch#registry-updates) by setting its `activation_epoch`. Otherwise, it might at one point become active, and then the beacon chain could flip to a fork in which it is not active. This could happen if the latter fork had fewer blocks and had thus processed fewer deposits.
+
 #### `is_slashable_validator`
 
 <a id="def_is_slashable_validator"></a>
@@ -2331,6 +2364,12 @@ def is_slashable_validator(validator: Validator, epoch: Epoch) -> bool:
     """
     return (not validator.slashed) and (validator.activation_epoch <= epoch < validator.withdrawable_epoch)
 ```
+
+Used by [`process_proposer_slashing()`](/part3/transition/block#def_process_proposer_slashing) and [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing).
+
+Validators can be slashed only once: the flag [`Validator.slashed`](/part3/containers/dependencies#validator) is [set](/part3/helper/mutators#def_slash_validator) on the occasion of the first slashing.
+
+An unslashed validator remains eligible to be slashed from when it becomes active right up until it becomes withdrawable. This is [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs (around 27 hours) after it has exited from being a validator and ceased validation duties.
 
 #### `is_slashable_attestation_data`
 
@@ -2348,6 +2387,12 @@ def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationDa
         (data_1.source.epoch < data_2.source.epoch and data_2.target.epoch < data_1.target.epoch)
     )
 ```
+
+This predicate is used by [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) to check that the two sets of alleged conflicting attestation data in an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) do in fact qualify as slashable.
+
+There are two ways for validators to get slashed under Casper FFG:
+  1. A double vote: voting more than once for the same target epoch, or
+  2. A surround vote: the source&ndash;target interval of one attestation entirely contains the source&ndash;target interval of a second attestation from the same validator or validators. The reporting block proposer needs to take care to order the `IndexedAttestation`s within the `AttesterSlashing` object so that the first set of votes surrounds the second. (The opposite ordering also describes a slashable offence, but is not checked for here.)
 
 #### `is_valid_indexed_attestation`
 
@@ -2369,6 +2414,20 @@ def is_valid_indexed_attestation(state: BeaconState, indexed_attestation: Indexe
     return bls.FastAggregateVerify(pubkeys, signing_root, indexed_attestation.signature)
 ```
 
+`is_valid_indexed_attestation()` is used in [attestation processing](/part3/transition/block#attestations) and [attester slashing](/part3/transition/block#attester-slashings).
+
+[IndexedAttestation](/part3/containers/dependencies#indexedattestation)s differ from [Attestation](/part3/containers/operations#attestation)s in that the latter record the contributing validators in a bitlist and the former explicitly list the global indices of the contributing validators.
+
+An [IndexedAttestation](/part3/containers/dependencies#indexedattestation) passes this validity test only if all of the following apply.
+ 1. There is at least one validator index present.
+ 2. The list of validators contains no duplicates (the Python `set` function performs deduplication).
+ 3. The indices of the validators are sorted. (It is not clear to me why this is required. It's used in the duplicate check here, but that could just be replaced by checking the set size.)
+ 4. Its aggregated signature verifies against the aggregated public keys of the listed validators.
+
+Verifying the signature uses the magic of [aggregated BLS signatures](https://hackmd.io/@benjaminion/bls12-381#Aggregation). The indexed attestation contains a BLS signature that is supposed to be the combined individual signatures of each of the validators listed in the attestation. This is verified by passing it to `bls.FastAggregateVerify()` along with the list of public keys from the same validators. The verification succeeds only if exactly the same set of validators signed the message (`signing_root`) as appear in the list of public keys. Note that [`get_domain()`](/part3/helper/accessors#def_get_domain) mixes in the fork version, so that attestations are not valid across forks.
+
+No check is done here that the `attesting_indices` (which are the global validator indices) are all members of the correct committee for this attestation. In [`process_attestation()`](/part3/transition/block#def_process_attestation) they must be, by construction. In [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) it doesn't matter: _any_ validator signing conflicting attestations is liable to be slashed.
+
 #### `is_valid_merkle_branch`
 
 <a id="def_is_valid_merkle_branch"></a>
@@ -2387,7 +2446,11 @@ def is_valid_merkle_branch(leaf: Bytes32, branch: Sequence[Bytes32], depth: uint
     return value == root
 ```
 
-TODO
+This is the classic algorithm for [verifying a Merkle branch](https://blog.ethereum.org/2015/11/15/merkling-in-ethereum/) (also called a Merkle proof). Nodes are iteratively hashed as the tree is traversed from leaves to root. The bits of `index` select whether we are the right or left child of our parent at each level. The result should match the given `root` of the tree.
+
+In this way we prove that we know that `leaf` is the value at position `index` in the list of leaves, and that we know the whole structure of the rest of the tree, as summarised in `branch`.
+
+We use this function in [`process_deposit()`](/part3/transition/block#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/contract). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
 
 ### Misc <!-- /part3/helper/misc -->
 
@@ -4011,6 +4074,14 @@ TODO
 TODO
 
 ### Architecture <!-- /part4/the_merge/architecture* -->
+
+TODO
+
+### API <!-- /part4/the_merge/api* -->
+
+TODO
+
+### Optimistic Sync <!-- /part4/the_merge/sync* -->
 
 TODO
 
