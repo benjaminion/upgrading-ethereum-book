@@ -87,3 +87,8 @@ FNR == NR {
         $0 = substr($0, RSTART + RLENGTH)
     }
 }
+
+# Any empty links
+/\[[^]]+\]\(\)/ {
+    print("Empty link, line " FNR)
+}
