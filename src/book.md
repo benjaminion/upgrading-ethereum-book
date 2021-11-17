@@ -44,15 +44,27 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 The "Ethereum 2.0" terminology is out of favour in some circles, but I've never been one for following fashions. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
-Also, please note that I will be unapologetically use British English spelling, punctuation, and quirky modes of expression. It's a feature, not a bug.
+You will notice too that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
 ## Acknowledgements
 
-First and foremost, my gratitude to my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, I want to thank my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 [TODO: link to jobs board]::
 
-So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics.
+So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's work gets cited throughout this book, and I am totally indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
+
+Thank you, as well, to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter, and some kind crypto gifts from anons. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
+
+Shout-out to the EthStaker community: you are the best!
+
+TODO
+
+And circling back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a challenge and a joy. A challenge that keeps me sharp now that I am well past my prime, and a joy that 
+
+in particular the Protocols group, PegaSys, that has been my home for the past four years. Especially the wonderful R&D team that I helped establish, and the astonishingly  Working daily with such brilliant, talented, generous, and knowledgeable people is a challenge and a joy. A challenge that keeps me sharp now that I am well past my prime, and a joy that 
+
+Teku team.
 
 # Part 1: Building <!-- /part1 -->
 
@@ -1764,7 +1776,7 @@ class SyncCommittee(Container):
 
 Sync committees were introduced in the Altair upgrade to support light clients to the beacon chain protocol. The list of committee members for each of the current and next sync committees is stored in the beacon state. Members are updated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#epochs_per_sync_committee_period) epochs by [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee).
 
-The `aggregate_pubkey` of the sync committee is an [optimisation](https://github.com/ethereum/consensus-specs/commit/9c3d5982cfbe9a52b02e2bd028a873c9226a34c9) intended to save light clients some work when verifying the sync committee's signature. All the public keys of the committee members (including any duplicates) are aggregated into this single public key. If any signatures are missing from the [`SyncAggregate`](/part3/containers/operations#syncaggregate), the light client can "de-aggregate" them by performing elliptic curve subtraction. As long as more than half of the committee contributed to the signature, then this will be faster than constructing the aggregate of participating members from scratch.
+Including the `aggregate_pubkey` of the sync committee is an [optimisation](https://github.com/ethereum/consensus-specs/commit/9c3d5982cfbe9a52b02e2bd028a873c9226a34c9) intended to save light clients some work when verifying the sync committee's signature. All the public keys of the committee members (including any duplicates) are aggregated into this single public key. If any signatures are missing from the [`SyncAggregate`](/part3/containers/operations#syncaggregate), the light client can "de-aggregate" them by performing elliptic curve subtraction. As long as more than half of the committee contributed to the signature, then this will be faster than constructing the aggregate of participating members from scratch. If less than half contributed to the signature, the light client can start instead with the identity public key and use elliptic curve addition to aggregate those public keys that are present.
 
 See also [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size).
 
@@ -2483,7 +2495,32 @@ def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) ->
     return index
 ```
 
-See the [section on Shuffling](/part2/building_blocks/shuffling) for a detailed exposition of this algorithm.
+Selecting random, distinct committees of validators is a big part of Ethereum&nbsp;2.0; it is foundational for both its scalability and security. This selection is done by shuffling.
+
+Shuffling a list of objects is a well understood problem in computer science.  Notice, however, that this routine manages to shuffle a _single index_ to a new location, knowing only the total length of the list. To use the technical term for this, it is _oblivious_. To shuffle the whole list, this routine needs to be called once per validator index in the list. By construction, each input index maps to a distinct output index. Thus, when applied to all indices in the list, it results in a permutation, also called a shuffling.
+
+Why do this rather than a simpler, more efficient, conventional shuffle? It's all about light clients. Beacon nodes will generally need to know the whole shuffling, but light clients will often be interested only in a small number of committees. Using this technique allows the composition of a single committee to be calculated without having to shuffle the entire set: potentially a big saving on time and memory.
+
+As stated in the code comments, this is an implementation of the "swap-or-not" shuffle, described in [the cited paper](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). Vitalik [kicked off a search](https://github.com/ethereum/eth2.0-specs/issues/323) for a shuffle with these properties in late 2018. With the help of Professor Dan Boneh of Stanford University, the swap-or-not [was identified](https://github.com/ethereum/eth2.0-specs/issues/563) as a candidate a couple of months later, and [adpopted](https://github.com/ethereum/eth2.0-specs/pull/576) into the spec.
+
+The algorithm breaks down as follows. For each iteration (each round), we start with a current `index`.
+1. Pseudo-randomly select a pivot. This is a 64-bit integer based on the seed and current round number. This domain is large enough that any non-uniformity caused by taking the modulus in the next step is [entirely negligible](https://github.com/ethereum/eth2.0-specs/pull/576#issuecomment-463293660).
+2. Use `pivot` to find another index in the list of validators, `flip`, which is `pivot - index` accounting for wrap-around in the list.
+3. Calculate a single pseudo-random bit based on the seed, the current round number, and some bytes from either `index` or `flip` depending on which is greater.
+4. If our bit is zero, we keep `index` unchanged; if it is one, we set `index` to `flip`.
+
+We are effectively swapping cards in a deck based on a deterministic algorithm.
+
+The way that `position` is broken down is worth noting:
+ - Bits 0-2 (3 bits) are used to select a single bit from the eight bits of `byte`.
+ - Bits 3-7 (5 bits) are used to select a single byte from the thirty-two bytes of `source`.
+ - Bits 8-39 (32 bits) are used in generating `source`. Note that the upper two bytes of this will always be zero in practice, due to limits on the number of active validators.
+
+[`SHUFFLE_ROUND_COUNT`](/part3/config/preset#shuffle_round_count) is, and always has been, 90 in the mainnet configuration, as explained there.
+
+See the [section on Shuffling](/part2/building_blocks/shuffling) for a more structured exposition and analysis of this algorithm (with diagrams!).
+
+`compute_shuffled_index()` is used by [`compute_committee()`](#def_compute_committee) and [`compute_proposer_index()`](#def_compute_proposer_index). In practice, full beacon node implementations will run this once per epoch using an optimised version that shuffles the whole list, and cache the result of that for the epoch.
 
 #### `compute_proposer_index`
 
@@ -2540,7 +2577,7 @@ def compute_committee(indices: Sequence[ValidatorIndex],
     return [indices[compute_shuffled_index(uint64(i), uint64(len(indices)), seed)] for i in range(start, end)]
 ```
 
-[`get_beacon_committee`](/part3/helper/accessors#get_beacon_committee) uses this to find the specific members of one of the committees at a slot.
+`compute_committee` is used by [`get_beacon_committee`](/part3/helper/accessors#get_beacon_committee) to find the specific members of one of the committees at a slot.
 
 Every epoch, a fresh set of committees is generated; during an epoch, the committees are stable.
 
@@ -2552,11 +2589,13 @@ Looking at the parameters in reverse order:
 
 Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
 
-It may not be immediately obvious, but not all committees returned will be the same size (can vary by one), and every validator in `indices` will be a member of exactly one committee. As we increment `index` from zero, clearly `start` for `index == j + 1` is `end` for `index == j`, so there are no gaps. In addition, the highest `index` is `count - 1`, so every validator in `indices` finds its way into a committee.
+It may not be immediately obvious, but not all committees returned will be the same size (they can vary by one), and every validator in `indices` will be a member of exactly one committee. As we increment `index` from zero, clearly `start` for `index == j + 1` is `end` for `index == j`, so there are no gaps. In addition, the highest `index` is `count - 1`, so every validator in `indices` finds its way into a committee.[^fn_formal_verif_committee_size]
 
-This method of selecting committees is light client friendly. Light clients can compute only the committees that they are interested in without needing to deal with the entire validator set. See the [section on Shuffling](/part2/building_blocks/shuffling) for explanation of how htis works.
+[^fn_formal_verif_committee_size]: Also not immediately obvious is that there is a subtle issue with committee sizes that was [discovered by formal verification](https://github.com/ethereum/consensus-specs/issues/2500), although, given the max supply of ETH it will never be triggered.
 
-[TODO: where is this used for sync committees?]::
+This method of selecting committees is light client friendly. Light clients can compute only the committees that they are interested in without needing to deal with the entire validator set. See the [section on Shuffling](/part2/building_blocks/shuffling) for explanation of how this works.
+
+Sync committees are assigned by a [different process](/part3/helper/accessors#get_next_sync_committee_indices) that is more akin to repeatedly performing [`compute_proposer_index()`](#def_compute_proposer_index).
 
 #### `compute_epoch_at_slot`
 
@@ -2642,9 +2681,7 @@ def compute_fork_digest(current_version: Version, genesis_validators_root: Root)
 
 Extracts the first four bytes of the [fork data root](#compute_fork_data_root) as a [`ForkDigest`](/part3/config/types#forkdigest) type. It is primarily used for domain separation on the peer-to-peer networking layer.
 
-`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md) to distinguish between independent beacon chain networks or forks: it is vital that activity on one chain does not interfere with other chains.
-
-[TODO: check the bit about compute_fork_digest in networking]::
+`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/p2p-interface.md) to distinguish between independent beacon chain networks or forks: it is important that activity on one chain does not interfere with other chains.
 
 #### `compute_domain`
 
@@ -2698,7 +2735,9 @@ The `domain` is usually the output of [`get_domain()`](/part3/helper/accessors#g
 
 This is exactly equivalent to adding the domain to an object and taking the hash tree root of the whole thing. Indeed, this function used to be called, as [`compute_domain_wrapper_root()`](https://github.com/ethereum/eth2.0-specs/blob/502ee295379c1f3c5c3649e12330fb5be5d7a83b/specs/core/0_beacon-chain.md#compute_domain_wrapper_root).
 
-### Participation flags
+### Participation flags <!-- /part3/helper/participation -->
+
+These two simple utilities were added in the Altair upgrade.
 
 #### `add_flag`
 
@@ -2713,7 +2752,7 @@ def add_flag(flags: ParticipationFlags, flag_index: int) -> ParticipationFlags:
     return flags | flag
 ```
 
-Added in Altair.
+This is simple and self-explanatory. The `2**flag_index` is a bit Pythony. In a C-like language it would use a bit-shift: `1 << flag_index`.
 
 TODO
 
@@ -2730,9 +2769,7 @@ def has_flag(flags: ParticipationFlags, flag_index: int) -> bool:
     return flags & flag == flag
 ```
 
-Added in Altair.
-
-TODO
+Again, this is self-explanatory.
 
 ### Beacon State Accessors <!-- /part3/helper/accessors -->
 
