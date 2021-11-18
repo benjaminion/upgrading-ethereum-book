@@ -21,18 +21,19 @@ Meanwhile, I might get round to making it prettier, ensuring it is accessible an
 
 ## What to expect
 
-This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on prooof of stake &ndash; at a technical level. I hope to be interesting, informative, and accurate. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
+This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on prooof of stake &ndash; at a technical level. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
-Although I am an Eth2 staker, and an Ethereum user, I am not writing for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but for practical purposes you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
+Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but for practical purposes you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
 
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
   - all things proof of stake and the beacon chain,
-  - The Merge: moving Ethereum&nbsp;1.0 to proof of stake, and
-  - in-protocol data sharding.
+  - the process of The Merge at which Ethereum&nbsp;1.0 moves to proof of stake,
+  - in-protocol data sharding, and
+  - an array of potential future enhancements.
 
-I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except where it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
+I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
 It's a chunky list of exclusions, but that still leaves [plenty to talk about](/contents).
 
@@ -42,7 +43,7 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 ## A note on Terminology
 
-The "Ethereum 2.0" terminology is out of favour in some circles, but I've never been one for following fashions. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
+The "Ethereum 2.0" terminology is out of favour in some circles, but fashions mean little to me. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
 You will notice too that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
@@ -1847,6 +1848,8 @@ This is the form in which attestations make their way around the network. It is 
 
 `Attestation`s contain the same information as [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s, but use knowledge of the validator committees at slots to compress the list of attesting validators down to a bitlist. Thus, `Attestation`s are at least 5 times smaller than `IndexedAttestation`s, and up to 35 times smaller (with 128 or 2048 validators per committee, respectively).
 
+When a validator first broadcasts its attestion to the network, the `aggregation_bits` list will contain only a single bit set, and calling [`get_attesting_indices()`](/part3/helper/accessors#def_get_attesting_indices) on it will return a list containing only a single entry, the validator's own index.
+
 #### `Deposit`
 
 ```python
@@ -2775,6 +2778,8 @@ Move along now, nothing to see here.
 
 ### Beacon State Accessors <!-- /part3/helper/accessors -->
 
+As the name suggests, these functions access the beacon state to calculate various useful things, without modifying it.
+
 #### `get_current_epoch`
 
 <a id="def_get_current_epoch"></a>
@@ -3159,9 +3164,15 @@ def get_unslashed_participating_indices(state: BeaconState, flag_index: int, epo
     return set(filter(lambda index: not state.validators[index].slashed, participating_indices))
 ```
 
-HERE!
+`get_unslashed_participating_indices()` returns the list of validators that made a timely attestation with the type [`flag_index`](/part3/config/constants#participation-flag-indices) during the `epoch` in question.
 
-TODO
+It is used with the `TIMELY_TARGET_FLAG_INDEX` flag in [`process_justification_and_finalization()`](/part3/transition/epoch#def_process_justification_and_finalization) to calculate the proportion of stake that voted for the candidate checkpoint in the current and previous epochs.
+
+It is also used with the `TIMELY_TARGET_FLAG_INDEX` for applying inactivity penalties in [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates) and [`get_inactivity_penalty_deltas()`](/part3/transition/epoch#def_get_inactivity_penalty_deltas). If a validator misses a correct target vote during an inactivity leak then it is considered not to have particpated at all (it is not contributing anything useful).
+
+And it is used in [`get_flag_index_deltas()`](#def_get_flag_index_deltas) for calculating rewards due for each type of correct vote.
+
+Slashed validators are ignored. Once slashed, validators no longer receive rewards or participate in consensus, although they are subject to penalties until they have finally been exited.
 
 #### `get_attestation_participation_flag_indices`
 
@@ -3196,7 +3207,35 @@ def get_attestation_participation_flag_indices(state: BeaconState,
     return participation_flag_indices
 ```
 
-TODO
+This is called by [`process_attestation()`](/part3/transition/block#def_process_attestation) during block processing, and is the heart of the mechanism for recording validators' votes as contained in their attestations.
+
+`data` is an [`AttestationData`](/part3/containers/dependencies#attestationdata) object that contains the source, target, and head votes of the validators that contributed to the attestation. The attestation may represent the votes of one or more validators, but that is not relevant here.
+
+`inclusion_delay` is the difference between the current slot on the beacon chain and the slot for which the attestation was created. For the block containing the attestation to be valid, `inclusion_delay` must be between [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) and [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) inclusive. In other words, attestations must be included in the next block, or in any block up to 32 slots later, after which they are ignored.
+
+Since the attestation may be up to 32 slots old, it might have been generated in the current epoch or the previous eopch, so the first thing the function does is to check the target checkpoint's epoch to see which epoch we should be looking at.
+
+First, the function checks whether the votes in the attestation are correct:
+  - Does the attestation's source vote match what we believe to be the justified checkpoint in the epoch in question?
+  - If so, does the attestation's target vote match the head block at the epoch's checkpoint, that is, the first slot of the epoch?
+  - If so, does the attestation's head vote match what we believe to be the head block at the attestation's slot? Note that the slot may not have a block &ndash; it may be a skip slot &ndash; in which case the last known block is considered to be the head.
+  
+These three build on each other, so that it is not possible to have a correct target vote without a correct source vote, and it is not possible to have a correct head vote without a correct target vote.
+
+The `assert` statement is interesting. If an attestation does not have the correct source vote, the block containing it is invalid. Having an incorrect source vote means that the block proposer disagrees with me about the last justified checkpoint, which is an irreconcilable difference.
+
+[TODO: check the irreconcilable bit. Maybe explain it.]::
+
+After checking the validity of the votes, the timeliness of each vote is checked.
+    - Source votes must be included within 5 slots (`integer_squareroot(32`). This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold).
+
+HERE!
+
+Head votes aren't useful after one slot, so that explains the timeliness requirement there. Target votes are useful at any time, but it is simpler if they don't span multiple epochs, so 32 slots is a reasonable requirement. As for using the geometric mean as the source inclusion threshhold, it is an arbitrary choice. Vitalik's view [^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
+
+[^fn_vitalik_geometric_mean]: From a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum Research Discord server.
+
+HERE!
 
 #### `get_flag_index_deltas`
 
