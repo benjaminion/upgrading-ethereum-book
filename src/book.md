@@ -49,7 +49,7 @@ You will notice too that I unapologetically use British English spelling, punctu
 
 ## Acknowledgements
 
-First and foremost, I want to thank my employer, ConsenSys, for allowing me to work on this in the course of my day job. The copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been cool with me working on this in the course of my day job. As a consequence, the copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 [TODO: link to jobs board]::
 
@@ -2618,7 +2618,7 @@ def compute_epoch_at_slot(slot: Slot) -> Epoch:
 
 This is trivial enough that I won't explain it. But note that it does rely on [`GENESIS_SLOT`](/part3/config/constants#miscellaneous) and [`GENESIS_EPOCH`](/part3/config/constants#miscellaneous) being zero. The more pernickety among us might prefer it to read,
 
-    return Epoch(GENESIS_EPOCH + (slot - GENESIS_SLOT) // SLOTS_PER_EPOCH)
+    return GENESIS_EPOCH + Epoch((slot - GENESIS_SLOT) // SLOTS_PER_EPOCH)
 
 #### `compute_start_slot_at_epoch`
 
@@ -2632,9 +2632,9 @@ def compute_start_slot_at_epoch(epoch: Epoch) -> Slot:
     return Slot(epoch * SLOTS_PER_EPOCH)
 ```
 
-Should really read,
+Maybe should read,
 
-    return Slot(GENESIS_SLOT + (epoch - GENESIS_EPOCH) * SLOTS_PER_EPOCH)
+    return GENESIS_SLOT + Slot((epoch - GENESIS_EPOCH) * SLOTS_PER_EPOCH))
 
 #### `compute_activation_exit_epoch`
 
@@ -2934,9 +2934,9 @@ There is always at least one committee per slot, and never more than [`MAX_COMMI
 Subject to these constraints, the actual number of committees per slot is $N / 4096$, where $N$ is the total number of active validators.
 
 The intended behaviour looks like this:
- 1. The ideal case is that there are [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) = 64 committees per slot. This maps to one committee per slot per shard once data sharding has been implemented. These committees will be responsible for voting on shard crosslinks. There must be at least 262,144 active validators to achieve this.
- 2. If there are fewer active validators, then the number of committees per shard is reduced below 64 in order to maintain a minimum committee size of [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) = 128. In this case, not every shard will get crosslinked at every slot (once sharding is in place).
- 3. Finally, only if the number of active validators falls below 4096 will the committee size be reduced to less than 128. With so few validators, the chain has no meaningful security in any case.
+ - The ideal case is that there are [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) = 64 committees per slot. This maps to one committee per slot per shard once data sharding has been implemented. These committees will be responsible for voting on shard crosslinks. There must be at least 262,144 active validators to achieve this.
+ - If there are fewer active validators, then the number of committees per shard is reduced below 64 in order to maintain a minimum committee size of [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) = 128. In this case, not every shard will get crosslinked at every slot (once sharding is in place).
+ - Finally, only if the number of active validators falls below 4096 will the committee size be reduced to less than 128. With so few validators, the chain has no meaningful security in any case.
 
 #### `get_beacon_committee`
 
@@ -3207,35 +3207,36 @@ def get_attestation_participation_flag_indices(state: BeaconState,
     return participation_flag_indices
 ```
 
-This is called by [`process_attestation()`](/part3/transition/block#def_process_attestation) during block processing, and is the heart of the mechanism for recording validators' votes as contained in their attestations.
+This is called by [`process_attestation()`](/part3/transition/block#def_process_attestation) during block processing, and is the heart of the mechanism for recording validators' votes as contained in their attestations. It filters the given attestation against the beacon state's current view of the chain, and returns [participation flag indices](/part3/config/constants#participation-flag-indices) only for the votes that are both correct and timely.
 
-`data` is an [`AttestationData`](/part3/containers/dependencies#attestationdata) object that contains the source, target, and head votes of the validators that contributed to the attestation. The attestation may represent the votes of one or more validators, but that is not relevant here.
+`data` is an [`AttestationData`](/part3/containers/dependencies#attestationdata) object that contains the source, target, and head votes of the validators that contributed to the attestation. The attestation may represent the votes of one or more validators.
 
 `inclusion_delay` is the difference between the current slot on the beacon chain and the slot for which the attestation was created. For the block containing the attestation to be valid, `inclusion_delay` must be between [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) and [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) inclusive. In other words, attestations must be included in the next block, or in any block up to 32 slots later, after which they are ignored.
 
-Since the attestation may be up to 32 slots old, it might have been generated in the current epoch or the previous eopch, so the first thing the function does is to check the target checkpoint's epoch to see which epoch we should be looking at.
+Since the attestation may be up to 32 slots old, it might have been generated in the current epoch or the previous epoch, so the first thing we do is to check the attestation's target vote epoch to see which epoch we should be looking at in the beacon state.
 
-First, the function checks whether the votes in the attestation are correct:
+Next, we check whether each of the votes in the attestation are correct:
   - Does the attestation's source vote match what we believe to be the justified checkpoint in the epoch in question?
   - If so, does the attestation's target vote match the head block at the epoch's checkpoint, that is, the first slot of the epoch?
-  - If so, does the attestation's head vote match what we believe to be the head block at the attestation's slot? Note that the slot may not have a block &ndash; it may be a skip slot &ndash; in which case the last known block is considered to be the head.
+  - If so, does the attestation's head vote match what we believe to be the head block at the attestation's slot? Note that the slot may not contain a block &ndash; it may be a skip slot &ndash; in which case the last known block is considered to be the head.
   
 These three build on each other, so that it is not possible to have a correct target vote without a correct source vote, and it is not possible to have a correct head vote without a correct target vote.
 
-The `assert` statement is interesting. If an attestation does not have the correct source vote, the block containing it is invalid. Having an incorrect source vote means that the block proposer disagrees with me about the last justified checkpoint, which is an irreconcilable difference.
+The `assert` statement is interesting. If an attestation does not have the correct source vote, the block containing it is invalid and is discarded. Having an incorrect source vote means that the block proposer disagrees with me about the last justified checkpoint, which is an irreconcilable difference.
 
 [TODO: check the irreconcilable bit. Maybe explain it.]::
 
-After checking the validity of the votes, the timeliness of each vote is checked.
-    - Source votes must be included within 5 slots (`integer_squareroot(32`). This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold).
-
-HERE!
-
-Head votes aren't useful after one slot, so that explains the timeliness requirement there. Target votes are useful at any time, but it is simpler if they don't span multiple epochs, so 32 slots is a reasonable requirement. As for using the geometric mean as the source inclusion threshhold, it is an arbitrary choice. Vitalik's view [^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
+After checking the validity of the votes, the timeliness of each vote is checked. Let's take them in reverse order.
+    - Correct head votes must be included immediately, that is, in the very next slot.
+       - Head votes, used for LMD GHOST consensus, are not useful after one slot.
+    - Correct target votes must be included within 32 slots, one epoch.
+       - Target votes are useful at any time, but it is simpler if they don't span more than a couple of epochs, so 32 slots is a reasonable limit. This check is actually redundant since attestations in blocks cannot be older than 32 slots.
+    - Correct source votes must be included within 5 slots (`integer_squareroot(32)`).
+       - This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold). This is an arbitrary choice. Vitalik's view [^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
 
 [^fn_vitalik_geometric_mean]: From a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum Research Discord server.
 
-HERE!
+The timely inclusion requirements are new in Altair. In Phase&nbsp;0, all correct votes received a reward, and there was an additional reward for inclusion the was proportional to the reciprocal of the inclusion distance. This led to a oddity where it was always more profitable to vote for a correct head, even if that meant waiting longer and risking not being included in the next slot.
 
 #### `get_flag_index_deltas`
 
