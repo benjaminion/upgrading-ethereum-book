@@ -41,9 +41,9 @@ FNR == NR {
 }
 
 # Skipping empty lines gives a nice speed-up
-length {
+length() {
     for (word in refs) {
-        if (!done[word] && match($0, word)) {
+        if (!done[word] && index($0, word)) {
             refs[word] = refs[word] "\"" page_path "#" anchor "\","
             heads[page_path "#" anchor] = "[\"" page_name   "\",\""  heading "\"]"
             done[word] = 1
