@@ -4,7 +4,7 @@ module.exports = {
     description: `A technical handbook on Ethereum's move to proof of stake and beyond`,
     author: `Ben Edgington (@benjaminion)`,
   },
-  pathPrefix: `/`,
+  pathPrefix: `/altair`,
   plugins: [
       {
       resolve: `gatsby-source-filesystem`,
