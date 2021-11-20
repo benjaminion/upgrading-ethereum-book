@@ -3,3 +3,4 @@ node_modules/
 public/
 tmp/
 src/md/pages/
+bin/priv/
