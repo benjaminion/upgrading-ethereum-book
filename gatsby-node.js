@@ -1,4 +1,14 @@
 const path = require(`path`)
+const execSync = require('child_process').execSync;
+
+exports.onPreInit = ({reporter}) => {
+  reporter.info("Unpacking book source...")
+  try {
+    execSync('bin/update.sh')
+  } catch (err) {
+    reporter.panic("Failed to unpack book source.", err)
+  }
+}
 
 exports.createPages = async ({ actions, graphql }) => {
   const { createPage } = actions
