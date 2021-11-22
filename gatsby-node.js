@@ -5,7 +5,7 @@ exports.onPreInit = ({reporter}) => {
 
   reporter.info("Checking internal links...")
   try {
-    const out = execSync('bin/links.awk src/book.md src/book.md', {encoding: 'utf8'})
+    const out = execSync('bin/build/links.awk src/book.md src/book.md', {encoding: 'utf8'})
     if (out !== "") {
       reporter.warn("Found some bad internal links:")
       out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
@@ -17,7 +17,7 @@ exports.onPreInit = ({reporter}) => {
 
   reporter.info("Unpacking book source...")
   try {
-    execSync('bin/update.sh')
+    execSync('bin/build/update.sh')
   } catch (err) {
     reporter.panic("Failed to unpack book source.", err)
   }

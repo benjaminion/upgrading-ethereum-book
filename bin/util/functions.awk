@@ -1,5 +1,7 @@
 #!/usr/bin/gawk -f
 
+# Insert an anchor for each function defined in the document, 2 lines ahead.
+
 NR == 1 {
     lm2 = $0
 }

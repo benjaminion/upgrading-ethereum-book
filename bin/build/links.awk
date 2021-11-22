@@ -17,7 +17,7 @@
 #
 # Remember to pass the target file twice:
 #
-#   ../bin/links.awk book.md book.md
+#   ../bin/build/links.awk book.md book.md
 #
 
 BEGIN {

@@ -2,7 +2,7 @@
 
 # Builds a JSON index from a file of keywords
 #
-# ./index.awk words.txt ../src/book.md
+# ./index.awk words.txt ../../src/book.md
 #
 # Should probably escape quotation marks in page_name and heading
 
