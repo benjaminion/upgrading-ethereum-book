@@ -1,7 +1,13 @@
+# Deployment utilities
+bin/priv/
+
+# Files generated during the build process
+src/md/pages/
+src/md/annotated.md
+index.json
+
+# Junk
 node_modules/
 .cache/
 public/
 tmp/
-src/md/pages/
-bin/priv/
-index.json

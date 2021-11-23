@@ -23,6 +23,8 @@
 BEGIN {
     # /contents is OK as a page, but will not be picked up automatically
     anchors["/contents"] = 1
+    # Ditto /annotated-spec
+    anchors["/annotated-spec"] = 1
 }
 
 # Path needs to be set on both passes
