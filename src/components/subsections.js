@@ -2,7 +2,7 @@ import React from "react"
 import { useStaticQuery, graphql } from "gatsby"
 
 import PageList from "./pagelist"
-import "./subsection.css"
+import "./subsections.css"
 
 // Format subsections of the page with index indexArray as a nested list
 const Subsections = ({indexArray}) => {
