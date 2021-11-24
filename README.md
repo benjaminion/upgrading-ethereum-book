@@ -32,6 +32,8 @@ v16.11.1
 npm install -g gatsby-cli
 ```
 
+You'll also need a working `gawk` (GNU awk) installed at _/usr/bin/gawk_ so that the build can preprocess the book document.
+
 ### Building
 
 Clone this repo. `cd` into it, then:
@@ -56,7 +58,7 @@ Instead of building and serving, you can run `gatsby develop` and point your bro
 
 ## Editing
 
-The whole text for the book is in the _src/book.md_ file. Everything under _src/md/pages_ is auto-generated and any changes there will be lost.
+The entire text for the book is in the _src/book.md_ file. Everything under _src/md/pages_ is auto-generated and any changes there will be lost.
 
 ## How to
 
