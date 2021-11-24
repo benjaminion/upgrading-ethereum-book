@@ -21,13 +21,6 @@ exports.onPreInit = ({reporter}) => {
   } catch (err) {
     reporter.panic("Failed to unpack book source.", err)
   }
-
-  reporter.info("Creating one-page annotated spec...")
-  try {
-    execSync('bin/build/annotated.awk src/book.md > src/md/annotated.md')
-  } catch (err) {
-    reporter.panic("Failed to create one page annotated spec.", err)
-  }
 }
 
 exports.createPages = async ({ actions, graphql }) => {
