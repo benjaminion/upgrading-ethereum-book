@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "gatsby"
 import { useStaticQuery, graphql } from "gatsby"
 import NestedList from "./nestedlist"
 
@@ -32,15 +31,15 @@ const PageNavi = ({path}) => {
   
   // console.log(JSON.stringify(thisPage.node.headings, undefined, 2))
 
-  const items = headings.map(h => {return ({
+  const items = headings.filter(h => h.depth >= 2).map(h => {return ({
     level: h.depth,
-    index: h.id,
+    label: "",
     title: h.value,
-    page: "#" + h.id,
+    link: "#" + h.id,
     hide: false
   })})
   
-  return (<NestedList items={items} level={1} idx={0} />)
+  return (<NestedList items={items} level={2} idx={0} />)
 }
 
 export default PageNavi

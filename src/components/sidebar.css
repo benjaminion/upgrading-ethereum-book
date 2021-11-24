@@ -39,7 +39,7 @@ nav.sidebar {
   font-weight: bold;
 }
 
-#index > ul > li .index-string {
+#index > ul > li .label-string {
   display: none;
 }
 
