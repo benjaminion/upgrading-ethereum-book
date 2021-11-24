@@ -630,13 +630,11 @@ This edition of Upgrading Ethereum is based on the Altair version of the beacon 
 
 For the following chapters, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/fork.md) documents into the flow of this one.
 
-For historical interest and comparison purposes, my previous [Phase&nbsp;0 annotated spec](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available.
-
 #### References
 
   - [The Phase&nbsp;0]((https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/phase0/beacon-chain.md)) beacon chain specification.
   - [Altair updates](https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/altair/beacon-chain.md) to the beacon chain specification.
-  - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/).
+  - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
   - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
 
 ## Types, Constants, Presets, and Configuration <!-- /part3/config -->
