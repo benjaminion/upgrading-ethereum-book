@@ -6,6 +6,7 @@ import Sidebar from "../components/sidebar"
 import Subsections from "../components/subsections"
 import PrevNext from "../components/prevnext"
 import Footer from "../components/footer"
+import PageNavi from "../components/pagenavi"
 
 export default function Template({
   data,
@@ -36,6 +37,7 @@ export default function Template({
         <Footer />
         <PrevNext seq={markdownRemark.frontmatter.sequence} />
       </div>
+      <PageNavi path={markdownRemark.frontmatter.path} />
     </Layout>
   )
 }

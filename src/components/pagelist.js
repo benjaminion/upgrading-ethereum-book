@@ -1,35 +1,5 @@
 import React from "react"
-import { Link } from "gatsby"
-
-function ConditionalLink(props) {
-  const ret = props.nolink
-        ? <>{props.children}</>
-        : <Link to={props.to} activeClassName="index-active">{props.children}</Link>
-  return (ret) 
-}
-
-function NestedList(props) {
-  var ret = []
-  var idx = props.idx
-  while (idx < props.items.length) {
-    const item = props.items[idx]
-    if (item.level === props.level) {
-      ret.push(
-          <li key={idx}><ConditionalLink to={item.page} nolink={item.hide}><span className="index-string">{item.index}</span> {item.title}</ConditionalLink></li>
-      )
-      idx++
-    } else if (item.level > props.level) {
-      ret.push(
-          <NestedList key={idx} items={props.items} level={props.level + 1} idx={idx} />
-      )
-      while (idx < props.items.length && props.items[idx].level > props.level)
-        idx++
-    } else {
-      break
-    }
-  }
-  return (<ul>{ret}</ul>)
-}
+import NestedList from "./nestedlist"
 
 // Format pages as a list according to their index data.
 // Depth is the length of prefix to ignore
