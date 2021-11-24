@@ -2,9 +2,9 @@
 
 ## Work in progress!
 
-This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3), but the rest is on its way.
+This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3) - the rest is on its way.
 
-When building a house, it's good to start from the ground up. Similarly, the Annotated Spec is the foundation for everything else. All the wiring and the plumbing of the beacon chain's innards are on display. It may not be easily accessible to the general reader, but with the foundation is in place the rest of the book can build on it.
+The Annotated Spec is the guts of the machine. Like the guts of a computer, there are a lot of components showing and wires hanging out: everything is on display. But with the guts in place, the rest of the book can build around them and the messy details neatly tucked away.
 
 My rough plan is as follows:
 
@@ -15,7 +15,7 @@ My rough plan is as follows:
   - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_ with all sections complete.
   - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing's going to keep me busy for a while.
 
-Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, providing downloadable PDFs, maybe even making a dead tree version. Perhaps NFTs... who knows?
+Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, providing downloadable PDFs, maybe even making a dead tree version. NFTs? Who knows...
 
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
 
@@ -713,7 +713,7 @@ Each validator making a successful deposit is consecutively assigned a unique va
 
 #### Gwei
 
-All Ether amounts are specified in units of Gwei ($\smash{10^9}$ Wei, $\smash{10^{-9}}$ Ether). This is basically a hack to avoid having to use integers wider than 64 bits to store validator balances and while doing calculations, since ($\smash{2^{64}}$ Wei is only 18 Ether. Even so, in some places care needs to be taken to avoid arithmetic overflow when dealing with Ether calculations.
+All Ether amounts are specified in units of Gwei ($10^9$ Wei, $10^{-9}$ Ether). This is basically a hack to avoid having to use integers wider than 64 bits to store validator balances and while doing calculations, since ($2^{64}$ Wei is only 18 Ether. Even so, in some places care needs to be taken to avoid arithmetic overflow when dealing with Ether calculations.
 
 #### Root
 
@@ -763,7 +763,7 @@ BLS (Boneh-Lynn-Shacham) is the digital signature scheme used by Eth2. It has so
 
 The `BLSPubkey` type holds a validator's public key, or the aggregation of several validators' public keys. This is used to verify messages that are claimed to have come from that validator or group of validators.
 
-In Ethereum&nbsp;2.0, BLS public keys are elliptic curve points from the BLS12-381 $\smash{G_1}$ group, thus are 48 bytes long when compressed.
+In Ethereum&nbsp;2.0, BLS public keys are elliptic curve points from the BLS12-381 $G_1$ group, thus are 48 bytes long when compressed.
 
 [TODO: link to BLS section]::
 
@@ -771,7 +771,7 @@ In Ethereum&nbsp;2.0, BLS public keys are elliptic curve points from the BLS12-3
 
 As above, we are using BLS signatures over the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve in order to sign messages between participants. As with all digital signature schemes, this guarantees both the identity of the sender and the integrity of the contents of any message.
 
-In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $\smash{G_2}$ group, thus are 96 bytes long when compressed.
+In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $G_2$ group, thus are 96 bytes long when compressed.
 
 #### ParticipationFlags
 
@@ -823,7 +823,7 @@ A candidate for the dullest constant. It's used as a default initialiser for val
 
 ##### `DEPOSIT_CONTRACT_TREE_DEPTH`
 
-`DEPOSIT_CONTRACT_TREE_DEPTH` specifies the size of the (sparse) Merkle tree used by the Eth1 deposit contract to store deposits made. With a value of 32, this allows for $\smash{2^{32}}$ = 4.3 billion deposits. Given that the minimum deposit it 1 Ether, that number is clearly enough.
+`DEPOSIT_CONTRACT_TREE_DEPTH` specifies the size of the (sparse) Merkle tree used by the Eth1 deposit contract to store deposits made. With a value of 32, this allows for $2^{32}$ = 4.3 billion deposits. Given that the minimum deposit it 1 Ether, that number is clearly enough.
 
 Since deposit receipts contain Merkle proofs, their size depends on the value of this constant.
 
@@ -858,7 +858,7 @@ Validators making attestions that get included on-chain are rewarded for three t
 
 These flags are temporarily recorded in the [`BeaconState`](/part3/containers/state#beaconstate) when attestations are processed, then used at the ends of epochs to update finality and to calculate validator rewards for making attestations.
 
-The mechanism for rewarding timely inclusion of attestations (thus penalising late attestations) differs between Altair and Phase&nbsp;0. In Phase&nbsp;0, attestations included within 32 slots would receive the full reward for the votes they got correct (source, target, head), plus a declining reward based on the delay in inclusion: $\smash{\frac{1}{2}}$ for a two slot delay, $\smash{\frac{1}{3}}$ for a three slot delay, and so on. With Altair, for each vote, we now have a cliff before which the validator receives the full reward and after which a penalty. The cliffs differ in duration, which is intended to more accurately target incentives at behaviours that genuinely help the chain (there is little value in rewarding a correct head vote made 30 slots late, for example). See [get_attestation_participation_flag_indices()](/part3/helper/accessors#get_attestation_participation_flag_indices) for how this is implemented in code.
+The mechanism for rewarding timely inclusion of attestations (thus penalising late attestations) differs between Altair and Phase&nbsp;0. In Phase&nbsp;0, attestations included within 32 slots would receive the full reward for the votes they got correct (source, target, head), plus a declining reward based on the delay in inclusion: $\frac{1}{2}$ for a two slot delay, $\frac{1}{3}$ for a three slot delay, and so on. With Altair, for each vote, we now have a cliff before which the validator receives the full reward and after which a penalty. The cliffs differ in duration, which is intended to more accurately target incentives at behaviours that genuinely help the chain (there is little value in rewarding a correct head vote made 30 slots late, for example). See [get_attestation_participation_flag_indices()](/part3/helper/accessors#get_attestation_participation_flag_indices) for how this is implemented in code.
 
 #### Incentivization weights
 
@@ -1019,7 +1019,7 @@ Note that sync committees are a different thing: there is only one sync committe
 
 To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
-Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](http://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minumum committee size needed to maintain a $\smash{2^{-40}}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
+Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](http://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minumum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
 
 If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
 
@@ -1038,7 +1038,7 @@ Vitalik provides some handy Python code to evaluate this expression.
     def probge(n, k, p):
         return sum([prob(n,i,p) for i in range(k,n+1)])
 
-Using this, I find that the minimum committee size to avoid a two-thirds majority with a $\smash{2^{-40}}$ probability is actually 109 rather than 111. But never mind.
+Using this, I find that the minimum committee size to avoid a two-thirds majority with a $2^{-40}$ probability is actually 109 rather than 111. But never mind.
 
     >>> probge(108, 72, 1.0 / 3) < 2**-40
     False
@@ -1147,7 +1147,7 @@ This mechanism is designed to allow sufficient time for committee members to fin
 
 The above notwithstanding, if an attacker has a large proportion of the stake, or is, for example, able to DoS block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. In which case the attacker might be able to manipulate the make up of committees advantageously by performing judicious exits and activations of their validators.
 
-To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond `MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD` = 3 epochs is $\smash{0.9^{3\times32}}$, which is about 1 in 25,000.
+To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
 ##### `MIN_EPOCHS_TO_INACTIVITY_PENALTY`
 
@@ -1243,7 +1243,7 @@ Thus, the total validator rewards per epoch (the Eth2 issuance rate) could in pr
 
 [TODO: link to some explanation of WB process]::
 
-One reward that is not tied to the base reward is the whistleblower reward. This is an amount awarded to the proposer of a block containing one or more proofs that a proposer or attestor has violated a slashing condition. The whistleblower reward is set at $\smash{\frac{1}{512}}$ of the effective balance of the slashed validator.
+One reward that is not tied to the base reward is the whistleblower reward. This is an amount awarded to the proposer of a block containing one or more proofs that a proposer or attestor has violated a slashing condition. The whistleblower reward is set at $\frac{1}{512}$ of the effective balance of the slashed validator.
 
 The whistleblower reward comes from new issuance of Ether on the beacon chain, but is more than offset by the Ether burned due to slashing penalties.
 
@@ -1263,7 +1263,7 @@ During a leak, no validators receive rewards, and they continue to accrue the no
 
 To examine the effect of the leak on a single validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing `INACTIVITY_PENALTY_QUOTIENT`.
 
-The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\smash{\frac{dB}{dt}=-\frac{Bt}{\alpha}}$, which can be solved to give $\smash{B(t)=B_0e^{-t^2/2\alpha}}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
+The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{Bt}{\alpha}$, which can be solved to give $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
 
 In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT` at `3 * 2**24`, this equates to around seven thousand epochs, or 31.5 days.
 
@@ -1350,7 +1350,7 @@ Only a single sync committee is active at any one time, and contains a randomly 
 
 A sync committee does its duties (and receives rewards for doing so) for only `EPOCHS_PER_SYNC_COMMITTEE_PERIOD` epochs until the next committee takes over.
 
-With 262,144 validators ($\smash{2^{18}}$), the expected time between being selected for sync committee duty is over 19 months. The probability of being in the current sync committee would be 1/512 per validator.
+With 262,144 validators ($2^{18}$), the expected time between being selected for sync committee duty is over 19 months. The probability of being in the current sync committee would be 1/512 per validator.
 
 `SYNC_COMMITTEE_SIZE` is a [trade-off](https://github.com/ethereum/consensus-specs/pull/2130) between [security](https://notes.ethereum.org/iMxxlEkuQMiPkEL1S6SfbQ) (ensuring that enough honest validators are always present) and efficiency for light clients (ensuring that they do not have to handle too much computation). The value 512 is conservative in terms of safety. It would be catastrophic for trustless bridges to other protocols, for example, if a sync committee voted in an invalid block.
 
@@ -2990,7 +2990,7 @@ The chosen block proposer does not need to be a member of one of the beacon comm
 
 The randao [is updated](/part3/transition/block#randao) with every block that is processed. To ensure that we are able to choose a different proposer at every slot, even if a block has not been received, the slot number is mixed into the seed using a hash.
 
-There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch: if every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\smash{\frac{1}{N}}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
+There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch: if every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
 
 #### `get_total_balance`
 

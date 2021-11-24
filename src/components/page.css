@@ -181,8 +181,7 @@ pre[class^="language-"] {
 }
 
 pre[class^="language-"] code {
-  font-size: 1.1em;
-  line-height: 1.2;
+  font-size: 0.9em;
 }
 
 /*** Displyed equations ***/

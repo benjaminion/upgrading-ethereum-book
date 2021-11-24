@@ -22,7 +22,7 @@ nav.sidebar {
 #index li {
   text-indent: -1em;
   list-style-type: none;
-  padding: 3px 0;
+  line-height: 1.4;
 }
 
 #index,

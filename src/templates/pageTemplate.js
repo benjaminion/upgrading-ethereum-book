@@ -37,7 +37,9 @@ export default function Template({
         <Footer />
         <PrevNext seq={markdownRemark.frontmatter.sequence} />
       </div>
-      <PageNavi path={markdownRemark.frontmatter.path} />
+      <div className="page-navi">
+        <PageNavi path={markdownRemark.frontmatter.path} />
+      </div>
     </Layout>
   )
 }
