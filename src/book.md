@@ -4,7 +4,7 @@
 
 This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3) - the rest is on its way.
 
-The Annotated Spec is the guts of the machine. Like the guts of a computer, there are a lot of components showing and wires hanging out: everything is on display. But with the guts in place, the rest of the book can build around them and the messy details neatly tucked away.
+The Annotated Spec is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, the rest of the book can build around them and the messy details neatly tucked away.
 
 My rough plan is as follows:
 
@@ -15,7 +15,7 @@ My rough plan is as follows:
   - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_ with all sections complete.
   - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing's going to keep me busy for a while.
 
-Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, providing downloadable PDFs, maybe even making a dead tree version. NFTs? Who knows...
+Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, PDF versions, maybe NFTs... who knows?
 
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
 
@@ -25,7 +25,7 @@ This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethere
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
-Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but for practical purposes you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
+Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
 
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
   - all things proof of stake and the beacon chain,
@@ -35,7 +35,7 @@ The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 pro
 
 I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
-It's a chunky list of exclusions, but that still leaves [plenty to talk about](/contents).
+It's a chunky list of exclusions, but there's still [plenty to talk about](/contents).
 
 ## Altair
 
@@ -43,7 +43,7 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 ## A note on Terminology
 
-The "Ethereum 2.0" terminology is out of favour in some circles, but fashions mean little to me. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
+The "Ethereum 2.0" terminology is out of favour in some circles, but I don't really care. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
 You will notice too that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
@@ -53,19 +53,13 @@ First and foremost, I want to thank my employer, ConsenSys. Much of the work has
 
 [TODO: link to jobs board]::
 
-So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's work gets cited throughout this book, and I am totally indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
+So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
-Thank you, as well, to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter, and some kind crypto gifts from anons. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
+Thank you to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter. And also some kind crypto gifts from anons. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
 
 Shout-out to the EthStaker community: you are the best!
 
-TODO
-
-And circling back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a challenge and a joy. A challenge that keeps me sharp now that I am well past my prime, and a joy that XXX
-
-in particular the Protocols group, PegaSys, that has been my home for the past four years. Especially the wonderful R&D team that I helped establish, and the astonishingly  Working daily with such brilliant, talented, generous, and knowledgeable people is a challenge and a joy. A challenge that keeps me sharp now that I am well past my prime, and a joy that XXX
-
-Teku team.
+Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. I helped establish the amazing Protocols R&D team, and later kicked off the project that became Teku. To all my colleagues and team-mates: you are incredible.
 
 # Part 1: Building <!-- /part1 -->
 
@@ -187,7 +181,7 @@ The Genesis event (beacon chain start) was originally designed to take place at 
 
 ### Introduction
 
-We have a challenge ahead of us. My task is to explain the following:
+We have a challenge ahead of us. My task is to explain the following.
 
 > The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
 
@@ -3223,7 +3217,7 @@ Next, we check whether each of the votes in the attestation are correct:
   - Does the attestation's source vote match what we believe to be the justified checkpoint in the epoch in question?
   - If so, does the attestation's target vote match the head block at the epoch's checkpoint, that is, the first slot of the epoch?
   - If so, does the attestation's head vote match what we believe to be the head block at the attestation's slot? Note that the slot may not contain a block &ndash; it may be a skip slot &ndash; in which case the last known block is considered to be the head.
-  
+
 These three build on each other, so that it is not possible to have a correct target vote without a correct source vote, and it is not possible to have a correct head vote without a correct target vote.
 
 The `assert` statement is interesting. If an attestation does not have the correct source vote, the block containing it is invalid and is discarded. Having an incorrect source vote means that the block proposer disagrees with me about the last justified checkpoint, which is an irreconcilable difference.
@@ -3270,7 +3264,9 @@ def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence
     return rewards, penalties
 ```
 
-TODO
+The "deltas" in the function name are the separate lists of rewards and penalties that it returns. Rewards and penalties are always treated separately. This is to avoid negative numbers, since all integers in the spec are unsigned.
+
+HERE
 
 ### Beacon State Mutators <!-- /part3/helper/mutators -->
 
@@ -3286,6 +3282,19 @@ def increase_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> 
     state.balances[index] += delta
 ```
 
+After creating a validator with its deposit balance, this and [`decrease_balance()`](#decrease_balance) are the only places in the spec where validator balances are ever modified.
+
+We need two separate functions to change validator balances, one to increase them and one to decrease them, since we are using only unsigned integers.
+
+Fun fact: A typo around this led to Teku's one and only [consensus failure](https://github.com/ConsenSys/teku/pull/885/files) at the initial [client interop event](https://media.consensys.net/how-30-eth-2-0-devs-locked-themselves-in-to-achieve-interoperability-175e4a807d92). Unsigned integers [induce bugs](https://critical.eschertech.com/2010/04/07/danger-unsigned-types-used-here/)!
+
+Used by:
+  - [`slash_validator()`](#def_slash_validator)
+  - [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties)
+  - [`process_attestation()`](/part3/transition/block#def_process_attestation)
+  - [`process_deposit()`](/part3/transition/block#def_process_deposit)
+  - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate)
+
 #### `decrease_balance`
 
 <a id="def_decrease_balance"></a>
@@ -3297,6 +3306,14 @@ def decrease_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> 
     """
     state.balances[index] = 0 if delta > state.balances[index] else state.balances[index] - delta
 ```
+
+The counterpart to [`increase_balance()`](#increase_balance). This has a little extra work to do to check for unsigned int underflow since balances may not go negative.
+
+Used by:
+  - [`slash_validator()`](#def_slash_validator)
+  - [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties)
+  - [`process_slashings()`](/part3/transition/epoch#def_process_slashings)
+  - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate)
 
 #### `initiate_validator_exit`
 
@@ -3323,6 +3340,25 @@ def initiate_validator_exit(state: BeaconState, index: ValidatorIndex) -> None:
     validator.exit_epoch = exit_queue_epoch
     validator.withdrawable_epoch = Epoch(validator.exit_epoch + MIN_VALIDATOR_WITHDRAWABILITY_DELAY)
 ```
+
+Exits may be initiated [voluntarily](/part3/transition/block#voluntary-exits), as a result of [being slashed](/part3/helper/mutators#slash_validator), or by [dropping to](/part3/transition/epoch#registry-updates) the [`EJECTION_BALANCE`](/part3/config/configuration#ejection_balance) threshold.
+
+In all cases, a dynamic "churn limit" caps the number of validators that may exit per epoch. This is calculated by [`get_validator_churn_limit()`](/part3/helper/accessors#get_validator_churn_limit). The mechanism for enforcing this is the exit queue: the validator's `exit_epoch` is set such that it is at the end of the queue.
+
+The exit queue is not maintained as a separate data structure, but is continually re-calculated from the exit epochs of all validators and allowing for a fixed number to exit per epoch. I expect there are some optimisations to be had around this in actual implementations.
+
+An exiting validator is expected to continue with its proposing and attesting duties until its `exit_epoch` has passed, and will continue to receive rewards and penalties accordingly.
+
+In addition, an exited validator remains eligible to be slashed until its `withdrawable_epoch`, which is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after its `exit_epoch`. This is to allow some extra time for any slashable offences by the validator to be detected and reported.
+
+Used by:
+  - [`slash_validator()`](/part3/helper/mutators#def_slash_validator)
+  - [`process_registry_updates()`](/part3/transition/epoch#def_process_registry_updates)
+  - [`process_voluntary_exit()`](/part3/transition/block#def_process_voluntary_exit)
+
+Uses:
+  - [`compute_activation_exit_epoch()`](/part3/helper/misc#compute_activation_exit_epoch)
+  - [`get_validator_churn_limit()`](/part3/helper/accessors#get_validator_churn_limit)
 
 #### `slash_validator`
 
@@ -3353,6 +3389,32 @@ def slash_validator(state: BeaconState,
     increase_balance(state, whistleblower_index, Gwei(whistleblower_reward - proposer_reward))
 ```
 
+Both [proposer slashings](/part3/transition/block#proposer-slashings) and [attester slashings](/part3/transition/block#attester-slashings) end up here when a report of a slashable offence has been verified during block processing.
+
+When a validator is slashed, several things happen immediately:
+ - The validator is processed for exit via [`initiate_validator_exit()`](#initiate_validator_exit), so it joins the exit queue.
+ - The validator is marked as slashed. This information is used when calculating rewards and penalties: while being exited, whatever it does, a slashed validator receives penalities as if it had failed to propose or attest, including the inactivity leak if applicable.
+ - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. Strictly, this postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
+ - The effective balance of the validator is added to the accumulated effective balances of validators slashed this epoch, and stored in the circular list, `state.slashings`. This will later be used by the slashing penalty calculation mentioned in the previous point.
+ - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair) is applied. With current values, this is a maximum of 0.5 Ether, increased from 0.25 Ether in Phase&nbsp;0. The plan is to increase this to 1 Ether at The Merge.
+ - The block proposer that included the slashing proof receives a reward.
+
+In short, a slashed validator receives an initial minor penalty, can expect to receive a further penalty later, and is marked for exit.
+
+Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/dev/specs/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
+
+As a final note, the only places where validator balances are updated outside epoch processing are here (when validators are initially slashed) and in [deposit processing](/part3/transition/block#deposits).
+
+Used by:
+ - [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing)
+ - [`process_attester_slashing`](/part3/transition/block#def_process_attester_slashing)
+
+Uses:
+ - [`initiate_validator_exit()`](#def_initiate_validator_exit)
+ - [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index)
+ - [`decrease_balance()`](#def_decrease_balance)
+ - [`increase_balance()`](#def_increase_balance)
+
 ## Beacon Chain State Transition Function <!-- /part3/transition -->
 
 ### Preamble
@@ -3376,6 +3438,8 @@ def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, valida
         assert block.state_root == hash_tree_root(state)
 ```
 
+TODO
+
 <a id="def_verify_block_signature"></a>
 
 ```python
@@ -3384,6 +3448,8 @@ def verify_block_signature(state: BeaconState, signed_block: SignedBeaconBlock) 
     signing_root = compute_signing_root(signed_block.message, get_domain(state, DOMAIN_BEACON_PROPOSER))
     return bls.Verify(proposer.pubkey, signing_root, signed_block.signature)
 ```
+
+TODO
 
 <a id="def_process_slots"></a>
 
@@ -3397,6 +3463,8 @@ def process_slots(state: BeaconState, slot: Slot) -> None:
             process_epoch(state)
         state.slot = Slot(state.slot + 1)
 ```
+
+TODO
 
 <a id="def_process_slot"></a>
 
@@ -3435,6 +3503,8 @@ def process_epoch(state: BeaconState) -> None:
     process_sync_committee_updates(state)  # [New in Altair]
 ```
 
+TODO
+
 #### Justification and finalization
 
 *Note*: The function `process_justification_and_finalization` is modified to adapt to the new participation records.
@@ -3454,6 +3524,8 @@ def process_justification_and_finalization(state: BeaconState) -> None:
     current_target_balance = get_total_balance(state, current_indices)
     weigh_justification_and_finalization(state, total_active_balance, previous_target_balance, current_target_balance)
 ```
+
+TODO
 
 <a id="def_weigh_justification_and_finalization"></a>
 
@@ -3496,6 +3568,8 @@ def weigh_justification_and_finalization(state: BeaconState,
         state.finalized_checkpoint = old_current_justified_checkpoint
 ```
 
+TODO
+
 #### Inactivity scores
 
 *Note*: The function `process_inactivity_updates` is new.
@@ -3519,6 +3593,8 @@ def process_inactivity_updates(state: BeaconState) -> None:
             state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
 ```
 
+TODO
+
 #### Rewards and penalties
 
 ##### Helpers
@@ -3536,6 +3612,8 @@ def get_base_reward_per_increment(state: BeaconState) -> Gwei:
     return Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
 ```
 
+TODO
+
 <a id="def_get_base_reward"></a>
 
 ```python
@@ -3547,12 +3625,16 @@ def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
     return Gwei(increments * get_base_reward_per_increment(state))
 ```
 
+TODO
+
 <a id="def_get_finality_delay"></a>
 
 ```python
 def get_finality_delay(state: BeaconState) -> uint64:
     return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 ```
+
+TODO
 
 <a id="def_is_in_inactivity_leak"></a>
 
@@ -3571,6 +3653,19 @@ def get_eligible_validator_indices(state: BeaconState) -> Sequence[ValidatorInde
         if is_active_validator(v, previous_epoch) or (v.slashed and previous_epoch + 1 < v.withdrawable_epoch)
     ]
 ```
+
+These are the validators that were subject to rewards and penalties in the previous epoch.
+
+The list differs from the active vaildator set returned by [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices) by including slashed by not fully exited validators in addition to the ones marked active. Slashed validators are subject to penalties right up to when they become withdrawable and are thus fully exited.
+
+Used by:
+  - [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas)
+  - [`process_inactivity_updates()`](#def_process_inactivity_updates)
+  - [`get_inactivity_penalty_deltas()`](#def_get_inactivity_penalty_deltas)
+
+Uses:
+  - [`get_previous_epoch()`](/part3/helper/accessors#def_get_previous_epoch)
+  - [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator)
 
 ##### Inactivity penalty deltas
 
