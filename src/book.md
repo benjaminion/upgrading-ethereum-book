@@ -618,11 +618,11 @@ The contents of each are identical.
 
 ### Annotated Specification
 
-The following chapters present the entire core beacon chain technical specification, annotated with my explanations and comments.
+What follows is the entire core beacon chain technical specification, annotated with my explanations and comments.
 
 This edition of Upgrading Ethereum is based on the Altair version of the beacon chain specification. At the time of writing, there is no single specification document for Altair. Instead, there is the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/phase0/beacon-chain.md) and an additional [Altair document](https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/altair/beacon-chain.md) describing the differences (a kind of text-based diff).
 
-For the following chapters, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/fork.md) documents into the flow of this one.
+For this work, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/fork.md) documents into the flow of this one.
 
 #### References
 
@@ -3394,7 +3394,7 @@ Both [proposer slashings](/part3/transition/block#proposer-slashings) and [attes
 When a validator is slashed, several things happen immediately:
  - The validator is processed for exit via [`initiate_validator_exit()`](#initiate_validator_exit), so it joins the exit queue.
  - The validator is marked as slashed. This information is used when calculating rewards and penalties: while being exited, whatever it does, a slashed validator receives penalities as if it had failed to propose or attest, including the inactivity leak if applicable.
- - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. Strictly, this postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
+ - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. The postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
  - The effective balance of the validator is added to the accumulated effective balances of validators slashed this epoch, and stored in the circular list, `state.slashings`. This will later be used by the slashing penalty calculation mentioned in the previous point.
  - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair) is applied. With current values, this is a maximum of 0.5 Ether, increased from 0.25 Ether in Phase&nbsp;0. The plan is to increase this to 1 Ether at The Merge.
  - The block proposer that included the slashing proof receives a reward.
@@ -3403,7 +3403,7 @@ In short, a slashed validator receives an initial minor penalty, can expect to r
 
 Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/dev/specs/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
 
-As a final note, the only places where validator balances are updated outside epoch processing are here (when validators are initially slashed) and in [deposit processing](/part3/transition/block#deposits).
+As a final observation, the only places where validator balances are updated outside epoch processing are here (when validators are initially slashed) and in [deposit processing](/part3/transition/block#deposits).
 
 Used by:
  - [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing)
@@ -3419,7 +3419,11 @@ Uses:
 
 ### Preamble
 
-The post-state corresponding to a pre-state `state` and a signed block `signed_block` is defined as `state_transition(state, signed_block)`. State transitions that trigger an unhandled exception (e.g. a failed `assert` or an out-of-range list access) are considered invalid. State transitions that cause a `uint64` overflow or underflow are also considered invalid.
+> The post-state corresponding to a pre-state `state` and a signed block `signed_block` is defined as `state_transition(state, signed_block)`. State transitions that trigger an unhandled exception (e.g. a failed `assert` or an out-of-range list access) are considered invalid. State transitions that cause a `uint64` overflow or underflow are also considered invalid.
+
+This is a very important statement of how the spec deals with invalid conditions and errors. Basically, if any block is processed that would trigger any kind of exception in the Python code of the specification, then that block is invalid and must be rejected. That means having to undo any state modifications already made in the course of processing the block.
+
+People who do [formal verification](https://github.com/ConsenSys/eth2.0-dafny) of the specification [don't much like this](https://github.com/ethereum/consensus-specs/issues/1797), as having assert statements in running code is an anti-pattern: it is better to ensure that your code can simply never fail.
 
 <a id="def_state_transition"></a>
 
@@ -3438,7 +3442,16 @@ def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, valida
         assert block.state_root == hash_tree_root(state)
 ```
 
-TODO
+In the spec, a state transition is triggered by receiving a block to process. That means that we first need to fast forward from our current slot number in the state (which is the slot at which we last processed a block) to the slot of the block we are processing. We treat intervening slots, if any, as empty. This "fast-forward" is done by [`process_slots()`](#def_process_slots), which also triggers epoch processing as required.
+
+In actual client implementations, state updates will usually be time-based, triggered by moving to the next slot if a block has not been received. However, the fast-forward functionality will be used when exploring different forks in the block tree.
+
+The `validate_result` parameter defaults to `True`, meaning that the block's signature will be checked, and that the result of applying the block to the state results in the same state root that the block claims it does (the "post-states" must match). When creating blocks, however, proposers can set `validate_result` to `False` to allow the state root to be calculated, else we'd have a circular dependency. The signature over the initial candidate block is omitted to avoid bad interactions with slashing protection when signing twice in a slot.
+
+Uses:
+ - [`process_slots()`](#def_process_slots)
+ - [`verify_block_signature`](#def_verify_block_signature)
+ - [`process_block`](/part3/transition/block#def_process_block)
 
 <a id="def_verify_block_signature"></a>
 
@@ -3449,7 +3462,15 @@ def verify_block_signature(state: BeaconState, signed_block: SignedBeaconBlock) 
     return bls.Verify(proposer.pubkey, signing_root, signed_block.signature)
 ```
 
-TODO
+Check that the signature on the block matches the block's contents and the public key of the claimed proposer of the block. This ensures that blocks cannot be forged, or tampered with in transit. All the public keys for validators are stored in the [`Validator`](/part3/containers/dependencies#validator)s list in state. See [domain types](/part3/config/constants#domain-types) for `DOMAIN_BEACON_PROPOSER`.
+
+Used by:
+ - [`state_transition()`](#def_state_transition)
+ 
+Uses:
+ - [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root)
+ - [`get_domain()`](/part3/helper/accessors#def_get_domain)
+ - [`bls.Verify()`](/part3/helper/crypto#bls-signatures)
 
 <a id="def_process_slots"></a>
 
@@ -3463,8 +3484,17 @@ def process_slots(state: BeaconState, slot: Slot) -> None:
             process_epoch(state)
         state.slot = Slot(state.slot + 1)
 ```
+ 
+Updates the state from its current slot up to the given slot number assuming that all the intermediate slots are empty (that they do not contain blocks). Iteratively calls [`process_slot()`](#def_process_slot) to apply the empty slot state-transition.
 
-TODO
+This is where epoch processing is triggered when required. Empty slot processing is extremely light weight, but any epoch transitions that need to be preocessed require the full rewards and penalties, and justification&ndash;finalisation apparatus.
+
+Used by:
+ - [`state_transition()`](#def_state_transition)
+ 
+Uses:
+ - [`process_slot()`](#def_process_slot)
+ - [`process_epoch()`](/part3/transition/epoch#def_process_epoch)
 
 <a id="def_process_slot"></a>
 
@@ -3481,7 +3511,28 @@ def process_slot(state: BeaconState) -> None:
     state.block_roots[state.slot % SLOTS_PER_HISTORICAL_ROOT] = previous_block_root
 ```
 
-TODO
+Apply a single slot state-transition (but updating the slot number, and any required epoch processing is handled by [`process_slots()`](#def_process_slots)). This is done at each slot whether or not there is a block present; if there is no block present then it is the only thing that is done.
+
+Slot processing is almost trivial and consists only of calculating the updated state and block hash tree roots (as necessary), and storing them in the historical lists in the state. In a circular way, the state roots only change over an the empty slot state transition due to updating the lists of state and block roots.
+
+[`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) is a multiple of [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch), so there is no danger of overwriting the circular lists of `state_roots` and `block_roots`. These will be dealt with correctly during epoch processing.
+
+The only curiosity here is the lines,
+
+```none
+    if state.latest_block_header.state_root == Bytes32():
+        state.latest_block_header.state_root = previous_state_root
+```
+
+This logic [was introduced](https://github.com/ethereum/consensus-specs/pull/711) to avoid a circular dependency while also keeping the state transition clean. Each block that we receive contains a post-state root, but as part of state processing we store the block in the state (in `state.latest_block_header`), thus changing the state root.
+
+To be able to verify the state transition, we use the convention that the state root of the incoming block, and the state root that we calculate after inserting the block into the state, are both based on a _temporary_ block header that has a stubbed state root, namely `Bytes32()`. This allows the block's claimed post-state root to validated without the circularity. The next time that `process_slots()` is called, the block's stubbed state root is updated to the actual post-state root.
+
+Used by:
+ - [`process_slots()`](#def_process_slots)
+
+Uses:
+ - [`hash_tree_root`](/part3/helper/crypto#hash_tree_root)
 
 ### Epoch processing <!-- /part3/transition/epoch -->
 
@@ -4517,7 +4568,7 @@ TODO
 
 TODO
 
-### Glossary <!-- /appendices/reference/glossary* -->
+## Glossary <!-- /appendices/reference/glossary* -->
 
 TODO
 
@@ -4535,4 +4586,3 @@ TODO
  - Light client
  - Sync committee
  - Aggregate signature
-
