@@ -28,7 +28,7 @@ in_part_3 {
     if (in_part_3 == 1) {
         print "# One Page Annotated Spec"
         print ""
-        print "**Note:** This page has been automatically generated from the chapters in [Part 3](/part3). You may find that some internal links are broken."
+        print "**Note:** This page is automatically generated from the chapters in [Part 3](/part3). You may find that some internal links are broken."
         in_part_3 = 2
         next
     }
