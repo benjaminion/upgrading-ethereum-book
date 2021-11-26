@@ -4,10 +4,11 @@
 
 This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3) - the rest is on its way.
 
-The Annotated Spec is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, the rest of the book can build around them and the messy details neatly tucked away.
+The Annotated Spec is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can build around them and the messy details neatly tucked away. My goal for the remaining parts of the book is to wrap a nice accessible narrative around the tricky technical details. There will be pictures.
 
 My rough plan is as follows:
 
+  - Spend some time fixing typos and generally recovering from doing the annotated spec.
   - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I aim to have done the following:
     - Completed [Part 1: Building](/part1)
     - Completed [Part 2: Technical Overview](/part2)
@@ -21,7 +22,7 @@ Meanwhile, I might get round to making it prettier, ensuring it is accessible an
 
 ## What to expect
 
-This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on prooof of stake &ndash; at a technical level. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
+This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on proof of stake &ndash; at a technical level. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
@@ -506,9 +507,9 @@ This property is important for light clients. Light clients are observers of the
 
 #### References
 
- - The initial discussion about the search for a good shuffling algorithm: https://github.com/ethereum/eth2.0-specs/issues/323.
- - The announcement of the winner: https://github.com/ethereum/eth2.0-specs/issues/563.
- - The orginal paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, "An Enciphering Scheme Based on a Card Shuffle": https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf. See the "generalized domain" algorithm on page 3.
+ - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/eth2.0-specs/issues/323) on the specs repo.
+ - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/eth2.0-specs/issues/563).
+ - The original paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, ["An Enciphering Scheme Based on a Card Shuffle"](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). See the "generalized domain" algorithm on page 3.
 
 ### BLS Signatures <!-- /part2/building_blocks/signatures* -->
 
@@ -610,19 +611,25 @@ TODO
 
 ## Introduction <!-- /part3/introduction -->
 
-The online annotated specification is available in two forms:
+This section, the Annotated Specification, is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. In the course of the next sections I will be dissecting the entire core beacon chain specification line by line. My aim is not only to explain how things work, but also to give some historical context, some of the reasoning behind how we ended up where we are today.
+
+[Early versions](https://github.com/ethereum/consensus-specs/blob/86ec833172704ea0889b5d595d17f45ba1a6676f/specs/core/0_beacon-chain.md) of the specs were written with much more narrative and explanation than today's. Over time they were coded up in Python for better precision and the benefits of being executable. However, in that process, most of the explanation and intuition was removed.[^fn-justinification]. Vitalik has created his own [annotated specifications](https://github.com/ethereum/annotated-spec] that cover many of the key insights. My goal here is to go one level deeper in thoroughness and detail. And perhaps to give an independent perspective as well.
+
+[^fn-justinification]: A process called "Justinification". Iykyk `;-)`
+
+As and when other parts of the book get written, I will add links to the specific chapters (for example on simple serialization, SSZ) on each topic.
+
+Note that the online annotated specification is available in two forms:
   - divided into chapters in [Part 3](/part3) of the main book, and
   - as a standalone [single page](/annotated-spec) that's useful for searching.
 
 The contents of each are identical.
 
-### Annotated Specification
-
-What follows is the entire core beacon chain technical specification, annotated with my explanations and comments.
+### Version information
 
 This edition of Upgrading Ethereum is based on the Altair version of the beacon chain specification. At the time of writing, there is no single specification document for Altair. Instead, there is the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/phase0/beacon-chain.md) and an additional [Altair document](https://github.com/ethereum/consensus-specs/blob/a89b55d7f791361c80c1133f411f5d2aaeb18c86/specs/altair/beacon-chain.md) describing the differences (a kind of text-based diff).
 
-For this work, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/fork.md) documents into the flow of this one.
+For this work, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the existing structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/b963f7ce96530d041f077cfa3c970bb631180dfb/specs/altair/fork.md) documents into the flow of this one.
 
 #### References
 
@@ -649,11 +656,11 @@ The specification defines the following Python custom types, "for type hinting a
 
 Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients, among other things. Here it can be thought of as just a primitive data type.
 
-[TODO: link instead to SSZ section]::
+[TODO: link instead to SSZ section when written]::
 
-Throughout the spec, (almost) all integers are now unsigned 64 bit numbers, `uint64`, but this hasn't always been the case.
+Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`, but this hasn't always been the case.
 
-Regarding "unsigned", there was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether Eth2 should use signed or unsigned integers, but eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertantly underflowing - negative numbers are forbidden.
+Regarding "unsigned", there was [much discussion](https://github.com/ethereum/eth2.0-specs/issues/626) around whether Eth2 should use signed or unsigned integers, but eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertantly causing underflows since negative numbers are forbidden.
 
 And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`.
 
@@ -779,9 +786,9 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 #### References
 
- - A primer on Merkle roots: https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/
-   - See also Wikipedia: https://en.wikipedia.org/wiki/Merkle_tree
- - Details of the BLS12-381 elliptic curve: https://hackmd.io/@benjaminion/bls12-381
+ - A [primer on Merkle roots](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/).
+   - See also [Wikipedia on Merkle Trees](https://en.wikipedia.org/wiki/Merkle_tree).
+ - I have written an [intro to the BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381) elsewhere.
 
 ### Constants <!-- /part3/config/constants -->
 
@@ -2166,6 +2173,8 @@ In principle `integer_squareroot` is also used in [`get_attestation_participatio
 
 [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) is used which has pretty good convergence properties, but implementations may use any method that gives identical results.
 
+Used by: [`get_base_reward_per_increment()`](/part3/transition/epoch#def_get_base_reward_per_increment), [`get_attestation_participation_flag_indices()`](/part3/helper/accessors#def_get_attestation_participation_flag_indices).
+
 #### `xor`
 
 <a id="def_xor"></a>
@@ -2183,6 +2192,8 @@ The bitwise `xor` of two 32-byte quantities is defined here in Python terms.
 This is used only in [`process_randao()`](/part3/transition/block#def_process_randao) when mixing in the new randao reveal.
 
 Fun fact: if you `xor` two `byte` types in Java, the result is a 32 bit (signed) integer. This is one reason  we need to define the "obvious" here. But mainly, because the spec is executable, we need to tell Python what it doesn't already know.
+
+Used by: [`process_randao()`](/part3/transition/block#def_process_randao).
 
 #### `uint_to_bytes`
 
@@ -2219,6 +2230,10 @@ def bytes_to_uint64(data: bytes) -> uint64:
 
 It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/validator.md#aggregation-selection).
 
+`int.from_bytes` is a [built-in](https://docs.python.org/3/library/stdtypes.html#int.from_bytes) Python&nbsp;3 method. The `uint64` cast is provided by the spec's SSZ implementation.
+
+Used by: [`compute_shuffled_index`](/part3/helper/misc#def_compute_shuffled_index).
+
 ### Crypto <!-- /part3/helper/crypto -->
 
 #### `hash`
@@ -2229,7 +2244,13 @@ SHA256 was [chosen](https://github.com/ethereum/eth2.0-specs/pull/779) as the pr
 
 There was a lot of [discussion](https://github.com/ethereum/eth2.0-specs/issues/612) about this choice early in the design process. The [original plan](https://github.com/ethereum/eth2.0-specs/pull/11) had been to use the BLAKE2b-512 hash function &ndash; that being a modern hash function that's faster than SHA3 &ndash; and to move to a STARK/SNARK friendly hash function at some point (such as [MiMC](https://ethresear.ch/t/hash-based-vdfs-mimc-and-starks/2337)). However, to keep interoperability with Eth1, in particular for the implementation of the deposit contract, the hash function was [changed to Keccak256](https://github.com/ethereum/eth2.0-specs/issues/151). Finally, we [settled on SHA256](https://github.com/ethereum/eth2.0-specs/pull/779) as having even broader compatibility.
 
+The hash function serves two purposes within the protocol. The main use, computationally, is in Merleization, the computation of hash tree roots, which is ubiquitous in the protocol. Its other use is to harden the randomness used in various places.
+
+Used by: [`hash_tree_root`](#def_hash_tree_root), [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`compute_shuffled_index()`](/part3/helper/misc#def_compute_shuffled_index), [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index), [`get_seed()`](/part3/helper/accessors#def_get_seed), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices), [`process_randao()`](/part3/transition/block#def_process_randao).
+
 #### `hash_tree_root`
+
+<a id="def_hash_tree_root"></a>
 
 > `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#beacon-chain-state-transition-function).
 
@@ -2382,11 +2403,11 @@ def is_slashable_validator(validator: Validator, epoch: Epoch) -> bool:
     return (not validator.slashed) and (validator.activation_epoch <= epoch < validator.withdrawable_epoch)
 ```
 
-Used by [`process_proposer_slashing()`](/part3/transition/block#def_process_proposer_slashing) and [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing).
-
 Validators can be slashed only once: the flag [`Validator.slashed`](/part3/containers/dependencies#validator) is [set](/part3/helper/mutators#def_slash_validator) on the occasion of the first slashing.
 
 An unslashed validator remains eligible to be slashed from when it becomes active right up until it becomes withdrawable. This is [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs (around 27 hours) after it has exited from being a validator and ceased validation duties.
+
+Used by: [`process_proposer_slashing()`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing).
 
 #### `is_slashable_attestation_data`
 
@@ -3288,12 +3309,7 @@ We need two separate functions to change validator balances, one to increase the
 
 Fun fact: A typo around this led to Teku's one and only [consensus failure](https://github.com/ConsenSys/teku/pull/885/files) at the initial [client interop event](https://media.consensys.net/how-30-eth-2-0-devs-locked-themselves-in-to-achieve-interoperability-175e4a807d92). Unsigned integers [induce bugs](https://critical.eschertech.com/2010/04/07/danger-unsigned-types-used-here/)!
 
-Used by:
-  - [`slash_validator()`](#def_slash_validator)
-  - [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties)
-  - [`process_attestation()`](/part3/transition/block#def_process_attestation)
-  - [`process_deposit()`](/part3/transition/block#def_process_deposit)
-  - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate)
+Used by: [`slash_validator()`](#def_slash_validator), [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties), [`process_attestation()`](/part3/transition/block#def_process_attestation), [`process_deposit()`](/part3/transition/block#def_process_deposit), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
 
 #### `decrease_balance`
 
@@ -3309,11 +3325,7 @@ def decrease_balance(state: BeaconState, index: ValidatorIndex, delta: Gwei) -> 
 
 The counterpart to [`increase_balance()`](#increase_balance). This has a little extra work to do to check for unsigned int underflow since balances may not go negative.
 
-Used by:
-  - [`slash_validator()`](#def_slash_validator)
-  - [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties)
-  - [`process_slashings()`](/part3/transition/epoch#def_process_slashings)
-  - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate)
+Used by: [`slash_validator()`](#def_slash_validator), [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties), [`process_slashings()`](/part3/transition/epoch#def_process_slashings), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
 
 #### `initiate_validator_exit`
 
@@ -3351,14 +3363,9 @@ An exiting validator is expected to continue with its proposing and attesting du
 
 In addition, an exited validator remains eligible to be slashed until its `withdrawable_epoch`, which is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after its `exit_epoch`. This is to allow some extra time for any slashable offences by the validator to be detected and reported.
 
-Used by:
-  - [`slash_validator()`](/part3/helper/mutators#def_slash_validator)
-  - [`process_registry_updates()`](/part3/transition/epoch#def_process_registry_updates)
-  - [`process_voluntary_exit()`](/part3/transition/block#def_process_voluntary_exit)
+Used by: [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`process_registry_updates()`](/part3/transition/epoch#def_process_registry_updates), [`process_voluntary_exit()`](/part3/transition/block#def_process_voluntary_exit).
 
-Uses:
-  - [`compute_activation_exit_epoch()`](/part3/helper/misc#compute_activation_exit_epoch)
-  - [`get_validator_churn_limit()`](/part3/helper/accessors#get_validator_churn_limit)
+Uses: [`compute_activation_exit_epoch()`](/part3/helper/misc#compute_activation_exit_epoch), [`get_validator_churn_limit()`](/part3/helper/accessors#get_validator_churn_limit).
 
 #### `slash_validator`
 
@@ -3405,15 +3412,9 @@ Note that the `whistleblower_index` defaults to `None` in the parameter list. Th
 
 As a final observation, the only places where validator balances are updated outside epoch processing are here (when validators are initially slashed) and in [deposit processing](/part3/transition/block#deposits).
 
-Used by:
- - [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing)
- - [`process_attester_slashing`](/part3/transition/block#def_process_attester_slashing)
+Used by: [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing`](/part3/transition/block#def_process_attester_slashing).
 
-Uses:
- - [`initiate_validator_exit()`](#def_initiate_validator_exit)
- - [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index)
- - [`decrease_balance()`](#def_decrease_balance)
- - [`increase_balance()`](#def_increase_balance)
+Uses: [`initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`decrease_balance()`](#def_decrease_balance), [`increase_balance()`](#def_increase_balance).
 
 ## Beacon Chain State Transition Function <!-- /part3/transition -->
 
@@ -3448,10 +3449,7 @@ In actual client implementations, state updates will usually be time-based, trig
 
 The `validate_result` parameter defaults to `True`, meaning that the block's signature will be checked, and that the result of applying the block to the state results in the same state root that the block claims it does (the "post-states" must match). When creating blocks, however, proposers can set `validate_result` to `False` to allow the state root to be calculated, else we'd have a circular dependency. The signature over the initial candidate block is omitted to avoid bad interactions with slashing protection when signing twice in a slot.
 
-Uses:
- - [`process_slots()`](#def_process_slots)
- - [`verify_block_signature`](#def_verify_block_signature)
- - [`process_block`](/part3/transition/block#def_process_block)
+Uses: [`process_slots()`](#def_process_slots), [`verify_block_signature`](#def_verify_block_signature), [`process_block`](/part3/transition/block#def_process_block).
 
 <a id="def_verify_block_signature"></a>
 
@@ -3464,13 +3462,9 @@ def verify_block_signature(state: BeaconState, signed_block: SignedBeaconBlock) 
 
 Check that the signature on the block matches the block's contents and the public key of the claimed proposer of the block. This ensures that blocks cannot be forged, or tampered with in transit. All the public keys for validators are stored in the [`Validator`](/part3/containers/dependencies#validator)s list in state. See [domain types](/part3/config/constants#domain-types) for `DOMAIN_BEACON_PROPOSER`.
 
-Used by:
- - [`state_transition()`](#def_state_transition)
+Used by: [`state_transition()`](#def_state_transition).
  
-Uses:
- - [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root)
- - [`get_domain()`](/part3/helper/accessors#def_get_domain)
- - [`bls.Verify()`](/part3/helper/crypto#bls-signatures)
+Uses: [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`bls.Verify()`](/part3/helper/crypto#bls-signatures).
 
 <a id="def_process_slots"></a>
 
@@ -3489,12 +3483,9 @@ Updates the state from its current slot up to the given slot number assuming tha
 
 This is where epoch processing is triggered when required. Empty slot processing is extremely light weight, but any epoch transitions that need to be preocessed require the full rewards and penalties, and justification&ndash;finalisation apparatus.
 
-Used by:
- - [`state_transition()`](#def_state_transition)
+Used by: [`state_transition()`](#def_state_transition).
  
-Uses:
- - [`process_slot()`](#def_process_slot)
- - [`process_epoch()`](/part3/transition/epoch#def_process_epoch)
+Uses: [`process_slot()`](#def_process_slot), [`process_epoch()`](/part3/transition/epoch#def_process_epoch).
 
 <a id="def_process_slot"></a>
 
@@ -3524,15 +3515,13 @@ The only curiosity here is the lines,
         state.latest_block_header.state_root = previous_state_root
 ```
 
-This logic [was introduced](https://github.com/ethereum/consensus-specs/pull/711) to avoid a circular dependency while also keeping the state transition clean. Each block that we receive contains a post-state root, but as part of state processing we store the block in the state (in `state.latest_block_header`), thus changing the state root.
+This logic [was introduced](https://github.com/ethereum/consensus-specs/pull/711) to avoid a circular dependency while also keeping the state transition clean. Each block that we receive contains a post-state root, but as part of state processing we store the block in the state (in `state.latest_block_header`), thus changing the post-state root.
 
-To be able to verify the state transition, we use the convention that the state root of the incoming block, and the state root that we calculate after inserting the block into the state, are both based on a _temporary_ block header that has a stubbed state root, namely `Bytes32()`. This allows the block's claimed post-state root to validated without the circularity. The next time that `process_slots()` is called, the block's stubbed state root is updated to the actual post-state root.
+Therefore, to be able to verify the state transition, we use the convention that the state root of the incoming block, and the state root that we calculate after inserting the block into the state, are both based on a _temporary_ block header that has a stubbed state root, namely `Bytes32()`. This allows the block's claimed post-state root to validated without the circularity. The next time that `process_slots()` is called, the block's stubbed state root is updated to the actual post-state root, as above.
 
-Used by:
- - [`process_slots()`](#def_process_slots)
+Used by: [`process_slots()`](#def_process_slots).
 
-Uses:
- - [`hash_tree_root`](/part3/helper/crypto#hash_tree_root)
+Uses: [`hash_tree_root`](/part3/helper/crypto#hash_tree_root).
 
 ### Epoch processing <!-- /part3/transition/epoch -->
 
@@ -3554,11 +3543,38 @@ def process_epoch(state: BeaconState) -> None:
     process_sync_committee_updates(state)  # [New in Altair]
 ```
 
+The long laundry list of things that need to be done at the end of an epoch. You can see from the comments that a bunch of extra work was added in Altair.
+
+With the exception of [slashing](/part3/helper/mutators#slash_validator) and [deposit processing](/part3/transition/block#deposits), epoch processing is the only place where validator balances are modified.
+
+Used by: [`process_slots()`](/part3/transition#def_process_slots).
+
+#### Inactivity scores
+
+*Note*: The function `process_inactivity_updates` is new.
+
+<a id="def_process_inactivity_updates"></a>
+
+```python
+def process_inactivity_updates(state: BeaconState) -> None:
+    # Skip the genesis epoch as score updates are based on the previous epoch participation
+    if get_current_epoch(state) == GENESIS_EPOCH:
+        return
+
+    for index in get_eligible_validator_indices(state):
+        # Increase the inactivity score of inactive validators
+        if index in get_unslashed_participating_indices(state, TIMELY_TARGET_FLAG_INDEX, get_previous_epoch(state)):
+            state.inactivity_scores[index] -= min(1, state.inactivity_scores[index])
+        else:
+            state.inactivity_scores[index] += INACTIVITY_SCORE_BIAS
+        # Decrease the inactivity score of all eligible validators during a leak-free epoch
+        if not is_in_inactivity_leak(state):
+            state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
+```
+
 TODO
 
 #### Justification and finalization
-
-*Note*: The function `process_justification_and_finalization` is modified to adapt to the new participation records.
 
 <a id="def_process_justification_and_finalization"></a>
 
@@ -3576,7 +3592,21 @@ def process_justification_and_finalization(state: BeaconState) -> None:
     weigh_justification_and_finalization(state, total_active_balance, previous_target_balance, current_target_balance)
 ```
 
-TODO
+I believe the corner cases mentioned in the comments are related to [Issue 849](https://github.com/ethereum/consensus-specs/issues/849)[^fn-ugly-integers]. In any case, skipping justification and finalisation calculations during the first two epochs definitely simplifies things.
+
+[^fn-ugly-integers]: Worth a visit if only to have a chuckle at Jacek's description of `uint`s as "ugly integers".
+
+For the purposes of the Casper FFG finality calculations, we are interested only in attestations that have source and target votes we agree with. If the source vote is incorrect, then the attestation is never processed into the state, so we just need the validators that voted for the correct target, according to their [participation flag indices](/part3/config/constants#participation-flag-indices).
+
+We collect votes from both the previous epoch and the current epoch because we will be using the "$k$-finality" feature of Casper FFG, with $k=2$. More on this below.
+
+Once we know which validators voted for the correct source and head in the current and previous epochs, we add up their effective balances (not actual balances). `total_active_balance` is the sum of the effective balances for all validators that ought to have voted during the current epoch.
+
+These aggregate balances are passed to [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization) to do the actual work of updating justification and finalisation.
+
+Used by: [`process_epoch`](#def_process_epoch).
+
+Uses: [`get_unslashed_participating_indices()`](), [`get_total_active_balance()`](), [`get_total_balance()`](), [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization).
 
 <a id="def_weigh_justification_and_finalization"></a>
 
@@ -3619,30 +3649,9 @@ def weigh_justification_and_finalization(state: BeaconState,
         state.finalized_checkpoint = old_current_justified_checkpoint
 ```
 
-TODO
+NB `total_active_balance` is current, so not strictly correct for the previous epoch. Doesn't matter since the set changes slowly? Or k-finality takes account of this?
 
-#### Inactivity scores
-
-*Note*: The function `process_inactivity_updates` is new.
-
-<a id="def_process_inactivity_updates"></a>
-
-```python
-def process_inactivity_updates(state: BeaconState) -> None:
-    # Skip the genesis epoch as score updates are based on the previous epoch participation
-    if get_current_epoch(state) == GENESIS_EPOCH:
-        return
-
-    for index in get_eligible_validator_indices(state):
-        # Increase the inactivity score of inactive validators
-        if index in get_unslashed_participating_indices(state, TIMELY_TARGET_FLAG_INDEX, get_previous_epoch(state)):
-            state.inactivity_scores[index] -= min(1, state.inactivity_scores[index])
-        else:
-            state.inactivity_scores[index] += INACTIVITY_SCORE_BIAS
-        # Decrease the inactivity score of all eligible validators during a leak-free epoch
-        if not is_in_inactivity_leak(state):
-            state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
-```
+HERE!
 
 TODO
 
@@ -3709,14 +3718,9 @@ These are the validators that were subject to rewards and penalties in the previ
 
 The list differs from the active vaildator set returned by [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices) by including slashed by not fully exited validators in addition to the ones marked active. Slashed validators are subject to penalties right up to when they become withdrawable and are thus fully exited.
 
-Used by:
-  - [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas)
-  - [`process_inactivity_updates()`](#def_process_inactivity_updates)
-  - [`get_inactivity_penalty_deltas()`](#def_get_inactivity_penalty_deltas)
+Used by: [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_inactivity_updates()`](#def_process_inactivity_updates), [`get_inactivity_penalty_deltas()`](#def_get_inactivity_penalty_deltas).
 
-Uses:
-  - [`get_previous_epoch()`](/part3/helper/accessors#def_get_previous_epoch)
-  - [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator)
+Uses: [`get_previous_epoch()`](/part3/helper/accessors#def_get_previous_epoch), [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator).
 
 ##### Inactivity penalty deltas
 
