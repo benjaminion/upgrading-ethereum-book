@@ -1232,13 +1232,13 @@ So, the unsuffixed versions are the Phase&nbsp;0 values, and the `_ALTAIR` suffi
 
 ##### `BASE_REWARD_FACTOR`
 
-[TODO: check the "almost" here - which ones aren't? Whistleblower; any more?]::
-
-This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward" which is [formulated as](/part3/transition/epoch#get_base_reward_per_increment),
+This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward" which is [formulated as](/part3/transition/epoch#def_get_base_reward_per_increment),
 
     EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state))
 
 Thus, the total validator rewards per epoch (the Eth2 issuance rate) could in principle be tuned by increasing or decreasing `BASE_REWARD_FACTOR`.
+
+The exception is proposer rewards for including slashing reports in blocks. However, these are more than offset by the amount of stake burnt, so do not increase the overall issuance rate.
 
 ##### `WHISTLEBLOWER_REWARD_QUOTIENT`
 
@@ -3287,7 +3287,7 @@ def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence
 
 The "deltas" in the function name are the separate lists of rewards and penalties that it returns. Rewards and penalties are always treated separately. This is to avoid negative numbers, since all integers in the spec are unsigned.
 
-HERE
+TODO
 
 ### Beacon State Mutators <!-- /part3/helper/mutators -->
 
@@ -3549,31 +3549,6 @@ With the exception of [slashing](/part3/helper/mutators#slash_validator) and [de
 
 Used by: [`process_slots()`](/part3/transition#def_process_slots).
 
-#### Inactivity scores
-
-*Note*: The function `process_inactivity_updates` is new.
-
-<a id="def_process_inactivity_updates"></a>
-
-```python
-def process_inactivity_updates(state: BeaconState) -> None:
-    # Skip the genesis epoch as score updates are based on the previous epoch participation
-    if get_current_epoch(state) == GENESIS_EPOCH:
-        return
-
-    for index in get_eligible_validator_indices(state):
-        # Increase the inactivity score of inactive validators
-        if index in get_unslashed_participating_indices(state, TIMELY_TARGET_FLAG_INDEX, get_previous_epoch(state)):
-            state.inactivity_scores[index] -= min(1, state.inactivity_scores[index])
-        else:
-            state.inactivity_scores[index] += INACTIVITY_SCORE_BIAS
-        # Decrease the inactivity score of all eligible validators during a leak-free epoch
-        if not is_in_inactivity_leak(state):
-            state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
-```
-
-TODO
-
 #### Justification and finalization
 
 <a id="def_process_justification_and_finalization"></a>
@@ -3596,15 +3571,15 @@ I believe the corner cases mentioned in the comments are related to [Issue 849](
 
 [^fn-ugly-integers]: Worth a visit if only to have a chuckle at Jacek's description of `uint`s as "ugly integers".
 
-For the purposes of the Casper FFG finality calculations, we are interested only in attestations that have source and target votes we agree with. If the source vote is incorrect, then the attestation is never processed into the state, so we just need the validators that voted for the correct target, according to their [participation flag indices](/part3/config/constants#participation-flag-indices).
+For the purposes of the Casper FFG finality calculations, we want attestations that have both source and target votes we agree with. If the source vote is incorrect, then the attestation is never processed into the state, so we just need the validators that voted for the correct target, according to their [participation flag indices](/part3/config/constants#participation-flag-indices).
 
-We collect votes from both the previous epoch and the current epoch because we will be using the "$k$-finality" feature of Casper FFG, with $k=2$. More on this below.
+Since correct target votes can be included up to 32 slots after they are made, we collect votes from both the previous epoch and the current epoch to ensure that we have them all.
 
-Once we know which validators voted for the correct source and head in the current and previous epochs, we add up their effective balances (not actual balances). `total_active_balance` is the sum of the effective balances for all validators that ought to have voted during the current epoch.
+Once we know which validators voted for the correct source and head in the current and previous epochs, we add up their effective balances (not actual balances). `total_active_balance` is the sum of the effective balances for all validators that ought to have voted during the current epoch. Slashed, but not exited validators are not included in these calculations.
 
 These aggregate balances are passed to [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization) to do the actual work of updating justification and finalisation.
 
-Used by: [`process_epoch`](#def_process_epoch).
+Used by: [`process_epoch()`](#def_process_epoch).
 
 Uses: [`get_unslashed_participating_indices()`](), [`get_total_active_balance()`](), [`get_total_balance()`](), [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization).
 
@@ -3649,21 +3624,82 @@ def weigh_justification_and_finalization(state: BeaconState,
         state.finalized_checkpoint = old_current_justified_checkpoint
 ```
 
-NB `total_active_balance` is current, so not strictly correct for the previous epoch. Doesn't matter since the set changes slowly? Or k-finality takes account of this?
+This routine handles justification first, and then finalisation.
 
-HERE!
+##### Justification
 
-TODO
+A supermajority link is a vote with a justified source checkpoint $C_m$ and a target checkpoint $C_n$ that was made by validators controlling more than two-thirds of the stake. If a checkpoint has a supermajority link pointing to it then we consider it justified. So, if more than two-thirds of the validators agree that checkpoint 3 was justified (their source vote) and have checkpoint 4 as their target vote, then we justify checkpoint 4.
+
+We know that all the attestations have source votes that we agree with. The first `if` statement tries to justify the previous epoch's checkpoint seeing if the (source, target) pair is a supermajority. The second `if` statement tries to justify the current epoch's checkpoint. Note that the previous epoch's checkpoint might already have been justified; this is not checked but does not affect the logic.
+
+The justification status of the last four epochs is stored in an array of bits in the state. After shifting the bits along by one at the outset of the routine, the justification status of the current epoch is stored in element 0, the previous in element 1, and so on.
+
+Note that the `total_active_balance` is the current epoch's total balance, so it may not be strictly correct for caluculating the supermajority for the previous epoch. However, the rate at which the validator set can change between epochs is [tightly constrained](/part3/config/configuration#min_per_epoch_churn_limit), so this is not a significant issue.
+
+##### Finalisation
+
+The version of Casper FFG described in the [Gasper paper](https://arxiv.org/abs/2003.03052) uses $k$-finality, which extends the handling of finality in the [original Casper FFG paper](https://arxiv.org/abs/1710.09437).
+
+In $k$-finality, if we have a consecutive set of $k$ justified checkpoints ${C_j, \ldots, C_{j+k-1}}$, and a supermajority link from $C_j$ to $C_{j+k}$, then $C_j$ is finalised. Also note that this justifies $C_{j+k}$, by the rules above.
+
+The Casper FFG version of this is $1$-finality. So, a supermajority link from a justified checkpoint $C_n$ to the very next checkpoint $C_{n+1}$ both justifies $C_{n+1}$ and finalises $C_n$.
+
+On the beacon chain we are using $2$-finality, since target votes may be included up to an epoch late. In $2$ finality, we keep records of checkpoint justification status for four epochs and have the following conditions for finalisation, where the checkpoint for the current epoch is $C_n$. Note that we have already updated the justification status of $C_n$ and $C_{n-1}$ in this routine, which implies the existence of supermajority links pointing to them if the corresponding bits are set, respectively.
+ 1. Checkpoints $C_{n-3}$ and $C_{n-2}$ are justified, and there is a supermajority link from $C_{n-3}$ to $C_{n-1}$: finalise $C_{n-3}$.
+ 2. Checkpoint $C_{n-2}$ is justified, and there is a supermajority link from $C_{n-2}$ to $C_{n-1}$: finalise $C_{n-2}$. This is equivalent to $1$-finality applied to the previous epoch.
+ 3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
+ 4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
+
+<div class="image">
+<img src="md/images/k-finality.svg" /><br />
+<span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
+</div>
+
+Almost always we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the 2/3rds particpation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 3 to immediately finalise $C_{n-1}$, for example.
+
+For the uninitiated, in Python's array slice syntax, `bits[1:4]` means bits 1, 2, and 3 (but not 4). This always trips me up.
+
+Used by: [`process_justification_and_finalization`](#def_process_justification_and_finalization).
+
+#### Inactivity scores
+
+<a id="def_process_inactivity_updates"></a>
+
+```python
+def process_inactivity_updates(state: BeaconState) -> None:
+    # Skip the genesis epoch as score updates are based on the previous epoch participation
+    if get_current_epoch(state) == GENESIS_EPOCH:
+        return
+
+    for index in get_eligible_validator_indices(state):
+        # Increase the inactivity score of inactive validators
+        if index in get_unslashed_participating_indices(state, TIMELY_TARGET_FLAG_INDEX, get_previous_epoch(state)):
+            state.inactivity_scores[index] -= min(1, state.inactivity_scores[index])
+        else:
+            state.inactivity_scores[index] += INACTIVITY_SCORE_BIAS
+        # Decrease the inactivity score of all eligible validators during a leak-free epoch
+        if not is_in_inactivity_leak(state):
+            state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
+```
+
+With Altair, each validator has an individual inactivity score in the beacon state which is updated as follows.
+  - Every epoch, irrespective of the inactivity leak,
+    - decrease the score by one when the validator makes a correct [timely target vote](/part3/config/constants#participation-flag-indices), and
+    - increase the score by [`INACTIVITY_SCORE_BIAS`](/part3/config/configuration#inactivity_score_bias) otherwise. Note that [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices) includes slashed but not yet withdrawable validators: slashed validators are treated as not participating, whatever they actually do.
+  - When _not_ in an inactivity leak
+    - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
+
+There is a floor of zero on the score. So, outside a leak, validators' scores will rapidly return to zero and stay there, since `INACTIVITY_SCORE_RECOVERY_RATE` is greater than `INACTIVITY_SCORE_BIAS`.
+
+See [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) for more discussion on this and some charts illustrating the effect.
+
+Used by: [`process_epoch()`](#def_process_epoch).
+
+Uses: [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices), [`get_unslashed_participating_indices`](/part3/helper/accessors#get_unslashed_participating_indices), [`is_in_inactivity_leak()`](/part3/transition/epoch#def_is_in_inactivity_leak).
 
 #### Rewards and penalties
 
 ##### Helpers
-
-<a id="get_base_reward_per_increment"></a>
-
-*Note*: The function `get_base_reward` is modified with the removal of `BASE_REWARDS_PER_EPOCH` and the use of increment based accounting.
-
-*Note*: On average an optimally performing validator earns one base reward per epoch.
 
 <a id="def_get_base_reward_per_increment"></a>
 
@@ -3672,7 +3708,25 @@ def get_base_reward_per_increment(state: BeaconState) -> Gwei:
     return Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
 ```
 
-TODO
+*Note*: On average an optimally performing validator earns one base reward per epoch.
+
+HERE! Revise this again:
+
+The maximum base reward (which I will call $B$ from here-on) is the fundamental determiner of the issuance rate of the beacon chain: all attester and proposer rewards are calculated from this. As I noted under [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor), this is the big knob to turn if we wish to increase or decrease the total reward for participating in Eth2.
+
+This function provides "the base reward per increment", which is $\frac{B}{32}$. An increment is a single unit of a validator's effective balance, denominated in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which happens to be one Ether. So, an increment is 1 Ether of effective balance, and maximally effective validator has 32 increments.
+
+The maximum base reward is inversely proportional to the square root of the total balance of all active validators. This means that, as the number $N$ of validators increases, the reward per validator decreases as $\frac{1}{\sqrt{N}}$, and the overall issuance per epoch increases as $\sqrt{N}$.
+
+The decrease with increasing $N$ in per-validator rewards provides a price discovery mechanism: the idea is that an equilibrium will be found where the total number of validators results in a reward similar to returns available elsewhere for similar risk. The [Eth2 Launch Pad](https://launchpad.ethereum.org/) has a graph that shows how this translates into expected APR for running a validator for different total amounts of ETH staked.
+
+[TODO: insert issuance graph]::
+
+A different curve could have been chosen for the rewards profile. For example, the inverse of total balance rather than its square root would keep total issuance constant. Vitalik justifies the inverse square root approach and discusses the trade-offs in the [Serenity design rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Base-rewards).
+
+Used by: [`get_base_reward()`](#def_get_base_reward), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
+
+Uses: [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot).
 
 <a id="def_get_base_reward"></a>
 
@@ -3684,6 +3738,14 @@ def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
     increments = state.validators[index].effective_balance // EFFECTIVE_BALANCE_INCREMENT
     return Gwei(increments * get_base_reward_per_increment(state))
 ```
+Thus, the base reward for a validator is proportional its effective balance, since that reflects how its votes are weighted in influencing the chain.
+
+> [`BASE_REWARDS_PER_EPOCH`](#base_rewards_per_epoch) multiplied by `get_base_reward()` is the total value of an attestation (when all attesters participate, i.e. $B = B'$). There are four components:
+>  - $B$ for getting the Casper FFG source vote right.
+>  - $B$ for getting the Casper FFG target vote right.
+>  - $B$ for getting the LMD GHOST head vote right.
+>  - $B$ divided between the attester and the proposer for getting the attestation included quickly.
+
 
 TODO
 
@@ -3694,7 +3756,9 @@ def get_finality_delay(state: BeaconState) -> uint64:
     return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 ```
 
-TODO
+Returns the number of epochs since the last finalised checkpoint (minus one). In ideal running this ought to be zero: during epoch processing we aim to have justified the checkpoint in the curren epoch and finalised the checkpoint in the previous epoch. A delay in finalisation suggests a chain split or large fraction of validators going offline.
+
+Used by: [`is_in_inactivity_leak()`](#def_is_in_inactivity_leak).
 
 <a id="def_is_in_inactivity_leak"></a>
 
@@ -3702,6 +3766,12 @@ TODO
 def is_in_inactivity_leak(state: BeaconState) -> bool:
     return get_finality_delay(state) > MIN_EPOCHS_TO_INACTIVITY_PENALTY
 ```
+
+If the beacon chain has not managed to finalise a checkpoint for [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs (that is, four epochs), then the chain enters the [inactivity leak](/part3/config/preset#inactivity_penalty_quotient_altair). In this mode, penalties for non-participation are heavily increased, with the goal of reducing the proportion of stake controlled by non-particpants, and eventually regaining finality.
+
+Used by: [`get_flag_index_deltas()`](/part3/helper/accessors#get_flag_index_deltas), [`process_inactivity_updates()`](#def_process_inactivity_updates).
+
+Uses: [`get_finality_delay()`](#def_get_finality_delay).
 
 <a id="def_get_eligible_validator_indices"></a>
 
@@ -3811,6 +3881,23 @@ def process_slashings(state: BeaconState) -> None:
             decrease_balance(state, ValidatorIndex(index), penalty)
 ```
 
+Slashing penalties are applied in two stages: the first stage is in [`slash_validator()`](/part3/helper/mutators#def_slash_validator), immediately on detection; the second stage is here.
+
+In `slash_validator()` the withdrawable epoch is set [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) in the future, so in this function we are considering all slashed validators that are halfway to being withdrawable, that is, completely exited from the protocol. Equivalently, they were slashed `EPOCHS_PER_SLASHINGS_VECTOR // 2` epochs ago (about 18 days).
+
+To calculate the additional slashing penalty, we do the following:
+ 1. Find the sum of the effective balances (at the time of the slashing) of all validators that were slashed in the previous `EPOCHS_PER_SLASHINGS_VECTOR` epochs (36 days). These are stored as a vector in the state.
+ 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
+ 3. For each slashed validator being considered, multiply its effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
+
+If only a single validator were slashed within the 36 days, then this secondary penalty is tiny (actually zero, see below). If one-third of validators were slashed (the minimum required to finalise conflicting blocks), then, with `PROPORTIONAL_SLASHING_MULTIPLIER` set to two, each slashed validator would lose two thirds of its effective balance. When `PROPORTIONAL_SLASHING_MULTIPLIER` is eventually set to its final value of three, a successful chain attack will result in the attackers losing their entire effective balances.
+
+Interestingly, due to the way the integer arithmetic is constructed in this routine, in particular the factoring out of `increment`, the result of this calculation will be zero if `validator.effective_balance * adjusted_total_slashing_balance` is less than `total_balance`. Effectively, the penalty is rounded down to the nearest whole amount of Ether. Issues [1322](https://github.com/ethereum/eth2.0-specs/issues/1322) and [2161](https://github.com/ethereum/eth2.0-specs/issues/2161) discuss this. In the end, the consequence is that when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
+
+Used by: [`process_epoch()`](#def_process_epoch).
+
+Uses: [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance).
+
 #### Eth1 data votes updates
 
 <a id="def_process_eth1_data_reset"></a>
@@ -3822,6 +3909,8 @@ def process_eth1_data_reset(state: BeaconState) -> None:
     if next_epoch % EPOCHS_PER_ETH1_VOTING_PERIOD == 0:
         state.eth1_data_votes = []
 ```
+
+TODO
 
 #### Effective balances updates
 
@@ -3842,6 +3931,8 @@ def process_effective_balance_updates(state: BeaconState) -> None:
             validator.effective_balance = min(balance - balance % EFFECTIVE_BALANCE_INCREMENT, MAX_EFFECTIVE_BALANCE)
 ```
 
+TODO
+
 #### Slashings balances updates
 
 <a id="def_process_slashings_reset"></a>
@@ -3852,6 +3943,8 @@ def process_slashings_reset(state: BeaconState) -> None:
     # Reset slashings
     state.slashings[next_epoch % EPOCHS_PER_SLASHINGS_VECTOR] = Gwei(0)
 ```
+
+TODO
 
 #### Randao mixes updates
 
@@ -3864,6 +3957,8 @@ def process_randao_mixes_reset(state: BeaconState) -> None:
     # Set randao mix
     state.randao_mixes[next_epoch % EPOCHS_PER_HISTORICAL_VECTOR] = get_randao_mix(state, current_epoch)
 ```
+
+TODO
 
 #### Historical roots updates
 
@@ -3878,6 +3973,8 @@ def process_historical_roots_update(state: BeaconState) -> None:
         state.historical_roots.append(hash_tree_root(historical_batch))
 ```
 
+TODO
+
 #### Participation flags updates
 
 *Note*: The function `process_participation_flag_updates` is new.
@@ -3889,6 +3986,8 @@ def process_participation_flag_updates(state: BeaconState) -> None:
     state.previous_epoch_participation = state.current_epoch_participation
     state.current_epoch_participation = [ParticipationFlags(0b0000_0000) for _ in range(len(state.validators))]
 ```
+
+TODO
 
 #### Sync committee updates
 
@@ -3904,6 +4003,8 @@ def process_sync_committee_updates(state: BeaconState) -> None:
         state.next_sync_committee = get_next_sync_committee(state)
 ```
 
+TODO
+
 ### Block processing <!-- /part3/transition/block -->
 
 <a id="def_process_block"></a>
@@ -3916,6 +4017,8 @@ def process_block(state: BeaconState, block: BeaconBlock) -> None:
     process_operations(state, block.body)  # [Modified in Altair]
     process_sync_aggregate(state, block.body.sync_aggregate)  # [New in Altair]
 ```
+
+TODO
 
 #### Block header
 
@@ -3945,6 +4048,8 @@ def process_block_header(state: BeaconState, block: BeaconBlock) -> None:
     assert not proposer.slashed
 ```
 
+TODO
+
 #### RANDAO
 
 <a id="def_process_randao"></a>
@@ -3961,6 +4066,8 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     state.randao_mixes[epoch % EPOCHS_PER_HISTORICAL_VECTOR] = mix
 ```
 
+TODO
+
 #### Eth1 data
 
 <a id="def_process_eth1_data"></a>
@@ -3971,6 +4078,8 @@ def process_eth1_data(state: BeaconState, body: BeaconBlockBody) -> None:
     if state.eth1_data_votes.count(body.eth1_data) * 2 > EPOCHS_PER_ETH1_VOTING_PERIOD * SLOTS_PER_EPOCH:
         state.eth1_data = body.eth1_data
 ```
+
+TODO
 
 #### Operations
 
@@ -3991,6 +4100,8 @@ def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
     for_ops(body.deposits, process_deposit)
     for_ops(body.voluntary_exits, process_voluntary_exit)
 ```
+
+TODO
 
 ##### Proposer slashings
 
@@ -4019,6 +4130,8 @@ def process_proposer_slashing(state: BeaconState, proposer_slashing: ProposerSla
     slash_validator(state, header_1.proposer_index)
 ```
 
+TODO
+
 ##### Attester slashings
 
 <a id="def_process_attester_slashing"></a>
@@ -4039,6 +4152,8 @@ def process_attester_slashing(state: BeaconState, attester_slashing: AttesterSla
             slashed_any = True
     assert slashed_any
 ```
+
+TODO
 
 ##### Attestations
 
@@ -4082,6 +4197,8 @@ def process_attestation(state: BeaconState, attestation: Attestation) -> None:
     increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
 ```
 
+TODO
+
 ##### Deposits
 
 <a id="def_get_validator_from_deposit"></a>
@@ -4101,6 +4218,8 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
         effective_balance=effective_balance,
     )
 ```
+
+TODO
 
 *Note*: The function `process_deposit` is modified to initialize `inactivity_scores`, `previous_epoch_participation`, and `current_epoch_participation`.
 
@@ -4145,6 +4264,8 @@ def process_deposit(state: BeaconState, deposit: Deposit) -> None:
         increase_balance(state, index, amount)
 ```
 
+TODO
+
 ##### Voluntary exits
 
 <a id="def_process_voluntary_exit"></a>
@@ -4168,6 +4289,8 @@ def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVolu
     # Initiate exit
     initiate_validator_exit(state, voluntary_exit.validator_index)
 ```
+
+TODO
 
 ##### Sync aggregate processing
 
