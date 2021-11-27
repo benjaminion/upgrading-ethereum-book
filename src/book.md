@@ -3689,6 +3689,11 @@ With Altair, each validator has an individual inactivity score in the beacon sta
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
+<div class="image">
+<img src="md/images/inactivity-scores-flow.svg" /><br />
+<span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
+</div>
+
 There is a floor of zero on the score. So, outside a leak, validators' scores will rapidly return to zero and stay there, since `INACTIVITY_SCORE_RECOVERY_RATE` is greater than `INACTIVITY_SCORE_BIAS`.
 
 See [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) for more discussion on this and some charts illustrating the effect.
