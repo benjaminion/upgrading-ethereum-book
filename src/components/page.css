@@ -111,6 +111,7 @@ td, th {
     border: solid #999999 1px;
     padding: 4px 8px;
     text-align: left;
+    vertical-align: top;
 }
 
 th {
