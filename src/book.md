@@ -3767,7 +3767,7 @@ def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
 ```
 Thus, the base reward for a validator is proportional its effective balance, since that reflects how its votes are weighted in influencing the chain.
 
-> [`BASE_REWARDS_PER_EPOCH`](#base_rewards_per_epoch) multiplied by `get_base_reward()` is the total value of an attestation (when all attesters participate, i.e. $B = B'$). There are four components:
+> `BASE_REWARDS_PER_EPOCH` multiplied by `get_base_reward()` is the total value of an attestation (when all attesters participate, i.e. $B = B'$). There are four components:
 >  - $B$ for getting the Casper FFG source vote right.
 >  - $B$ for getting the Casper FFG target vote right.
 >  - $B$ for getting the LMD GHOST head vote right.
@@ -3888,7 +3888,7 @@ Once the normal attestation rewards and penalties have been calculated, [additio
 As noted elsewhere, rewards and penalties are handled separately from each other since we don't do negative numbers.
 
 For reference, the only other places where rewards and penalties are applied are as follows:
-  - during epoch processing: for [sync committee participation](#def_process_sync_aggregate), and applying [extended slashing penalties](/part3/transition/epoch#def_process_slashings).
+  - during epoch processing: for [sync committee participation](/part3/transition/block#def_process_sync_aggregate), and applying [extended slashing penalties](/part3/transition/epoch#def_process_slashings).
   - during block processing: when applying the [proposer reward](/part3/transition/block#def_process_attestation), and initial [slashing rewards and penalties](/part3/helper/mutators#def_slash_validator).
 
 |||
@@ -3933,7 +3933,7 @@ TODO
 |||
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
-| Uses | [`is_eligible_for_activation_queue()`](), [`is_active_validator()`](), [`initiate_validator_exit()`](), [`is_eligible_for_activation()`](), [`get_validator_churn_limit()`](), [`compute_activation_exit_epoch()`]() |
+| Uses | [`is_eligible_for_activation_queue()`](/part3/helper/predicates#def_is_eligible_for_activation_queue), [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator), [`initiate_validator_exit()`](/part3/helper/mutators#initiate_validator_exit), [`is_eligible_for_activation()`](/part3/helper/predicates#def_is_eligible_for_activation), [`get_validator_churn_limit()`](/part3/helper/accessors#def_get_validator_churn_limit), [`compute_activation_exit_epoch()`](/part3/helper/misc#def_compute_activation_exit_epoch) |
 | See&nbsp;also | TODO |
 
 #### Slashings
@@ -4380,7 +4380,23 @@ def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVolu
     initiate_validator_exit(state, voluntary_exit.validator_index)
 ```
 
-TODO
+A voluntary exit message is submitted by a validator to indicate that it wishes to cease being an active validator. A proposer receives [voluntary exit messages](/part3/containers/operations#voluntaryexit) via gossip or via its own API and then includes the message in a block so that it can be processed by the network.
+
+Most of the checks are straightforward, as per the comments in the code. Note the following.
+ - Voluntary exits are ignored if they are included in blocks before the given `epoch`, so nodes might buffer any future-dated exits they see before putting them in a block.
+ - A validator must have been active for at least [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs (27 hours). See [there](/part3/config/configuration#shard_committee_period) for the rationale.
+ - Voluntary exits are signed with the validator's usual signing key. There is some discussion about [changing this](https://github.com/ethereum/eth2.0-specs/issues/1578) to also allow signing of a voluntary exit with the validator's withdrawal key.
+
+If the voluntary exit message is valid then the validator is added to the exit queue by calling [`initiate_validator_exit()`](/part3/helper/mutators#initiate_validator_exit).
+
+At present it is [not possible](https://notes.ethereum.org/elDvTNrbRqmgP6np_YWc2g#Concerns-that-motivated-removing-re-activation-functionality-in-2017) for a validator to exit and re-enter, but this functionality [may be introduced](https://hackmd.io/@HWeNw8hNRimMm2m2GH56Cw/HkTzLKOov#Exit-and-re-entry) in future.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_operations()`](/part3/transition/block#def_process_operations) |
+| Uses | [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`initiate_validator_exit()`](/part3/helper/mutators#def_initiate_validator_exit) |
+| See&nbsp;also | [`VoluntaryExit`](/part3/containers/operations#voluntaryexit), [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) |
+
 
 ##### Sync aggregate processing
 
