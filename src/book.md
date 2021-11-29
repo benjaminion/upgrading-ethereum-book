@@ -794,8 +794,6 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
 
-[TODO: Altair changes]::
-
 #### Miscellaneous
 
 | Name | Value |
@@ -957,7 +955,7 @@ In addition, as a cryptographic nicety, each of the protocol's signature types i
 
 In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
-##### For aggregator selection
+##### Aggregator selection
 
 The remaining four types, suffixed `_PROOF` are not used directly in the beacon chain specification. They [were introduced](https://github.com/ethereum/eth2.0-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/eth2.0-specs/issues/1595) for denial of service resistance. The technique was [extended](https://github.com/ethereum/consensus-specs/pull/2266) to sync committees with the Altair upgrade.
 
@@ -976,11 +974,9 @@ These four are not part of the consensus-critical state-transition, but are none
 | - | - |
 | `G2_POINT_AT_INFINITY` | `BLSSignature(b'\xc0' + b'\x00' * 95)` |
 
-[TODO: link to BLS spec]::
-
 This is the compressed [serialisation](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization) of the "point at infinity", the identity point, of the G2 group of the BLS12-381 curve that we are using for signatures. Note that it is in big-endian format (unlike all other constants in the spec).
 
-It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS standard would reject these.
+It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS signature standard would reject these.
 
 ### Preset <!-- /part3/config/preset -->
 
@@ -1083,7 +1079,7 @@ These calculations are done in [`process_effective_balance_updates()`](/part3/tr
 
 ##### `MIN_DEPOSIT_AMOUNT`
 
-`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the Phase&nbsp;0 Beacon Chain Specification document. Rather, it is used in the [deposit contract](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
+`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the beacon chain specification document. Rather, it is used in the [deposit contract](https://github.com/ethereum/eth2.0-specs/blob/v1.0.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
 
 Allowing stakers to make deposits smaller than a full stake is useful for topping-up a validator's balance if its effective balance has dropped below 32&nbsp;Ether, so as to maintain full productivity. However, this actually led to a [vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) for some staking pools, involving the front-running of deposits. In some circumstances, a front-running attacker could change a genuine depositor's withdrawal credentials to their own.
 
@@ -1233,11 +1229,11 @@ So, the unsuffixed versions are the Phase&nbsp;0 values, and the `_ALTAIR` suffi
 
 ##### `BASE_REWARD_FACTOR`
 
-This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward" which is [formulated as](/part3/transition/epoch#def_get_base_reward_per_increment),
+This is the big knob to turn to change the issuance rate of Eth2. Almost all validator rewards are calculated in terms of a "base reward per increment" which is [formulated as](/part3/transition/epoch#def_get_base_reward_per_increment),
 
     EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state))
 
-Thus, the total validator rewards per epoch (the Eth2 issuance rate) could in principle be tuned by increasing or decreasing `BASE_REWARD_FACTOR`.
+Thus, the total validator rewards per epoch (the Eth2 issuance rate) could be tuned by increasing or decreasing `BASE_REWARD_FACTOR`.
 
 The exception is proposer rewards for including slashing reports in blocks. However, these are more than offset by the amount of stake burnt, so do not increase the overall issuance rate.
 
@@ -1319,7 +1315,7 @@ However, for the initial stage of the beacon chain, Phase&nbsp;0, `PROPORTIONAL_
 
 These parameters are used to size lists in the beacon block bodies for the purposes of SSZ serialisation, as well as constraining the maximum size of beacon blocks so that they can propagate efficiently, and avoid DoS attacks.
 
-[TODO: calculate the sizes of things]::
+[TODO: calculate the sizes of things - see the appendix]::
 
 <!--
 With these settings, the maximum size of a beacon block (before compression) is 123,016 bytes. By far the largest object is the [AttesterSlashing](/part3/containers/operations#attesterslashing), at up to 33,216 bytes. However, a single attester slashing can be used to slash many misbehaving validators at the same time (assuming that in an attack, many validators would make the same conflicting vote).
@@ -1332,7 +1328,7 @@ Some calculations to support the above can be found for each of the containers i
 Some comments on the chosen values:
  - I have suggested [elsewhere](https://github.com/ethereum/eth2.0-specs/issues/2152) reducing `MAX_DEPOSITS` from sixteen to one to ensure that more validators must process deposits, which encourages them to run Eth1 clients.
  - At first sight, there looks to be a disparity between the number of proposer slashings and the number of attester slashings that may be included in a block. But note that an attester slashing (a) can be much larger than a proposer slashing, and (b) can result in many more validators getting slashed than a proposer slashing.
- - `MAX_ATTESTATIONS` is double the value of [`MAX_COMMITTEES_PER_SLOT`](#max_committees_per_slot). This allows there to be an empty slot (no block proposal), yet still include all the attestations for the empty slot in the next slot, since, ideally, each committee produces a single aggregate attestation: a block can hold two slots' worth of aggregate attestations.
+ - `MAX_ATTESTATIONS` is double the value of [`MAX_COMMITTEES_PER_SLOT`](#max_committees_per_slot). This allows there to be an empty slot (with no block proposal), yet still include all the attestations for the empty slot in the next slot. Since, ideally, each committee produces a single aggregate attestation, a block can hold two slots' worth of aggregate attestations.
 
 #### Sync committee
 
@@ -1347,6 +1343,8 @@ Some comments on the chosen values:
 [TODO: Link to sync committees section]::
 
 Sync committees were introduced by the Altair upgrade to allow light clients to quickly and trustlessly determine the head of the beacon chain.
+
+Why did we need a new committee type? Couldn't this be built on top of existing committees, say committees 0 to 3 at a slot? After all, voting for the head of the chain is already one of their duties. The reason is that it is important for reducing the load on light clients that sync committees do not change very often. Standard committees change every slot; we need something much longer lived here.
 
 Only a single sync committee is active at any one time, and contains a randomly selected subset of size `SYNC_COMMITTEE_SIZE` of the total validator set.
 
@@ -1613,7 +1611,7 @@ Validators' actual balances are stored separately in the `BeaconState` structure
 
 For similar reasons, validators' inactivity scores are stored outside validator records aswell, as they are also updated every epoch.
 
-A validator's record is created when its deposit is first processed. Sending multiple deposits does not create multiple validator records: deposits with the same public key are aggregated in one record. Validator records never expire; they are stored permanently, even after the validator has exited the system. Thus there is a 1:1 mapping between a validator's index in the list and the identity of the validator (validator records are only ever appended to the list).
+A validator's record is [created](/part3/transition/block#def_get_validator_from_deposit) when its deposit is first processed. Sending multiple deposits does not create multiple validator records: deposits with the same public key are aggregated in one record. Validator records never expire; they are stored permanently, even after the validator has exited the system. Thus there is a 1:1 mapping between a validator's index in the list and the identity of the validator (validator records are only ever appended to the list).
 
 Also stored in `Validator`:
  - `pubkey` serves as both the unique identity of the validator and the means of cryptographically verifying messages purporting to have been signed by it. The public key is stored raw, unlike in Eth1, where it is hashed to form the account address. This allows public keys to be aggregated for verifying aggregated attestations.
@@ -1868,8 +1866,6 @@ This container is used to include deposit data from prospective validators in be
 
 The `proof` is a Merkle proof constructed by the block proposer that the [`DepositData`](/part3/containers/dependencies#depositdata) corresponds to the previously agreed deposit root of the Eth1 contract's deposit tree. It is verified in [`process_deposit()`](/part3/transition/block#def_process_deposit) by [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch).
 
-[TODO: link to Eth1 data voting]::
-
 #### `VoluntaryExit`
 
 ```python
@@ -1922,7 +1918,7 @@ The following objects are always present in a valid beacon block.
   - `randao_reveal`: the block is invalid if the RANDAO reveal does not verify correctly against the proposer's public key. This is the block proposer's contribution to the beacon chain's randomness. The proposer generates it by signing the current epoch number (combined with [`DOMAIN_RANDAO`](/part3/config/constants#domain_randao)) with its private key. To the best of anyone's knowledge, the result is indistinguishable from random. This gets [mixed into](/part3/transition/block#randao) the beacon state RANDAO.
   - See [Eth1Data](/part3/containers/dependencies#eth1data) for `eth1_data`. In principle, this is mandatory, but it is not checked, and there is no penalty for making it up.
   - `graffiti` is left free for the proposer to insert whatever data it wishes. It has no protocol level signifcance. It can be left as zero; most clients set the client name and version string as their own default graffiti value.
-  - `sync_aggregate`: TODO
+  - `sync_aggregate` is a record of which validators in the current sync committee voted for the chain head in the previous slot.
 
 Deposits are a special case. They are mandatory only if there are pending deposits to be processed. There is no explicit reward for including deposits, except that a block is invalid without any that ought to be there.
   - `deposits`: if the block does not contain either all the outstanding [`Deposit`](/part3/containers/operations#deposit)s, or [`MAX_DEPOSITS`](/part3/config/preset#max_deposits) of them in deposit order, then it is [invalid](/part3/transition/block#operations).
@@ -1934,7 +1930,7 @@ The proposer earns rewards for including any of the following. Rewards for attes
   - `attester_slashings`: up to [`MAX_ATTESTER_SLASHINGS`](/part3/config/preset#max_attester_slashings) [`AttesterSlashing`](/part3/containers/operations#attesterslashing) objects may be included.
   - `attestations`: up to [`MAX_ATTESTATIONS`](/part3/config/preset#max_attestations) (aggregated) [`Attestation`](/part3/containers/operations#attestation) objects may be included. The block proposer is incentivised to include well-packed aggregate attestations, as it receives a micro reward for each unique attestation. In a perfect world, with perfectly aggregated attestations, `MAX_ATTESTATIONS` would be equal to `MAX_COMMITTEES_PER_SLOT`; in our configuration it is double. This provides capacity in blocks to catch up with attestations after skip slots, and also room to include some imperfectly aggregated attestations.
 
-Including voluntary exits is optional, and there are no rewards for including them.
+Including voluntary exits is optional, and there are no explicit rewards for including them.
   - `voluntary_exits`: up to [`MAX_VOLUNTARY_EXITS`](/part3/config/preset#max_voluntary_exits) [`SignedVoluntaryExit`](/part3/containers/envelopes#signedvoluntaryexit) objects may be included.
 
 #### `BeaconBlock`
@@ -3150,11 +3146,11 @@ def get_next_sync_committee_indices(state: BeaconState) -> Sequence[ValidatorInd
     return sync_committee_indices
 ```
 
-`get_next_sync_committee_indices()` is used to select the subset of validators that will make up a sync committee. The committee size is [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size), and the committee is allowed to contain duplicates, that is, the same validator more than once.
+`get_next_sync_committee_indices()` is used to select the subset of validators that will make up a sync committee. The committee size is [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size), and the committee is allowed to contain duplicates, that is, the same validator more than once. This is to [handle gracefully](https://github.com/ethereum/consensus-specs/pull/2130#discussion_r532499943) the situation of there being fewer active validators than `SYNC_COMMITTEE_SIZE`.
 
 Similarly to being chosen to propose a block, the probability of any validator being selected for a sync committee is proportional to its effective balance. Thus, the algorithm is almost the same as that of [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index), except that this one exits only after finding `SYNC_COMMITTEE_SIZE` members, rather than exiting as soon as a candidate is found. Both routines use the try-and-increment method to weight the probability of selection with the validators' effective balances.
 
-[TODO: why proportional to balance?]::
+It's fairly clear why block proposers are selected with a probability proportional to their effective balances: block production is subject to slashing, and proposers with less at stake have less to slash, so we reduce their influence accordingly. It is not so clear why the probability of being in a sync committee is also proportional to a validator's effective balance; sync committees are not subject to slashing. It has to do with keeping calculations for [light clients simple](https://github.com/ethereum/consensus-specs/pull/2130#discussion_r524848644). We don't want to burden light clients with summing up validators' balances to judge whether a 2/3 supermajority of stake in the committee has voted for a block. Ideally, they can just count the participation flags. To make approach this somewhat reliable, we weight the probability of participation with the validator's effective balance.
 
 #### `get_next_sync_committee`
 
@@ -3298,9 +3294,24 @@ def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence
     return rewards, penalties
 ```
 
-The "deltas" in the function name are the separate lists of rewards and penalties that it returns. Rewards and penalties are always treated separately. This is to avoid negative numbers, since all integers in the spec are unsigned.
+The "deltas" in the function name are the separate lists of rewards and penalties returned. Rewards and penalties are always treated separately to avoid negative numbers, since all integers in the spec are unsigned.
 
 TODO
+
+Untangling the arithmetic, the maximum total issuance due to rewards for attestors in an epoch, $I_A$, comes out as follows.
+
+TODO - Fix this:
+$$
+I_A = \frac{(W_s + W_t + W_h)NB}{W_{\Sigma}} = \frac{(14 + 26 + 14)}{64}NB = \frac{27}{32}NB
+$$
+
+where $N$ is the total number of active validators, $B$ is the base reward, and $W_s$, $W_t$, $W_h$, and $W_{\Sigma}$ are the weights for timely source, target, head, and the weight denominator respectively.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties) |
+| Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#def_get_unslashed_participating_indices), [`get_total_balance()`](/part3/helper/accessors#def_get_total_balance), [`get_total_active_balance()`](/part3/helper/accessors#get_total_active_balance), [`get_eligible_validator_indices()`](/part3/transition/epoch#def_get_eligible_validator_indices), [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward), [`is_in_inactivity_leak()`](/part3/transition/epoch#def_is_in_inactivity_leak) |
+| See&nbsp;also | TODO |
 
 ### Beacon State Mutators <!-- /part3/helper/mutators -->
 
@@ -3438,6 +3449,8 @@ Uses: [`initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_
 ## Beacon Chain State Transition Function <!-- /part3/transition -->
 
 ### Preamble
+
+<a id="assert"></a>
 
 > The post-state corresponding to a pre-state `state` and a signed block `signed_block` is defined as `state_transition(state, signed_block)`. State transitions that trigger an unhandled exception (e.g. a failed `assert` or an out-of-range list access) are considered invalid. State transitions that cause a `uint64` overflow or underflow are also considered invalid.
 
@@ -3726,6 +3739,52 @@ Uses: [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices),
 
 #### Rewards and penalties
 
+Without wanting to go full [Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf) on you, I am going to adopt a little notation to help analyse the rewards.
+
+We will define a base reward $B$ that we will see turns out to be the expected long-run average income of an optimally performing validator per epoch (ignoring validator set size changes). The total number of active validators is $N$.
+
+The base reward is calculated from a [base reward per increment](def_get_base_reward_per_increment), $b$. An "increment" is a unit of effective balance in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment). $B = 32b$ because [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance)] = `32 * EFFECTIVE_BALANCE_INCREMENT`
+
+Other quantities we will use in rewards calculation are the [incentivization weights](/part3/config/constants#incentivization-weights): $W_s$, $W_t$, $W_h$, and $W_y$ being the weights for correct source, target, head, and sync committee votes respectively; $W_p$ being the proposer weight; and the weight denominator $W_{\Sigma}$ which is the sum of the weights.
+
+Issuance for regular rewards are happens in four ways:
+  - $I_A$ is the maximum total reward for all validators attesting in an epoch;
+  - $I_{P_A}$ is the maximum reward issued to proposers in an epoch for including attestations;
+  - $I_S$ is the maximum total reward for all sync committee participants in an epoch; and
+  - $I_{P_S}$ is the maximum reward issued to proposers in an epoch for including sync aggregates;
+
+Under [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation), and [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) we find that these work out as follows in terms of $B$ and $N$:
+
+$$
+I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}NB
+$$
+
+$$
+I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A
+$$
+
+$$
+I_S = \frac{W_y}{W_{\Sigma}}NB
+$$
+
+$$
+I_{S_P} = \frac{W_p}{W_{\Sigma} - W_p}I_S
+$$
+
+To find the total optimal issuance per epoch, we can first sum $I_A$ and $I_S$,
+
+$$
+I_A + I_S = \frac{W_s + W_t + W_h + W_y}{W_{\Sigma}}NB = \frac{W_{\Sigma} - W_p}{W_{\Sigma}}NB
+$$
+
+Now adding in the proposer rewards,
+
+$$
+I_A + I_S + I_{A_P} + I_{S_P} = \frac{W_{\Sigma} - W_p}{W_{\Sigma}}(1 + \frac{W_p}{W_{\Sigma} - W_p})NB = (\frac{W_{\Sigma} - W_p}{W_{\Sigma}} + \frac{W_p}{W_{\Sigma}})NB = NB
+$$
+
+So, we see that every epoch, $NB$ Gwei is awarded to $N$ validators. Every validator participates in attesting, and proposing and sync committee duties are uniformly random, so the long-term expected income per optimally performing validator per epoch is $B$ Gwei.
+
 ##### Helpers
 
 <a id="def_get_base_reward_per_increment"></a>
@@ -3735,15 +3794,13 @@ def get_base_reward_per_increment(state: BeaconState) -> Gwei:
     return Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
 ```
 
-*Note*: On average an optimally performing validator earns one base reward per epoch.
+The base reward per increment is the fundamental unit of reward in terms of which all other regular rewards and penalties are calculated. We will denote the base reward per increment, $b$.
 
-HERE! Revise this again:
+As I noted under [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor), this is the big knob to turn if we wish to increase or decrease the total reward for participating in Eth2, otherwise known as the issuance rate of new Ether.
 
-The maximum base reward (which I will call $B$ from here-on) is the fundamental determiner of the issuance rate of the beacon chain: all attester and proposer rewards are calculated from this. As I noted under [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor), this is the big knob to turn if we wish to increase or decrease the total reward for participating in Eth2.
+An increment is a single unit of a validator's effective balance, denominated in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which happens to be one Ether. So, an increment is 1 Ether of effective balance, and maximally effective validator has 32 increments.
 
-This function provides "the base reward per increment", which is $\frac{B}{32}$. An increment is a single unit of a validator's effective balance, denominated in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which happens to be one Ether. So, an increment is 1 Ether of effective balance, and maximally effective validator has 32 increments.
-
-The maximum base reward is inversely proportional to the square root of the total balance of all active validators. This means that, as the number $N$ of validators increases, the reward per validator decreases as $\frac{1}{\sqrt{N}}$, and the overall issuance per epoch increases as $\sqrt{N}$.
+The base reward per increment is inversely proportional to the square root of the total balance of all active validators. This means that, as the number $N$ of validators increases, the reward per validator decreases as $\frac{1}{\sqrt{N}}$, and the overall issuance per epoch increases as $\sqrt{N}$.
 
 The decrease with increasing $N$ in per-validator rewards provides a price discovery mechanism: the idea is that an equilibrium will be found where the total number of validators results in a reward similar to returns available elsewhere for similar risk. The [Eth2 Launch Pad](https://launchpad.ethereum.org/) has a graph that shows how this translates into expected APR for running a validator for different total amounts of ETH staked.
 
@@ -3751,9 +3808,10 @@ The decrease with increasing $N$ in per-validator rewards provides a price disco
 
 A different curve could have been chosen for the rewards profile. For example, the inverse of total balance rather than its square root would keep total issuance constant. Vitalik justifies the inverse square root approach and discusses the trade-offs in the [Serenity design rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Base-rewards).
 
-Used by: [`get_base_reward()`](#def_get_base_reward), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
-
-Uses: [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot).
+|||
+|-|-|
+| Used&nbsp;by | [`get_base_reward()`](#def_get_base_reward), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) |
+| Uses | [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot) |
 
 <a id="def_get_base_reward"></a>
 
@@ -3765,16 +3823,14 @@ def get_base_reward(state: BeaconState, index: ValidatorIndex) -> Gwei:
     increments = state.validators[index].effective_balance // EFFECTIVE_BALANCE_INCREMENT
     return Gwei(increments * get_base_reward_per_increment(state))
 ```
-Thus, the base reward for a validator is proportional its effective balance, since that reflects how its votes are weighted in influencing the chain.
 
-> `BASE_REWARDS_PER_EPOCH` multiplied by `get_base_reward()` is the total value of an attestation (when all attesters participate, i.e. $B = B'$). There are four components:
->  - $B$ for getting the Casper FFG source vote right.
->  - $B$ for getting the Casper FFG target vote right.
->  - $B$ for getting the LMD GHOST head vote right.
->  - $B$ divided between the attester and the proposer for getting the attestation included quickly.
+The base reward is the reward that an optimally performing validator can expect to earn on average per epoch, over the long term. It is proportional to the validator's effective balance; a validator with [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) can expect to receive the full base reward $B = 32b$ per epoch on a long-term average.
 
-
-TODO
+|||
+|-|-|
+| Used&nbsp;by | [`get_flag_index_deltas`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation) |
+| Uses | [`get_base_reward_per_increment()`](#def_get_base_reward_per_increment) |
+| See&nbsp;also | [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) |
 
 <a id="def_get_finality_delay"></a>
 
@@ -3928,13 +3984,21 @@ def process_registry_updates(state: BeaconState) -> None:
 
 The [`Registry`](/part3/containers/state#registry) is the part of the beacon state that stores [`Validator`](/part3/containers/dependencies#validator) records. These particular updates are, for the most part, concerned with moving validators through the activation queue.
 
-TODO
+[`is_eligible_for_activation_queue()`](/part3/helper/predicates#def_is_eligible_for_activation_queue) finds validators that have sufficient deposit yet their `activation_eligibility_epoch` is set to [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch). These will be all the validators for which deposits were process during the last epoch, potentially up to `MAX_DEPOSITS * SLOTS_PER_EPOCH`, which is 512. These have their `activation_eligibility_epoch` set to the next epoch. They will become eligible to be activated once that epoch is finalised.
+
+Next, any validators whose effective balance has fallen to [`EJECTION_BALANCE`](/part3/config/configuration#ejection_balance) have their exit initiated.
+
+[`is_eligible_for_activation()`](/part3/helper/predicates#is_eligible_for_activation) selects validators whose `activation_eligibility_epoch` has just been finalised. The list of these is ordered by eligibility epoch, and then by index. There might be multiple eligibility epochs in the list if finalisation got delayed for some reason.
+
+Finally, the first [`get_validator_churn_limit()`](/part3/helper/accessors#def_get_validator_churn_limit) validators in the list get their activation epochs set to [`compute_activation_exit_epoch()`](/part3/helper/misc#def_compute_activation_exit_epoch).
+
+On first sight, you'd think that the activation epochs of the whole queue could be set here, rather than just an epoch's worth. But at some point, `get_validator_churn_limit()` will change unpredictably (we don't know when validators will exit), which makes that infeasible. The current scheme is simple, if repetitious. Clients could optimise this by persisting the sorted activation queue rather than recalculating it.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
 | Uses | [`is_eligible_for_activation_queue()`](/part3/helper/predicates#def_is_eligible_for_activation_queue), [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator), [`initiate_validator_exit()`](/part3/helper/mutators#initiate_validator_exit), [`is_eligible_for_activation()`](/part3/helper/predicates#def_is_eligible_for_activation), [`get_validator_churn_limit()`](/part3/helper/accessors#def_get_validator_churn_limit), [`compute_activation_exit_epoch()`](/part3/helper/misc#def_compute_activation_exit_epoch) |
-| See&nbsp;also | TODO |
+| See&nbsp;also | [`Validator`](/part3/containers/dependencies#validator), [`EJECTION_BALANCE`](/part3/config/configuration#ejection_balance) |
 
 #### Slashings
 
@@ -3966,9 +4030,11 @@ If only a single validator were slashed within the 36 days, then this secondary 
 
 Interestingly, due to the way the integer arithmetic is constructed in this routine, in particular the factoring out of `increment`, the result of this calculation will be zero if `validator.effective_balance * adjusted_total_slashing_balance` is less than `total_balance`. Effectively, the penalty is rounded down to the nearest whole amount of Ether. Issues [1322](https://github.com/ethereum/eth2.0-specs/issues/1322) and [2161](https://github.com/ethereum/eth2.0-specs/issues/2161) discuss this. In the end, the consequence is that when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
 
-Used by: [`process_epoch()`](#def_process_epoch).
-
-Uses: [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| Uses | [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) |
+| See&nbsp;also | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair) |
 
 #### Eth1 data votes updates
 
@@ -3984,9 +4050,10 @@ def process_eth1_data_reset(state: BeaconState) -> None:
 
 There is a fixed period during which beacon block proposers vote on their view of the Eth1 deposit contract and try to come to a simple majority agreement. At the end of the period, the record of votes is cleared and voting begins again, whether or not agreement was reached during the period.
 
-See [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) and [`Eth1Data`](/part3/containers/dependencies#eth1data) for more.
-
-Used by: [`process_epoch()`](#def_process_epoch).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| See&nbsp;also | [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period), [`Eth1Data`](/part3/containers/dependencies#eth1data) |
 
 #### Effective balances updates
 
@@ -4011,7 +4078,10 @@ Each validator's balance is represented twice in the state: once accurately in a
 
 A hysteresis mechanism is used when calculating the effective balance of a validator when its actual balance changes. See [Hysteresis Parameters](/part3/config/preset#hysteresis-parameters) for more discussion of this, and the values of the related constants. With the current values, a validator's effective balance drops to `X` ETH when its actual balance drops below `X.75` ETH, and increases to `Y` ETH when its actual balance rises above `Y.25` ETH. The hysteresis mechanism ensures that effective balances change infrequently, which means that the list of validator records needs to be re-hashed only infrequently when calculating the state root, saving considerably on work.
 
-Used by: [`process_epoch()`](#def_process_epoch).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| See&nbsp;also | [Hysteresis Parameters](/part3/config/preset#hysteresis-parameters) |
 
 #### Slashings balances updates
 
@@ -4024,9 +4094,12 @@ def process_slashings_reset(state: BeaconState) -> None:
     state.slashings[next_epoch % EPOCHS_PER_SLASHINGS_VECTOR] = Gwei(0)
 ```
 
-TODO
+`state.slashings` is a circular list of length [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) that contains the total of the effective balances of all validators that have been slashed at each epoch. These are used to apply a correlated slashing penalty to slashed validators before they are exited. Each epoch we overwrite the oldest entry with zero, and it becomes the current entry.
 
-Used by: [`process_epoch()`](#def_process_epoch).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| See&nbsp;also | [`process_slashings()`](/part3/transition/epoch#def_process_slashings), [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) |
 
 #### Randao mixes updates
 
@@ -4040,9 +4113,15 @@ def process_randao_mixes_reset(state: BeaconState) -> None:
     state.randao_mixes[next_epoch % EPOCHS_PER_HISTORICAL_VECTOR] = get_randao_mix(state, current_epoch)
 ```
 
-TODO
+`state.randao_mixes` is a circular list of length [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector). The current value of the RANDAO, which is updated with every block that arrives, is stored at position `state.randao_mixes[current_epoch % EPOCHS_PER_HISTORICAL_VECTOR]`, as per [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix).
 
-Used by: [`process_epoch()`](#def_process_epoch).
+At the end of every epoch, final value of the RANDAO for this epoch is copied over to become the starting value of the randao for the next, preserving the remaining entries as historical values.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| Uses | [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix) |
+| See&nbsp;also | [`process_randao()`](/part3/transition/block#def_process_randao), [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) |
 
 #### Historical roots updates
 
@@ -4057,9 +4136,14 @@ def process_historical_roots_update(state: BeaconState) -> None:
         state.historical_roots.append(hash_tree_root(historical_batch))
 ```
 
-TODO
+Every [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots, the historical roots accumulator is updated. This is implements part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571) for the past history of the chain. Once `SLOTS_PER_HISTORICAL_ROOT` block roots and the same number of state roots have been accumulated in the beacon state, they are put in a [`HistoricalBatch`](/part3/containers/dependencies#historicalbatch) object and the hash tree root of that is appended to the `historical_roots` list in the beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period.
 
-Used by: [`process_epoch()`](#def_process_epoch).
+Storing past roots like this allows historical Merkle proofs to be constructed if required.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| See&nbsp;also | [`HistoricalBatch`](/part3/containers/dependencies#historicalbatch), [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) |
 
 #### Participation flags updates
 
@@ -4073,9 +4157,12 @@ def process_participation_flag_updates(state: BeaconState) -> None:
     state.current_epoch_participation = [ParticipationFlags(0b0000_0000) for _ in range(len(state.validators))]
 ```
 
-TODO
+Two epochs' worth of validator participation flags (that record validators' attestation activity) are stored. At the end of every epoch the current becomes the previous, and a new empty list becomes current.
 
-Used by: [`process_epoch()`](#def_process_epoch).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| See&nbsp;also | [`ParticipationFlags`](/part3/config/types#participationflags) |
 
 #### Sync committee updates
 
@@ -4091,9 +4178,13 @@ def process_sync_committee_updates(state: BeaconState) -> None:
         state.next_sync_committee = get_next_sync_committee(state)
 ```
 
-TODO
+Sync committees are rotated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#epochs_per_sync_committee_period). The next sync committee is ready and waiting so that validators can prepare in advance by subscribing to the necessary subnets. That becomes the current sync committee, and the next is calculated.
 
-Used by: [`process_epoch()`](#def_process_epoch).
+|||
+|-|-|
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| Uses | [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee) |
+| See&nbsp;also | [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#epochs_per_sync_committee_period) |
 
 ### Block processing <!-- /part3/transition/block -->
 
@@ -4108,7 +4199,14 @@ def process_block(state: BeaconState, block: BeaconBlock) -> None:
     process_sync_aggregate(state, block.body.sync_aggregate)  # [New in Altair]
 ```
 
-TODO
+These are the tasks that the beacon node performs in order to process a block and update the state. If any of the called functions triggers an `assert` failure or any other kind of exception, then the [entire block is invalid](/part3/transition#assert), and any state changes must be rolled back.
+
+[`process_operations()`](#def_process_operations) covers the processing of any slashing reports (proposer and attester) in the block, any attestations, any deposits, and any voluntary exits.
+
+|||
+|-|-|
+| Used&nbsp;by | [`state_transition()`](/part3/transition#def_state_transition) |
+| Uses | [`process_block_header()`](#def_process_block_header), [`process_randao()`](#def_process_randao), [`process_eth1_data()`](#def_process_eth1_data), [`process_operations()`](#def_process_operations), [`process_sync_aggregate()`](#def_process_sync_aggregate) |
 
 #### Block header
 
@@ -4138,7 +4236,15 @@ def process_block_header(state: BeaconState, block: BeaconBlock) -> None:
     assert not proposer.slashed
 ```
 
-TODO
+A straightfoward set of validity conditions for the [block header](/part3/containers/dependencies#beaconblockheader) data.
+
+The version of the block header object that this routine stores in the state is a duplicate of the incoming block's header, but with its `state_root` set to its default empty `Bytes32()` value. See [`process_slot()`](/part3/transition#def_process_slot) for the explanation of this.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
+| See&nbsp;also | [BeaconBlockHeader](/part3/containers/dependencies#beaconblockheader), [`process_slot()`](/part3/transition#def_process_slot) |
 
 #### RANDAO
 
@@ -4156,7 +4262,26 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     state.randao_mixes[epoch % EPOCHS_PER_HISTORICAL_VECTOR] = mix
 ```
 
-TODO
+A good source of randomness is foundational to the operation of the beacon chain. Security of the protocol depends significantly on being able to unpredictably and uniformly select block proposers and committee members. In fact, the very name "beacon chain" was inspired by Dfinity's concept of a [randomness beacon](https://arxiv.org/abs/1805.04548).
+
+The current mechanism for providing randomness is a RANDAO, in which each block proposer provides some randomness and all the contributions are mixed together over the course of an epoch. This is not unbiasable (a malicious proposer may choose to skip a block if it is to its advantage to do so), but is [good enough](https://ethresear.ch/t/rng-exploitability-analysis-assuming-pure-randao-based-main-chain/1825?u=benjaminion). In future, Ethereum might use a verifiable delay function ([VDF](https://www.vdfalliance.org/)) to provide unbiasable randomness.
+
+[Early designs](https://github.com/ethereum/eth2.0-specs/pull/33/files) had the validators pre-committing to "hash onions", peeling off one layer of hashing at each block proposal. This [was changed](https://github.com/ethereum/eth2.0-specs/pull/483) to using a BLS signature over the [epoch number](https://github.com/ethereum/eth2.0-specs/pull/498) as the entropy source. Using signatures is both a simplification, and an enabler for multi-party validators such as secret shared validators. The (reasonable) assumption is that sufficient numbers of validators generated their secret keys with good entropy to ensure that the RANDAO's entropy is adequate.
+
+[TODO: link to SSV ^^^]::
+
+The `process_randao()` function simply uses the proposer's public key to verify that the RANDAO reveal in the block is indeed the epoch number signed with the proposer's private key. It then mixes the hash of the reveal into the current epoch's RANDAO accumulator. The hash is used in order to reduce the signature down from 96 to 32 bytes, and to make it uniform. [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) past values of the RANDAO accumulator at the ends of epochs are stored in the state.
+
+From Justin Drake's [notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr):
+> Using `xor` in `process_randao` is (slightly) more secure than using `hash`. To illustrate why, imagine an attacker can grind randomness in the current epoch such that two of his validators are the last proposers, in a different order, in two resulting samplings of the next epochs. The commutativity of `xor` makes those two samplings equivalent, hence reducing the attacker’s grinding opportunity for the next epoch versus `hash` (which is not commutative). The strict security improvement may simplify the derivation of RANDAO security formal lower bounds.
+
+Note that the `assert` statement means that the whole block is invalid if the RANDAO reveal is incorrectly formed.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`hash()`](/part3/helper/crypto#hash), [`xor()`](/part3/helper/math#def_xor), [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix) |
+| See&nbsp;also | [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) |
 
 #### Eth1 data
 
@@ -4169,7 +4294,16 @@ def process_eth1_data(state: BeaconState, body: BeaconBlockBody) -> None:
         state.eth1_data = body.eth1_data
 ```
 
-TODO
+Blocks may contain [`Eth1Data`](/part3/containers/dependencies#eth1data) which is supposed to be the proposer's best view of the Eth1 chain and the deposit contract at the time. There is no incentive to get this data correct, or penalty for it being incorrect.
+
+If there is a simple majority of the same vote being cast by proposers during each voting period of [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) epochs (6.8 hours) then the Eth1 data is committed to the beacon state. This updates the chain's view of the deposit contract, and new deposits since the last update will start being processed.
+
+This mechanism has proved to [be fragile](https://github.com/ethereum/eth2.0-specs/issues/2018) in the past, but appears to be workable if not perfect.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| See&nbsp;also | [`Eth1Data`](/part3/containers/dependencies#eth1data), [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) |
 
 #### Operations
 
@@ -4191,7 +4325,17 @@ def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
     for_ops(body.voluntary_exits, process_voluntary_exit)
 ```
 
-TODO
+Just a dispatcher for handling the various optional contents in a block.
+
+Deposits are optional only in the sense that some blocks have them and some don't. However, as per the `assert` statement, if, according to the beacon chain's view of the Eth1 chain, there are deposits pending, then the block _must_ include them, otherwise the block is invalid. On the face of it, this suggests that it is important for a block proposer to have access to an Eth1 node, so as to be able to obtain the deposit data. In practice, this turns out to be [not so important](https://github.com/ethereum/eth2.0-specs/issues/2152), although. with Altair, the proposer reward was increased by a factor of four, which increases the importance of the Eth1 node.
+
+Block proposers are explicitly rewarded for including any available attestations and slashing reports. There is a validity condition, and thus an implicit reward, related to including deposit messages. The incentive for including voluntary exits is that a smaller validator set means higher rewards for the remaining validators.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
+| See&nbsp;also | [`BeaconBlockBody`](/part3/containers/blocks#beaconblockbody) |
 
 ##### Proposer slashings
 
@@ -4220,7 +4364,19 @@ def process_proposer_slashing(state: BeaconState, proposer_slashing: ProposerSla
     slash_validator(state, header_1.proposer_index)
 ```
 
-TODO
+A [`ProposerSlashing`](/part3/containers/operations#proposerslashing) is a proof that a proposer has signed two blocks at the same height. Up to [`MAX_PROPOSER_SLASHINGS`](/part3/config/preset#max_proposer_slashings) of them may be included in a block. It contains the evidence in the form of a pair of [`SignedBeaconBlockHeader`](/part3/containers/envelopes#signedbeaconblockheader)s.
+
+The proof is simple: the two proposals come from the same slot, have the same proposer, but differ in one or more of `parent_root`, `state_root`, or `body_root`. In addition, they were both signed by the proposer. The conflicting blocks do not need to be valid: any pair of headers that meet the criteria, irrespective of the blocks' contents, are liable to be slashed.
+
+As ever, the `assert` statements ensure that the containing block is invalid if it contains any invalid slashing claims.
+
+Fun fact: the [first slashing](https://beaconcha.in/block/138731#proposer-slashings) to occur on the beacon chain was a proposer slashing. Two clients running side-by-side with the same keys will often produce the same attestations since the protocol is designed to encourage that. Independently producing the same block is very unlikely as blocks contain much more data.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`is_slashable_validator()`](/part3/helper/predicates#def_is_slashable_validator), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`slash_validator()`](/part3/helper/mutators#def_slash_validator) |
+| See&nbsp;also | [`ProposerSlashing`](/part3/containers/operations#proposerslashing) |
 
 ##### Attester slashings
 
@@ -4243,11 +4399,21 @@ def process_attester_slashing(state: BeaconState, attester_slashing: AttesterSla
     assert slashed_any
 ```
 
-TODO
+[`AttesterSlashing`](/part3/containers/operations#attesterslashing)s are similar to proposer slashings in that they just provide the evidence of the two aggregate [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s that conflict with each other. Up to [`MAX_ATTESTER_SLASHINGS`](/part3/config/preset#max_attester_slashings) of them may be included in a block.
+
+The validity checking is done by [`is_slashable_attestation_data()`](/part3/helper/predicates#is_slashable_attestation_data), which checks the double vote and surround vote conditions, and by [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation) which verifies the signatures on the attestations.
+
+Any validators that appear in both attestations are slashed. If no validator is slashed, then the attester slashing claim was not valid after all, and therefore its containing block is invalid.
+
+Examples: a [double vote](https://beaconcha.in/block/43920#attester-slashings) attester slashing; [surround vote](https://beaconcha.in/block/17184#attester-slashings) attester slashings.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`is_slashable_attestation_data()`](/part3/helper/predicates#is_slashable_attestation_data), [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation), [`is_slashable_validator()`](/part3/helper/predicates#def_is_slashable_validator), [`slash_validator()`](/part3/helper/mutators#def_slash_validator) |
+| See&nbsp;also | [`AttesterSlashing`](/part3/containers/operations#attesterslashing) |
 
 ##### Attestations
-
-*Note*: The function `process_attestation` is modified to do incentive accounting with epoch participation flags.
 
 <a id="def_process_attestation"></a>
 
@@ -4287,7 +4453,32 @@ def process_attestation(state: BeaconState, attestation: Attestation) -> None:
     increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
 ```
 
-TODO
+Block proposers are rewarded here for including attestations during block processing, while attesting validators receive their rewards and penalties during [epoch processing](/part3/transition/epoch#process-rewards-and-penalties).
+
+This routine processes each attestation included in the block. First a bunch of validity checks are performed. If any of these fails, then the whole block is invalid (it is most likely from a proposer on a different fork, and so useless to us):
+ - The target vote of the attestation must be either the previous epoch's checkpoint or the current epoch's checkpoint.
+ - The target checkpoint and the attestation's slot must belong to the same epoch.
+ - The attestation must be no newer than [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) slots, which is one. So this condition rules out attestations from the current or future slots.
+ - The attestation must be no older than [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) slots, which is 32.
+ - The attestation must come from a committee that existed when the attestation was created.
+ - The size of the committee and the size of the aggregate must match (`aggregation_bits`).
+ - The (aggregate) signature on the attestation must be valid and must correspond to the aggregated public keys of the validators that it claims to be signed by. This (and other criteria) is checked by [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation).
+
+Once the attestation has passed the checks it is processed by converting the votes from validators that it contains into flags in the state.
+
+It's easy to skip over amidst all the checking, but the actual attestation processing is done by [`get_attestation_participation_flag_indices()`](/part3/helper/accessors#def_get_attestation_participation_flag_indices). This takes the source, target, and head votes of the attestation, along with its inclusion delay (how many slots late was it included in a block) and returns a list of up to [three flags](/part3/config/constants#participation-flag-indices) corresponding to the votes that were both correct and timely, in `participation_flag_indices`.
+
+For each validator that signed the attestation, if each flag in `participation_flag_indices` is not already set for it in its `epoch_participation` record, then the flag is set, and the proposer is rewarded. Recall that the validator making the attestation is not rewarded until the end of the epoch. If the flag is already set in the corresponding epoch for a validator, no proposer reward is accumulated: the attestation for this validator was included in an earlier block.
+
+The proposer reward is accumulated, and weighted according to the [weight](/part3/config/constants#participation_flag_weights) assigned to each of the flags (timely source, timely target, timely head).
+
+If a proposer includes all the attestations only for one slot, and all the relevant validators vote, then its reward will be, in the [notation](/part3/transition/epoch#rewards-and-penalties) established earlier,
+
+$$
+I_{A_P} = \frac{W_p}{32(W_{\Sigma} - W_p)}I_A
+$$
+
+The total available reward in an epoch for proposers including attestations is 32 times this.
 
 ##### Deposits
 
@@ -4309,9 +4500,12 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
     )
 ```
 
-TODO
+Create a newly initialised validator object from a deposit. This was [factored out](https://github.com/ethereum/eth2.0-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the sharding spec.
 
-*Note*: The function `process_deposit` is modified to initialize `inactivity_scores`, `previous_epoch_participation`, and `current_epoch_participation`.
+|||
+|-|-|
+| Used&nbsp;by | [`process_deposit()`](#def_process_deposit) |
+| See&nbsp;also | [`Validator`](/part3/containers/dependencies#validator), [`Deposit`](/part3/containers/operations#deposit), [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch), [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) |
 
 <a id="def_process_deposit"></a>
 
@@ -4354,7 +4548,21 @@ def process_deposit(state: BeaconState, deposit: Deposit) -> None:
         increase_balance(state, index, amount)
 ```
 
-TODO
+Here, we process a deposit from a block. If the deposit is valid, either a new validator is created or the deposit amount is added to an existing validator.
+
+The call to [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch) ensures that it is not possible to fake a deposit. The `eth1data.deposit_root` from the deposit contract has been [agreed](/part3/transition/block#eth1-data) by the beacon chain and includes all pending deposits visible to the beacon chain. The deposit itself contains a Merkle proof that it is included in that root. The `state.eth1_deposit_index` counter ensures that deposits are processed in order. In short, the proposer provides `leaf` and `branch`, but neither `index` nor `root`.
+
+Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain forks (such as Phase&nbsp;0 and Altair), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
+
+If the Merkle branch check fails, then the whole block is invalid. However, individual deposits can fail the signature check without invalidating the block. This allows incorrectly signed deposits to be de-queued (via `state.eth1_deposit_index += 1`) without blocking further progress (that increment would have to be reverted if the block were invalid).
+
+Note that it is not possible to change a validator's withdrawal credentials after the initial deposit: the withdrawal credentials of subsequent deposits for the same validator are ignored; only the credentials appearing on the initial deposit are stored on the beacon chain. This is an important security measure. If an attacker steals a validator's signing key, we don't want them to be able to change the withdrawl credentials in order to steal the stake for themselves. However, it works both ways, and [a vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) was identified for staking pools in which a malicious operator could potentially front-run a deposit transaction with a 1 ETH deposit to set the withdrawal credentials to their own.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`compute_domain()`](/part3/helper/misc#def_compute_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`get_validator_from_deposit()`](#def_get_validator_from_deposit) |
+| See&nbsp;also | [`Deposit`](/part3/containers/operations#deposit) |
 
 ##### Voluntary exits
 
@@ -4397,10 +4605,7 @@ At present it is [not possible](https://notes.ethereum.org/elDvTNrbRqmgP6np_YWc2
 | Uses | [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`initiate_validator_exit()`](/part3/helper/mutators#def_initiate_validator_exit) |
 | See&nbsp;also | [`VoluntaryExit`](/part3/containers/operations#voluntaryexit), [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) |
 
-
 ##### Sync aggregate processing
-
-*Note*: The function `process_sync_aggregate` is new.
 
 <a id="def_process_sync_aggregate"></a>
 
@@ -4432,7 +4637,44 @@ def process_sync_aggregate(state: BeaconState, sync_aggregate: SyncAggregate) ->
             decrease_balance(state, participant_index, participant_reward)
 ```
 
-TODO
+Similarly to how attestations are handled, the beacon block proposer includes in its block an aggregation of sync committee votes that agree with its local view of the chain. Specifically, the sync committee votes are for the head block that the proposer saw in the previous slot. (If the previous slot is empty, then the head block will be from an earlier slot.)
+
+We validate these votes against our local view of the chain, and if they agree then we reward the participants that voted. If they do not agree with our local view, then the entire block is invalid: it is on another branch.
+
+To perform the validation, we form the signing root of the block at the previous slot, with `DOMAIN_SYNC_COMMITTEE` mixed in. Then we check if the aggregate signature received in the [`SyncAggregate`](/part3/containers/operations#syncaggregate) verifies against it, using the aggregate public key of the validators who claimed to have signed it. If either the signing root (that is, the head block) is wrong, or the list of participants is wrong, then the verification will fail and the block is invalid.
+
+Like proposer rewards, but unlike attestation rewards, sync committee rewards are not weighted with the participants' effective balances. This is already taken care of by the committee selection process that weights the probability of selection with the effective balance of the validator.
+
+Running through the calculations:
+ - `total_active_increments`: the sum of the effective balances of the entire active validator set normalising with the [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) to give the total number of increments.
+ - `total_base_rewards`: the maximum rewards that will be awarded to all validators for all duties this epoch. It is at most $NB$ in the [notation](/part3/transition/epoch#rewards-and-penalties) established earlier.
+ - `max_participant_rewards`: the amount of the total reward to be givento the entire sync committee in this slot.
+ - `participant_reward`: the reward per participating validator, and the penalty per non-particpating validator.
+ - `proposer_reward`: one seventh of the participant reward.
+
+Each committee member that voted receives a reward of `participant_reward`, and the proposer receives one seventh of this in addition.
+
+Each committee member that failed to vote receives a penalty of `participant_reward`, and the proposer receives nothing.
+
+In our [notation](/part3/transition/epoch#rewards-and-penalties) the maximum issuance (reward) due to sync committees per slot is as follows.
+
+The maximum reward per slot for sync committee members:
+
+$$
+I_S = \frac{W_y}{32 \cdot W_{\Sigma}}NB
+$$
+
+The per-epoch rewards is thirty-two times this. The maximum reward for the proposer in respect of sync aggregates:
+
+$$
+I_{S_P} = \frac{W_p}{W_{\Sigma} - W_p}I_S
+$$
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_operations()`](/part3/transition/block#def_process_operations) |
+| Uses | [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`get_base_reward_per_increment()`](/part3/transition/epoch#def_get_base_reward_per_increment), [`increase_balance()`](/part3/helper/mutators#def_increase_balance), [`decrease_balance()`](/part3/helper/mutators#decrease_balance) |
+| See&nbsp;also | [Incentivization weights](/part3/config/constants#incentivization-weights) |
 
 ## Initialise State <!-- /part3/initialise -->
 
@@ -4501,6 +4743,8 @@ def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
     return state
 ```
 
+TODO
+
 ### Genesis state
 
 Let `genesis_state = candidate_state` whenever `is_valid_genesis_state(candidate_state) is True` for the first time.
@@ -4516,9 +4760,13 @@ def is_valid_genesis_state(state: BeaconState) -> bool:
     return True
 ```
 
+TODO
+
 ### Genesis block
 
 Let `genesis_block = BeaconBlock(state_root=hash_tree_root(genesis_state))`.
+
+TODO
 
 ## Altair Fork Logic <!-- /part3/altair-fork -->
 
@@ -4573,6 +4821,8 @@ def translate_participation(state: BeaconState, pending_attestations: Sequence[p
                 epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 ```
 
+TODO
+
 <a id="def_upgrade_to_altair"></a>
 
 ```python
@@ -4624,7 +4874,6 @@ def upgrade_to_altair(pre: phase0.BeaconState) -> BeaconState:
     post.next_sync_committee = get_next_sync_committee(post)
     return post
 ```
-
 
 TODO
 
