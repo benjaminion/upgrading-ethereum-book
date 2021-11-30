@@ -162,6 +162,10 @@ div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
   margin: 0;
 }
 
+div.title-page img {
+  margin: 0 auto;
+}
+
 /*** Code prettifier ***/
 
 pre.language-text {
