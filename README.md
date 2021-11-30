@@ -10,6 +10,10 @@ It is a work in progress. Currently, the only reasonably complete section is the
 
 I am not looking for contributions. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
 
+## Licence
+
+The copyright on the original parts of this work belongs to ConsenSys. We are currently deciding what licence to apply.
+
 ## Installing
 
 ### Pre-requisites

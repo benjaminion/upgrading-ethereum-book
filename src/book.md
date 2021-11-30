@@ -50,7 +50,7 @@ You will notice too that I unapologetically use British English spelling, punctu
 
 ## Acknowledgements
 
-First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been cool with me working on this in the course of my day job. As a consequence, the copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been very cool with me working on this in the course of my day job. <!-- As a consequence, the copyright belongs to ConsenSys, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO. --> ConsenSys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
