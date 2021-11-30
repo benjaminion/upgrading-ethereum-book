@@ -4,11 +4,11 @@
 
 This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3) - the rest is on its way.
 
-The Annotated Spec is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can build around them and the messy details neatly tucked away. My goal for the remaining parts of the book is to wrap a nice accessible narrative around the tricky technical details. There will be pictures.
+The Annotated Spec is the guts of the machine. Like the innards of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can be built around them and the messy details neatly tucked away. My goal for the remaining parts of the book is to wrap a nice accessible narrative around the tricky technical details. There will be pictures.
 
 My rough plan is as follows:
 
-  - Spend some time fixing typos and generally recovering from doing the annotated spec.
+  - Spend some time fixing typos and polishing the annotated spec.
   - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I aim to have done the following:
     - Completed [Part 1: Building](/part1)
     - Completed [Part 2: Technical Overview](/part2)
@@ -22,7 +22,7 @@ Meanwhile, I might get round to making it prettier, ensuring it is accessible an
 
 ## What to expect
 
-This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on proof of stake &ndash; at a technical level. I am aiming for a degree of completeness, at least touching on all the main areas. But this is an explainer, not an encyclopedia.
+This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on proof of stake &ndash; at a technical level. What does it do? How does it work? Why is it like this?
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
@@ -52,15 +52,13 @@ You will notice too that I unapologetically use British English spelling, punctu
 
 First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been cool with me working on this in the course of my day job. As a consequence, the copyright belongs to ConsenSys[, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO]. ConsenSys is an amazing employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
-[TODO: link to jobs board]::
-
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
 Thank you to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter. And also some kind crypto gifts from anons. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
 
 Shout-out to the EthStaker community: you are the best!
 
-Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. I helped establish the amazing Protocols R&D team, and later kicked off the project that became Teku. To all my colleagues and team-mates: you are incredible.
+Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. It is where I helped establish the amazing Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
 
 # Part 1: Building <!-- /part1 -->
 
@@ -1030,12 +1028,17 @@ Vitalik provides some handy Python code to evaluate this expression.
     def probge(n, k, p):
         return sum([prob(n,i,p) for i in range(k,n+1)])
 
-Using this, I find that the minimum committee size to avoid a two-thirds majority with a $2^{-40}$ probability is actually 109 rather than 111. But never mind.
+Using this, I find that the minimum committee size to avoid a two-thirds majority with a $2^{-40}$ probability is actually 109 rather than 111.
 
     >>> probge(108, 72, 1.0 / 3) < 2**-40
     False
     >>> probge(109, 73, 1.0 / 3) < 2**-40
     True
+
+In any case, a committee size of 128 is very safe against an attacker with 1/3 of the stake:
+
+    >>> probge(128, 86, 1.0 / 3)
+    5.551560731791749e-15
 
 Another concern is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
 
@@ -1133,7 +1136,7 @@ As a reminder, epoch transitions are where the comparatively heavy beacon chain 
 
 Since every validator attests one every epoch, there is an interplay between the number of slots per epoch, the number of committees per slot, committee sizes, and the total number of validators.
 
-[TODO: why is 32 the right number?]::
+The choice of 32 slots per epoch is a trade-off between time to finality (we need two epochs to finalise, so we prefer to keep them as short as we can) and being as certain as possible that at least one honest proposer per epoch will make a block to update the RANDAO (for which we prefer longer epochs).
 
 ##### `MIN_SEED_LOOKAHEAD`
 
@@ -1145,7 +1148,7 @@ This mechanism is designed to allow sufficient time for committee members to fin
 
 The above notwithstanding, if an attacker has a large proportion of the stake, or is, for example, able to DoS block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. In which case the attacker might be able to manipulate the make up of committees advantageously by performing judicious exits and activations of their validators.
 
-To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
+To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount, which allows new randomness to come in via block proposals from honest validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD - MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
 ##### `MIN_EPOCHS_TO_INACTIVITY_PENALTY`
 
@@ -1471,11 +1474,15 @@ Note that the dependence on effective balance means that the validator is queued
 
 Validators are allowed to exit the system and cease validating, and new validators may apply to join at any time. For [interesting reasons](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Exiting), a design decision was made to apply a rate-limit to entries (activations) and exits. Basically, it is important in proof of stake protocols that the validator set not change too quickly.
 
-In the normal case, a validator is able to exit fairly swiftly: it just needs to wait `MAX_SEED_LOOKAHEAD` (currently four) epochs. However, if there are large numbers of validators wishing to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](/part3/helper/accessors#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
+In the normal case, a validator is able to exit fairly swiftly: it just needs to wait [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) (currently four) epochs. However, if there are large numbers of validators wishing to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](/part3/helper/accessors#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
 
 The same applies to new validator activations, once a validator has been marked as eligible for activation.
 
 In concrete terms, this means that up to four validators can enter or exit the active validator set each epoch (900 per day) until we have 327,680 active validators, at which point the limit rises to five.
+
+The rate at which validators can exit is strongly related to the concept of weak subjectivity, and the weak subjectivity period.
+
+[TODO: Link to weak subjectivity discussion when done]::
 
 ##### `CHURN_LIMIT_QUOTIENT`
 
@@ -1525,7 +1532,7 @@ Vitalik illustrates some scenarios for individual validators in his [annotated A
 <span>Balances per validator in different scenarios. The x-axis is in epochs. It's not clear what the y-axis is, but it is not percentage.</span>
 </div>
 
-TODO: re-do graph with better y-axis.
+TODO: re-do graph with clearer y-axis.
 
 ## Containers <!-- /part3/containers -->
 
@@ -3294,24 +3301,29 @@ def get_flag_index_deltas(state: BeaconState, flag_index: int) -> Tuple[Sequence
     return rewards, penalties
 ```
 
-The "deltas" in the function name are the separate lists of rewards and penalties returned. Rewards and penalties are always treated separately to avoid negative numbers, since all integers in the spec are unsigned.
+This function is used during epoch processing to assign rewards and penalties to individual validators based on their voting record in the previous epoch. Rewards for block proposers for including attestations are calculated [during block processing](/part3/transition/block#def_process_attestation). The "deltas" in the function name are the separate lists of rewards and penalties returned. Rewards and penalties are always treated separately to avoid negative numbers.
 
-TODO
+The function is called once for each of the [flag types](/part3/config/constants#participation-flag-indices) corresponding to correct attestation votes: timely source, timely target, timely head.
 
-Untangling the arithmetic, the maximum total issuance due to rewards for attestors in an epoch, $I_A$, comes out as follows.
+The list of validators returned by [`get_unslashed_participating_indices()`](/part3/helper/accessors#def_get_unslashed_participating_indices) contains the ones that will be rewarded for making this vote type in a timely and correct manner. That routine uses the flags set in state for each validator by [`process_attestation()`](/part3/transition/block#def_process_attestation) during block processing and returns the validators for which the corresponding flag is set.
 
-TODO - Fix this:
+Every active validator is expected to make an attestation exactly once per epoch, so we then cycle through the entire set of active validators, rewarding them if they appear in `unslashed_participating_indices`, as long as we are not in an inactivity leak. If we are in a leak, no validator is rewarded for any of its votes, but penalties still apply to non-particpating validators.
+
+Notice that the reward is weighted with `unslashed_participating_increments`, which is proportional to the total stake of the validators that made a correct vote with this flag. This means that, if participation by other validators is lower, then my rewards are lower, even if I perform my duties perfectly. The reason for this is to do with [discouragement attacks](https://raw.githubusercontent.com/ethereum/research/master/papers/discouragement/discouragement.pdf) (see also this [nice explainer](https://hackingresear.ch/discouragement-attacks/)). In short, with this mechanism, validators are incentivised to help each other out (e.g. by forwarding gossip messages, or aggregating attestations well) rather than to attack or censor one-another.
+
+Validators that did not make a correct and timely vote are penalised with a full weighted base reward for each flag that they missed, except for missing the head vote. Head votes have only a single slot to get included, so a missing block in the next slot is sufficient to cause a miss, but is completely outside the attester's control. Thus head votes are only rewarded, not penalised. This also allows perfectly performing validators to break even during an inactivity leak, when we expect at least a third of blocks to be missing: they receive no rewards, but ideally no penalties either.
+
+Untangling the arithmetic, the maximum total issuance due to rewards for attestors in an epoch, $I_A$, comes out as follows, in the [notation](/part3/transition/epoch#rewards-and-penalties) described later.
+
 $$
-I_A = \frac{(W_s + W_t + W_h)NB}{W_{\Sigma}} = \frac{(14 + 26 + 14)}{64}NB = \frac{27}{32}NB
+I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}NB
 $$
-
-where $N$ is the total number of active validators, $B$ is the base reward, and $W_s$, $W_t$, $W_h$, and $W_{\Sigma}$ are the weights for timely source, target, head, and the weight denominator respectively.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_rewards_and_penalties()`](/part3/transition/epoch#def_process_rewards_and_penalties) |
 | Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#def_get_unslashed_participating_indices), [`get_total_balance()`](/part3/helper/accessors#def_get_total_balance), [`get_total_active_balance()`](/part3/helper/accessors#get_total_active_balance), [`get_eligible_validator_indices()`](/part3/transition/epoch#def_get_eligible_validator_indices), [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward), [`is_in_inactivity_leak()`](/part3/transition/epoch#def_is_in_inactivity_leak) |
-| See&nbsp;also | TODO |
+| See&nbsp;also | [`process_attestation()`](/part3/transition/block#def_process_attestation), [participation flag indices](/part3/config/constants#participation-flag-indices), [rewards and penalties](/part3/transition/epoch#rewards-and-penalties) |
 
 ### Beacon State Mutators <!-- /part3/helper/mutators -->
 
@@ -4478,7 +4490,7 @@ $$
 I_{A_P} = \frac{W_p}{32(W_{\Sigma} - W_p)}I_A
 $$
 
-The total available reward in an epoch for proposers including attestations is 32 times this.
+Where $I_A$ is the total maximum reward per epoch for attestors, calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas). The total available reward in an epoch for proposers including attestations is 32 times this.
 
 ##### Deposits
 
