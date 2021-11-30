@@ -45,5 +45,11 @@ module.exports = {
       },
     },
     `gatsby-plugin-catch-links`,
+    {
+      resolve: 'gatsby-plugin-htaccess',
+      options: {
+        ErrorDocument: `ErrorDocument 404 /altair/404.html`,
+      },
+    },
   ],
 };
