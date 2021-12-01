@@ -21,7 +21,8 @@ main {
   flex-direction: row;
   margin: 0px;
   padding: 0px;
-  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 
 div.main-content {
