@@ -627,7 +627,7 @@ The contents of each are identical.
 
 ### Version information
 
-This edition of Upgrading Ethereum is based on the Altair version of the beacon chain specification, and corresponds to [Release v1.1.1](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.1) of the specifications, made on the 4th of October 2021.
+This edition of Upgrading Ethereum is based on the Altair version of the beacon chain specification, and corresponds to [Release v1.1.1](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.1), made on the 4th of October 2021.
 
 At the time of writing, there is no single specification document for Altair. Instead, there is the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md) and an additional [Altair document](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/beacon-chain.md) describing the differences (a kind of text-based diff).
 
@@ -660,9 +660,9 @@ Each type has a name, an "SSZ equivalent", and a description. SSZ is the encodin
 
 Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`, but this hasn't always been the case.
 
-Regarding "unsigned", there was [much discussion](https://github.com/ethereum/consensus-specs/issues/626) around whether Eth2 should use signed or unsigned integers, but eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertently causing underflows since negative numbers are forbidden.
+Regarding "unsigned", there was [much discussion](https://github.com/ethereum/consensus-specs/issues/626) around whether Eth2 should use signed or unsigned integers, and eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertently causing underflows since negative numbers are forbidden.
 
-And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`.
+And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`, and is really a `byte` type.
 
 | Name                 | SSZ equivalent | Description                                                |
 | -                    | -              | -                                                          |
