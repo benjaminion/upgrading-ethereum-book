@@ -64,6 +64,8 @@ Finally, to circle back to ConsenSys: working daily with such brilliant, talente
 
 ## Introduction <!-- /part1/introduction* -->
 
+TODO
+
 ### Why Ethereum 2.0? <!-- /part1/introduction/whyeth2* -->
 
 TODO
@@ -609,13 +611,13 @@ TODO
 
 ## Introduction <!-- /part3/introduction -->
 
-This section, the Annotated Specification, is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. In the course of the next sections I will be dissecting the entire core beacon chain specification line by line. My aim is not only to explain how things work, but also to give some historical context, some of the reasoning behind how we ended up where we are today.
+The beacon chain specification is the guts of the machine. Like the guts of a computer, all the components are showing and the wires are hanging out: everything is on display. In the course of the next sections I will be dissecting the entire core beacon chain specification line by line. My aim is not only to explain how things work, but also to give some historical context, some of the reasoning behind how we ended up where we are today.
 
-[Early versions](https://github.com/ethereum/consensus-specs/blob/86ec833172704ea0889b5d595d17f45ba1a6676f/specs/core/0_beacon-chain.md) of the specs were written with much more narrative and explanation than today's. Over time they were coded up in Python for better precision and the benefits of being executable. However, in that process, most of the explanation and intuition was removed.[^fn-justinification]. Vitalik has created his own [annotated specifications](https://github.com/ethereum/annotated-spec] that cover many of the key insights. My goal here is to go one level deeper in thoroughness and detail. And perhaps to give an independent perspective as well.
+[Early versions](https://github.com/ethereum/consensus-specs/blob/86ec833172704ea0889b5d595d17f45ba1a6676f/specs/core/0_beacon-chain.md) of the specs were written with much more narrative and explanation than today's. Over time they were coded up in Python for better precision and the benefits of being executable. However, in that process, most of the explanation and intuition was removed.[^fn-justinification] Vitalik has created his own [annotated specifications](https://github.com/ethereum/annotated-spec) that covers many of the key insights. It's hard to compete with Vitalik, but my intention here is to go one level deeper in thoroughness and detail. And perhaps to give an independent perspective.
 
 [^fn-justinification]: A process called "Justinification". Iykyk `;-)`
 
-As and when other parts of the book get written, I will add links to the specific chapters (for example on simple serialization, SSZ) on each topic.
+As and when other parts of the book get written I will add links to the specific chapters on each topic (for example on simple serialize, consensus, networking).
 
 Note that the online annotated specification is available in two forms:
   - divided into chapters in [Part 3](/part3) of the main book, and
@@ -644,9 +646,9 @@ For this work, I have consolidated the two specifications into one, omitting par
 
 For some, a chapter on constants, presets and parameters will seem drier than the Namib desert, but I've long found these to be a rich and fertile way in to the ideas and mechanisms we'll be unpacking in detail in later chapters. Far from being a desert, this part of the spec bustles with life.
 
-The foundation is laid with a set of custom data types. As previously discussed [TODO: link], the beacon chain specification is executable in Python. The data types defined at the top of the spec represent the fundamental quantities that will reappear frequently.
+The foundation is laid with a set of custom data types. The beacon chain specification is executable in Python; the data types defined at the top of the spec represent the fundamental quantities that will reappear frequently.
 
-Then - with constants, presets, and parameters - we will examine the numbers that define and constrain the behaviour of the chain. Each of these quantities tells a story. Each parameter encapsulates an insight, or a mechanism, or a compromise. Why is it here? How has it changed over time? Where does its value come from?
+Then &ndash; with constants, presets, and parameters &ndash; we will examine the numbers that define and constrain the behaviour of the chain. Each of these quantities tells a story. Each parameter encapsulates an insight, or a mechanism, or a compromise. Why is it here? How has it changed over time? Where does its value come from?
 
 ### Custom Types <!-- /part3/config/types -->
 
@@ -826,7 +828,7 @@ Since deposit receipts contain Merkle proofs, their size depends on the value of
 
 ##### `JUSTIFICATION_BITS_LENGTH`
 
-As an optimisation to Casper FFG&mdash;the process by which finality is conferred on epochs&mdash;the beacon chain uses a "$k$-finality" rule. We will describe this more fully when we look at processing [justification and finalisation](/part3/transition/epoch#def_weigh_justification_and_finalization). For now, this constant is just the number of bits we need to store in state to implement $k$-finality. With $k = 2$, we track the justification status of the last four epochs.
+As an optimisation to Casper FFG &ndash; the process by which finality is conferred on epochs &ndash; the beacon chain uses a "$k$-finality" rule. We will describe this more fully when we look at processing [justification and finalisation](/part3/transition/epoch#def_weigh_justification_and_finalization). For now, this constant is just the number of bits we need to store in state to implement $k$-finality. With $k = 2$, we track the justification status of the last four epochs.
 
 ##### `PARTICIPATION_FLAG_WEIGHTS`
 
@@ -1089,7 +1091,7 @@ Allowing stakers to make deposits smaller than a full stake is useful for toppin
 
 ##### `MAX_EFFECTIVE_BALANCE`
 
-There is a concept of "effective balance" for validators: whatever a validator's total balance, its voting power is weighted by its effective balance, even if its actual balance is higher. Effective balance is also the amount on which all rewards, penalties, and slashings are calculated&mdash;it's used a lot in the protocol
+There is a concept of "effective balance" for validators: whatever a validator's total balance, its voting power is weighted by its effective balance, even if its actual balance is higher. Effective balance is also the amount on which all rewards, penalties, and slashings are calculated - it's used a lot in the protocol
 
 The `MAX_EFFECTIVE_BALANCE` is the highest effective balance that a validator can have: 32 Ether. Any balance above this is ignored. Note that this means that staking rewards don't compound in the usual case (unless a validator's effective balance somehow falls below 32&nbsp;Ether, in which case rewards kind of compound).
 
@@ -1125,7 +1127,7 @@ One aspect of performance is network bandwidth. When a validator becomes the blo
 
 `MIN_ATTESTATION_INCLUSION_DELAY` was an attempt to "level the playing field" by setting a minimum number of slots before an attestation can be included in a beacon block. It was [originally set at 4](https://github.com/ethereum/consensus-specs/pull/143), with a 6 second slot time, allowing 24 seconds for attestations to propagate around the network.
 
-It was [later set to one](https://github.com/ethereum/consensus-specs/pull/1157)&mdash;attestations are included as early as possible&mdash;and, now that we plan to crosslink shards every slot, this is the only value that makes sense. So `MIN_ATTESTATION_INCLUSION_DELAY` exists today as a kind of relic of the earlier design.
+It was [later set to one](https://github.com/ethereum/consensus-specs/pull/1157) &ndash; attestations are included as early as possible &ndash; and, now that we plan to crosslink shards every slot, this is the only value that makes sense. So `MIN_ATTESTATION_INCLUSION_DELAY` exists today as a kind of relic of the earlier design.
 
 The current slot time of 12 seconds is assumed to allow sufficient time for attestations to propagate and be aggregated sufficiently within one slot.
 
@@ -1293,7 +1295,7 @@ The value was halved in the Altair upgrade from `2**7` to `2**6` as a step towar
 
 ##### `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`
 
-When a validator has been slashed, a further penalty is later applied to the validator based on how many other validators were slashed during a window of size [`EPOCHS_PER_SLASHINGS_VECTOR`](#state-list-lengths) epochs centred on that slashing event (approximately 18 days before and after).
+When a validator has been slashed, a further penalty is later applied to the validator based on how many other validators were slashed during a window of size [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector) epochs centred on that slashing event (approximately 18 days before and after).
 
 The proportion of the validator's remaining effective balance that will be subtracted [is calculated](/part3/transition/epoch#slashings) as, `PROPORTIONAL_SLASHING_MULTIPLIER` multiplied by the sum of the effective balances of the slashed validators in the window, divided by the total effective balance of all validators. The idea of this mechanism is to punish accidents lightly (in which only a small number of validators were slashed) and attacks heavily (where many validators coordinated to double vote).
 
@@ -1670,7 +1672,7 @@ class IndexedAttestation(Container):
     signature: BLSSignature
 ```
 
-This is one of the forms in which aggregated attestations&mdash;combined identical attestations from multiple validators in the same committee&mdash;are handled.
+This is one of the forms in which aggregated attestations &ndash; combined identical attestations from multiple validators in the same committee &ndash; are handled.
 
 [`Attestation`](/part3/containers/operations#attestation)s and `IndexedAttestation`s contain essentially the same information. The difference being that the list of attesting validators is stored uncompressed in `IndexedAttestation`s. That is, each attesting validator is referenced by its global validator index, and non-attesting validators are not included. To be [valid](/part3/helper/predicates#is_valid_indexed_attestation), the validator indices must be unique and sorted, and the signature must be an aggregate signature from exactly the listed set of validators.
 
@@ -1709,7 +1711,7 @@ class Eth1Data(Container):
 
 Proposers include their view of the Ethereum&nbsp;1 chain in blocks, and this is how they do it. The beacon chain stores these votes up in the [beacon state](/part3/containers/state#beaconstate) until there is a simple majority consensus, then the winner is committed to beacon state. This is to allow the [processing](/part3/transition/block#deposits) of Eth1 deposits, and creates a simple "honest-majority" one-way bridge from Eth1 to Eth2. The 1/2 majority assumption for this (rather than 2/3 for committees) is considered safe as the number of validators voting each time is large: [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) * [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) = 64 * 32 = 2048.
 
-  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on&mdash;it's the root of the (sparse) Merkle tree of deposits.
+  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
   - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
   - `block_hash` is the hash of the Eth1 block being voted for. This doesn't have any current use within the Eth2 protocol, but is "too potentially useful to not throw in there", to quote Danny Ryan.
 
@@ -3356,7 +3358,9 @@ It's fairly clear why block proposers are selected with a probability proportion
 
 #### `get_next_sync_committee`
 
-*Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part3/altair-fork#upgrading-the-state).
+> *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part3/altair-fork#upgrading-the-state).
+
+The random seed that generates the sync committee is based on the number of the next epoch. [`get_next_sync_committee_indices()`](#def_get_next_sync_committee_indices) doesn't contain any check that the epoch corresponds to a sync-committee change boundary, which allowed the timing of the Altair upgrade to be more flexible. But a consequence is that you will get an incorrect committee if you call `get_next_sync_committee()` at the wrong time.
 
 <a id="def_get_next_sync_committee"></a>
 
@@ -4000,19 +4004,12 @@ Issuance for regular rewards are happens in four ways:
 Under [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation), and [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) we find that these work out as follows in terms of $B$ and $N$:
 
 $$
-I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}NB
-$$
-
-$$
-I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A
-$$
-
-$$
-I_S = \frac{W_y}{W_{\Sigma}}NB
-$$
-
-$$
-I_{S_P} = \frac{W_p}{W_{\Sigma} - W_p}I_S
+\begin{aligned}
+&I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}NB \\
+&I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A \\
+&I_S = \frac{W_y}{W_{\Sigma}}NB \\
+&I_{S_P} = \frac{W_p}{W_{\Sigma} - W_p}I_S
+\end{aligned}
 $$
 
 To find the total optimal issuance per epoch, we can first sum $I_A$ and $I_S$,
@@ -4160,8 +4157,6 @@ The returned `rewards` is always an array of zeros. It's here just to make the P
 | See&nbsp;also | [Inactivity Scores](#inactivity-scores), [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) |
 
 ##### Process rewards and penalties
-
-*Note*: The function `process_rewards_and_penalties` is modified to support the incentive accounting reforms.
 
 <a id="def_process_rewards_and_penalties"></a>
 
@@ -4391,8 +4386,6 @@ Storing past roots like this allows historical Merkle proofs to be constructed i
 
 #### Participation flags updates
 
-*Note*: The function `process_participation_flag_updates` is new.
-
 <a id="def_process_participation_flag_updates"></a>
 
 ```python
@@ -4409,8 +4402,6 @@ Two epochs' worth of validator participation flags (that record validators' atte
 | See&nbsp;also | [`ParticipationFlags`](/part3/config/types#participationflags) |
 
 #### Sync committee updates
-
-*Note*: The function `process_sync_committee_updates` is new.
 
 <a id="def_process_sync_committee_updates"></a>
 
@@ -4939,8 +4930,6 @@ Proof-of-work blocks must only be considered once they are at least `SECONDS_PER
 Aka genesis.
 
 This helper function is only for initializing the state for pure Altair testnets and tests.
-
-*Note*: The function `initialize_beacon_state_from_eth1` is modified: (1) using `ALTAIR_FORK_VERSION` as the current fork version, (2) utilizing the Altair `BeaconBlockBody` when constructing the initial `latest_block_header`, and (3) adding initial sync committees.
 
 <a id="def_initialize_beacon_state_from_eth1"></a>
 
