@@ -6,7 +6,7 @@ This is a teaser, an appetiser. Only one part is reasonably complete, the [Annot
 
 The Annotated Spec is the guts of the machine. Like the innards of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can be built around them and the messy details neatly tucked away. My goal for the remaining parts of the book is to wrap a nice accessible narrative around the tricky technical details. There will be pictures.
 
-My rough plan is as follows:
+In an ideal world, my plan is as follows:
 
   - Spend some time fixing typos and polishing the annotated spec.
   - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I aim to have done the following:
@@ -58,7 +58,7 @@ Thank you to the many GitCoin grant supporters who donated in support of the ori
 
 Shout-out to the EthStaker community: you rock!
 
-Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. It is where I helped establish the amazing Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
+Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. It is where I helped establish the fabulous Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
 
 # Part 1: Building <!-- /part1 -->
 
