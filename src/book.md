@@ -54,9 +54,9 @@ First and foremost, I want to thank my employer, ConsenSys. Much of the work has
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
-Thank you to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter. And also some kind crypto gifts from anons. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
+Thank you to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter. And to generous crypto friends, anon and otherwise, for your kind gifts over the years. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
 
-Shout-out to the EthStaker community: you are the best!
+Shout-out to the EthStaker community: you rock!
 
 Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past four-plus years. It is where I helped establish the amazing Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
 
@@ -5301,3 +5301,7 @@ TODO
  - Light client
  - Sync committee
  - Aggregate signature
+ - Execution client
+ - Beacon node
+ - Validator client
+ - Remote signer
