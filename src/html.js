@@ -12,9 +12,14 @@ export default function HTML(props) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         <title>Upgrading Ethereum</title>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:site" content="eth2book.info"/>
+        <meta name="twitter:creator" content="@benjaminion_xyz"/>
+        <meta name="twitter:image" content="https://benjaminion.xyz/f/henohenomoheji.svg"/>
+        <meta property="og:image" content="https://benjaminion.xyz/f/android-icon-192x192.png"/>
         <meta name="description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
         <meta property="og:image" content="https://benjaminion.xyz/android-icon-192x192.png" />
-        <meta property="og:title" content="Ethereum 2.0 Explained" />
+        <meta property="og:title" content="Upgrading Ethereum" />
         <meta property="og:description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
         <link rel="apple-touch-icon" sizes="57x57" href="https://benjaminion.xyz/f/apple-icon-57x57.png" />
         <link rel="apple-touch-icon" sizes="60x60" href="https://benjaminion.xyz/f/apple-icon-60x60.png" />
