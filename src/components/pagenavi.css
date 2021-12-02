@@ -24,6 +24,7 @@ div.page-navi ul {
 div.page-navi li {
   list-style-type: none;
   padding-bottom: 3px;
+  font-weight: normal;
 }
 
 div.page-navi > ul > li {

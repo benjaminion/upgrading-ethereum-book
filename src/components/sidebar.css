@@ -19,15 +19,16 @@ nav.sidebar {
   text-align: left;
 }
 
+#index,
+#index a:hover {
+  text-decoration: none;
+}
+
 #index li {
   text-indent: -1em;
   list-style-type: none;
   line-height: 1.4;
-}
-
-#index,
-#index a:hover {
-  text-decoration: none;
+  font-weight: normal;
 }
 
 #index ul {
@@ -39,7 +40,7 @@ nav.sidebar {
   font-weight: bold;
 }
 
-#index > ul > li .label-string {
+#index > ul > li > a > span.label-string {
   display: none;
 }
 
