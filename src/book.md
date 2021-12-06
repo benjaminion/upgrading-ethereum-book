@@ -4739,6 +4739,8 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
 
 Create a newly initialised validator object from a deposit. This was [factored out](https://github.com/ethereum/consensus-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the sharding spec.
 
+The `state` parameter in the input argument list is an oversight: it is not used or required.
+
 |||
 |-|-|
 | Used&nbsp;by | [`process_deposit()`](#def_process_deposit) |
