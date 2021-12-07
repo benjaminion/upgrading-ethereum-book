@@ -11,3 +11,7 @@ node_modules/
 .cache/
 public/
 tmp/
+
+# IntelliJ configs
+.idea/
+*.iml
