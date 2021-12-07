@@ -1,0 +1,59 @@
+@import "custom.css";
+
+nav.sidebar {
+  box-sizing: border-box;
+  width: var(--sidebar-width);
+  max-width: var(--sidebar-max-width);
+  min-width: var(--sidebar-min-width);
+  height: 100%;
+  padding: 0 1em 0 2em;
+  margin: 0px;
+  overflow-y: auto;
+  border-right: 1px solid rgb(230, 236, 241);
+  text-align: center;
+  background-color: rgb(243, 245, 246);
+}
+
+#index {
+  margin: 0 1em;
+  text-align: left;
+}
+
+#index,
+#index a:hover {
+  text-decoration: none;
+}
+
+#index li {
+  text-indent: -1em;
+  list-style-type: none;
+  line-height: 1.4;
+  font-weight: normal;
+}
+
+#index ul {
+  padding-left: 1em;
+}
+
+#index > ul > li {
+  padding-top: 1ex;
+  font-weight: bold;
+}
+
+#index > ul > li > a > span.label-string {
+  display: none;
+}
+
+#index a.index-active {
+  text-decoration: underline;
+}
+
+nav.sidebar div.sidebar-title {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+nav.sidebar div.sidebar-title a:hover {
+  text-decoration: none;
+}

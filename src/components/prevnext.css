@@ -1,0 +1,28 @@
+div.prevnext {
+  width: 100%;
+  margin: 0;
+  padding: 6px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+div.prevnext span {
+  width: 40%;
+  display: flex;
+}
+
+div.prevnext span.prev {
+  justify-content: flex-start;
+}
+
+div.prevnext span.prev a {
+  padding-right: 100%;
+}
+
+div.prevnext span.next {
+  justify-content: flex-end;
+}
+
+div.prevnext span.next a {
+  padding-left: 100%;
+}

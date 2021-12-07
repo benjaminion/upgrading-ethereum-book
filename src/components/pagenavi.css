@@ -1,0 +1,33 @@
+div.page-navi {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0 1em 0 2em;
+  margin: 0px;
+  overflow-y: auto;
+  color: #999999;
+  font-size: 80%;
+}
+
+div.page-navi a {
+  color: #777;
+}
+
+div.page-navi a:hover {
+  text-decoration: none;
+  color: #444;
+}
+
+div.page-navi ul {
+  padding-left: 1em;
+}
+
+div.page-navi li {
+  list-style-type: none;
+  padding-bottom: 3px;
+  font-weight: normal;
+}
+
+div.page-navi > ul > li {
+  padding-top: 1ex;
+  font-weight: bold;
+}

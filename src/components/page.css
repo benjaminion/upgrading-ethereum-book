@@ -1,0 +1,215 @@
+@import "custom.css";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  color: #24292e;
+  text-rendering: optimizeLegibility;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";  
+}
+
+/* A fix for PgUp/PgDn not working to scroll */
+#gatsby-focus-wrapper {
+  display: contents;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: row;
+  margin: 0px;
+  padding: 0px;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+div.main-content {
+  box-sizing: border-box;
+  margin: 0px;
+  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
+  /* margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(700px,30vw));*/
+  width: var(--main-width);
+  max-width: var(--main-max-width);
+  min-width: var(--main-min-width);
+  padding: 0px 64px 0 96px;
+  overflow-y: auto;
+}
+
+code, pre, tt {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+p {
+  margin-top: 0px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a[rel*="external"]::after {
+  content: "↗";
+  font-size: 10px;
+  vertical-align: top;
+}
+
+code {
+  font-size: 95%;
+}
+
+h3 {
+  padding-bottom: 6px;
+  border-bottom: 1px solid #cccccc;
+  margin-bottom: 3ex;
+}
+
+h4, h5, h6 {
+  margin-top: 4ex;
+  margin-bottom: 1ex;
+}
+
+h1 + p,
+h2 + p,
+h3 + p,
+h4 + p,
+h5 + p,
+h6 + p {
+  margin-top: 1ex;
+}
+
+h4 code {font-size: inherit; }
+
+h5 code {
+  font-size: 110%;
+}
+
+div.image {
+  text-align: center;
+  padding: 3ex 0;
+}
+
+div.image img {
+  width: 80%;
+}
+
+div.image span {
+  display: inline;
+  font-style: italic;
+}
+
+table {
+    border: solid #999999 1px;
+    border-collapse: collapse;
+    margin: 3ex 0;
+}
+
+td, th {
+    border: solid #999999 1px;
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    color: white;
+    background-color: #999999;
+    border: solid #cccccc 1px;
+    border-top-style: inherit;
+}
+
+th:first-child {
+    border-left-style: inherit;
+}
+
+th:last-child {
+    border-right-style: inherit;
+}
+
+th:empty {
+  display: none;
+}
+
+div.section li {
+  line-height: 1.5;
+  padding-bottom: 3px;
+}
+
+blockquote {
+  margin-left: 0;
+  padding-left: 2em;
+  border-left: solid #ccc 4px;
+  font-style: italic;
+}
+
+/*** Title page format ***/
+
+div.title-page {
+  display: flex;
+  margin:6ex 20%;
+  height: 80vh;
+  text-align:center;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+div.title-page img {
+  margin: 0 auto;
+}
+
+/*** Code prettifier ***/
+
+pre.language-text {
+  background-color: inherit;
+  color: inherit;
+}
+
+code.language-text {
+  color: inherit;
+}
+
+div.gatsby-highlight {
+  margin: 1ex 0 3ex 0;
+}
+
+pre[class^="language-"] {
+  border-radius: 1ex;
+}
+
+pre[class^="language-"] code {
+  font-size: 0.9em;
+}
+
+/*** Displyed equations ***/
+
+/* Make larger than the default size */
+div.math-display {
+  font-size: 1.1em;
+}
+
+/*** Footnotes ***/
+
+div.footnotes hr {
+  margin-top: 6ex;
+  border: 0;
+  border-top: solid 1px #ccc;
+}
+
+div.footnotes {
+  font-size: 85%;
+}

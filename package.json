@@ -1,12 +1,10 @@
 {
-  "name": "ethereum-2.0-explained",
+  "name": "upgrading-ethereum-book",
   "version": "1.0.0",
   "private": true,
-  "description": "Ethereum 2.0 Explained",
+  "description": "A technical handbook on Ethereum's move to proof of stake and beyond",
   "author": "Ben Edgington",
-  "keywords": [
-    "gatsby"
-  ],
+  "keywords": [],
   "scripts": {
     "develop": "gatsby develop",
     "start": "gatsby develop",
@@ -15,8 +13,23 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
-    "gatsby": "^3.14.2",
+    "gatsby": "^4.1.3",
+    "gatsby-plugin-catch-links": "^4.0.0",
+    "gatsby-plugin-htaccess": "^1.4.0",
+    "gatsby-plugin-sharp": "^4.0.0",
+    "gatsby-remark-autolink-headers": "^5.0.0",
+    "gatsby-remark-copy-linked-files": "^5.0.0",
+    "gatsby-remark-external-links": "^0.0.4",
+    "gatsby-remark-images": "^6.0.0",
+    "gatsby-remark-numbered-footnotes": "^1.0.1",
+    "gatsby-remark-prismjs": "^6.1.0",
+    "gatsby-source-filesystem": "^4.0.0",
+    "gatsby-transformer-remark": "^5.0.0",
+    "gatsby-transformer-sharp": "^4.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "rehype-mathjax": "^3.1.0",
+    "remark-math": "^4.0.0",
+    "remark-rehype": "^8.1.0"
   }
 }
