@@ -50,7 +50,7 @@ You will notice too that I unapologetically use British English spelling, punctu
 
 ## Acknowledgements
 
-First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been very cool with me working on this in the course of my day job. <!-- As a consequence, the copyright belongs to ConsenSys, but the company has generously agreed to apply a liberal licensing policy, for which I am extremely grateful - TBD - TODO. --> ConsenSys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been very cool with me working on this in the course of my day job. ConsenSys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
@@ -141,42 +141,6 @@ TODO
 ### Genesis <!-- /part2/beacon/genesis* -->
 
 TODO
-
-[TODO: include Phase 0 params and spec section]::
-<!--
-| Name | Value |
-| - | - |
-| `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` | `uint64(2**14)` (= 16,384) |
-| `MIN_GENESIS_TIME` | `uint64(1606824000)` (Dec 1, 2020, 12pm UTC) |
-| `GENESIS_FORK_VERSION` | `Version('0x00000000')` |
-| `GENESIS_DELAY` | `uint64(604800)` (7 days) |
-
-##### `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`
-
-`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` is the minimum number of full validator stakes that must have been deposited before the beacon chain can start producing blocks. The number is chosen to ensure a degree of security. It allows for four 128 member committees per slot, rather than the 64 eventually desired to support Phase&nbsp;1. But fewer validators means higher rewards per validator, so it is designed to attract early participants to get things bootstrapped.
-
-`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` used to be much higher (65,536 = 2 million Ether staked), but was reduced when `MIN_GENESIS_TIME`, below, was added.
-
-##### `MIN_GENESIS_TIME`
-
-`MIN_GENESIS_TIME` is the earliest date that the beacon chain can start.
-
-Having a `MIN_GENESIS_TIME` allows us to start the chain with fewer validators than was previously thought necessary. The previous plan was to start the chain as soon as there were `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` validators staked. But there were concerns that with a lowish initial validator count, a single entity could form the majority of them and then act to prevent other validators from entering (a "[gatekeeper attack](https://github.com/ethereum/consensus-specs/pull/1467)"). A minimum genesis time allows time for all intending depositors to make their deposits before they could be excluded by a gatekeeper attack.
-
-In the event, the beacon chain started at 12:00:23 UTC on the 1st of December 2020. The extra 23 seconds comes from the timestamp of the first Eth1 block to meet the [genesis criteria](#genesis), [block 11320899](https://etherscan.io/block/11320899). I like to think of this as a little remnant of proof of work forever embedded in the beacon chain's history.
-
-##### `GENESIS_FORK_VERSION`
-
-[TODO: update]::
-
-Forks/upgrades are expected, if only when we move to Phase&nbsp;1. This is the fork version the beacon chain starts with at its "Genesis" event: the point at which the chain first starts producing blocks.
-
-##### `GENESIS_DELAY`
-
-The `GENESIS_DELAY` is a grace period to allow nodes and node operators time to prepare for the Genesis event. The Genesis event cannot occur before [`MIN_GENESIS_TIME`](#min_genesis_time). If there are not [`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`](#min_genesis_active_validator_count) registered validators sufficiently in advance of `MIN_GENESIS_TIME`, then Genesis will occur `GENESIS_DELAY` seconds after enough validators have been registered.
-
-The Genesis event (beacon chain start) was originally designed to take place at midnight UTC, even for testnets, which was not always convenient. This has now been [changed](https://github.com/ethereum/consensus-specs/pull/1866). Once we're past `MIN_GENESIS_TIME - GENESIS_DELAY`, Genesis could end up being at any time of the day, depending on when the last deposit needed comes in. In the event, genesis occurred at 12:00:23 UTC on the 1st of December 2020, according to the timestamp of Ethereum block number [11320899](https://etherscan.io/block/11320899) plus `GENESIS_DELAY`.
--->
 
 ## Consensus <!-- /part2/consensus* -->
 
@@ -302,7 +266,84 @@ TODO
 
 ## Economics <!-- /part2/economics* -->
 
+<!-- Do a section on attacks/analyses? Do we actually have a Nash equilibrium. RIG's work?
+
+One type of attack:
+ - Vlad "A pile of external capital would have to come into the system to attack the blockchain"
+
+Bribing attack:
+ - Vlad: "With the bribe attack, the question became “what is the price of bribing the currently existing nodes to get the desired outcome?”"
+
+-->
+
 ### Introduction
+
+Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics encourages correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and want the chain to give correct, non-contradictory results under all reasonable circumstances.
+
+The tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
+
+One of the few attractive aspects of Proof of Work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penaltes or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
+
+By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
+
+1. The most fundamental economic component is the [stake](/part2/economics/staking) itself.
+2. Within the protocol, the stake is represented as an [effective balance](/part2/economics/effective_balance) that is the actual measure of the influence a validator has on the protocol.
+3. [Rewards](/part2/economics/rewards) incentivise desirable behviours such as publishing beacon blocks and timely attestations.
+4. [Penalties](/part2/economics/rewards) disincentivise undesirable behaviours such as failing to make attestations, or making late or incorrect attestations.
+5. The [inactivity leak](/part2/economics/inactivity) is a special regime that the beacon chain may enter in which rewards and penalties are modified to much more heavily penalise non-participation.
+6. [Slashings](/part2/economics/slashing) are punishments for breaking the protocol rules in very specific ways that look like attacks.
+
+As we shall see, every validator has a beacon chain balance where its stake is stored. All beacon chain protocol rewards come from new issuance of Ether and are added to validators' beacon chain balances. Penalties and slashings are subtracted from validators' beacon chain balances and thus reduce the issuance rate of Ether, or even burn Ether if they exceed the rewards.
+
+#### Further reading
+
+ - Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the backgrounf to many of the design decisions that led, eventually, to the protocol we see today.
+   - [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9)
+   - [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780)
+   - [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc)
+   - [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e)
+   - [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58)
+
+### Staking <!-- /part2/economics/staking* -->
+
+A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must put down. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
+
+The stake in Ethereum&nbsp;2 has three roles.
+
+First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can join. Such systems need a way to prevent individuals from cheaply creating large numbers of duplicate identities and overwhelming the chain. Proof of Work chains achieve this by requiring participants to expend hashpower, which costs money, a finite resource. Proof of Stake chains require participants to stake some of the chain's coin, which is again a finite resource. The influence of each staker in the protocol is proportional to the stake that they put down. This prevents the proliferation of an unlimited number of particpants.
+
+Second, the stake aligns incentives. Stakers own some of what they are guarding, and are incentivised to guard it well.
+
+Third, the stake provides accountability. In Ethereum&nbsp;2's proof of stake system, there is a direct cost to acting in a harmful way. Specific types of harmful behaviour can be uniquely attributed to the stakers that preformed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the "economic security" of the protocol in terms of what it would cost an attacker to do something harmful.[^fn-asic-farm]
+
+[^fn-asic-farm]: In PoW, an unsuccessful attacker can just keep coming back; in PoS this is not so. It is obligatory to quote Vlad Zamfir at this point: under PoS, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
+
+The size of the stake is 32 Ether per validator. This is a compromise value that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. HERE.
+
+#### Nothing at stake
+
+One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose.
+
+#### Long-range attacks
+
+<!-- knowing your validator set -->
+
+#### Economic finality
+
+TODO
+
+#### Further reading
+
+ - The "nothing at stake" problem is discussed in the [Proof of Stake FAQ](https://eth.wiki/concepts/proof-of-stake-faqs#what-is-the-nothing-at-stake-problem-and-how-can-it-be-fixed)
+
+<!--
+Types of participant.
+  - Honest
+  - Economically rational
+  - Attacker
+-->
+
+### Effective Balance <!-- /part2/economics/effective_balance* -->
 
 TODO
 
@@ -310,15 +351,15 @@ TODO
 
 TODO
 
+### Inactivity leak <!-- /part2/economics/inactivity* -->
+
+TODO
+
 ### Slashing <!-- /part2/economics/slashing* -->
 
 TODO
 
-### Inactivity <!-- /part2/economics/inactivity* -->
-
-TODO
-
-### Effective Balance <!-- /part2/economics/effective_balance* -->
+#### Correlated penalities
 
 TODO
 
@@ -3752,7 +3793,7 @@ def process_slots(state: BeaconState, slot: Slot) -> None:
             process_epoch(state)
         state.slot = Slot(state.slot + 1)
 ```
- 
+
 Updates the state from its current slot up to the given slot number assuming that all the intermediate slots are empty (that they do not contain blocks). Iteratively calls [`process_slot()`](#def_process_slot) to apply the empty slot state-transition.
 
 This is where epoch processing is triggered when required. Empty slot processing is extremely light weight, but any epoch transitions that need to be processed require the full rewards and penalties, and justification&ndash;finalisation apparatus.
@@ -5220,14 +5261,9 @@ TODO
 
 TODO
 
- - [Slides](https://docs.google.com/presentation/d/13bmmLbkKte5QGiJjqpIZLgvKxsYdravIgtytQMPBQ-M/edit#slide=id.gec85c98018_0_394)
-
 ### Statelessness <!-- /part4/research/statelessness* -->
 
 TODO
-
- - [Roadmap](https://notes.ethereum.org/Yn_mwNa2SeeQHnKsRgekKg)
- - [Resources](https://notes.ethereum.org/@gballet/Sy-a6T5St)
 
 ### Single Secret Leader Election <!-- /part4/research/ssle* -->
 
@@ -5290,22 +5326,3 @@ TODO
 ## Glossary <!-- /appendices/reference/glossary* -->
 
 TODO
-
- - Merkleise/ize
- - beacon state
- - slashed
- - validator
- - effective balance
- - Eth1
- - Eth2
- - Deposit contract
- - Phase&nbsp;0
- - Altair
- - Fork
- - Light client
- - Sync committee
- - Aggregate signature
- - Execution client
- - Beacon node
- - Validator client
- - Remote signer
