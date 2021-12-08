@@ -3,3 +3,7 @@ footer {
   padding-top: 1ex;
   margin-top: 10ex;
 }
+
+footer a.githash {
+  font-family: monospace;
+}
