@@ -1,8 +1,23 @@
+const execSync = require('child_process').execSync;
+
+function getGitHash() {
+  try {
+    return execSync('git log -1 --format="%h" 2>/dev/null', {encoding: 'utf8'}).replace(/(\r\n|\n|\r)/,"")
+  } catch(e) {
+    return "unknown"
+  }
+}
+
 module.exports = {
   siteMetadata: {
     title: "Upgrading Ethereum",
-    description: `A technical handbook on Ethereum's move to proof of stake and beyond`,
-    author: `Ben Edgington (@benjaminion)`,
+    description: "A technical handbook on Ethereum's move to proof of stake and beyond",
+    author: "Ben Edgington",
+    copyright: "© Copyright 2021 ConsenSys",
+    gitHash: getGitHash(),
+    gitUrl: "https://github.com/benjaminion/upgrading-ethereum-book",
+    licenceUrl: "",
+    licence: "TBD",
   },
   pathPrefix: `/altair`,
   plugins: [

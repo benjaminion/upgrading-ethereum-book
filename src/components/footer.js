@@ -1,17 +1,32 @@
 import React from "react"
+import { useStaticQuery, graphql } from "gatsby"
 
 import "./footer.css"
 
 const Footer = () => {
+
+  const data = useStaticQuery(graphql`
+    {
+      site {
+        siteMetadata {
+          author
+          copyright
+          gitHash
+          gitUrl
+          licenceUrl
+          licence
+        }
+      }
+    }
+  `)
+
+  const meta = data.site.siteMetadata
+
   return (
     <footer>
-      <p>Created by Ben Edgington. © Copyright 2021 ConsenSys. License TBD.</p>
+      <p>Created by {meta.author}. {meta.copyright}. Licensed under <a href={meta.licenceUrl}>{meta.licence}</a>. Commit <a className="githash" href={meta.gitUrl}>{meta.gitHash}</a></p>
     </footer>
   )
 }
-
-//     <footer>
-//       <p>Created by Ben Edgington. © Copyright 2021 ConsenSys. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noreferrer" target="_blank">CC BY-SA 4.0</a>.</p>
-//    </footer>
 
 export default Footer
