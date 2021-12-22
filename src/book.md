@@ -3153,7 +3153,7 @@ There is a chance of the same proposer being selected in two consecutive slots, 
 |||
 |-|-|
 | Used&nbsp;by | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`process_block_header()`](/part3/transition/block#def_process_block_header), [`process_randao()`](/part3/transition/block#def_process_randao), [`process_attestation()`](/part3/transition/block#def_process_attestation), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) |
-| Uses | [`get_seed(#def_get_seed)`](), [`uint_to_bytes()`](/part3/helper/math#uint_to_bytes), [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) |
+| Uses | [`get_seed(#def_get_seed)`](#def_get_seed), [`uint_to_bytes()`](/part3/helper/math#uint_to_bytes), [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) |
 
 #### `get_total_balance`
 
@@ -3176,7 +3176,6 @@ As an aside, there is an interesting example of some fragility in the spec lurki
 |||
 |-|-|
 | Used&nbsp;by | [`get_total_active_balance()`](#def_get_total_active_balance), [`get_flag_index_deltas()`](#def_get_flag_index_deltas), [`process_justification_and_finalization()`](/part3/transition/epoch#def_process_justification_and_finalization) |
-| Uses | |
 | See&nbsp;also | [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) |
 
 #### `get_total_active_balance`
@@ -3827,7 +3826,7 @@ These aggregate balances are passed to [`weigh_justification_and_finalization()`
 |||
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
-| Uses | [`get_unslashed_participating_indices()`](), [`get_total_active_balance()`](), [`get_total_balance()`](), [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization) |
+| Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#def_get_unslashed_participating_indices), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`get_total_balance()`](/part3/helper/accessors#def_get_total_balance), [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization) |
 | See&nbsp;also | [participation flag indices](/part3/config/constants#participation-flag-indices) |
 
 <a id="def_weigh_justification_and_finalization"></a>
@@ -3908,8 +3907,8 @@ For the uninitiated, in Python's array slice syntax, `bits[1:4]` means bits 1, 2
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_justification_and_finalization`](#def_process_justification_and_finalization) |
-| Uses | `get_block_root(/part3/helper/accessors#def_get_block_root)`, |
+| Used&nbsp;by | [`process_justification_and_finalization()`](#def_process_justification_and_finalization) |
+| Uses | [`get_block_root()`](/part3/helper/accessors#def_get_block_root)` |
 | See&nbsp;also | [`JUSTIFICATION_BITS_LENGTH`](/part3/config/constants#justification_bits_length), [`Checkpoint`](/part3/containers/dependencies#checkpoint) |
 
 #### Inactivity scores
@@ -3950,7 +3949,7 @@ There is a floor of zero on the score. So, outside a leak, validators' scores wi
 |||
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
-| Uses | [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices), [`get_unslashed_participating_indices`](/part3/helper/accessors#get_unslashed_participating_indices), [`is_in_inactivity_leak()`](/part3/transition/epoch#def_is_in_inactivity_leak) |
+| Uses | [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices), [`get_unslashed_participating_indices()`](/part3/helper/accessors#get_unslashed_participating_indices), [`is_in_inactivity_leak()`](/part3/transition/epoch#def_is_in_inactivity_leak) |
 | See&nbsp;also | [`INACTIVITY_SCORE_BIAS`](/part3/config/configuration#inactivity_score_bias), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) |
 
 #### Reward and penalty calculations
@@ -4037,7 +4036,7 @@ The base reward is the reward that an optimally performing validator can expect 
 
 |||
 |-|-|
-| Used&nbsp;by | [`get_flag_index_deltas`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation) |
+| Used&nbsp;by | [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation) |
 | Uses | [`get_base_reward_per_increment()`](#def_get_base_reward_per_increment) |
 | See&nbsp;also | [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) |
 
@@ -4120,7 +4119,7 @@ The returned `rewards` is always an array of zeros. It's here just to make the P
 
 |||
 |-|-|
-| Used&nbsp;by | [`def_process_rewards_and_penalties`](#def_process_rewards_and_penalties) |
+| Used&nbsp;by | [`def_process_rewards_and_penalties()`](#def_process_rewards_and_penalties) |
 | Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#get_unslashed_participating_indices), [`get_eligible_validator_indices()`](/part3/transition/epoch#def_get_eligible_validator_indices) |
 | See&nbsp;also | [Inactivity Scores](#inactivity-scores), [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) |
 
