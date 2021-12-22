@@ -349,7 +349,13 @@ Types of participant.
 
 ### Effective Balance <!-- /part2/economics/effective_balance* -->
 
-TODO
+Each validator has two records of its balance on the beacon chain: its actual balance and its effective balance.
+
+A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. It is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee particpants.
+
+The effective balance was initially introduced to signify the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made, a validator would start with an actual balance of 64 Ether, but an effective balance of only 32 Ether.
+
+#### Hysteresis
 
 ### Rewards and Penalties <!-- /part2/economics/rewards* -->
 
