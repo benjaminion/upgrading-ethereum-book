@@ -308,21 +308,25 @@ As we shall see, every validator has a beacon chain balance where its stake is s
 
 A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must put down. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
-The stake in Ethereum&nbsp;2 has three roles.
+The stake in Ethereum&nbsp;2 has three key roles.
 
-First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can join. Such systems need a way to prevent individuals from cheaply creating large numbers of duplicate identities and overwhelming the chain. Proof of Work chains achieve this by requiring participants to expend hashpower, which costs money, a finite resource. Proof of Stake chains require participants to stake some of the chain's coin, which is again a finite resource. The influence of each staker in the protocol is proportional to the stake that they put down. This prevents the proliferation of an unlimited number of particpants.
+First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can join. Permissionless systems must find a way to to allocate influence among their participants. It is not feasible to allow all claimed identities to participate on an equal footing, otherwise individuals could cheaply creating large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hashpower, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they put down.
+
+[^fn-one-cpu-one-vote]: In the Bitcoin whitepaper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
 
 Second, the stake aligns incentives. Stakers own some of what they are guarding, and are incentivised to guard it well.
 
-Third, the stake provides accountability. In Ethereum&nbsp;2's proof of stake system, there is a direct cost to acting in a harmful way. Specific types of harmful behaviour can be uniquely attributed to the stakers that preformed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the "economic security" of the protocol in terms of what it would cost an attacker to do something harmful.[^fn-asic-farm]
+Third, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the "economic security" of the protocol in terms of what it would cost an attacker to do something harmful.[^fn-asic-farm]
 
 [^fn-asic-farm]: In PoW, an unsuccessful attacker can just keep coming back; in PoS this is not so. It is obligatory to quote Vlad Zamfir at this point: under PoS, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
 
-The size of the stake is 32 Ether per validator. This is a compromise value that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. HERE.
+The size of the stake is 32 Ether per validator. 32 ETH is a compromise value that is as small as possible in order to allow wide participation, while remaining large enough that we don't end up with too many validators. The hard cap on the number of validators is the total Ether supply divided by the stake size. As of today, that's about 3.6 million validators. We expect that the beacon chain architecture can likely handle up to around a million validators, and we expect perhaps 10-20% of Ether to be staked eventually, so 32 ETH per stake is about as low as we can go while ensuring we remain within capacity. An alternative might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the amount of compute resources required. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate.
+
+Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) called for a minimum deposit size of 1500 ETH as the system design could handle up to around 900 active validators.
 
 #### Nothing at stake
 
-One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose.
+One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose and perhaps much to gain - you never want to be building on a fork that later gets orphaned.
 
 #### Long-range attacks
 
