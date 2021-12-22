@@ -24,7 +24,7 @@ const Footer = () => {
 
   return (
     <footer>
-      <p>Created by {meta.author}. {meta.copyright}. Licensed under <a href={meta.licenceUrl}>{meta.licence}</a>. Commit <a className="githash" href={meta.gitUrl}>{meta.gitHash}</a></p>
+      <p>Created by {meta.author}. {meta.copyright}. Licensed under <a href={meta.licenceUrl} target="_blank" rel="external noopener">{meta.licence}</a>. Commit <a className="githash" href={meta.gitUrl} target="_blank" rel="external noopener">{meta.gitHash}</a>.</p>
     </footer>
   )
 }

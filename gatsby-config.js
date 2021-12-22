@@ -16,8 +16,8 @@ module.exports = {
     copyright: "© Copyright 2021 ConsenSys",
     gitHash: getGitHash(),
     gitUrl: "https://github.com/benjaminion/upgrading-ethereum-book",
-    licenceUrl: "",
-    licence: "TBD",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    licence: "CC BY-SA 4.0",
   },
   pathPrefix: `/altair`,
   plugins: [

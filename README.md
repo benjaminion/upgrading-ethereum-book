@@ -8,11 +8,11 @@ You can read it at [upgrading-ethereum.info](https://upgrading-ethereum.info/alt
 
 It is a work in progress. Currently, the only reasonably complete section is the [annotated specification](https://upgrading-ethereum.info/altair/annotated-spec) (Part 3). But I thought you might like a glimpse at where it's going. I say more about the plan in the [preface](https://upgrading-ethereum.info/altair/preface).
 
-I am not looking for contributions. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
+I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
 
 ## Licence
 
-The copyright on the original parts of this work belongs to ConsenSys. We are currently deciding what licence to apply.
+This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) licence.
 
 ## Installing
 
