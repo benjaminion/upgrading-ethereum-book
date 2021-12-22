@@ -756,7 +756,9 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 ### Constants <!-- /part3/config/constants -->
 
-The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times[^fn-presets]. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+
+[^fn-presets]: See [Issue 2390](https://github.com/ethereum/consensus-specs/pull/2390) for discussion and a rationale for the current categorisation into constants, presets, and configuration variables.
 
 #### Miscellaneous
 
