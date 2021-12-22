@@ -65,7 +65,14 @@ FNR == NR {
     next
 }
 
-# Second pass: check anchors exist
+#### Second pass
+
+# Any empty links
+/\[[^]]+\]\(\)/ {
+    print("Empty link, line " FNR)
+}
+
+# Check anchors exist
 {
     # There may be multiple anchors on the line
     # This mess matches non-greedy [foo](#bar) and [foo](/a/b/c#xyz) etc.
@@ -88,9 +95,4 @@ FNR == NR {
 
         $0 = substr($0, RSTART + RLENGTH)
     }
-}
-
-# Any empty links
-/\[[^]]+\]\(\)/ {
-    print("Empty link, line " FNR)
 }
