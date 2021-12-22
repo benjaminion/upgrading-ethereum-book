@@ -4105,7 +4105,7 @@ A different curve could have been chosen for the rewards profile. For example, t
 |||
 |-|-|
 | Used&nbsp;by | [`get_base_reward()`](#def_get_base_reward), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) |
-| Uses | [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot) |
+| Uses | [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance) |
 
 <a id="def_get_base_reward"></a>
 
