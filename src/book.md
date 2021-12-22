@@ -264,7 +264,7 @@ TODO
 
 TODO
 
-## Economics <!-- /part2/economics* -->
+## Economics <!-- /part2/economics -->
 
 <!-- Do a section on attacks/analyses? Do we actually have a Nash equilibrium. RIG's work?
 
@@ -304,7 +304,7 @@ As we shall see, every validator has a beacon chain balance where its stake is s
    - [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e)
    - [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58)
 
-### Staking <!-- /part2/economics/staking* -->
+### Staking <!-- /part2/economics/staking -->
 
 A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must put down. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
@@ -347,25 +347,54 @@ Types of participant.
   - Attacker
 -->
 
-### Effective Balance <!-- /part2/economics/effective_balance* -->
+### Effective Balance <!-- /part2/economics/effective_balance -->
 
 Each validator has two records of its balance on the beacon chain: its actual balance and its effective balance.
 
-A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. It is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee particpants.
+A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee particpants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$ ETH.
 
-The effective balance was initially introduced to signify the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made, a validator would start with an actual balance of 64 Ether, but an effective balance of only 32 Ether.
+A validator's effective balance is derived from its actual balance and is designed to change much more slowly. To achieve this, its units are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
+
+Using the effective balance achieves two goals, one to do with economics, the other purely engineering.
+
+#### Economic aspects
+
+The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made, a validator would start with an actual balance of 64 ETH, but an effective balance of only 32 ETH.
+
+Weight of a validator.
+
+A validator's actual balance is never used in consensus calculations or for calculating rewards and penalties, only ever the validator's effective balance.
+
+#### Engineering aspects of effective balance
+
+https://github.com/ethereum/consensus-specs/pull/317
+
 
 #### Hysteresis
 
-### Rewards and Penalties <!-- /part2/economics/rewards* -->
+https://en.wikipedia.org/wiki/Hysteresis
+
+https://github.com/ethereum/consensus-specs/issues/1609
+
+https://github.com/ethereum/consensus-specs/pull/1627
+
+#### See also
+
+From the spec:
+  - These presets constrain the effective balance: [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance), and [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)
+  - The [parameters that control the hysteresis](/part3/config/preset#hysteresis-parameters)
+  - The function [`process_effective_balance_updates()`](/part3/transition/epoch#def_process_effective_balance_updates) for the actual calculation and application of hysteresis.
+  - [`Validator`](/part3/containers/dependencies#validator) objects store the effective balances. The [registry](/part3/containers/state#registry) in the beacon state contains the list of validators alongside a separate list of the actual balances.
+
+### Rewards and Penalties <!-- /part2/economics/rewards -->
 
 TODO
 
-### Inactivity leak <!-- /part2/economics/inactivity* -->
+### Inactivity leak <!-- /part2/economics/inactivity -->
 
 TODO
 
-### Slashing <!-- /part2/economics/slashing* -->
+### Slashing <!-- /part2/economics/slashing -->
 
 TODO
 
@@ -843,7 +872,9 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 ### Constants <!-- /part3/config/constants -->
 
-The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+The distinction between "constants", "presets", and "configuration values" is not always clear, and things have moved back and forth between the sections at times[^fn-presets]. In essence, "constants" are things that are expected never to change for the beacon chain, no matter what fork or test network it is running.
+
+[^fn-presets]: See [Issue 2390](https://github.com/ethereum/consensus-specs/pull/2390) for discussion and a rationale for the current categorisation into constants, presets, and configuration variables.
 
 #### Miscellaneous
 
