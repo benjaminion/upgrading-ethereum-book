@@ -156,6 +156,18 @@ TODO
 
 [TODO: That paper is a great starting place for an exposition of PoS]::
 
+<-- What problems are we solving?
+
+#### Nothing at stake
+
+One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose and perhaps much to gain - you never want to be building on a fork that later gets orphaned.
+
+#### Long-range attacks
+
+The benefits of knowing your validator set
+
+-->
+
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
 TODO
@@ -278,7 +290,7 @@ Bribing attack:
 
 ### Introduction
 
-Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics encourages correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and want the chain to give correct, non-contradictory results under all reasonable circumstances.
+Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics incentivises correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and we want the chain to give reasonable, non-contradictory results under all reasonable circumstances.
 
 The tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
 
@@ -293,39 +305,70 @@ By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of d
 5. The [inactivity leak](/part2/economics/inactivity) is a special regime that the beacon chain may enter in which rewards and penalties are modified to much more heavily penalise non-participation.
 6. [Slashings](/part2/economics/slashing) are punishments for breaking the protocol rules in very specific ways that look like attacks.
 
-As we shall see, every validator has a beacon chain balance where its stake is stored. All beacon chain protocol rewards come from new issuance of Ether and are added to validators' beacon chain balances. Penalties and slashings are subtracted from validators' beacon chain balances and thus reduce the issuance rate of Ether, or even burn Ether if they exceed the rewards.
+As we shall see, every validator has a beacon chain balance that represents its stake. All beacon chain protocol rewards come from new issuance of Ether and are added to validators' beacon chain balances. Penalties and slashings are subtracted from validators' beacon chain balances and thus reduce the issuance rate of Ether, or even burn Ether if they exceed the rewards.
 
 #### Further reading
 
- - Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the backgrounf to many of the design decisions that led, eventually, to the protocol we see today. [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9), [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780), [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc), [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e), [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58).
+ - Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the background to many of the design decisions that led, eventually, to the protocol we see today. [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9), [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780), [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc), [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e), [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58).
 
 ### Staking <!-- /part2/economics/staking -->
 
-A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must put down. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
+A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
 The stake in Ethereum&nbsp;2 has three key roles.
 
-First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can join. Permissionless systems must find a way to to allocate influence among their participants. It is not feasible to allow all claimed identities to participate on an equal footing, otherwise individuals could cheaply creating large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hashpower, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they put down.
+First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to to allocate influence among their participants. There must be some cost to creating an identity that partipates in the protocol, otherwise individuals could cheaply create large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hashpower, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
 
 [^fn-one-cpu-one-vote]: In the Bitcoin whitepaper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
 
-Second, the stake aligns incentives. Stakers own some of what they are guarding, and are incentivised to guard it well.
+Second, the stake aligns incentives. Stakers necessarily own some of what they are guarding, and are incentivised to guard it well.
 
 Third, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the "economic security" of the protocol in terms of what it would cost an attacker to do something harmful.[^fn-asic-farm]
 
 [^fn-asic-farm]: In PoW, an unsuccessful attacker can just keep coming back; in PoS this is not so. It is obligatory to quote Vlad Zamfir at this point: under PoS, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
 
-The size of the stake is 32 Ether per validator. 32 ETH is a compromise value that is as small as possible in order to allow wide participation, while remaining large enough that we don't end up with too many validators. The hard cap on the number of validators is the total Ether supply divided by the stake size. As of today, that's about 3.6 million validators. We expect that the beacon chain architecture can likely handle up to around a million validators, and we expect perhaps 10-20% of Ether to be staked eventually, so 32 ETH per stake is about as low as we can go while ensuring we remain within capacity. An alternative might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the amount of compute resources required. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate.
+#### Stake size
+
+The size of the stake in Ethereum&nbsp;2 is 32 ETH per validator.
+
+This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwith networks, thus increasing the forces of centralisation.
+
+The main practical constraint on the number of validators is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
+
+Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, then with $n$ validators the time to finality, $f$ can be modelled as,
+
+$$
+f \ge \frac{2n}{\omega}
+$$
+
+We would like $f$ to be as short as possible, while also allowing broad participation by validators on less than perfect networks, which puts a cap on $\omega$. Together these imply a cap on $n$, the total number of validators.
+
+This is the classic scalability trilemma. I don't find these pictures of triangles very intuitive, but it has become the canonical way to represent the trade-offs>
+
+<div class="image">
+<img src="md/images/scalability-trilemma.svg" /><br />
+<span>The classic scalability trilemma: pick any two.</span>
+</div>
+
+1. Our ideal would be to have high participation (large $n$) with low overhead (low $\omega$) &ndash; lots of stakers on low-spec machines &endash;, but finality would take a long time since message exchange would be slow.
+2. We could have very fast finality and high participation, but would need to mandate that stakers run high spec machines on high bandwidth networks in order to participate.
+3. Or we could have fast finality on reasonably specced machines by severely limiting the number of participants.
+
+It's not clear exactly how to place Ethereum&nbsp;2 on such a diagram, but we definitely favour participation over time to finality: maybe "x" marks the spot. One complexity is participation and overhead are not entirely independent: increasing the overhead will limit the number people able or willing to particpate. Exercise for the reader: try placing some of the other L1 blockchains within the trade-off space.
+
+To put this in more concrete terms, the hard limit on the number of validators is the total Ether supply divided by the stake size. With a 32 ETH stake, that's about 3.6 million validators today, which is consistent with a time to finality of 768 seconds (two epochs), and a message overhead of 9375 messages per second[^fn-message-overhead]. That's a substantial number of messages per second to handle. However, we don't ever expect _all_ Ether to be staked, perhaps around 10-20%. In addition, due to the use of BLS aggregate signatures, messages are highly compressed to an asymptotic 1-bit per validator.
+
+[TODO: link to BLS signatures]::
+
+[^fn-message-overhead]: Vitalik's [estimate](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) of 5461 is too low since he omits the factor of two in the calculation.
+
+Given the capacity of current p2p networks, 32 ETH per stake is about as low as we can go while ensuring we can deliver finality in two epochs.
+
+An alternative approach might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the number of messages exchanged. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate, but participating only on a part-time basis.
+
+Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (many of which might be hosted by a single node). A design goal of the Etherum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we should apply the analysis to the most distributed case, that of one-validator per node.
 
 Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) called for a minimum deposit size of 1500 ETH as the system design could handle up to around 900 active validators.
-
-#### Nothing at stake
-
-One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose and perhaps much to gain - you never want to be building on a fork that later gets orphaned.
-
-#### Long-range attacks
-
-<!-- knowing your validator set -->
 
 #### Economic finality
 
@@ -334,6 +377,8 @@ TODO
 #### Further reading
 
  - The "nothing at stake" problem is discussed in the [Proof of Stake FAQ](https://eth.wiki/concepts/proof-of-stake-faqs#what-is-the-nothing-at-stake-problem-and-how-can-it-be-fixed)
+ - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
+ - [Why 32 ETH validator sizes?](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) from Vitalik's Serenity Design Rationale.
 
 <!--
 Types of participant.
@@ -344,11 +389,20 @@ Types of participant.
 
 ### Effective Balance <!-- /part2/economics/effective_balance -->
 
-Each validator has two records of its balance on the beacon chain: its actual balance and its effective balance.
+#### Summary
+
+  - Each validator maintains an _effective balance_ in addition to its actual balance.
+  - The validator's "weight" or influence in the protocol is proportional to its effective balance, as are its rewards and penalties.
+  - The effective balance tracks the validator's actual balance, but is designed to change much more rarely. This is an optimisation.
+  - A validator's effective balance is capped at 32 ETH.
+
+#### Introduction
+
+Each validator maintains two records of its balance on the beacon chain: its actual balance and its effective balance.
 
 A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee particpants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$ ETH.
 
-A validator's effective balance is derived from its actual balance and is designed to change much more slowly. To achieve this, its units are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
+A validator's effective balance is derived from its actual balance in such a way that it changes much more slowly. To achieve this, the units of effective balance are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
 
 Using the effective balance achieves two goals, one to do with economics, the other purely engineering.
 
@@ -356,20 +410,47 @@ Using the effective balance achieves two goals, one to do with economics, the ot
 
 The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made, a validator would start with an actual balance of 64 ETH, but an effective balance of only 32 ETH.
 
-The scope quickly grew, and now the effective balance completely represents the weight of a validator in the consensus protocol:
-  - the probability of a validator being selected as the beacon block proposer is proportional to its effective balance (see [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index));
-  - the justification and finalisation calculations are based on the 
+This scope quickly grew, and now the effective balance completely represents the weight of a validator in the consensus protocol. By capping the effective balance, we prevent single validators from gaining undue influence by depositing excess Ether.
 
-Weight of a validator.
+All of the following consensus-related matters are proportional to the effective balance of a validator:
+  - the probability of being [selected](/part3/helper/misc#def_compute_proposer_index) as the beacon block proposer;
+  - the validator's weight in the LMD-GHOST fork choice rule;
+  - the validator's weight in the justification and finalisation [calculations](/part3/transition/epoch#def_weigh_justification_and_finalization) calculations; and
+  - the probability of being [included](/part3/helper/accessors#def_get_next_sync_committee_indices) in a sync committee.
 
-A validator's actual balance is never used in consensus calculations or for calculating rewards and penalties, only ever the validator's effective balance.
+[TODO link to fork choice rule above]::
+
+Correspondingly, the following rewards, penalties, and punishments are also weighted by effective balance:
+  - the [base reward](/part3/transition/epoch#def_get_base_reward) for a validator, in terms of which the attestation rewards and penalties are calculated;
+  - the [inactivity penalties](/part3/transition/epoch#def_get_inactivity_penalty_deltas) applied to a validator as a consequence of an inactivity leak; and
+  - both the [initial](/part3/helper/mutators#def_slash_validator) slashing penalty and the [correlated](/part3/transition/epoch#slashings) slashing penalty.
+
+The block proposer reward is not scaled in proportion to the proposer's effective balance. Since a validator's probability of being selected to propose is proportional to its effective balance, the expected long-term reward is the same. For similar reasons, sync committee rewards are not proportional to the participants' effective balances.
 
 #### Engineering aspects of effective balance
+
+We could have achieved all of the above simply by using using validators' actual balances as their weights, capped at 32 ETH. However, we can gain significant performance benefits by basing everything on effective balance instead.
+
+For one thing, effective balances are [updated](/part3/transition/epoch#def_process_effective_balance_updates) only once per epoch, which means that we need only calculate things like the [base reward per increment](/part3/transition/epoch#def_get_base_reward_per_increment) once and we can cache the result for the whole epoch, irrespective of any changes in actual balances.
+
+But the main feature of effective balances is that they are designed to change very rarely. This is achieved by making them very granular, and by applying hysteresis to changes.
+
+<!-- Explain the benefits of splitting out the balance from the validators -->
+
+##### Granularity
+
+Effective balances can only be whole multiples of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which is 1 ETH ($10^9$ Gwei), whereas actual balances are denominated in Gwei.
+
+
 
 https://github.com/ethereum/consensus-specs/pull/317
 
 
-#### Hysteresis
+Crude early design: https://github.com/ethereum/consensus-specs/issues/685
+
+Implementation: https://github.com/ethereum/consensus-specs/pull/949
+
+##### Hysteresis
 
 https://en.wikipedia.org/wiki/Hysteresis
 
@@ -388,6 +469,8 @@ From the spec:
 ### Rewards and Penalties <!-- /part2/economics/rewards -->
 
 TODO
+
+#### Discouragement attack
 
 ### Inactivity leak <!-- /part2/economics/inactivity -->
 
