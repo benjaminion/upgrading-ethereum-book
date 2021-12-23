@@ -180,7 +180,23 @@ TODO
 
 TODO
 
+#### Resources
+
+ - The original [Casper FFG paper](https://arxiv.org/abs/1710.09437) covers the Ethereum&nbsp;2 implementation fairly closely, although it was originally intended to be an overlay on the PoW chain.
+ - Although this does not reflect the current implementation, it contains some good insights and background: [Minimal Slashing Conditions](https://medium.com/@VitalikButerin/minimal-slashing-conditions-20f0b500fc6c). In particular, the relationship between Casper FFG and traditional BFT consensus is more evident.
+
 ### Finality <!-- /part2/consensus/finality* -->
+
+<!--
+
+(my take) Finality requires two rounds as we need to agree, then we need to agree that we have agreed.
+
+ - hear from M validators that they vote for red
+ - but did each of them hear from M validators that they vote for red?
+ - can only know once you've heard from M validators that they heard from M validators that they voted for red.
+ - Blue eyes problem: https://www.popularmechanics.com/science/math/a26557/riddle-of-the-week-27-blue-eyed-islanders/ or https://xkcd.com/blue_eyes.html (solution - but give it a couple of hours thought first! https://xkcd.com/solution.html)
+
+-->
 
 TODO
 
@@ -333,17 +349,17 @@ The size of the stake in Ethereum&nbsp;2 is 32 ETH per validator.
 
 This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwith networks, thus increasing the forces of centralisation.
 
-The main practical constraint on the number of validators is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
+The main practical constraint on the number of validators in a monolithic L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
 
-Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, then with $n$ validators the time to finality, $f$ can be modelled as,
+Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and desire a time to finality of $f$, then we can have participation from at most $n$ validators, where
 
 $$
-f \ge \frac{2n}{\omega}
+n \le \frac{\omega f}{2}
 $$
 
-We would like $f$ to be as short as possible, while also allowing broad participation by validators on less than perfect networks, which puts a cap on $\omega$. Together these imply a cap on $n$, the total number of validators.
+We would like to allow as broad as possible participation by validators, including those on less than perfect networks, which implies keeping $\omega$ small. And we would like $f$ to be as short as possible. Taken together, these requirements imply a cap on $n$, the total number of validators.
 
-This is the classic scalability trilemma. I don't find these pictures of triangles very intuitive, but it has become the canonical way to represent the trade-offs>
+This is the classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs:
 
 <div class="image">
 <img src="md/images/scalability-trilemma.svg" /><br />
@@ -354,7 +370,7 @@ This is the classic scalability trilemma. I don't find these pictures of triangl
 2. We could have very fast finality and high participation, but would need to mandate that stakers run high spec machines on high bandwidth networks in order to participate.
 3. Or we could have fast finality on reasonably specced machines by severely limiting the number of participants.
 
-It's not clear exactly how to place Ethereum&nbsp;2 on such a diagram, but we definitely favour participation over time to finality: maybe "x" marks the spot. One complexity is participation and overhead are not entirely independent: increasing the overhead will limit the number people able or willing to particpate. Exercise for the reader: try placing some of the other L1 blockchains within the trade-off space.
+It's not clear exactly how to place Ethereum&nbsp;2 on such a diagram, but we definitely favour participation over time to finality: maybe "x" marks the spot. One complexity is that participation and overhead are not entirely independent: increasing the overhead increases the hardware and networking requirements, which will reduce the number people able or willing to participate. Exercise for the reader: try placing some of the other L1 blockchains within the trade-off space.
 
 To put this in more concrete terms, the hard limit on the number of validators is the total Ether supply divided by the stake size. With a 32 ETH stake, that's about 3.6 million validators today, which is consistent with a time to finality of 768 seconds (two epochs), and a message overhead of 9375 messages per second[^fn-message-overhead]. That's a substantial number of messages per second to handle. However, we don't ever expect _all_ Ether to be staked, perhaps around 10-20%. In addition, due to the use of BLS aggregate signatures, messages are highly compressed to an asymptotic 1-bit per validator.
 
