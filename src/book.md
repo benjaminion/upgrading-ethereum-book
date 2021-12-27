@@ -166,6 +166,19 @@ One of the issues that had to be solved in order to make Proof of Stake practica
 
 The benefits of knowing your validator set
 
+#### Other stuff
+
+Types of participant.
+  - Honest
+  - Economically rational
+  - Attacker
+
+One type of attack:
+ - Vlad "A pile of external capital would have to come into the system to attack the blockchain"
+
+Bribing attack:
+ - Vlad: "With the bribe attack, the question became “what is the price of bribing the currently existing nodes to get the desired outcome?”"
+
 -->
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
@@ -294,16 +307,6 @@ TODO
 
 ## Economics <!-- /part2/economics -->
 
-<!-- Do a section on attacks/analyses? Do we actually have a Nash equilibrium. RIG's work?
-
-One type of attack:
- - Vlad "A pile of external capital would have to come into the system to attack the blockchain"
-
-Bribing attack:
- - Vlad: "With the bribe attack, the question became “what is the price of bribing the currently existing nodes to get the desired outcome?”"
-
--->
-
 ### Introduction
 
 Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics incentivises correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and we want the chain to give reasonable, non-contradictory results under all reasonable circumstances.
@@ -339,9 +342,7 @@ First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless
 
 Second, the stake aligns incentives. Stakers necessarily own some of what they are guarding, and are incentivised to guard it well.
 
-Third, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the "economic security" of the protocol in terms of what it would cost an attacker to do something harmful.[^fn-asic-farm]
-
-[^fn-asic-farm]: In PoW, an unsuccessful attacker can just keep coming back; in PoS this is not so. It is obligatory to quote Vlad Zamfir at this point: under PoS, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
+Third, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the [economic security](#economic-finality] of the protocol in terms of what it would cost an attacker to do something harmful.
 
 #### Stake size
 
@@ -388,20 +389,30 @@ Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github
 
 #### Economic finality
 
-TODO
+The requirement for validators to lock up stakes and the introduction of slashing conditions allows us to quantify the security of the beacon chain in some sense.
+
+The primary attack that we wish to avoid is one that rewrites the history of the chain. The cost of such an attack parametrises the security of the chain. In proof of work, this is the cost of acquiring an overwhelming (51%) of hashpower for a period of time. Interestingly, a successful 51% attack in proof of work costs essentially nothing, since the attacker claims all of the block rewards on the rewritten chain.
+
+In Ethereum's proof of stake protocol we can measure security in terms of _economic finality_. That is, if an attacker wished to revert a finalised block on the chain, what would be the cost?
+
+This is easy to quantify. To quote Vitalik's [Parametrizing Casper](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735),
+
+> State $H_1$ is economically finalized if enough validators sign a message attesting to $H_1$, with the property that if both $H_1$ and a conflicting $H_2$ are finalized, then there is evidence that can be used to prove that at least $\frac{1}{3}$ of validators were malicious and therefore destroy their entire deposits.
+
+Ethereum's proof of stake protocol has this property. In order to finalise a checkpoint ($H_1$), two-thirds of the validators must have attested to it. To finalise a conflicting checkpoint ($H_2$) requires two-thirds of validators to attest to that as well. Thus, at least one-third of validators must have attested to both checkpoints. Since individual validators sign their attestations, this is both detectable and attributable: it's easy to submit the evidence on-chain that those validators contradicted themselves, and they can be punished by the protocol.
+
+In the Altair implementation, if one-third of validators were to be slashed simultaneously, they would have around two-thirds of their stake burned (20 ETH). The plan is to increase this later to their full stake (32 ETH). At that point, with, say, nine million Ether staked, the cost of reverting a finalised block would be three million of the attackers' Ether being permanently burned, and the attackers being expelled from the network.
+
+It is obligatory at this point to quote Vlad Zamfir. Comparing proof of stake to proof of work, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
+
+For more on the mechanics of economic finality, see below under [Slashing](/part2/economics/slashing), and for more on the rationale and justification, see the section on Casper FFG.
+
+[TODO: link to Casper FFG when written]
 
 #### Further reading
 
- - The "nothing at stake" problem is discussed in the [Proof of Stake FAQ](https://eth.wiki/concepts/proof-of-stake-faqs#what-is-the-nothing-at-stake-problem-and-how-can-it-be-fixed)
- - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
+ - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs for different stake sizes. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
  - [Why 32 ETH validator sizes?](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) from Vitalik's Serenity Design Rationale.
-
-<!--
-Types of participant.
-  - Honest
-  - Economically rational
-  - Attacker
--->
 
 ### Effective Balance <!-- /part2/economics/effective_balance -->
 
@@ -483,6 +494,28 @@ From the spec:
   - [`Validator`](/part3/containers/dependencies#validator) objects store the effective balances. The [registry](/part3/containers/state#registry) in the beacon state contains the list of validators alongside a separate list of the actual balances.
 
 ### Rewards and Penalties <!-- /part2/economics/rewards -->
+
+#### Introduction
+
+The three ongoing mechanisms in Ethereum's proof of stake designed to encourage economically rational validators to act in the protocol's best interests are rewards, penalties, and punishments.
+
+  - Rewards are provided to validators that participate in the protocol by attesting to blocks, proposing blocks, or participating in sync committees. Rewards are tuned so that more valuable contributions (such as timely votes, or well-assembled blocks) receive a greater amount.
+  - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
+  - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
+  
+It's fairly common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
+
+In this section we will cover rewards and penalties. In the next we will look at how these rewards and penalties are modified if the beacon chain is not finalising. Finally, we will look at slashing.
+
+#### The reward curve
+
+TODO
+
+NB "Issuance"
+
+#### Rewards
+
+
 
 TODO
 
@@ -4172,7 +4205,7 @@ Without wanting to go full [Yellow Paper](https://ethereum.github.io/yellowpaper
 
 We will define a base reward $B$ that we will see turns out to be the expected long-run average income of an optimally performing validator per epoch (ignoring validator set size changes). The total number of active validators is $N$.
 
-The base reward is calculated from a [base reward per increment](def_get_base_reward_per_increment), $b$. An "increment" is a unit of effective balance in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment). $B = 32b$ because [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) = `32 * EFFECTIVE_BALANCE_INCREMENT`
+The base reward is calculated from a [base reward per increment](#def_get_base_reward_per_increment), $b$. An "increment" is a unit of effective balance in terms of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment). $B = 32b$ because [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) = `32 * EFFECTIVE_BALANCE_INCREMENT`
 
 Other quantities we will use in rewards calculation are the [incentivization weights](/part3/config/constants#incentivization-weights): $W_s$, $W_t$, $W_h$, and $W_y$ being the weights for correct source, target, head, and sync committee votes respectively; $W_p$ being the proposer weight; and the weight denominator $W_{\Sigma}$ which is the sum of the weights.
 
