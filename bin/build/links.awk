@@ -25,6 +25,9 @@ BEGIN {
     anchors["/contents"] = 1
     # Ditto /annotated-spec
     anchors["/annotated-spec"] = 1
+
+    # Used for skipping code blocks
+    in_code = 0
 }
 
 # Path needs to be set on both passes
@@ -67,32 +70,57 @@ FNR == NR {
 
 #### Second pass
 
+# Don't look inside code blocks
+/^```/ {
+    in_code = 1 - in_code
+    next
+}
+
+in_code { next }
+
 # Any empty links
 /\[[^]]+\]\(\)/ {
     print("Empty link, line " FNR)
 }
 
+# Anything pointing to localhost (oops)
+/\[[^]]+\]\([^)]*localhost[^)]*\)/ {
+    print("Link to localhost, line " FNR)
+}
+
 # Check anchors exist
 {
     # There may be multiple anchors on the line
-    # This mess matches non-greedy [foo](#bar) and [foo](/a/b/c#xyz) etc.
-    while (match($0, /\[[^]]+\]\([#/][^)]+\)/)) {
-
-        # Workaround awk's greediness, otherwise we just get the last match per line.
+    # This mess matches non-greedy [foo](...)
+    while (match($0, /\[[^]]+\]\([^)]+\)/)) {
+        
+        rstart = RSTART
+        rlength = RLENGTH
         partial = substr($0, RSTART, RLENGTH)
-        name = gensub(/\[[^]]+\]\(([#/][^)]+)\)/,  "\\1", "1", partial)
 
-        # Full paths start with "/", paths to the same page with "#". We do not use relative ".." paths.
-        if (name ~ /^#/) {
-            anchor = path name
+        # Internal anchors start with "#" or "/"
+        if (match(partial, /\[[^]]+\]\([#/][^)]+\)/)) {
+
+            name = gensub(/\[[^]]+\]\(([#/][^)]+)\)/,  "\\1", "1", partial)
+
+            # Full paths start with "/", paths to the same page with "#". We do not use relative ".." paths.
+            if (name ~ /^#/) {
+                anchor = path name
+            } else {
+                anchor = name
+            }
+
+            if (anchors[anchor] != 1) {
+                print("Anchor not found, line " FNR ": " name)
+            }
+        } else if (match(partial, /\[[^]]+\]\(https[^)]+\)/)) {
+            # Do nothing
+        } else if (match(partial, /\[[^]]+\]\(http[^)]+\)/)) {
+            print ("HTTP link, line " FNR)
         } else {
-            anchor = name
+            print ("Suspicious link, line " FNR)
         }
 
-        if (anchors[anchor] != 1) {
-            print("Anchor not found, line " FNR ": " name)
-        }
-
-        $0 = substr($0, RSTART + RLENGTH)
+        $0 = substr($0, rstart + rlength)
     }
 }
