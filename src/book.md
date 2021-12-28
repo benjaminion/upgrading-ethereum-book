@@ -503,15 +503,38 @@ The three ongoing mechanisms in Ethereum's proof of stake designed to encourage 
   - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
   - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
   
-It's fairly common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
+It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
 
 In this section we will cover rewards and penalties. In the next we will look at how these rewards and penalties are modified if the beacon chain is not finalising. Finally, we will look at slashing.
 
-#### The reward curve
+#### The base reward per increment
+
+All rewards are calculated in terms of a "base reward per increment". This is [calculated](/part3/transition/epoch#def_get_base_reward_per_increment) as
+
+```none
+Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
+```
+
+We will call this $B$ for brevity. An increment is one unit of effective balance, which is 1 ETH ([`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), so active validators have up to 32 increments.
+
+The goal is that, on a long term average, all validators earn $nB$ Gwei per epoch, where $n$ is their effective balance in Ether (the number of increments they possess). Thus, a well-performing validator with a 32 ETH effective balance will earn a long-term average of $32B$ Gwei per epoch.
+
+We'll discuss the dependency of $B$ on the inverse square root of the total active balance when we look at the [Reward and issuance curves](#reward-and-issuance-curves).
+
+#### Reward and issuance curves
+
+<div class="image">
+<img src="md/images/rewards_curve.svg" /><br />
+<span>Optimum annual percentage rewards for stakers as a function of the number of active validators.</span>
+</div>
+
+<div class="image">
+<img src="md/images/issuance_curve.svg" /><br />
+<span>Maximum annual protocol issuance as a function of the number of active validators.</span>
+</div>
 
 TODO
 
-NB "Issuance"
 
 #### Rewards
 
@@ -873,7 +896,7 @@ Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`
 
 Regarding "unsigned", there was [much discussion](https://github.com/ethereum/consensus-specs/issues/626) around whether Eth2 should use signed or unsigned integers, and eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertently causing underflows since negative numbers are forbidden.
 
-And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](http://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`, and is really a `byte` type.
+And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](https://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`, and is really a `byte` type.
 
 | Name                 | SSZ equivalent | Description                                                |
 | -                    | -              | -                                                          |
@@ -1023,7 +1046,7 @@ The distinction between "constants", "presets", and "configuration values" is no
 
 The very first slot number for the beacon chain is zero.
 
-Perhaps this seems uncontroversial, but it actually featured heavily in the Great Signedness Wars mentioned [previously](types#custom-types). The issue was that calculations on unsigned integers might have negative intermediate values, which would cause problems. A proposed work-around for this was to start the chain at a non-zero slot number. It was initially set to [2^19](https://github.com/ethereum/consensus-specs/commit/656eae6f6ad85de5f4b9493ca0a4f8ca16d2e261#diff-51a43328a58414e132a744f3771f018cR193), then [2^63](https://github.com/ethereum/consensus-specs/commit/7f39f79b2e72654920b2e12127cfdfe6ad0088c6), then [2^32](https://github.com/ethereum/consensus-specs/commit/9b7b35bc9d18d0fac92ee142f1ea66ab289d3175), and finally [back to zero](https://github.com/ethereum/consensus-specs/commit/8c32128ffbda5c7e056c218cdb78ab76d856c5f5#diff-51a43328a58414e132a744f3771f018cR219). In my humble opinion, this madness only confirms that we should have been using signed integers all along.
+Perhaps this seems uncontroversial, but it actually featured heavily in the Great Signedness Wars mentioned [previously](/part3/config/types#custom-types). The issue was that calculations on unsigned integers might have negative intermediate values, which would cause problems. A proposed work-around for this was to start the chain at a non-zero slot number. It was initially set to [2^19](https://github.com/ethereum/consensus-specs/commit/656eae6f6ad85de5f4b9493ca0a4f8ca16d2e261#diff-51a43328a58414e132a744f3771f018cR193), then [2^63](https://github.com/ethereum/consensus-specs/commit/7f39f79b2e72654920b2e12127cfdfe6ad0088c6), then [2^32](https://github.com/ethereum/consensus-specs/commit/9b7b35bc9d18d0fac92ee142f1ea66ab289d3175), and finally [back to zero](https://github.com/ethereum/consensus-specs/commit/8c32128ffbda5c7e056c218cdb78ab76d856c5f5#diff-51a43328a58414e132a744f3771f018cR219). In my humble opinion, this madness only confirms that we should have been using signed integers all along.
 
 ##### `GENESIS_EPOCH`
 
@@ -1225,7 +1248,7 @@ Note that sync committees are a different thing: there is only one sync committe
 
 To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
-Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](http://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minimum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
+Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](https://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minimum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
 
 If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
 
@@ -5497,3 +5520,5 @@ TODO
 ## Glossary <!-- /appendices/reference/glossary* -->
 
 TODO
+
+Gwei
