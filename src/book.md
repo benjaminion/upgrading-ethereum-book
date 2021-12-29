@@ -4536,7 +4536,7 @@ Block proposers are explicitly rewarded for including any available attestations
 |||
 |-|-|
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
-| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
+| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit()`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
 | See&nbsp;also | [`BeaconBlockBody`](/part3/containers/blocks#beaconblockbody) |
 
 ##### Proposer slashings
@@ -4682,6 +4682,12 @@ $$
 
 Where $I_A$ is the total maximum reward per epoch for attesters, calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas). The total available reward in an epoch for proposers including attestations is 32 times this.
 
+|||
+|-|-|
+| Used&nbsp;by | [`process_operations()`](#def_process_operations) |
+| Uses | [`get_committee_count_per_slot()`](/part3/helper/accessors#def_get_committee_count_per_slot), [`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee), [`get_attestation_participation_flag_indices()`](/part3/helper/accessors#def_get_attestation_participation_flag_indices), [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation), [`get_indexed_attestation()`](/part3/helper/accessors#def_get_indexed_attestation), [`get_attesting_indices()`](/part3/helper/accessors#def_get_attesting_indices), [`has_flag()`](/part3/helper/participation#def_has_flag), [`add_flag()`](/part3/helper/participation#def_add_flag), [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward), [`increase_balance()`](/part3/helper/mutators#def_increase_balance) |
+| See&nbsp;also | [Participation flag indices](/part3/config/constants#participation-flag-indices), [`PARTICIPATION_FLAG_WEIGHTS`](/part3/config/constants#participation_flag_weights), [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) |
+
 ##### Deposits
 
 <a id="def_get_validator_from_deposit"></a>
@@ -4764,7 +4770,7 @@ Note that it is not possible to change a validator's withdrawal credentials afte
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Used&nbsp;by | [`process_operations()`](#def_process_operations) |
 | Uses | [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`compute_domain()`](/part3/helper/misc#def_compute_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`get_validator_from_deposit()`](#def_get_validator_from_deposit) |
 | See&nbsp;also | [`Deposit`](/part3/containers/operations#deposit) |
 
