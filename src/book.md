@@ -326,6 +326,18 @@ By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of d
 
 As we shall see, every validator has a beacon chain balance that represents its stake. All beacon chain protocol rewards come from new issuance of Ether and are added to validators' beacon chain balances. Penalties and slashings are subtracted from validators' beacon chain balances and thus reduce the issuance rate of Ether, or even burn Ether if they exceed the rewards.
 
+<!-- 
+The three ongoing mechanisms in Ethereum's proof of stake designed to encourage economically rational validators to act in the protocol's best interests are rewards, penalties, and punishments.
+
+  - Rewards are provided to validators that participate in the protocol by attesting to blocks, proposing blocks, or participating in sync committees. Rewards are tuned so that more valuable contributions (such as timely votes, or well-assembled blocks) receive a greater amount.
+  - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
+  - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
+
+It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
+
+-->
+
+
 #### Further reading
 
  - Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the background to many of the design decisions that led, eventually, to the protocol we see today. [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9), [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780), [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc), [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e), [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58).
@@ -495,23 +507,25 @@ From the spec:
   - The function [`process_effective_balance_updates()`](/part3/transition/epoch#def_process_effective_balance_updates) for the actual calculation and application of hysteresis.
   - [`Validator`](/part3/containers/dependencies#validator) objects store the effective balances. The [registry](/part3/containers/state#registry) in the beacon state contains the list of validators alongside a separate list of the actual balances.
 
-### Overview of rewards and penalties <!-- /part2/economics/rewards_overview -->
+### Issuance <!-- /part2/economics/issuance -->
 
 #### Introduction
 
-The three ongoing mechanisms in Ethereum's proof of stake designed to encourage economically rational validators to act in the protocol's best interests are rewards, penalties, and punishments.
+Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, burned transaction fees and so forth is sometimes referred to as inflation, or supply growth.
 
-  - Rewards are provided to validators that participate in the protocol by attesting to blocks, proposing blocks, or participating in sync committees. Rewards are tuned so that more valuable contributions (such as timely votes, or well-assembled blocks) receive a greater amount.
-  - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
-  - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
-  
-It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
+The Eth1 chain issues new Ether in the form of block and uncle rewards. Since the London upgrade this issuance has been offset in part, or even at times exceeded by the burning of transaction base fees.
 
-In this section we will cover rewards and penalties. In the next we will look at how these rewards and penalties are modified if the beacon chain is not finalising. Finally, we will look at slashing.
+During the Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards, but the base fee burn will remain, and is is very likely that the net issuance will become permanently negative: more Ether will be destroyed than created.[^fn-ultrasound-money]
+
+[^fn-ultrasound-money]: You can see Ethereum's current issuance and play with various scenarios at [ultrasound.money](https://ultrasound.money/).
+
+In this section we will look at the big picture of rewards in terms of overall issuace, and what individual validators can expect in general terms. We'll look in detail at individual validator rewards and penalties in the next sections.
+
+For now, we will be assuming that the beacon chain is running optimally, that is, with all validators performing their duties perfectly. In reality, this is impossible to achieve on a permissionless, globally distributed, peer-to-peer network, although the beacon chain has been performing within a few percent of optimally for most of its history. In any case, actual validator rewards and overall issuance will certainly be lower, depending on participation rates in the network.
 
 #### The base reward per increment
 
-All rewards are calculated in terms of a "base reward per increment". This is [calculated](/part3/transition/epoch#def_get_base_reward_per_increment) as
+All rewards are calculated in terms of a "base reward per increment". This is in turn [calculated](/part3/transition/epoch#def_get_base_reward_per_increment) as
 
 ```none
 Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_total_active_balance(state)))
@@ -519,13 +533,32 @@ Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_
 
 We will call this base reward per increment $b$ for brevity. An increment is one unit of effective balance, which is 1 ETH ([`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), so active validators have up to 32 increments.
 
-The goal is that, on a long term average, each validators earns $nb$ Gwei per epoch, where $n$ is its effective balance in Ether (the number of increments they possess). Thus, a well-performing validator with a 32 ETH effective balance will earn a long-term average of $32b$ Gwei per epoch. Of course, $b$ changes over time as the total active balance changes, but absent a mass slashing event that change will be slow.
+#### Overall issuance
 
-#### Reward and issuance curves
+Under the ideal conditions we are assuming, the beacon chain is designed to issue a total of exactly $Tb$ Gwei in rewards per epoch. Here, $T$ is the total number of increments held by active validators, or in other words the total of all their effective balances in Ether. This is the maximum issuance &ndash; the maximum amount of new Ether &ndash; that the beacon chain can generate. If all validators have the optimal 32 ETH effective balance, then this works out to be $32Nb$ Gwei per epoch in total.
 
-Let's assume that the beacon chain is running optimally. In this case, all active validators will have effective balances of 32 ETH (32 increments), and the total active balance will be $32N$, where $N$ is the number of validators.
+With $365.25 \times 225 = 82181.25$ epochs per year, and [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) = $64$,
 
-With this assumption, we can calculate the expected annual percentage reward for a validator due to participating in the beacon chain protocol. Here we have set epochs per year to be $365.25 \times 225 = 82181.25$, and `BASE_REWARD_FACTOR` is $64$.
+$$
+\mbox{Max issuance per year} = 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \mbox{ETH}
+$$
+
+With 300,000 validators this equates to 515,333 ETH per year, plus change. For comparison, the Eth1 block and uncle rewards currently amount to almost five million ETH per year.
+
+We can graph the maximum issuance as a function of the number of validators. It's just a scaled square root curve.
+
+<div class="image">
+<img src="md/images/issuance_curve.svg" /><br />
+<span>Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.</span>
+</div>
+
+#### Validator rewards
+
+The goal is to distribute these rewards evenly among validators (continuing to assume that things are running optimally), so that, on a long term average, each validator, $i$, earns $n_ib$ Gwei per epoch, where $n_i$ is its effective balance in Ether: the number of increments it possesses. In these terms $T = \sum^{N-1}_{i=0}{n_i}$.
+
+Thus, a well-performing validator with a 32 ETH effective balance can expect to earn a long-term average of $32b$ Gwei per epoch. Of course, $b$ changes over time as the total active balance changes, but absent a mass slashing event that change will be slow.
+
+Similarly to the issuance calculation, we can calculate the expected annual percentage reward for a validator due to participating in the beacon chain protocol:
 
 $$
 \mbox{APR} = 100 \times 82181.25 \times \frac{64}{\sqrt{32 \times 10^9 \times N}}
@@ -533,30 +566,23 @@ $$
 
 For example, with 300,000 validators participating, this amounts to an expected return of 5.37% on a validator's effective balance.
 
+Graphing this give us an inverse square root curve.
+
 <div class="image">
 <img src="md/images/rewards_curve.svg" /><br />
 <span>Expected annual percentage rewards for stakers as a function of the number of active validators.</span>
 </div>
 
-Actual individual validator returns, even on an optimally running beacon chain, will vary above and below this amount, since block proposals and sync committee duties are assigned randomly. This leads to variance in the rewards, with some validators earning more and some earning less. But an average validator over a long period can expect to earn a return in line with that APR.
+Actual individual validator returns, even on an optimally running beacon chain, will vary above and below this amount, since block proposals and sync committee duties are assigned randomly. This leads to variance in the rewards, with some validators earning more and some earning less. Nonetheless, an average validator over a long period can expect to earn a return in line with that APR.
 
-The following chart shows the expected distribution of rewards if we have 300,000 validators, all participating perfectly, each with 32 ETH of effective balance. The mean reward is 1.7177 ETH/year (the 5.37% number from above), and the median 1.7188 ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.596 ETH over the year, and 10% more than 1.866 ETH, due solely to randomness in assigning duties.
+The following chart shows the expected distribution of rewards for 300,000 validators, all participating perfectly, each with 32 ETH of effective balance. The mean reward is 1.7177 ETH/year (the 5.37% number from above), and the median 1.7188 ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.596 ETH over the year, and 10% more than 1.866 ETH, due solely to randomness in assigning duties.
 
 <div class="image">
 <img src="md/images/reward_variance.svg" /><br />
 <span>Distribution of rewards for 300,000 validators with 32 ETH staked.</span>
 </div>
 
-The overall maximum issuance by the beacon chain per year is simply the expected earnings per validator multiplied by the number of validators.
-
-<div class="image">
-<img src="md/images/issuance_curve.svg" /><br />
-<span>Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.</span>
-</div>
-
-As a reminder, the charts and calculations above show the situation for when the beacon chain is operating ideally, with every validator, propoposer, and sync committee member performing its duties flawlessly. (We also assumed a fixed number of validators.) These ideal conditions are impossible to achieve on a permissionless, globally distributed, peer-to-peer network, although the beacon chain has been performing within a few percent of ideally for most of its history. In any case, actual validator rewards and overall issuance will certainly be lower, depending on participation rates in the network.
-
-Note that, post Merge, validators will additionally receive the transaction tips from Eth1 blocks, and potentially MEV-related income. These will substantially increase the percentage earnings for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance. Overall issuance of the whole Ethereum ecosystem will drop substantially since there will no longer be a 2 ETH block reward or any uncle reward for miners.
+Post Merge, validators will additionally receive the transaction tips from execution blocks, and potentially MEV-related income. These will substantially increase the percentage earnings for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance.
 
 #### Inverse square root scaling
 
@@ -573,7 +599,7 @@ That would rule out the first, $p=0$, option. The danger with that is, if the re
 
 The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/economics/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themeselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
 
-Note that, post-Merge, validators' income will include a significant component from transaction tips and MEV, which will have the effect of pushing $p$ closer to $1$, and much of this reasoning will become moot. Discouragement attacks in that regime are an unsolved problem.
+As noted above, after the Merge, validators' income will include a significant component from transaction tips and MEV, which will have the effect of pushing $p$ closer to $1$, and much of this reasoning will become moot. Discouragement attacks in that regime are an unsolved problem.
 
 #### See also
 
@@ -583,52 +609,59 @@ Note that, post-Merge, validators' income will include a significant component f
     - Vitalik's [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Base-rewards), and
     - the [Discouragement Attacks](https://github.com/ethereum/research/blob/master/papers/discouragement/discouragement.pdf) paper.
 
-### Rewards <!-- /part2/economics/rewards -->
+### Rewards in detail <!-- /part2/economics/rewards -->
 
 #### Introduction
 
-The beacon chain protocol incentivises validators to behave well by providing rewards for three main activities:
+The beacon chain protocol incentivises each validator to behave well by providing rewards for three activities.
 
-1. attesting to its view of the chain as part of the consensus protocol:
-   - voting for a source checkpoint for Casper FFG
-   - voting for a target checkpoint for Casper FFG
-   - voting for a chain head block for LMD-GHOST
-2. proposing beacon chain blocks, and
-3. voting in the sync committees that support light clients.
+1. Attesting to its view of the chain as part of the consensus protocol:
+   - voting for a source checkpoint for Casper FFG;
+   - voting for a target checkpoint for Casper FFG; and
+   - voting for a chain head block for LMD-GHOST.
+2. Proposing beacon chain blocks.
+3. Signing off on block headers in the sync committees that support light clients.
 
-The first of these, making attestations, happens regularly every epoch and accounts for 84.4% of a validator's total reward. However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to those rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
+The first of these, making attestations, happens regularly every epoch and accounts for 84.4% of a validator's total expected reward.
+
+However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
 <div class="image">
 <img src="md/images/weights.svg" style="width:50%" /><br />
 <span>The proportion of a validator's total reward derived from each activity.</span>
 </div>
 
-These proportions are set by the [incentivisation weights](/part3/config/constants#incentivization-weights) in the spec. For convenience, I've given each weight a symbol in the third column.
+These proportions are set by the [incentivisation weights](/part3/config/constants#incentivization-weights) in the spec. For convenience, I've assigned a symbol to each weight in the last column.
 
-| Name | Value | Symbol | Percentage |
+| Name | Value | Percentage | Symbol |
 | - | - | - | - |
-| `TIMELY_SOURCE_WEIGHT` | `uint64(14)` | $W_s$ | 21.9% |
-| `TIMELY_TARGET_WEIGHT` | `uint64(26)` | $W_t$ | 40.6% |
-| `TIMELY_HEAD_WEIGHT`   | `uint64(14)` | $W_h$ | 21.9% |
-| `SYNC_REWARD_WEIGHT`   | `uint64(2)`  | $W_y$ | 3.1% |
-| `PROPOSER_WEIGHT`      | `uint64(8)`  | $W_p$ | 12.5% |
-| `WEIGHT_DENOMINATOR`   | `uint64(64)` | $W_{\Sigma}$ | 100% |
+| `TIMELY_SOURCE_WEIGHT` | `uint64(14)` | 21.9% | $W_s$ |
+| `TIMELY_TARGET_WEIGHT` | `uint64(26)` | 40.6% | $W_t$ |
+| `TIMELY_HEAD_WEIGHT`   | `uint64(14)` | 21.9% | $W_h$ |
+| `SYNC_REWARD_WEIGHT`   | `uint64(2)`  | 3.1%  | $W_y$ |
+| `PROPOSER_WEIGHT`      | `uint64(8)`  | 12.5% | $W_p$ |
+| `WEIGHT_DENOMINATOR`   | `uint64(64)` | 100%  | $W_{\Sigma}$ |
 
-A further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare.
+One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare and we will ignore it in this section (see [Slashing](/part2/economics/slashing) for more on this).
 
 #### Expected rewards scale with effective balance
 
-All of the above rewards are scaled in proportion to a validator's effect balance.
+All of the above rewards are scaled in proportion to a validator's effective balance. This reflects the fact that a validator's influence (weight) in the protocol is proportional to its effective balance.
 
-If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/economics/rewards_overview#the-base-reward-per-increment).
+If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/economics/issuance#the-base-reward-per-increment).
 
-For the regular attestations that occur every epoch, this is achieved by explicitly scaling the base reward in [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward).
+For the regular attestations that occur every epoch, this is achieved explicitly by scaling the base reward in [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward).
 
-For the random elements &ndash; block proposals and sync committee participation &ndash; the scaling is achieved by modifying the probability that a validator is selected for duty to be proportional to $\frac{n}{T}$, where $T$ is the total effective balance of the active validator set. So, if your effective balance is 24 ETH, then you are 25% less likely to be selected to propose a block or join a sync committee than a validator with 32 ETH. See [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) and [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices) for the details.
+For the random elements &ndash; block proposals and sync committee participation &ndash; the scaling is achieved implicitly by modifying the probability that a validator is selected for duty to be proportional to $\frac{n}{T}$, where $T$ is the total effective balance of the active validator set. So, if your effective balance is 24 ETH, then you are 25% less likely to be selected to propose a block or join a sync committee than a validator with 32 ETH. See [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) and [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices) for the details.
 
 #### Attestation rewards
 
+The largest part, 84.4%, of validators' rewards come from making attestations. Although committee and slot assignments for attesting are randomised, every active validator will be selected to make exactly one attestation each epoch.
 
+An attestation contains three votes. Each vote is eligible for a reward subject to conditions.
+1. A correct source checkpoint vote that is included within 5 slots 
+
+HERE
 
 #### Discouragement attack
 
@@ -4904,7 +4937,7 @@ Block proposers are explicitly rewarded for including any available attestations
 |||
 |-|-|
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
-| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
+| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit()`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
 | See&nbsp;also | [`BeaconBlockBody`](/part3/containers/blocks#beaconblockbody) |
 
 ##### Proposer slashings
@@ -5050,6 +5083,12 @@ $$
 
 Where $I_A$ is the total maximum reward per epoch for attesters, calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas). The total available reward in an epoch for proposers including attestations is 32 times this.
 
+|||
+|-|-|
+| Used&nbsp;by | [`process_operations()`](#def_process_operations) |
+| Uses | [`get_committee_count_per_slot()`](/part3/helper/accessors#def_get_committee_count_per_slot), [`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee), [`get_attestation_participation_flag_indices()`](/part3/helper/accessors#def_get_attestation_participation_flag_indices), [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation), [`get_indexed_attestation()`](/part3/helper/accessors#def_get_indexed_attestation), [`get_attesting_indices()`](/part3/helper/accessors#def_get_attesting_indices), [`has_flag()`](/part3/helper/participation#def_has_flag), [`add_flag()`](/part3/helper/participation#def_add_flag), [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward), [`increase_balance()`](/part3/helper/mutators#def_increase_balance) |
+| See&nbsp;also | [Participation flag indices](/part3/config/constants#participation-flag-indices), [`PARTICIPATION_FLAG_WEIGHTS`](/part3/config/constants#participation_flag_weights), [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) |
+
 ##### Deposits
 
 <a id="def_get_validator_from_deposit"></a>
@@ -5132,7 +5171,7 @@ Note that it is not possible to change a validator's withdrawal credentials afte
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Used&nbsp;by | [`process_operations()`](#def_process_operations) |
 | Uses | [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`compute_domain()`](/part3/helper/misc#def_compute_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`get_validator_from_deposit()`](#def_get_validator_from_deposit) |
 | See&nbsp;also | [`Deposit`](/part3/containers/operations#deposit) |
 
@@ -5618,3 +5657,26 @@ TODO
 TODO
 
 Gwei
+
+Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, transaction fees burned and so forth is sometimes referred to as inflation.
+
+Increment (rewards contect)
+
+ - Merkleise/ize
+ - beacon state
+ - slashed
+ - validator
+ - effective balance
+ - Eth1
+ - Eth2
+ - Deposit contract
+ - Phase&nbsp;0
+ - Altair
+ - Fork
+ - Light client
+ - Sync committee
+ - Aggregate signature
+ - Execution client
+ - Beacon node
+ - Validator client
+ - Remote signer
