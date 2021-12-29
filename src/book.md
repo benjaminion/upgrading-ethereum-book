@@ -4850,7 +4850,7 @@ To perform the validation, we form the signing root of the block at the previous
 Like proposer rewards, but unlike attestation rewards, sync committee rewards are not weighted with the participants' effective balances. This is already taken care of by the committee selection process that weights the probability of selection with the effective balance of the validator.
 
 Running through the calculations:
- - `total_active_increments`: the sum of the effective balances of the entire active validator set normalising with the [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) to give the total number of increments.
+ - `total_active_increments`: the sum of the effective balances of the entire active validator set normalised with the [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) to give the total number of increments.
  - `total_base_rewards`: the maximum rewards that will be awarded to all validators for all duties this epoch. It is at most $NB$ in the [notation](/part3/transition/epoch#reward-and-penalty-calculations) established earlier.
  - `max_participant_rewards`: the amount of the total reward to be given to the entire sync committee in this slot.
  - `participant_reward`: the reward per participating validator, and the penalty per non-participating validator.
@@ -4861,8 +4861,6 @@ Each committee member that voted receives a reward of `participant_reward`, and 
 Each committee member that failed to vote receives a penalty of `participant_reward`, and the proposer receives nothing.
 
 In our [notation](/part3/transition/epoch#reward-and-penalty-calculations) the maximum issuance (reward) due to sync committees per slot is as follows.
-
-The maximum reward per slot for sync committee members:
 
 $$
 I_S = \frac{W_y}{32 \cdot W_{\Sigma}}NB
@@ -4878,7 +4876,7 @@ $$
 |-|-|
 | Used&nbsp;by | [`process_operations()`](/part3/transition/block#def_process_operations) |
 | Uses | [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`get_base_reward_per_increment()`](/part3/transition/epoch#def_get_base_reward_per_increment), [`increase_balance()`](/part3/helper/mutators#def_increase_balance), [`decrease_balance()`](/part3/helper/mutators#decrease_balance) |
-| See&nbsp;also | [Incentivization weights](/part3/config/constants#incentivization-weights) |
+| See&nbsp;also | [Incentivization weights](/part3/config/constants#incentivization-weights), [`SYNC_COMMITTEE_SIZE`](/part3/config/preset#sync_committee_size) |
 
 ## Initialise State <!-- /part3/initialise -->
 
