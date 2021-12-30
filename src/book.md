@@ -3964,9 +3964,9 @@ Other quantities we will use in rewards calculation are the [incentivization wei
 
 Issuance for regular rewards are happens in four ways:
   - $I_A$ is the maximum total reward for all validators attesting in an epoch;
-  - $I_{P_A}$ is the maximum reward issued to proposers in an epoch for including attestations;
+  - $I_{A_P}$ is the maximum reward issued to proposers in an epoch for including attestations;
   - $I_S$ is the maximum total reward for all sync committee participants in an epoch; and
-  - $I_{P_S}$ is the maximum reward issued to proposers in an epoch for including sync aggregates;
+  - $I_{S_P}$ is the maximum reward issued to proposers in an epoch for including sync aggregates;
 
 Under [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation), and [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) we find that these work out as follows in terms of $B$ and $N$:
 
