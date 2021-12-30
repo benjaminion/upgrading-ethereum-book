@@ -644,7 +644,7 @@ These proportions are set by the [incentivisation weights](/part3/config/constan
 
 One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare and we will ignore it in this section (see [Slashing](/part2/economics/slashing) for more on this).
 
-#### Expected rewards scale with effective balance
+#### Rewards scale with effective balance
 
 All of the above rewards are scaled in proportion to a validator's effective balance. This reflects the fact that a validator's influence (weight) in the protocol is proportional to its effective balance.
 
@@ -658,10 +658,78 @@ For the random elements &ndash; block proposals and sync committee participation
 
 The largest part, 84.4%, of validators' rewards come from making attestations. Although committee and slot assignments for attesting are randomised, every active validator will be selected to make exactly one attestation each epoch.
 
-An attestation contains three votes. Each vote is eligible for a reward subject to conditions.
-1. A correct source checkpoint vote that is included within 5 slots 
+Attestations receive rewards for being included in blocks. An attestation contains three votes. Each vote is eligible for a reward subject to conditions.
 
-HERE
+| Validity | Timeliness | Reward |
+| - | - | - |
+| Correct source                  | Within 5 slots  | $\frac{W_s}{W_{\Sigma}}nb$ |
+| Correct source and target       | Within 32 slots | $\frac{W_t}{W_{\Sigma}}nb$ |
+| Correct source, target and head | Within 1 slot   | $\frac{W_h}{W_{\Sigma}}nb$ |
+
+These are cumulative, so the maximum attestation reward per epoch (for getting all three votes correct and getting the attestation included the next block) is $\frac{W_s + W_t + W_h}{W_{\Sigma}}nb$, or $0.84375nb$.
+
+The maximum total issuance per epoch across all validators is then:
+
+$$
+I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}Tb
+$$
+
+where, once again, $T$ is the total number of increments of active validators (the sum of their effective balances in ETH terms).
+
+##### Correctness
+
+"Correct" in the above means that the attestation agrees with the view of the blockchain that the current block proposer has. If the attesting validator votes for different checkpoints or head blocks then it is on a different fork and that vote is not useful to us. For instance, if the source checkpoint vote is different from what we as proposer think it ought to be, then our view of the chain's history is fundamentally different from the attester's, and so we must ignore their attestation. The attestation will instead receive rewards in blocks on the other fork, and eventually one fork or the other fork will win.
+
+##### Timeliness
+
+One of the changes brought in with Altair was a tightening of the timeliness requirements for attestations. Previously, there were rewards for correctness and a separate reward for timely inclusion that declined as $\frac{1}{d}$, where $d$ was the inclusion distance in slots, up to a maximum of 32 slots. This led to oddities, like it being worth waiting slightly longer to make sure to get the head vote correct since that was worth more than any loss due to lateness of inclusion, even though a late head vote is pretty much useless.
+
+The new timeliness reward better reflects the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward, Target votes are always useful, but we only want to have to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots.
+
+The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: full reward at 1 slot; $\frac{2}{3}$ reward up to 5 slots; $\frac{1}{3}$ reward up to 32 slots, although this ignores the weightings.[^fn-five-slots]
+
+[^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
+    > vbuterin:<br/>
+    > The rationale for the number 5 is just that 5 is geometrically halfway in between 1 and 32<br/>
+    > And so we get the closest that makes sense to a smooth curve in terms of rewarding earlier inclusion<br/>
+    > ...<br/>
+    > ah I mean on an exponential curve, not quadratic<br/>
+    > To me exponential feels more logical<br/>
+    > What's a bigger improvement in quality, 4 slot delay vs 6 slot delay, or 20 slot delay vs 23 slot delay?
+
+##### Remarks
+
+Note that the attester does not have full control over whether it receives rewards or not. An attester may behave perfectly, but if the next block is skipped because the proposer is offline, then it will not receive the correct head block reward. Or if the next proposer happens to be on a minority fork, again, the attester will forgo rewards. Or if the next proposer's block is late and gets orphaned: subsequent proposers are supposed to pick up the orphaned attestations in that case, but there can be considerable delay if block space is tight. And so on.
+
+It often perplexes stakers when, to all intents and purposes, their validators seem to be working perfectly but they still miss out on rewards or receive penalties. But this is the nature of permissionless, global, peer-to-peer networks. It is a testament to the quality of the protocol and the various client impementations that missed rewards have been surprisingly rare on the beacon chain so far.
+
+#### Proposer rewards for attestations
+
+If the attestations in a block are worth a total of $R$ in rewards to the attesters, then the proposer including the attestations receives a reward
+
+$$
+R_p = \frac{W_p}{W_{\Sigma} - W_p}R
+$$
+
+Thus, over an epoch, the maximum total issuance due to proposer rewards in respect of attestations is
+
+$$
+I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A
+$$
+
+with $I_A$ being the maximum issuance to attesters per epoch, as above.
+
+Thus, a proposer is strongly incentivised to include high value attestations, which basically means including them quickly, and including well-packed, as correct as possible aggregates.
+
+#### Sync committee rewards
+
+#### Proposer rewards for sync committees
+
+
+
+#### Rewards scale with participation
+
+
 
 #### Discouragement attack
 
@@ -4365,9 +4433,9 @@ Other quantities we will use in rewards calculation are the [incentivization wei
 
 Issuance for regular rewards are happens in four ways:
   - $I_A$ is the maximum total reward for all validators attesting in an epoch;
-  - $I_{P_A}$ is the maximum reward issued to proposers in an epoch for including attestations;
+  - $I_{A_P}$ is the maximum reward issued to proposers in an epoch for including attestations;
   - $I_S$ is the maximum total reward for all sync committee participants in an epoch; and
-  - $I_{P_S}$ is the maximum reward issued to proposers in an epoch for including sync aggregates;
+  - $I_{S_P}$ is the maximum reward issued to proposers in an epoch for including sync aggregates;
 
 Under [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas), [`process_attestation()`](/part3/transition/block#def_process_attestation), and [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) we find that these work out as follows in terms of $B$ and $N$:
 
