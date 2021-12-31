@@ -335,7 +335,6 @@ The three ongoing mechanisms in Ethereum's proof of stake designed to encourage 
   - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
   - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
 
-It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being slashed is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed. Penalties for being offline are relatively very mild.
 
 -->
 
@@ -531,6 +530,8 @@ Gwei(EFFECTIVE_BALANCE_INCREMENT * BASE_REWARD_FACTOR // integer_squareroot(get_
 
 We will call the base reward per increment $b$ for brevity. An increment is one unit of effective balance, which is 1 ETH ([`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), so active validators have up to 32 increments.
 
+TODO: cover `BASE_REWARD_FACTOR`
+
 #### Issuance
 
 Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, burned transaction fees and so forth is sometimes referred to as inflation, or supply growth.
@@ -594,9 +595,15 @@ The following chart shows the expected distribution of rewards for 300,000 valid
 <span>Distribution of rewards for 300,000 validators with 32 ETH staked.</span>
 </div>
 
-There are further sources of variation that the above analysis doesn't account for. For example, if my validator proposes a block right after a skipped slot, in which there was no block, then my block proposal could be worth up to 71.4% more than a normal block proposal. This is because I get to include attestations from the skipped slot as well as from my own slot, and benefit from the extra source and target votes (but not the extra head votes, which will be too late, or the extra sync committee inclusion).
+##### Remarks
 
-Post Merge, validators will additionally receive the transaction tips from execution blocks, and potentially MEV-related income. These will substantially increase the percentage earnings for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance.
+A few remarks on this.
+
+First, the Altair upgrade did not change the expected reward per validator, but it did change the variance considerably. This is due to an increase in the block reward of a factor of four and the introduction of sync committees, with a corresponding reduction in attestation rewards. Since block proposals and sync committee participation are randomly assigned, while attestation rewards are steady, Altair greatly increased the variance in actual rewards. For an analysis of the change, see [Pintail's article](https://pintail.xyz/posts/modelling-the-impact-of-altair/).
+
+Second, there are further sources of variation that the above analysis doesn't account for. For example, if my validator proposes a block right after a skipped slot, in which there was no block, then my block proposal could be worth up to 71.4% more than a normal block proposal. This is because I get to include attestations from the skipped slot as well as from my own slot, and benefit from the extra source and target votes (but not the extra head votes, which will be too late, or the extra sync committee inclusion).
+
+Third (and most significantly), post-Merge, validators will additionally receive the transaction tips from execution blocks, and potentially MEV-related income as well. These will substantially increase the percentage earnings, and variance in earnings, for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance.
 
 #### Inverse square root scaling
 
@@ -684,7 +691,9 @@ These are cumulative, so the maximum attestation reward per epoch (for getting a
 
 The full matrix of possible weights for an attestation reward is as follows. In each case we need to multiply by $\frac{nb}{W_{\Sigma}}$ to get the actual reward.
 
-| Timeliness | 1 slot | 5 slots | 32 slots | Later |
+<a id="rewards-table"></a>
+
+| Timeliness | 1 slot | <= 5 slots | <= 32 slots | > 32 Slots (missing) |
 | - | - | - | - | - |
 | Wrong source                    | 0                 | 0           | 0     | 0 |
 | Correct source                  | $W_s$             | $W_s$       | 0     | 0 |
@@ -696,12 +705,12 @@ But this is not the whole picture: we will also need to account for [penalties](
 The maximum total issuance per epoch across all validators is
 
 $$
-I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}Tb
+\begin{flalign}
+I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}Tb &&
+\end{flalign}
 $$
 
 where, once again, $T$ is the total number of increments of active validators (the sum of their effective balances in ETH terms).
-
-In the spec, validator rewards for attestations are calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) as part of [epoch processing](/part3/transition/epoch).
 
 ##### Correctness
 
@@ -713,7 +722,7 @@ One of the changes brought in with Altair was a tightening of the timeliness req
 
 The new timeliness reward better reflects the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward, Target votes are always useful, but we only want to have to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots.
 
-The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: full reward at 1 slot; $\frac{2}{3}$ reward up to 5 slots; $\frac{1}{3}$ reward up to 32 slots, although this ignores the weightings.[^fn-five-slots]
+The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
 
 [^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
     > vbuterin:<br/>
@@ -735,20 +744,22 @@ It often perplexes stakers when, to all intents and purposes, their validators s
 If the attestations in a block are worth a total of $R$ in rewards to the attesters, then the proposer including the attestations receives a reward
 
 $$
-R_P = \frac{W_p}{W_{\Sigma} - W_p}R
+\begin{flalign}
+R_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}R &&
+\end{flalign}
 $$
 
 Thus, over an epoch, the maximum total issuance due to proposer rewards in respect of attestations is
 
 $$
-I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A
+\begin{flalign}
+I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A &&
+\end{flalign}
 $$
 
 with $I_A$ being the maximum issuance to attesters per epoch, as above.
 
 Thus, a proposer is strongly incentivised to include high value attestations, which basically means including them quickly, and including well-packed, as correct as possible aggregates.
-
-In the spec, proposer rewards for attestations are calculated in [`process_attestation()`](/part3/transition/block#def_process_attestation) as part of [block processing](/part3/transition/block#block-processing).
 
 #### Sync committee rewards
 
@@ -759,7 +770,9 @@ Once every [256](/part3/config/preset#epochs_per_sync_committee_period) epochs (
 Sync committee participants receive a reward every slot that they correctly perform their duties. With 512 members in the committee, and 32 slots per epoch, the reward per validator per slot for correct participation is
 
 $$
-R_Y = \frac{W_y}{32 \times 512 \times W_{\Sigma}}Tb
+\begin{flalign}
+R_Y = \frac{W_y}{32 \times 512 \times W_{\Sigma}}Tb &&
+\end{flalign}
 $$
 
 The $T$ here is the total increments of the whole active validator set, so this is a large number. The per-epoch reward is 32 times this.
@@ -767,7 +780,9 @@ The $T$ here is the total increments of the whole active validator set, so this 
 The maximum issuance per epoch to sync committee members is then
 
 $$
-I_Y = \frac{W_y}{W_{\Sigma}}Tb
+\begin{flalign}
+I_Y = \frac{W_y}{W_{\Sigma}}Tb &&
+\end{flalign}
 $$
 
 #### Proposer rewards for sync committees
@@ -775,13 +790,17 @@ $$
 The block proposer that includes the sync committee's output receives a reward proportional to the reward of the whole committee:
 
 $$
-R_{Y_P} = 512\frac{W_p}{W_{\Sigma} - W_p}R_Y
+\begin{flalign}
+R_{Y_P} = 512\frac{W_p}{W_{\Sigma} - W_p}R_Y &&
+\end{flalign}
 $$
 
 So the maximum issuance per epoch to sync committee proposers is
 
 $$
-I_{Y_P} = \frac{W_p}{W_{\Sigma} - W_p}I_Y
+\begin{flalign}
+I_{Y_P} = \frac{W_p}{W_{\Sigma} - W_p}I_Y &&
+\end{flalign}
 $$
 
 #### Remarks on proposer rewards
@@ -839,13 +858,93 @@ TODO
 
 NB client diversity: it is in all stakers best interests to promote client diversity - if one major client goes down (due to a bug), then rewards reduce more for everybody. The risk mitigation is to diversify across clients.
 
+#### In numbers
+
+The following calculations are based on 300 thousand active validators, all performing perfectly and all with 32 ETH of effective balance.
+
+  - Base reward per increment
+    - $b = 653 \mbox{ Gwei}$
+  - Value of a single attestation
+    - $R_A = \frac{14 + 26 + 14}{64}32b = 17,631 \mbox{ Gwei}$
+  - Value of a single sync committee contribution
+    - $R_Y = \frac{2}{32 \times 512 \times 64}300,000 \times 32b = 11,957 \mbox{ Gwei}$
+  - Value of a block proposal due to attestations
+    - $R_{A_P} = \frac{300,000}{32}\frac{8}{64-8}R_A = 23,612,946 \mbox{ Gwei}$
+    - Note: this can actually be higher if the chain is not performing perfectly, as after a skip slot the proposer can include high value attestations from the missed slot.
+  - Value of a block proposal due to sync committee contributions
+    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874,569 \mbox{ Gwei}$
+
+Putting it all together, the total available reward per epoch across all validators is $300,000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6,268,800,000 \mbox{ Gwei}$ (to 5 significant figures)
+
+Finally, as a check-sum, $Tb = 300,000 \times 32b = 6,268,800,000 \mbox{ Gwei} = 6.268 \mbox{ ETH}$.
+
+#### See also
+
+The detailed rewards calculations are defined in the spec in these functions:
+  - Validator rewards for attestations are calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) as part of [epoch processing](/part3/transition/epoch).
+  - Proposer rewards for attestations are calculated in [`process_attestation()`](/part3/transition/block#def_process_attestation) as part of [block processing](/part3/transition/block#block-processing).
+  - Both validator and proposer rewards for sync committee participation are calculated in [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) as part of [block processing](/part3/transition/block#block-processing).
+
 ### Penalties <!-- /part2/economics/penalties -->
 
+#### Introduction
+
+Incentivisation of validators on the beacon chain is a combination of carrot and stick. Validators are rewarded for contributing to the chain's security, and penalised for failing to contribute. As we shall see, penalties are quite mild. Nonetheless they provide good motivation for stakers to ensure that their validator deployments are running well.
+
+It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being [slashed](/part2/economics/slashing) is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed.
+
+#### Attestation penalties
+
+Attestations are penalised for being missing, late, or incorrect. We'll lump these together as "missed" for conciseness.
+
+Attesters are penalised for missed CASPER FFG votes, that is, missed source or target votes. But there is no penalty for a missed head vote. If a source vote is incorrect, then the target vote is missed; if the source or target vote is incorrect then the head vote is missed.
+
+Let's update our [rewards matrix](/part2/economics/rewards#rewards-table) to give the full picture of penalties and rewards for attestations. Recall that this shows the weights; we need to multiply by $\frac{nb}{W_{\Sigma}}$ to get the actual reward.
+
+<a id="penalties-rewards-table"></a>
+
+| Timeliness | 1 slot | <= 5 slots | <= 32 slots | > 32 Slots (missing) |
+| - | - | - | - | - |
+| Wrong source                    | $-W_s-W_t$    | $-W_s-W_t$ | $-W_s-W_t$ | $-W_s-W_t$ |
+| Correct source only             | $W_s-W_t$     | $W_s-W_t$  | $-W_s-W_t$ | $-W_s-W_t$ |
+| Correct source and target only  | $W_s+W_t$     | $W_s+W_t$  | $-W_s+W_t$ | $-W_s-W_t$ |
+| Correct source, target and head | $W_s+W_t+W_h$ | $W_s+W_t$  | $-W_s+W_t$ | $-W_s-W_t$ |
+
+For more intuition, we can put in the numbers, $W_s = 14$, $W_t = 26$, $W_h = 14$, and normalise with $W_{\Sigma} = 64$:
+
+| Timeliness | 1 slot | <= 5 slots | <= 32 slots | > 32 Slots (missing) |
+| - | - | - | - | - |
+| Wrong source                    | -0.625 | -0.625 | -0.625 | -0.625 |
+| Correct source only             | -0.188 | -0.188 | -0.625 | -0.625 |
+| Correct source and target only  | +0.625 | +0.625 | +0.188 | -0.625 |
+| Correct source, target and head | +0.844 | +0.625 | +0.188 | -0.625 |
+
+##### Break-even uptime
+
+Stakers sometimes worry that downtime will be very expensive. To examine this, we can estimate the break-even uptime. We'll ignore sync committee participation since that is so rare, so only attestations are relevant for the calculation.
+
+We'll assume that, when online, the validator's performance is perfect, and that the rest of the validators are performing well (both of which are pretty good approximations to the beacon chain's actual performance over its first year).
+
+If $p$ is the proportion of time the validator is online, then its net income is, $0.844p - 0.625(1-p) = 1.469p - 0.625$. This is positive for $p > 42.5%$. So, if your validator is online more than 42.5% of the time, you will be earning a positive return.
+
+A useful rule of thumb is that it takes about a day of uptime to recover from a day of downtime.
+
+#### Sync committee penalties
+
 TODO
 
-#### Break-even uptime
+#### Remarks
 
-TODO
+ - proposers are not penalised directly
+ - no explicit penalty for failing to include deposits (desirable behaviours not explicitly incentivised)
+ - NB Correct voting on the Eth1 deposit contract is not incentivised in any way. Where to put this?
+ - Penalties are not scaled.
+
+#### See also
+
+The detailed penalty calculations are defined in the spec in these functions:
+  - Penalties for missed attestations are calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) as part of [epoch processing](/part3/transition/epoch).
+  - Penalties for missed sync committee participation are calculated in [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) as part of [block processing](/part3/transition/block#block-processing).
 
 ### Inactivity leak <!-- /part2/economics/inactivity -->
 
