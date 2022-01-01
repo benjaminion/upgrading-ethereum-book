@@ -924,10 +924,10 @@ For more intuition, we can put in the numbers, $W_s = 14$, $W_t = 26$, $W_h = 14
 
 | Timeliness | 1 slot | <= 5 slots | <= 32 slots | > 32 Slots (missing) |
 | - | - | - | - | - |
-| Wrong source                    | -0.625 | -0.625 | -0.625 | -0.625 |
-| Correct source only             | -0.188 | -0.188 | -0.625 | -0.625 |
-| Correct source and target only  | +0.625 | +0.625 | +0.188 | -0.625 |
-| Correct source, target and head | +0.844 | +0.625 | +0.188 | -0.625 |
+| Wrong source                    | $-0.625$ | $-0.625$ | $-0.625$ | $-0.625$ |
+| Correct source only             | $-0.188$ | $-0.188$ | $-0.625$ | $-0.625$ |
+| Correct source and target only  | $+0.625$ | $+0.625$ | $+0.188$ | $-0.625$ |
+| Correct source, target and head | $+0.844$ | $+0.625$ | $+0.188$ | $-0.625$ |
 
 ##### Break-even uptime
 
