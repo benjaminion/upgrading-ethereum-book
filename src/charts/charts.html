@@ -1,0 +1,262 @@
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <title>Charts</title>
+    <script src="./roughviz.min.js">
+      <!-- This library can be built from https://github.com/benjaminion/roughViz -->
+    </script>
+    <style>
+      div.svg {border: solid black 1px; margin: 1ex 0;}
+      div.all {width: 1200px; margin: 10ex auto;}
+    </style>
+  </head>
+  <body>
+
+<div class="all">
+
+<script>
+  <!-- set some defaults -->
+  opts = {
+    width: 1200,
+    height: 600,
+    roughness: 1,
+    bowing: 0,
+    simplification: 0.2,
+    axisRoughness: 1,
+    axisStrokeWidth: 1.0,
+    axisFontSize: 20,
+    labelFontSize: 30,
+    legend: false,
+    interactive: false,
+  };
+</script>
+  
+<!-- Issuance Curve ------------------------------------------------ -->
+
+<div class="svg" id="issuance-curve"></div>
+<script>
+  {
+    const nPoints = 12;
+    const xVals = [];
+    const yVals = [];
+
+    const epochsPerYear = 365.25 * 225;
+    const xFunc = i => (1 + i) * 50;
+    const yFunc = x => epochsPerYear * 32 * x * 64 / Math.floor(Math.sqrt(1000000000 * 32 * x));
+    
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = xFunc(i);
+      yVals[i] = yFunc(1000 * xVals[i]) / 1000;
+    }
+
+    new roughViz.Line({
+      element: '#issuance-curve',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y: yVals,
+      },
+      x: xVals,
+      xLabel: "Number of active validators (thousands)",
+      yLabel: "Annual issuance (thousand ETH)",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["curve"],
+
+      circle: true,
+      circleRadius: 6,
+      circleRoughness: 1,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 50, right: 20, bottom: 80, left: 100},
+
+      legend: opts.legend,
+      //interactive: opts.interactive,
+      interactive: true,
+    });
+  }
+</script>
+
+<!-- Issuance Curve ------------------------------------------------ -->
+
+<div class="svg" id="rewards-curve"></div>
+<script>
+  {
+    const nPoints = 12;
+    const xVals = [];
+    const yVals = [];
+
+    const epochsPerYear = 365.25 * 225;
+    const xFunc = i => (1 + i) * 50;
+    const yFunc = x => epochsPerYear * 64 / Math.floor(Math.sqrt(1000000000 * 32 * x));
+    
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = xFunc(i);
+      yVals[i] = yFunc(1000 * xVals[i]) * 100;
+    }
+
+    console.log(yVals);
+    new roughViz.Line({
+      element: '#rewards-curve',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y: yVals,
+      },
+      x: xVals,
+      xLabel: "Number of active validators (thousands)",
+      yLabel: "Annual return on 32 ETH stake (%)",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["curve"],
+
+      circle: true,
+      circleRadius: 6,
+      circleRoughness: 1,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 50, right: 20, bottom: 80, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+</script>
+
+<!-- Reward Variance ----------------------------------------------- -->
+
+<div class="svg" id="reward-variance"></div>
+<script>
+  {
+    new roughViz.Bar({
+      element: '#reward-variance',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        labels: [1.4, 1.425, 1.45, 1.475, 1.5, 1.525, 1.55, 1.575, 1.6, 1.625, 1.65, 1.675, 1.7, 1.725, 1.75, 1.775, 1.8, 1.825, 1.85, 1.875, 1.9, 1.925, 1.95, 1.975],
+        values: [0, 9.012097147132001e-05, 0.0007900030693065276, 0.0034625936780776404, 0.010117724758439453, 0.022222501861968585, 0.03930741130795962, 0.05869508559787125, 0.07667608389578497, 0.09011582615639349, 0.097360246574628, 0.0982297322584306, 0.0935787996300737, 0.08483788991116106, 0.07363622456242747, 0.06149378860071459, 0.04961300241343375, 0.03880057869052064, 0.029494711073457386, 0.021843117625188306, 0.015791505923118995, 0.011164359278243946, 0.007730431979276688, 0],
+      },
+      xLabel: "Annual reward (ETH, 300k validators)",
+      yLabel: "Proportion of validators",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      color: 'black',
+      fillStyle: 'hachure',
+      fillWeight: 0.2,
+      strokeWidth: 1.5,
+      padding: 0.01,
+      
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 50, right: 20, bottom: 90, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+</script>
+
+<!-- Reward Timeliness against exponential ------------------------- -->
+    
+<div class="svg" id="reward-timeliness"></div>
+<script>
+  {
+    const nPoints = 40;
+    const xVals = [];
+    const y1Vals = [];
+    const y2Vals = [];
+
+    const y1Func = i => {
+      if (i == 0)
+        return 0.844;
+      else if (i <= 4)
+        return 0.625;
+      else if (i <= 31)
+        return 0.188;
+      return -0.625;
+    }
+
+    // y2 = -0.6 + 1.44*exp(-0.1*x)
+    const y2Func = i => -0.6 + 1.44 * Math.exp(-0.1 * i);
+
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = (1 + i);
+      y1Vals[i] = y1Func(i);
+      y2Vals[i] = y2Func(i);
+    }
+    xVals[0] = "";
+
+    new roughViz.Line({
+      element: '#reward-timeliness',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Vals,
+        y2: y2Vals,
+      },
+      x: xVals,
+      xLabel: "Slots delay",
+      yLabel: "Net attestation reward weight",
+      xLabelDelta: -10,
+      yLabelDelta: -40,
+      
+      roughness: 0.7,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      interpolation: ["straight", "curve"],
+      dash: [[0], [8, 6]],
+      strokeWidth: 1.5,
+
+      circle: false,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 50, right: 20, bottom: 60, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+</script>
+
+</div>
+</body>
