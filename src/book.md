@@ -494,6 +494,11 @@ Implementation: https://github.com/ethereum/consensus-specs/pull/949
 
 ##### Hysteresis
 
+<div class="image">
+<img src="md/images/hysteresis.svg" /><br />
+<span>TODO</span>
+</div>
+
 https://en.wikipedia.org/wiki/Hysteresis
 
 https://github.com/ethereum/consensus-specs/issues/1609
@@ -723,6 +728,11 @@ One of the changes brought in with Altair was a tightening of the timeliness req
 The new timeliness reward better reflects the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward, Target votes are always useful, but we only want to have to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots.
 
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
+
+<div class="image">
+<img src="md/images/reward_delay_exponential.svg" /><br />
+<span>TODO</span>
+</div>
 
 [^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
     > vbuterin:<br/>
