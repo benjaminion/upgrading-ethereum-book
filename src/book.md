@@ -875,18 +875,18 @@ The following calculations are based on 300 thousand active validators, all perf
   - Base reward per increment
     - $b = 653 \mbox{ Gwei}$
   - Value of a single attestation
-    - $R_A = \frac{14 + 26 + 14}{64}32b = 17,631 \mbox{ Gwei}$
+    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631 \mbox{ Gwei}$
   - Value of a single sync committee contribution
-    - $R_Y = \frac{2}{32 \times 512 \times 64}300,000 \times 32b = 11,957 \mbox{ Gwei}$
+    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957 \mbox{ Gwei}$
   - Value of a block proposal due to attestations
-    - $R_{A_P} = \frac{300,000}{32}\frac{8}{64-8}R_A = 23,612,946 \mbox{ Gwei}$
+    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946 \mbox{ Gwei}$
     - Note: this can actually be higher if the chain is not performing perfectly, as after a skip slot the proposer can include high value attestations from the missed slot.
   - Value of a block proposal due to sync committee contributions
-    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874,569 \mbox{ Gwei}$
+    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569 \mbox{ Gwei}$
 
-Putting it all together, the total available reward per epoch across all validators is $300,000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6,268,800,000 \mbox{ Gwei}$ (to 5 significant figures)
+Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000 \mbox{ Gwei}$ (to 5 significant figures)
 
-Finally, as a check-sum, $Tb = 300,000 \times 32b = 6,268,800,000 \mbox{ Gwei} = 6.268 \mbox{ ETH}$.
+Finally, as a check-sum, $Tb = 300{,}000 \times 32b = 6{,}268{,}800{,}000 \mbox{ Gwei} = 6.268 \mbox{ ETH}$.
 
 #### See also
 
