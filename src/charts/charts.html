@@ -203,8 +203,6 @@
       if (i <= 31) return 0.188;
       return -0.625;
     }
-
-    // y2 = -0.6 + 1.44*exp(-0.1*x)
     const y2Func = i => -0.6 + 1.44 * Math.exp(-0.1 * i);
 
     for (let i = 0; i < nPoints; i++) {
@@ -258,12 +256,12 @@
 <div class="svg" id="hysteresis"></div>
 <script>
   {
-    const nPoints = 36;
-    const xVals = [];
+    const xVals = [0];
     const y1Vals = [32.0, 32.2, 32.4, 32.6, 32.8, 33.0, 33.2, 33.4, 33.2, 33.0, 32.8, 32.6, 32.4, 32.2, 32.0, 31.8, 31.6, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.6];
-    const y2Vals = [];
-    const y3Vals = [];
-    const y4Vals = [];
+    const y2Vals = [32.0];
+    const y3Vals = [32.25];
+    const y4Vals = [31.75];
+    const nPoints = y1Vals.length;
 
     const y2Func = (eb, y) => {
       if (y > eb + 1.25) return eb == 32 ? 32 : eb + 1;
@@ -271,10 +269,6 @@
       return eb;
     }
 
-    xVals[0] = 0;
-    y2Vals[0] = y2Func(y1Vals[0]);
-    y3Vals[0] = 32.25;
-    y4Vals[0] = 31.75;
     for (let i = 1; i < nPoints; i++) {
       xVals[i] = i;
       y2Vals[i] = y2Func(y2Vals[i - 1], y1Vals[i]);
