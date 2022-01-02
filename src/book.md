@@ -363,7 +363,11 @@ The size of the stake in Ethereum&nbsp;2 is 32 ETH per validator.
 
 This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwith networks, thus increasing the forces of centralisation.
 
-The main practical constraint on the number of validators in a monolithic L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
+The main practical constraint on the number of validators in a monolithic[^fn-monolithic] L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
+
+[^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
+    - More the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
+    - More on modularity: [The lay of the modular blockchain land](https://polynya.medium.com/the-lay-of-the-modular-blockchain-land-d937f7df4884) by Polynya.
 
 Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and desire a time to finality of $f$, then we can have participation from at most $n$ validators, where
 
@@ -377,7 +381,7 @@ This is the classic scalability trilemma. Personally, I don't find these picture
 
 <div class="image">
 <img src="md/images/scalability-trilemma.svg" /><br />
-<span>The classic scalability trilemma: pick any two.</span>
+<span>A version of the scalability trilemma: pick any two.</span>
 </div>
 
 1. Our ideal would be to have high participation (large $n$) with low overhead (low $\omega$) &ndash; lots of stakers on low-spec machines &ndash;, but finality would take a long time since message exchange would be slow.
@@ -1057,7 +1061,7 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
 <div class="image">
-<img src="md/images/shuffling_0.svg" /><br />
+<img src="md/images/shuffling_0.svg" style="width:80%" /><br />
 <span>The pivot and the first mirror index.</span>
 </div>
 
@@ -1072,7 +1076,7 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
 <div class="image">
-<img src="md/images/shuffling_1.svg" /><br />
+<img src="md/images/shuffling_1.svg" style="width:80%" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
 </div>
 
@@ -1083,7 +1087,7 @@ The decision as to whether to swap or not is based on hashing together the rando
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
 <div class="image">
-<img src="md/images/shuffling_2.svg" /><br />
+<img src="md/images/shuffling_2.svg" style="width:80%" /><br />
 <span>The second mirror index.</span>
 </div>
 
@@ -1092,7 +1096,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
 <div class="image">
-<img src="md/images/shuffling_3.svg" /><br />
+<img src="md/images/shuffling_3.svg" style="width:80%" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
 </div>
 
@@ -1103,7 +1107,7 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
 <div class="image">
-<img src="md/images/shuffling_4.svg" /><br />
+<img src="md/images/shuffling_4.svg" style="width:80%" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
 </div>
 
