@@ -317,5 +317,175 @@
   }
 </script>
 
+<!-- Leak Scores and Balances -------------------------------------- -->
+
+<div class="svg" id="leak-scores"></div>
+<div class="svg" id="leak-balances"></div>
+<script>
+  {
+    const nEpochs = 150;
+    const xInterval = 5;
+    const xVals = [];
+    const y1Score = []; // Always online
+    const y2Score = []; // 90% online
+    const y3Score = []; // 70% online
+    const y4Score = []; // Offline
+    const y5Score = []; // Temporarily offline
+
+    const y1Balance = []; // Always online
+    const y2Balance = []; // 90% online
+    const y3Balance = []; // 70% online
+    const y4Balance = []; // Offline
+    const y5Balance = []; // Temporarily offline
+
+    const leakEnd = 99;
+    const offlineStart = 50;
+    const offlineEnd = 74;
+
+    const scoreUpdate = (score, inLeak, isOnline) => {
+      return Math.max(0, score + (isOnline ? -1 : 4) + (inLeak ? 0 : -16));
+    }
+
+    const balanceUpdate = (balance, score) => {
+      const inactivity_penalty_quotient = 50331648; // 3 * 2**24 (Altair)
+      const inactivity_score_bias = 4;
+      // Assume effective balance does not fall below 32 (i.e. balance remains above 31.75)
+      return balance - 32 * score / (inactivity_score_bias * inactivity_penalty_quotient);
+    }
+
+    var y1s = y2s = y3s = y4s = y5s = 0;
+    var y1b = y2b = y3b = y4b = y5b = 32;
+    for (let i = 0; i < nEpochs; i++) {
+      var inLeak = (i <= leakEnd);
+      if (i % xInterval === 0) {
+        var idx = i / xInterval;
+        xVals[idx] = i;
+        y1Score[idx] = y1s;
+        y2Score[idx] = y2s;
+        y3Score[idx] = y3s;
+        y4Score[idx] = y4s;
+        y5Score[idx] = y5s;
+        y1Balance[idx] = y1b;
+        y2Balance[idx] = y2b;
+        y3Balance[idx] = y3b;
+        y4Balance[idx] = y4b;
+        y5Balance[idx] = y5b;
+      }
+      y1s = scoreUpdate(y1s, inLeak, true);
+      y2s = scoreUpdate(y2s, inLeak, i % 10 < 9);
+      y3s = scoreUpdate(y3s, inLeak, i % 10 < 7);
+      y4s = scoreUpdate(y4s, inLeak, false);
+      y5s = scoreUpdate(y5s, inLeak, (i < offlineStart) || (i > offlineEnd));
+      y1b = balanceUpdate(y1b, y1s);
+      y2b = balanceUpdate(y2b, y2s);
+      y3b = balanceUpdate(y3b, y3s);
+      y4b = balanceUpdate(y4b, y4s);
+      y5b = balanceUpdate(y5b, y5s);
+    }
+    xVals[(leakEnd + 1) / xInterval] = "End";
+    xVals[offlineStart / xInterval] = "A";
+    xVals[(offlineEnd + 1) / xInterval] = "B";
+
+    const dashPattern = [[2, 6], [6, 6], [10, 6], [0], [10, 6, 4, 6]];
+    const margin = {top: 30, right: 20, bottom: 80, left: 120};
+
+    new roughViz.Line({
+      element: '#leak-scores',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Score,
+        y2: y2Score,
+        y3: y3Score,
+        y4: y4Score,
+        y5: y5Score,
+      },
+      x: xVals,
+      xLabel: "Epochs since leak start",
+      yLabel: "Inactivity score",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+      yDomain: [-40, 420],
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["straight"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 830, y: 100, text: "Offline"},
+        {x: 750, y: 340, text: "Temporarily offline"},
+        {x: 590, y: 390, text: "70% online"},
+        {x: 590, y: 436, text: "90% online"},
+        {x: 590, y: 473, text: "Always online"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    new roughViz.Line({
+      element: '#leak-balances',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Balance,
+        y2: y2Balance,
+        y3: y3Balance,
+        y4: y4Balance,
+        y5: y5Balance,
+      },
+      x: xVals,
+      yValueFormat: ".4f",
+      xLabel: "Epochs since leak start",
+      yLabel: "Balance (ETH)",
+      xLabelDelta: 0,
+      yLabelDelta: -60,
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["straight"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 200, y: 80, text: "Offline"},
+        {x: 876, y: 105, text: "Temporarily offline"},
+        {x: 840, y: 62, text: "70% online"},
+        {x: 1000, y: 47, text: "90% online"},
+        {x: 990, y: 13, text: "Always online"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+</script>
+
 </div>
 </body>
