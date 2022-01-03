@@ -1068,8 +1068,8 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
-<div class="image">
-<img src="md/images/diagrams/shuffling_0.svg" style="width:80%" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_0.svg" /><br />
 <span>The pivot and the first mirror index.</span>
 </div>
 
