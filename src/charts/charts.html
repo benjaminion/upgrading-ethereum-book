@@ -15,7 +15,7 @@
 <div class="all">
 
 <script>
-  <!-- set some defaults -->
+  // set some defaults
   opts = {
     width: 1200,
     height: 600,
@@ -29,6 +29,28 @@
     legend: false,
     interactive: false,
   };
+
+  // Make a right-click download link forthe SVG data
+  function makeLink(chart, id) {
+    const svg = chart.svg;
+    const serializer = new XMLSerializer();
+    var source = serializer.serializeToString(svg.node());
+
+    source = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">' + source + '</svg>';
+
+    //convert svg source to URI data scheme.
+    const url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+
+    //set url value to a element's href attribute.
+    const div = document.getElementById(id);
+    if (div !== null) {
+      const anchor = document.createElement('a');
+      anchor.appendChild(document.createTextNode('Download'));
+      anchor.href = url;
+      div.appendChild(anchor);
+    }
+  }
+
 </script>
 
 <!-- Issuance Curve ------------------------------------------------ -->
@@ -49,7 +71,7 @@
       yVals[i] = yFunc(1000 * xVals[i]) / 1000;
     }
 
-    new roughViz.Line({
+    const chart = new roughViz.Line({
       element: '#issuance-curve',
       width: opts.width,
       height: opts.height,
@@ -85,6 +107,8 @@
       legend: opts.legend,
       interactive: opts.interactive,
     });
+
+    makeLink(chart, 'issuance-curve');
   }
 </script>
 
@@ -106,7 +130,7 @@
       yVals[i] = yFunc(1000 * xVals[i]) * 100;
     }
 
-    new roughViz.Line({
+    const chart = new roughViz.Line({
       element: '#rewards-curve',
       width: opts.width,
       height: opts.height,
@@ -142,6 +166,8 @@
       legend: opts.legend,
       interactive: opts.interactive,
     });
+
+    makeLink(chart, 'rewards-curve');
   }
 </script>
 
@@ -150,7 +176,7 @@
 <div class="svg" id="reward-variance"></div>
 <script>
   {
-    new roughViz.Bar({
+    const chart = new roughViz.Bar({
       element: '#reward-variance',
       width: opts.width,
       height: opts.height,
@@ -184,7 +210,9 @@
       legend: opts.legend,
       interactive: opts.interactive,
     });
-  }
+
+    makeLink(chart, 'reward-variance');
+}
 </script>
 
 <!-- Reward Timeliness against exponential ------------------------- -->
@@ -212,7 +240,7 @@
     }
     xVals[0] = "";
 
-    new roughViz.Line({
+    const chart = new roughViz.Line({
       element: '#reward-timeliness',
       width: opts.width,
       height: opts.height,
@@ -248,6 +276,8 @@
       legend: opts.legend,
       interactive: opts.interactive,
     });
+
+    makeLink(chart, 'reward-timeliness');
   }
 </script>
 
@@ -272,7 +302,7 @@
       y2Vals[i] = y2Func(y2Vals[i - 1], y1Vals[i]);
     }
 
-    new roughViz.Line({
+    const chart = new roughViz.Line({
       element: '#hysteresis',
       width: opts.width,
       height: opts.height,
@@ -307,19 +337,21 @@
         {y: 31.75, dash: [2, 6]},
         {y: 32.25, dash: [2, 6]},
       ],
-      
+
       margin: {top: 30, right: 20, bottom: 30, left: 100},
 
       legend: opts.legend,
       interactive: opts.interactive,
     });
+
+    makeLink(chart, 'hysteresis');
   }
 </script>
 
 <!-- Leak Scores and Balances -------------------------------------- -->
 
 <div class="svg" id="leak-scores"></div>
-<div class="svg" id="leak-balances"></div>
+<div class="svg" id="leak-balances">
 <script>
   {
     const nEpochs = 150;
@@ -394,7 +426,7 @@
       {x: offlineEnd + 1, dash: [2, 10]},
     ];
 
-    new roughViz.Line({
+    const chart_1 = new roughViz.Line({
       element: '#leak-scores',
       width: opts.width,
       height: opts.height,
@@ -430,7 +462,8 @@
 
       notes: [
         {x: 200, y: 270, text: "Always offline"},
-        {x: 660, y: 330, text: "Temporarily offline"},
+        {x: 454, y: 350, text: "Temporarily"},
+        {x: 430, y: 375, text: "offline"},
         {x: 620, y: 390, text: "70% online"},
         {x: 620, y: 436, text: "90% online"},
         {x: 630, y: 473, text: "Always online"},
@@ -444,7 +477,9 @@
       interactive: opts.interactive,
     });
 
-    new roughViz.Line({
+    makeLink(chart_1, 'leak-scores');
+
+    const chart_2 = new roughViz.Line({
       element: '#leak-balances',
       width: opts.width,
       height: opts.height,
@@ -493,6 +528,8 @@
       legend: opts.legend,
       interactive: opts.interactive,
     });
+
+    makeLink(chart_2, 'leak-balances');
   }
 </script>
 
