@@ -95,7 +95,8 @@ h5 code {
 
 div.image {
   text-align: center;
-  padding: 3ex 0;
+  padding: 0;
+  margin: 3ex auto;
 }
 
 div.image img {

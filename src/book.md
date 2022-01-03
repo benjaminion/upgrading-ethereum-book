@@ -377,8 +377,8 @@ We would like to keep $\omega$ small to allow the broadest possible participatio
 
 This is the classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
-<div class="image">
-<img src="md/images/scalability-trilemma.svg" /><br />
+<div class="image" style="width: 60%">
+<img src="md/images/diagrams/scalability-trilemma.svg" /><br />
 <span>A version of the scalability trilemma: pick any two.</span>
 </div>
 
@@ -497,7 +497,7 @@ Implementation: https://github.com/ethereum/consensus-specs/pull/949
 ##### Hysteresis
 
 <div class="image">
-<img src="md/images/hysteresis.svg" /><br />
+<img src="md/images/charts/hysteresis.svg" /><br />
 <span>TODO</span>
 </div>
 
@@ -566,7 +566,7 @@ With 300,000 validators this equates to 515,333 ETH per year, plus change. For c
 We can graph the maximum issuance as a function of the number of validators. It's just a scaled square root curve.
 
 <div class="image">
-<img src="md/images/issuance_curve.svg" /><br />
+<img src="md/images/charts/issuance_curve.svg" /><br />
 <span>Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.</span>
 </div>
 
@@ -587,7 +587,7 @@ For example, with 300,000 validators participating, this amounts to an expected 
 Graphing this give us an inverse square root curve.
 
 <div class="image">
-<img src="md/images/rewards_curve.svg" /><br />
+<img src="md/images/charts/rewards_curve.svg" /><br />
 <span>Expected annual percentage rewards for stakers as a function of the number of active validators.</span>
 </div>
 
@@ -598,7 +598,7 @@ Actual individual validator returns, even on an optimally running beacon chain, 
 The following chart shows the expected distribution of rewards for 300,000 validators, all participating perfectly, each with 32 ETH of effective balance. The mean reward is 1.7177 ETH/year (the 5.37% number from above), and the median 1.7188 ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.596 ETH over the year, and 10% more than 1.866 ETH, due solely to randomness in assigning duties.
 
 <div class="image">
-<img src="md/images/reward_variance.svg" /><br />
+<img src="md/images/charts/reward_variance.svg" /><br />
 <span>Distribution of rewards for 300,000 validators with 32 ETH staked.</span>
 </div>
 
@@ -655,7 +655,7 @@ The first of these, making attestations, happens regularly every epoch and accou
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
 <div class="image">
-<img src="md/images/weights.svg" style="width:50%" /><br />
+<img src="md/images/diagrams/weights.svg" style="width:50%" /><br />
 <span>The proportion of a validator's total reward derived from each activity.</span>
 </div>
 
@@ -732,7 +732,7 @@ The new timeliness reward better reflects the relative importance of the votes. 
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
 
 <div class="image">
-<img src="md/images/reward_delay_exponential.svg" /><br />
+<img src="md/images/charts/reward_delay_exponential.svg" /><br />
 <span>TODO</span>
 </div>
 
@@ -824,7 +824,7 @@ This factor works out to be $\frac{8}{56} = \frac{1}{7}$ which means that $\frac
 In the following chart, I have separated out the validator rewards from the proposer rewards, and we can see that they are split exactly equally between the duties.
 
 <div class="image">
-<img src="md/images/reward_split.svg" /><br />
+<img src="md/images/diagrams/reward_split.svg" /><br />
 <span>On the left, the breakdown of expected rewards for validators for performing duties. On the right, the breakdown of rewards for proposers for including evidence of those duties.</span>
 </div>
 
@@ -960,6 +960,16 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 ### Inactivity leak <!-- /part2/economics/inactivity -->
 
+<div class="image">
+<img src="md/images/charts/inactivity_scores.svg" /><br />
+<span>TODO</span>
+</div>
+
+<div class="image">
+<img src="md/images/charts/inactivity_balances.svg" /><br />
+<span>TODO</span>
+</div>
+
 TODO
 
 NB client diversity. Permanent chain split (discuss under staking).
@@ -1059,7 +1069,7 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
 <div class="image">
-<img src="md/images/shuffling_0.svg" style="width:80%" /><br />
+<img src="md/images/diagrams/shuffling_0.svg" style="width:80%" /><br />
 <span>The pivot and the first mirror index.</span>
 </div>
 
@@ -1073,8 +1083,8 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
-<div class="image">
-<img src="md/images/shuffling_1.svg" style="width:80%" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_1.svg" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
 </div>
 
@@ -1084,8 +1094,8 @@ The decision as to whether to swap or not is based on hashing together the rando
 
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
-<div class="image">
-<img src="md/images/shuffling_2.svg" style="width:80%" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_2.svg" /><br />
 <span>The second mirror index.</span>
 </div>
 
@@ -1093,8 +1103,8 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
-<div class="image">
-<img src="md/images/shuffling_3.svg" style="width:80%" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_3.svg" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
 </div>
 
@@ -1104,8 +1114,8 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
-<div class="image">
-<img src="md/images/shuffling_4.svg" style="width:80%" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_4.svg" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
 </div>
 
@@ -1528,8 +1538,8 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
-<div class="image">
-<img src="md/images/weights.svg" style="width:50%" /><br />
+<div class="image" style="width:50%">
+<img src="md/images/diagrams/weights.svg" /><br />
 <span>The proportion of the total reward derived from each of the micro-rewards.</span>
 </div>
 
@@ -4582,8 +4592,8 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
-<div class="image">
-<img src="md/images/k-finality.svg" /><br />
+<div class="image" style="width: 80%">
+<img src="md/images/diagrams/k-finality.svg" /><br />
 <span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
 </div>
 
@@ -4626,7 +4636,7 @@ With Altair, each validator has an individual inactivity score in the beacon sta
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
 <div class="image">
-<img src="md/images/inactivity-scores-flow.svg" /><br />
+<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
 <span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
 </div>
 
