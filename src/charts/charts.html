@@ -259,8 +259,6 @@
     const xVals = [0];
     const y1Vals = [32.0, 32.2, 32.4, 32.6, 32.8, 33.0, 33.2, 33.4, 33.2, 33.0, 32.8, 32.6, 32.4, 32.2, 32.0, 31.8, 31.6, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.6];
     const y2Vals = [32.0];
-    const y3Vals = [32.25];
-    const y4Vals = [31.75];
     const nPoints = y1Vals.length;
 
     const y2Func = (eb, y) => {
@@ -272,8 +270,6 @@
     for (let i = 1; i < nPoints; i++) {
       xVals[i] = i;
       y2Vals[i] = y2Func(y2Vals[i - 1], y1Vals[i]);
-      y3Vals[i] = 32.25;
-      y4Vals[i] = 31.75;
     }
 
     new roughViz.Line({
@@ -285,8 +281,6 @@
       data: {
         y1: y1Vals,
         y2: y2Vals,
-        y3: y3Vals,
-        y4: y4Vals,
       },
       yDomain: [30, 34],
       yLabel: "Balance / Effective Balance",
@@ -299,7 +293,7 @@
 
       colors: ["black"],
       interpolation: ["straight"],
-      dash: [[0], [10, 10], [2, 6], [2, 6]],
+      dash: [[0], [10, 10]],
       strokeWidth: 1.5,
 
       circle: false,
@@ -309,6 +303,11 @@
       axisFontSize: opts.axisFontSize,
       labelFontSize: opts.labelFontSize,
 
+      yLines: [
+        {y: 31.75, dash: [2, 6]},
+        {y: 32.25, dash: [2, 6]},
+      ],
+      
       margin: {top: 30, right: 20, bottom: 30, left: 100},
 
       legend: opts.legend,
@@ -389,6 +388,12 @@
     const dashPattern = [[2, 6], [6, 6], [10, 6], [0], [10, 6, 4, 6]];
     const margin = {top: 30, right: 20, bottom: 80, left: 120};
 
+    const xLines = [
+      {x: leakEnd + 1, dash: [4, 8]},
+      {x: offlineStart, dash: [2, 10]},
+      {x: offlineEnd + 1, dash: [2, 10]},
+    ];
+
     new roughViz.Line({
       element: '#leak-scores',
       width: opts.width,
@@ -424,13 +429,15 @@
       labelFontSize: opts.labelFontSize,
 
       notes: [
-        {x: 830, y: 100, text: "Offline"},
-        {x: 750, y: 340, text: "Temporarily offline"},
-        {x: 590, y: 390, text: "70% online"},
-        {x: 590, y: 436, text: "90% online"},
-        {x: 590, y: 473, text: "Always online"},
+        {x: 200, y: 270, text: "Always offline"},
+        {x: 660, y: 330, text: "Temporarily offline"},
+        {x: 620, y: 390, text: "70% online"},
+        {x: 620, y: 436, text: "90% online"},
+        {x: 630, y: 473, text: "Always online"},
       ],
       notesFontSize: 0.8 * opts.labelFontSize,
+
+      xLines: xLines,
 
       margin: margin,
       legend: opts.legend,
@@ -472,13 +479,15 @@
       labelFontSize: opts.labelFontSize,
 
       notes: [
-        {x: 200, y: 80, text: "Offline"},
+        {x: 170, y: 80, text: "Always offline"},
         {x: 876, y: 105, text: "Temporarily offline"},
         {x: 840, y: 62, text: "70% online"},
         {x: 1000, y: 47, text: "90% online"},
         {x: 990, y: 13, text: "Always online"},
       ],
       notesFontSize: 0.8 * opts.labelFontSize,
+
+      xLines: xLines,
 
       margin: margin,
       legend: opts.legend,

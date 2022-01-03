@@ -335,9 +335,7 @@ The three ongoing mechanisms in Ethereum's proof of stake designed to encourage 
   - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
   - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
 
-
 -->
-
 
 #### Further reading
 
