@@ -47,6 +47,7 @@
       const anchor = document.createElement('a');
       anchor.appendChild(document.createTextNode('Download'));
       anchor.href = url;
+      anchor.download = id + '.svg'
       div.appendChild(anchor);
     }
   }
@@ -55,7 +56,7 @@
 
 <!-- Issuance Curve ------------------------------------------------ -->
 
-<div class="svg" id="issuance-curve"></div>
+<div class="svg" id="issuance_curve"></div>
 <script>
   {
     const nPoints = 12;
@@ -72,7 +73,7 @@
     }
 
     const chart = new roughViz.Line({
-      element: '#issuance-curve',
+      element: '#issuance_curve',
       width: opts.width,
       height: opts.height,
 
@@ -108,13 +109,13 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart, 'issuance-curve');
+    makeLink(chart, 'issuance_curve');
   }
 </script>
 
 <!-- Issuance Curve ------------------------------------------------ -->
 
-<div class="svg" id="rewards-curve"></div>
+<div class="svg" id="rewards_curve"></div>
 <script>
   {
     const nPoints = 12;
@@ -131,7 +132,7 @@
     }
 
     const chart = new roughViz.Line({
-      element: '#rewards-curve',
+      element: '#rewards_curve',
       width: opts.width,
       height: opts.height,
 
@@ -167,17 +168,17 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart, 'rewards-curve');
+    makeLink(chart, 'rewards_curve');
   }
 </script>
 
 <!-- Reward Variance ----------------------------------------------- -->
 
-<div class="svg" id="reward-variance"></div>
+<div class="svg" id="reward_variance"></div>
 <script>
   {
     const chart = new roughViz.Bar({
-      element: '#reward-variance',
+      element: '#reward_variance',
       width: opts.width,
       height: opts.height,
 
@@ -211,13 +212,13 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart, 'reward-variance');
+    makeLink(chart, 'reward_variance');
 }
 </script>
 
 <!-- Reward Timeliness against exponential ------------------------- -->
 
-<div class="svg" id="reward-timeliness"></div>
+<div class="svg" id="reward_timeliness"></div>
 <script>
   {
     const nPoints = 40;
@@ -241,7 +242,7 @@
     xVals[0] = "";
 
     const chart = new roughViz.Line({
-      element: '#reward-timeliness',
+      element: '#reward_timeliness',
       width: opts.width,
       height: opts.height,
 
@@ -277,7 +278,7 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart, 'reward-timeliness');
+    makeLink(chart, 'reward_timeliness');
   }
 </script>
 
@@ -350,8 +351,8 @@
 
 <!-- Leak Scores and Balances -------------------------------------- -->
 
-<div class="svg" id="leak-scores"></div>
-<div class="svg" id="leak-balances">
+<div class="svg" id="leak_scores"></div>
+<div class="svg" id="leak_balances">
 <script>
   {
     const nEpochs = 150;
@@ -427,7 +428,7 @@
     ];
 
     const chart_1 = new roughViz.Line({
-      element: '#leak-scores',
+      element: '#leak_scores',
       width: opts.width,
       height: opts.height,
 
@@ -477,10 +478,10 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart_1, 'leak-scores');
+    makeLink(chart_1, 'leak_scores');
 
     const chart_2 = new roughViz.Line({
-      element: '#leak-balances',
+      element: '#leak_balances',
       width: opts.width,
       height: opts.height,
 
@@ -529,7 +530,7 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart_2, 'leak-balances');
+    makeLink(chart_2, 'leak_balances');
   }
 </script>
 

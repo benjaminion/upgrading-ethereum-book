@@ -732,7 +732,7 @@ The new timeliness reward better reflects the relative importance of the votes. 
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
 
 <div class="image">
-<img src="md/images/charts/reward_delay_exponential.svg" /><br />
+<img src="md/images/charts/reward_timeliness.svg" /><br />
 <span>TODO</span>
 </div>
 
