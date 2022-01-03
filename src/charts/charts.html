@@ -370,9 +370,9 @@
     const y4Balance = []; // Offline
     const y5Balance = []; // Temporarily offline
 
-    const leakEnd = 99;
+    const leakEnd = 100;
     const offlineStart = 50;
-    const offlineEnd = 74;
+    const offlineEnd = 75;
 
     const scoreUpdate = (score, inLeak, isOnline) => {
       return Math.max(0, score + (isOnline ? -1 : 4) + (inLeak ? 0 : -16));
@@ -388,7 +388,7 @@
     var y1s = y2s = y3s = y4s = y5s = 0;
     var y1b = y2b = y3b = y4b = y5b = 32;
     for (let i = 0; i < nEpochs; i++) {
-      var inLeak = (i <= leakEnd);
+      var inLeak = (i < leakEnd);
       if (i % xInterval === 0) {
         var idx = i / xInterval;
         xVals[idx] = i;
@@ -407,24 +407,24 @@
       y2s = scoreUpdate(y2s, inLeak, i % 10 < 9);
       y3s = scoreUpdate(y3s, inLeak, i % 10 < 7);
       y4s = scoreUpdate(y4s, inLeak, false);
-      y5s = scoreUpdate(y5s, inLeak, (i < offlineStart) || (i > offlineEnd));
+      y5s = scoreUpdate(y5s, inLeak, (i < offlineStart) || (i >= offlineEnd));
       y1b = balanceUpdate(y1b, y1s);
       y2b = balanceUpdate(y2b, y2s);
       y3b = balanceUpdate(y3b, y3s);
       y4b = balanceUpdate(y4b, y4s);
       y5b = balanceUpdate(y5b, y5s);
     }
-    xVals[(leakEnd + 1) / xInterval] = "End";
+    xVals[leakEnd / xInterval] = "End";
     xVals[offlineStart / xInterval] = "A";
-    xVals[(offlineEnd + 1) / xInterval] = "B";
+    xVals[offlineEnd / xInterval] = "B";
 
     const dashPattern = [[2, 6], [6, 6], [10, 6], [0], [10, 6, 4, 6]];
     const margin = {top: 30, right: 20, bottom: 80, left: 120};
 
     const xLines = [
-      {x: leakEnd + 1, dash: [4, 8]},
+      {x: leakEnd, dash: [4, 8]},
       {x: offlineStart, dash: [2, 10]},
-      {x: offlineEnd + 1, dash: [2, 10]},
+      {x: offlineEnd, dash: [2, 10]},
     ];
 
     const chart_1 = new roughViz.Line({
