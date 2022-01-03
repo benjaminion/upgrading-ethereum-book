@@ -481,18 +481,18 @@ But the main feature of effective balances is that they are designed to change v
 
 <!-- Explain the benefits of splitting out the balance from the validators -->
 
-##### Granularity
-
-Effective balances can only be whole multiples of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which is 1 ETH ($10^9$ Gwei), whereas actual balances are denominated in Gwei.
-
-<!-- it might have been better to store the effective balance as "increments" -->
-
 https://github.com/ethereum/consensus-specs/pull/317
-
-
 Crude early design: https://github.com/ethereum/consensus-specs/issues/685
-
 Implementation: https://github.com/ethereum/consensus-specs/pull/949
+
+
+##### Increments
+
+Although effective balances are denominated in Gwei they can only be whole multiples of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which is 1 ETH ($10^9$ Gwei). Actual balances can be any number of Gwei.
+
+This multiple is known in the spec as an "increment" and shows up in places like calculating the [base reward](/part3/transition/epoch#def_get_base_reward_per_increment), and other rewards and penalties calculations. Being a handy 1 ETH, it's easy to mentally substitute "Ether" for "increment" to gain some intuition.
+
+It would probably have been cleaner to store effective balance in terms of increments instead of Gwei. It would certainly reduce the amount of dividing and multiplying by `EFFECTIVE_BALANCE_INCREMENT` that goes on, and the associated danger of [arithmetic overflows](https://github.com/ethereum/consensus-specs/pull/1286). But the current version evolved over time, and it would be intrusive and risky to go back and change things now.
 
 ##### Hysteresis
 
