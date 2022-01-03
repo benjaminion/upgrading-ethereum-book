@@ -372,8 +372,8 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
-<div class="image">
-<img src="md/images/shuffling_0.svg" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_0.svg" /><br />
 <span>The pivot and the first mirror index.</span>
 </div>
 
@@ -387,8 +387,8 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
-<div class="image">
-<img src="md/images/shuffling_1.svg" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_1.svg" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
 </div>
 
@@ -398,8 +398,8 @@ The decision as to whether to swap or not is based on hashing together the rando
 
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
-<div class="image">
-<img src="md/images/shuffling_2.svg" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_2.svg" /><br />
 <span>The second mirror index.</span>
 </div>
 
@@ -407,8 +407,8 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
-<div class="image">
-<img src="md/images/shuffling_3.svg" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_3.svg" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
 </div>
 
@@ -418,8 +418,8 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
-<div class="image">
-<img src="md/images/shuffling_4.svg" /><br />
+<div class="image" style="width:80%">
+<img src="md/images/diagrams/shuffling_4.svg" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
 </div>
 
@@ -842,8 +842,8 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
-<div class="image">
-<img src="md/images/weights.svg" style="width:50%" /><br />
+<div class="image" style="width:50%">
+<img src="md/images/diagrams/weights.svg" /><br />
 <span>The proportion of the total reward derived from each of the micro-rewards.</span>
 </div>
 
@@ -3896,8 +3896,8 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
-<div class="image">
-<img src="md/images/k-finality.svg" /><br />
+<div class="image" style="width: 80%">
+<img src="md/images/diagrams/k-finality.svg" /><br />
 <span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
 </div>
 
@@ -3940,7 +3940,7 @@ With Altair, each validator has an individual inactivity score in the beacon sta
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
 <div class="image">
-<img src="md/images/inactivity-scores-flow.svg" /><br />
+<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
 <span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
 </div>
 
