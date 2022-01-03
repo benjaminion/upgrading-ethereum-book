@@ -496,16 +496,39 @@ Implementation: https://github.com/ethereum/consensus-specs/pull/949
 
 ##### Hysteresis
 
+Effective balances are guaranteed to vary much more slowly than actual balances by adding [hysteresis](https://en.wikipedia.org/wiki/Hysteresis) to their calculation.
+
+In our context, hysteresis means that if the effective balance is 31 ETH, the actual balance must rise to 32.25 ETH to trigger an effective balance update to 32 ETH. Similarly, if the effective balance is 31 ETH, then the actual balance must fall to 30.75 ETH to trigger an effective balance update to 30 ETH.
+
+The following chart illustrates the behaviour.
+  - The actual balance and the effective balance both start at 32 ETH.
+  - Initially the actual balance rises. Effective balance is capped at 32 ETH, so it does not get updated.
+  - Only when the actual balance falls below 31.75 ETH does the effective balance get reduced to 31 ETH.
+  - Although the actual balance rises and oscillates around 32 ETH, no effective balance update is triggered and it remains at 31 ETH.
+  - Eventually the actual balance rises above 32.25 ETH, and the effective balance is updated to 32 ETH.
+  - Despite the actual balance falling again, it does not fall below 31.75 ETH, so the effective balance remains at 32 ETH.
+
 <div class="image">
 <img src="md/images/charts/hysteresis.svg" /><br />
-<span>TODO</span>
+<span>Illustration of the relationship between the actual balance (solid line) and the effective balance (dashed line) of a validator. The dotted lines are the thresholds at which the effective balance gets updated - the hysteresis.</span>
 </div>
 
-https://en.wikipedia.org/wiki/Hysteresis
+The hysteresis levels are controlled by the [hysteresis parameters](/part3/config/preset#hysteresis-parameters) in the spec:
 
-https://github.com/ethereum/consensus-specs/issues/1609
+| Name | Value |
+| - | - |
+| `HYSTERESIS_QUOTIENT` | `uint64(4)` |
+| `HYSTERESIS_DOWNWARD_MULTIPLIER` | `uint64(1)` |
+| `HYSTERESIS_UPWARD_MULTIPLIER` | `uint64(5)` |
 
-https://github.com/ethereum/consensus-specs/pull/1627
+These are applied at the end of each epoch during [effective balance updates](/part3/transition/epoch#effective-balances-updates). Every validator in the state (whether active or not) has its actual balance checked and its effective balance updated if necessary.
+
+  - If actual balance is less than effective balance minus 0.25 ( `= HYSTERESIS_DOWNWARD_MULTIPLIER / HYSTERESIS_QUOTIENT`) increments (ETH), then reduce the effective balance by an increment.
+  - If actual balance is more than effective balance plus 1.25 ( `= HYSTERESIS_UPWARD_MULTIPLIER / HYSTERESIS_QUOTIENT`) increments (ETH), then increase the effective balance by an increment.
+
+The effect of the hysteresis is that the effective balance cannot change more often than it takes for a validator's actual balance to change by 0.5 ETH, which would normally take several weeks or months.
+
+Historical note: the initial implementation of hysteresis effectively [had](https://github.com/ethereum/consensus-specs/pull/1627#discussion_r387294528) `QUOTIENT = 2`, `DOWNWARD_MULTIPLIER = 0`, and `UPWARD_MULTIPLIER = 3`. This meant that a validator starting with 32 ETH actual balance but suffering a minor initial outage would immediately drop to 31 ETH effective balance. To get back to 32 ETH effective balance it would need to achieve a 32.5 ETH actual balance, and meanwhile the validator's rewards would be 3.1% lower due to the reduced effective balance. This [seemed unfair](https://github.com/ethereum/consensus-specs/issues/1609), and incentivised stakers to "over-deposit" Ether to avoid the risk of an initial effective balance drop. Hence the [change](https://github.com/ethereum/consensus-specs/pull/1627) to the current parameters.
 
 #### See also
 
@@ -729,11 +752,11 @@ One of the changes brought in with Altair was a tightening of the timeliness req
 
 The new timeliness reward better reflects the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward, Target votes are always useful, but we only want to have to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots.
 
-The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's an arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
+The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
 
 <div class="image">
 <img src="md/images/charts/reward_timeliness.svg" /><br />
-<span>TODO</span>
+<span>It is plausible that setting the inclusion distance for correct source to 5 gives a kind of exponential reduction in reward with time. This graph shows the net reward (reward + penalty) for a completely correct attestation as it gets older, plotted against an exponential curve for comparison.</span>
 </div>
 
 [^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
