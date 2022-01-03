@@ -351,8 +351,8 @@
 
 <!-- Leak Scores and Balances -------------------------------------- -->
 
-<div class="svg" id="leak_scores"></div>
-<div class="svg" id="leak_balances">
+<div class="svg" id="inactivity_scores"></div>
+<div class="svg" id="inactivity_balances">
 <script>
   {
     const nEpochs = 150;
@@ -428,7 +428,7 @@
     ];
 
     const chart_1 = new roughViz.Line({
-      element: '#leak_scores',
+      element: '#inactivity_scores',
       width: opts.width,
       height: opts.height,
 
@@ -478,10 +478,10 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart_1, 'leak_scores');
+    makeLink(chart_1, 'inactivity_scores');
 
     const chart_2 = new roughViz.Line({
-      element: '#leak_balances',
+      element: '#inactivity_balances',
       width: opts.width,
       height: opts.height,
 
@@ -530,7 +530,7 @@
       interactive: opts.interactive,
     });
 
-    makeLink(chart_2, 'leak_balances');
+    makeLink(chart_2, 'inactivity_balances');
   }
 </script>
 
