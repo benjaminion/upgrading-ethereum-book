@@ -497,6 +497,8 @@ From the notes for an [early attempt](https://github.com/ethereum/consensus-spec
 
 The point is that light clients will not need to download the list of actual balances that is stored separately in state, only the validator records they were downloading anyway. So, adding effective balances to validators' records allows us to achieve two performance goals simultaneously: avoiding the workload of frequently re-hashing the validator list in the state while not increasing the workload of light clients.
 
+[TODO: look into the fork choice efficiencies in V's [third point](https://github.com/ethereum/consensus-specs/issues/685#issue-414041799)]::
+
 ##### Increments
 
 Although effective balances are denominated in Gwei they can only be whole multiples of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which is 1 ETH ($10^9$ Gwei). Actual balances can be any number of Gwei.
@@ -894,7 +896,7 @@ HERE
 
 One interesting side-effect of this is that, if participation drops by 10% (due to 10% of validators being offline, say), then total issuance of rewards due to attestations will fall by 19%, in addition to a further reduction from penalties.
 
-We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak]() will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
+We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/economics/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
 
 Note that the proposer reward is not scaled like this &ndash; proposers are already well incentivised to include all relevant attestations &ndash; and neither are sync committee rewards. Penalties do not scale with participation, either.
 
@@ -977,14 +979,25 @@ A useful rule of thumb is that it takes about a day of uptime to recover from a 
 
 #### Sync committee penalties
 
-TODO
+The small group of validators currently on sync committee duty receive a [reward](/part2/economics/rewards#sync-committee-rewards) in each slot that they sign off on the correct head block (correct from the proposer's point of view).
 
-#### Remarks
+Validators that don't participate (sign the wrong head block or don't show up at all) receive a penalty exactly equal to the reward they would have earned for being correct. And the block proposer receives nothing for the missing contribution.
 
- - proposers are not penalised directly
- - no explicit penalty for failing to include deposits (desirable behaviours not explicitly incentivised)
- - NB Correct voting on the Eth1 deposit contract is not incentivised in any way. Where to put this?
- - Penalties are not scaled.
+Historical note: Since sync committee participation is rare for any given validator, and since rewards are significant, there were [concerns](https://github.com/ethereum/consensus-specs/issues/2448) with earlier designs that the resulting [variance in rewards](TODO) for validators would be quite unfair. Small stakers might prefer to join staking pools rather than solo stake in order to smooth out the variance, similarly to how proof of work mining pools have sprung up.
+
+One [suggested approach](https://github.com/ethereum/consensus-specs/pull/2450) to reducing the variance was not to reward sync committee participation at all, but rather to raise overall reward levels for everyone and to penalise the sync committee validators if they did not participate. Ultimately the [approach adopted](https://github.com/ethereum/consensus-specs/pull/2453) was to reduce the length of sync committees (meaning lower rewards, but more often), reduce the proportion of total reward for participation, and introduce a penalty for non-partipcation &ndash; kind of half-way to the other proposal.
+
+The main reasons[^fn-sync-penalties] for not adopting the former proposal, although it is elegant, seem to be around the psychology of being explicitly penalised but never explicitly rewarded. The penalty for not participating in a sync committee would be substantially bigger than the attestation reward over an epoch. In addition, participation is not entirely in the validator's own hands: it depends on the next block proposer being on the right fork. There were also concerns about changing the [clean relationship](/part2/economics/rewards#remarks-on-proposer-rewards) between proposer rewards and the value of the duties they include in blocks.
+
+[^fn-sync-penalities]: The quite interesting discussion remains on the [Ethereum R&D Discord](https://discord.com/channels/595666850260713488/595701319793377299/847063172174577744).
+
+#### Remarks on penalties
+
+There are no explicit penalties related to block proposers.
+
+In particular, there is no explicit penalty for failing to include deposits from the Eth1 chain, nor any direct incentive for including them. However, if a block proposer does not include deposits that the rest of the network knows about, then its block is invalid. This provides a powerful incentive to include outstanding deposits.
+
+Also note that penalties are not scaled with participation as [rewards are](/part2/economics/rewards#rewards-scale-with-participation).
 
 #### See also
 
@@ -994,23 +1007,120 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 ### Inactivity leak <!-- /part2/economics/inactivity -->
 
+#### Introduction
+
+If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) (4) epochs, then it enters "inactivity leak" mode.
+
+Inactivity leak mode is a kind of emergency state in which rewards and penalties are modified as follows.
+  - Attesters receive no attestation rewards while attestation penalties are unchanged.
+  - Any validators deemed inactive have their inactivity scores raised, leading to an additional inactivity penalty that potentially grows quadratically with time. This is the inactivity leak, sometimes known as the quadratic leak.
+  - Proposer and sync committee rewards are unchanged.
+
+The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that of how to recover finality (liveness, in some sense) in the event that over one-third of validators goes offline. Finality requires a majority vote from validators representing 2/3 of the total stake.
+
+The idea is that, when loss of finality is detected, the inactivity leak gradually reduces the stakes of validators who are not making attestations until, eventually, the participating validators control 2/3 of the remaining stake. They can then begin to finalise checkpoints once again.
+
+This inactivity penalty mechanism is designed to protect the chain long-term in the face of catastrophic events (sometimes referred to as the ability to survive World War III). The result might be that the beacon chain could permanently split into two independent chains either side of a network partition, and this is assumed to be a reasonable outcome for any problem that can't be fixed in a few weeks. In this sense, the beacon chain formally prioritises availability over consistency. (You [can't have both](https://en.wikipedia.org/wiki/CAP_theorem).)
+
+In any case, it provides a powerful incentive for stakers to fix any issues they have and to get back online.
+
+[TODO: why no rewards for anyone?]::
+
+<!-- -->
+In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
+
+In Altair, `inactivity_score` is a per-validator quantity, whereas previously validators were penalised by a globally calculated amount when they missed a duty during a leak. See [inactivity penalties](/part3/config/configuration#inactivity-penalties) for more on the rationale for this and how this score is calculated per validator.
+<!-- -->
+
+#### Mathematics
+
+Let's study the effect of the leak on a single validator's balance, assuming that during the period of the inactivity leak (non-finalisation) the validator is completely offline.
+
+At each epoch, the offline validator will be penalised an amount proportional to $tB / \alpha$, where $t$ is the number of epochs since the chain last finalised, $B$ is the validator's effective balance, and $\alpha$ is the [`INACTIVITY_PENALTY_QUOTIENT`](/part3/config/preset#rewards-and-penalties).
+
+The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $t$ epochs would be $t(t+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{tB}{\alpha}$, which can be solved to give the exponential $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
+
+In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT` at `3 * 2**24`, this equates to around seven thousand epochs, or 31.5 days.
+
+For Phase&nbsp;0 of the beacon chain, the value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from $2^{24}$ to $2^{26}$, so that validators would be penalised less severely if there were non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the whole eleven months of Phase&nbsp;0 of the beacon chain.
+
+The value was decreased by one quarter in the Altair upgrade from $2^{26}$ to $3 \times 2^{24}$ as a step towards eventually setting it to its final value. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
+
+#### Inactivity scores
+
+During Phase&nbsp;0, the inactivity penalty was an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time could still be quite severely penalised due to the growth of the inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair." We found during the [Medalla testnet incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that keeping a validator online when all around you is chaos is not easy. We don't want to punish stakers who are honestly doing their best.
+
+To improve this, the Altair upgrade introduced individual validator inactivity scores that are stored in the state. The scores are updated each epoch as follows.
+  - Every epoch, irrespective of the inactivity leak,
+    - decrease the score by one when the validator makes a correct timely target vote, and
+    - increase the score by `INACTIVITY_SCORE_BIAS` (four) otherwise.
+  - When _not_ in an inactivity leak,
+    - decrease every validator's score by `INACTIVITY_SCORE_RECOVERY_RATE` (sixteen).
+
+Graphically, the flow-chart looks like this.
+
+<div class="image">
+<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
+<span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
+</div>
+
+Note that there is a floor of zero on the score.
+
+When not in an inactivity leak, validators' inactivity scores are reduced by `INACTIVITY_SCORE_RECOVERY_RATE + 1` per epoch when they make a timely target vote, and by `INACTIVITY_SCORE_RECOVERY_RATE - INACTIVITY_SCORE_BIAS` when they don't. So, even for non-performing validators, scores decrease outside a leak.
+
+When in a leak, if $p$ is the participation rate between $0$ and $1$, and $\lambda$ is `INACTIVITY_SCORE_BIAS`, then the expected score after $N$ epochs is $\max (0, N((1-p)\lambda - p))$. For $\lambda = 4$ this is $\max (0, N(4 - 5p))$. So a validator that is participating 80% of the time or more can maintain a score that is bounded near zero. With less than 80% average participation, its score will increase unboundedly.
+
+This is nice because, if many validators are able to participate intermittently, it indicates that whatever event has befallen the chain is potentially recoverable (unlike a permanent network partition, or a super-majority network fork, for example). The inactivity leak is intended to bring finality to irrecoverable situations, so prolonging the time to finality if it's recoverable is likely a good thing.
+
+The following graph illustrates some scenarios. We have an inactivity leak that starts at zero, and ends after 100 epochs, after which finality is recovered and we are no longer in the leak. There are five validators. Working up from the lowest line, they are:
+
+1. Always online: correctly registering a timely target vote in every epoch. The inactivity score remains at zero.
+2. 90% online: the inactivity score remains bounded near zero. From the analysis above, it is expected that anything better than 80% online will bound the score near zero.
+3. 70% online: the inactivity score grows slowly over time.
+4. Generally online, but offline between epochs 50 and 75: the inactivity score is zero during the initial online period; grows linearly and fairly rapidly while offline during the leak; declines slowly when back online during the leak; and declines rapidly once the leak is over.
+5. Always offline: the inactivity score increases rapidly during the leak, and declines even more rapidly once the leak is over.
+
 <div class="image">
 <img src="md/images/charts/inactivity_scores.svg" /><br />
-<span>TODO</span>
+<span>The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.</span>
 </div>
+
+#### Inactivity penalties
+
+The inactivity penalty is applied to all validators at every epoch based on their individual inactivity scores, irrespective of whether a leak is in progress or not. When there is no leak, the scores return to zero (rapidly for active validators, less rapidly for inactive onces), so most of the time this is a no-op.
+
+The penalty for validator $i$ is calculated as
+
+$$
+s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) = \frac{s_iB_i}{4 \times 50{,}331{,}648}
+$$
+
+where $s_i$ is the validator's inactivity score, and $B_i$ is the validator's effective balance.
+
+This penalty is applied at each epoch, so (for constant $B_i$) the total penalty is proportional to the area under the curve of the inactivity score, above. With the same five validator persona's we can quantify the penalties in the following graph.
+
+1. Always online: no penalty due to the leak.
+2. 90% online: negligible penalty due to the leak.
+3. 70% online: the total penalty grows quadratically but slowly during the leak, and rapidly stops after the leak ends.
+4. Generally online, but offline between epochs 50 and 75: a growing penalty during the leak, that rapidly stops when the leak ends.
+5. Always offline: we can clearly see the quadratic nature of the penalty in the initial parabolic shape of the curve. After the end of the leak it takes around 35 epochs for the penalties to return to zero.
 
 <div class="image">
 <img src="md/images/charts/inactivity_balances.svg" /><br />
-<span>TODO</span>
+<span>The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.</span>
 </div>
 
-TODO
-
-NB client diversity. Permanent chain split (discuss under staking).
+We can see that the new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a buffer that should mitigate such behaviour.
 
 ### Slashing <!-- /part2/economics/slashing -->
 
+Slashing occurs when validators break very specific protocol rules when submitting attestations and is intended to be a punishment rather than a penalty. Getting slashed means losing a potentially significant amount of stake and being ejected from the protocol.
+
 TODO
+
+Slashed validators are penalised as if they are not participating until they become withdrawable, except for sync committees. Eligible for sync committee participation until exited. Eligible to be chosen as block proposer, but block will be invalid (`process_block_header()`)
+
+
 
 #### Correlated punishment
 
@@ -2190,7 +2300,7 @@ This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](/par
 
 If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`. See [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair) for discussion of the inactivity leak itself.
 
-The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time nevertheless could be quite severely penalised due to the growth of the per-epoch inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully online validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair."
+The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time nevertheless could be quite severely penalised due to the growth of the per-epoch inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair."
 
 In addition, if many validators are able to participate intermittently, it indicates that whatever event has befallen the chain is potentially recoverable (unlike a permanent network partition, or a super-majority network fork, for example). The inactivity leak is intended to bring finality to irrecoverable situations, so prolonging the time to finality if it's not irrecoverable is likely a good thing.
 
@@ -2207,7 +2317,7 @@ When in a leak, if $p$ is the participation rate between $0$ and $1$, and $\lamb
 
 ##### `INACTIVITY_SCORE_RECOVERY_RATE`
 
-When not in an inactivity leak, validators' inactivity scores are reduced by `INACTIVITY_SCORE_RECOVERY_RATE + 1` per epoch when they make a timely head vote, and by `INACTIVITY_SCORE_RECOVERY_RATE - INACTIVITY_SCORE_BIAS` when they don't. So, even for non-performing validators, scores decrease three times faster than they increase.
+When not in an inactivity leak, validators' inactivity scores are reduced by `INACTIVITY_SCORE_RECOVERY_RATE + 1` per epoch when they make a timely target vote, and by `INACTIVITY_SCORE_RECOVERY_RATE - INACTIVITY_SCORE_BIAS` when they don't. So, even for non-performing validators, scores decrease three times faster than they increase.
 
 The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
 
