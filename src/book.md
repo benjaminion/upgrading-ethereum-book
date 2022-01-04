@@ -473,18 +473,29 @@ The block proposer reward is not scaled in proportion to the proposer's effectiv
 
 #### Engineering aspects of effective balance
 
-We could have achieved all of the above simply by using using validators' actual balances as their weights, capped at 32 ETH. However, we can gain significant performance benefits by basing everything on effective balance instead.
+We could have achieved all of the above simply by using using validators' actual balances as their weights, capped at 32 ETH. However, we can gain significant performance benefits by basing everything on effective balances instead.
 
 For one thing, effective balances are [updated](/part3/transition/epoch#def_process_effective_balance_updates) only once per epoch, which means that we need only calculate things like the [base reward per increment](/part3/transition/epoch#def_get_base_reward_per_increment) once and we can cache the result for the whole epoch, irrespective of any changes in actual balances.
 
-But the main feature of effective balances is that they are designed to change very rarely. This is achieved by making them very granular, and by applying hysteresis to changes.
+But the main feature of effective balances is that they are designed to change very rarely. This is achieved by making them very [granular](#increments), and by applying [hysteresis](#hysteresis) to changes.
 
-<!-- Explain the benefits of splitting out the balance from the validators -->
+One of the big performance challenges of the beacon chain state transition is calculating the hash tree root of the entire state. The Merkleisation process allows parts of the state that have not been changed to be cached, providing a significant performance boost.
 
-https://github.com/ethereum/consensus-specs/pull/317
-Crude early design: https://github.com/ethereum/consensus-specs/issues/685
-Implementation: https://github.com/ethereum/consensus-specs/pull/949
+[TODO: link to hash tree root description and merkleisation in the above when done]::
 
+The list of validator records in the state is a large data structure. Were we to store the validators' actual balances within those records they would be frequently changing and the whole list would often need to be re-hashed.
+
+An [early attempt](https://github.com/ethereum/consensus-specs/pull/317/files) to address this simply moved the validators' balances out of the validator records into a dedicated list in the state. This reduced the amount of re-hashing required as the whole record does not need to be re-hashed when only the balance changes.
+
+However, that leads to another performance issue. Light clients needing information on validator balances would now need data from two parts of state &ndash; the validator record and the validator balance list. This requires two Merkle proofs rather than one, significantly increasing their bandwidth costs.
+
+A way round this is to store a slowly changing version of the balances in the validators' records &ndash; meaning that they need to be re-hashed infrequently &ndash; and to store the actual balances in a separate list, a much smaller structure to re-hash.
+
+From the notes for an [early attempt](https://github.com/ethereum/consensus-specs/issues/685) at a kind of effective balance implementation:
+
+> [Effective balances are an] "approximate balance" that can be used by light clients in the `validator_registry`, reducing the number of Merkle branches per validator they need to download from 3 to 2 (actually often from ~2.01 to ~1.01, because when fetching a committee the Merkle branches in active_index_roots are mostly shared), achieving a very significant decrease in light client bandwidth costs
+
+The point is that light clients will not need to download the list of actual balances that is stored separately in state, only the validator records they were downloading anyway. So, adding effective balances to validators' records allows us to achieve two performance goals simultaneously: avoiding the workload of frequently re-hashing the validator list in the state while not increasing the workload of light clients.
 
 ##### Increments
 
