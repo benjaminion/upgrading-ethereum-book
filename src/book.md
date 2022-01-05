@@ -307,7 +307,10 @@ TODO
 
 ## Economics <!-- /part2/economics -->
 
-[Status: draft. Need to make it more of a narrative.]
+| Stage | Done |
+| - | - |
+| First cut |&#x2714; |
+| Revision | |
 
 ### Introduction
 
@@ -659,7 +662,7 @@ If we model the per-validator reward as $r \propto N^{-p}$, then some options ar
 
 Adopting a concave function is attractive as it allows an equilibrium number of validators to be discovered without constantly fiddling with parameters. Ideally, if more validators join, we want the per-validator reward to decrease to disincentivise further joiners; if validators drop out we want the per-validator reward to increase to encourage new joiners. Eventually, an equilibrium number of validators will be found that balances the staking reward against the perceived risk and opportunity cost of locking up the stake. Assuming that the protocol is not overly sensitive to the total number of validators, this seems to be a nice feature.
 
-That would rule out the first, $p=0$, option. The danger with that is, if the reward rate is set lower than the perceived risk, then all rational validators will exit. If we set it too high, then we end up paying for more security than we need (too many validators). Frequent manual tuning via hard-forks could be required to adjust the rate.
+That would rule out the first, $p=0$, option. The danger with $p = 0$ is, if the reward rate is set lower than the perceived risk, then all rational validators will exit. If we set it too high, then we end up paying for more security than we need (too many validators). Frequent manual tuning via hard-forks could be required to adjust the rate.
 
 The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/economics/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themeselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
 
@@ -941,6 +944,8 @@ Incentivisation of validators on the beacon chain is a combination of carrot and
 
 It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being [slashed](/part2/economics/slashing) is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed.
 
+Penalties are subtracted from validators' balances on the beacon chain and effectively burned, so they reduce the net issuance of the beacon chain.
+
 #### Attestation penalties
 
 Attestations are penalised for being missing, late, or incorrect. We'll lump these together as "missed" for conciseness.
@@ -1024,7 +1029,9 @@ This inactivity penalty mechanism is designed to protect the chain long-term in 
 
 In any case, it provides a powerful incentive for stakers to fix any issues they have and to get back online.
 
-[TODO: why no rewards for anyone?]::
+As with penalties, the amounts subtracted from validators' beacon chain accounts due to the inactivity leak are effectively burned, reducing the overall net issuance of the beacon chain.
+
+[TODO: why no rewards for anyone?  Likely because the leak might be due to validators censoring other validators' attestations; we don't want to risk rewarding them for this. ]::
 
 <!-- -->
 In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`.
@@ -1114,17 +1121,116 @@ We can see that the new scoring system means that some validators will continue 
 
 ### Slashing <!-- /part2/economics/slashing -->
 
-Slashing occurs when validators break very specific protocol rules when submitting attestations and is intended to be a punishment rather than a penalty. Getting slashed means losing a potentially significant amount of stake and being ejected from the protocol.
+#### Introduction
 
-TODO
+Slashing occurs when validators break very specific protocol rules when submitting attestations or block proposals which could constitute attacks on the chain. Getting slashed means losing a potentially significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty". The good news is that stakers can take simple precautions to protect against ever being slashed.
 
-Slashed validators are penalised as if they are not participating until they become withdrawable, except for sync committees. Eligible for sync committee participation until exited. Eligible to be chosen as block proposer, but block will be invalid (`process_block_header()`)
+Validators' stakes can be slashed for two distinct behaviours:
+1. as attesters, for breaking the Casper commandments, the two rules on voting for source and target checkpoints; and
+2. as proposers, for proposing two different blocks at the same height (equivocation).
 
+The slashing of misbehaving attesters is what underpins Ethereum&nbsp;2.0's [economic finality](/part2/economics/staking#economic-finality) guarantee by enforcing the Casper FFG protocol rules.
 
+Proposer slashing, however, is not part of the Casper FFG protocol, and is not directly related to economic finality. It punishes a proposer that spams the block tree with multiple blocks that could partition the network, for example in a [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079).
 
-#### Correlated punishment
+[TODO: Link to Casper FFG section when done]::
 
-TODO
+As with penalties, the amounts removed from validators' beacon chain accounts due to slashing are effectively burned, reducing the overall net issuance of the beacon chain.
+
+#### The cost of being slashed
+
+When it comes to the punishment for being slashed it does not matter which rule was broken. All slashings are dealt with in the same way.
+
+##### The initial penalty
+
+Slashing is triggered by the evidence of the offence being included in a beacon chain block. Once the evidence is confirmed by the network, the offending validator (or validators) is slashed.
+
+The offender immediately has one sixty-fourth ([`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair)) of its effective balance deducted from its actual balance. This is a maximum of 0.5 ETH due to the cap on effective balance.
+
+This initial penalty was [introduced](https://github.com/ethereum/consensus-specs/pull/624) to make it somewhat costly for validators to self-slash for any reason.
+
+[TODO: why would anyone wish to self-slash? Vitalik says "to DoS the chain" - how would that work?]::
+
+Along with the initial penalty, the validator is queued for exit, and has its withdrawability epoch set to around 36 days ([`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), which is 8192 epochs) in the future.
+
+During Phase&nbsp;0, this initial penalty was $\frac{1}{128}$ of the offender's effective balance. It is expected to be raised to its full value of $\frac{1}{32}$ of the effective balance, a maximum of 1 ETH, as part of The Merge.
+
+##### The correlation penalty
+
+At the half way point of its withdrawability period (18 days after being slashed) the slashed validator is due to receive a second penalty.
+
+This second penalty is based on the total amount of stake slashed during the 18 days before and after our validator was slashed. The idea is to scale the punishment so that a one-off event posing little threat to the chain is only lightly punished, while a mass slashing event that might be the result of an attempt to finalise conflicting blocks is punished to the maximum extent possible.
+
+To be able to calculate this, the beacon chain maintains a record of the effective balances of all validators that were slashed during the most recent 8192 epochs (about 36 days).
+
+The correlated penalty is calculated as follows.
+ 1. Compute the sum of the effective balances (as they were when the validators were slashed) of all validators that were slashed in the previous 36 days. That is, for the 18 days preceding and the 18 days following our validator's slashing.
+ 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
+ 3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
+
+The slashing multiplier in Altair is set to 2. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
+
+$$
+\begin{flalign}
+\mbox{Correlation penalty} = \min(B, \frac{2SB}{T}) &&
+\end{flalign}
+$$
+
+Interestingly, [due to](https://github.com/ethereum/consensus-specs/issues/1322) the way the integer arithmetic is constructed in [the implementation](/part3/transition/epoch#def_process_slashings) the result of this calculation will be zero if $2SB < T$. Effectively, the penalty is rounded down to the nearest whole amount of Ether. As a consequence, when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
+
+The intention is to raise the proportional slashing multiplier from 2 to 3 around The Merge, three being its "correct" cryptoeconomic value. To successfully finalise conflicting blocks at least one third of validators need to break attestation slashing rules. With the multiplier set to 3, that third would lose their entire stakes through this mechanism, which is optimal for security.
+
+##### Other penalties
+
+Validators that exit normally (by sending a voluntary exit message) are expected to participate only until their exit epoch, which is normally only a couple of epochs later.
+
+A validator that is slashed continues to receive attestation penalties until its withdrawable epoch, which is set to 8192 epochs (36 days) after the slashing, and they are unable to receive any attestation rewards during this time. They are also subject for this entire period to any [inactivity leak](/part2/economics/inactivity) that might be in operation. It's not clear to me why there is this large hang-over from being slashed during which validators continue to receive penalties[^fn-slashed-validators]; it seems like a cruel and unusual punishment, especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty.
+
+[^slashed-validators]: Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit. The exit mechanics are the same in each case.
+
+So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 106{,}987{,}520 \mbox{ Gwei} = 0.107 \mbox{ ETH}$, based on 300k validators, assuming that the chain is not in an inactivity leak. And (much) more if it is.
+
+Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to skip slashed validators, but that is not how it is implemented currently.)
+
+In an interesting edge case, however, slashed validators are eligible to be selected for sync committee duty until they reach their exit epoch and to receive the rewards for sync committee participation. Though the odds of this happening, absent a mass slashing event, are pretty tiny.
+
+#### The value of reporting a slashing
+
+In order for the beacon chain to verify slashings and take action against the offender, the evidence needs to be included in a beacon block. To incentivise validators to make the effort there is a specific reward for the proposer of a block that includes slashings.
+
+##### The proposer reward
+
+At the point of the the initial slashing report being included in a block, the proposer of the block receives a reward of `validator.effective_balance` / [`WHISTLEBLOWER_REWARD_QUOTIENT`](/part3/config/preset#whistleblower_reward_quotient), which is $B / 512$ if $B$ is the effective balance of the validator being slashed.
+
+A report of a proposer slashing violation can slash only one validator, but a report of an attestation slashing violation can simultaneously slash up to an entire committee, which might be hundreds of validators. This could be extremely lucrative for the proposer including the reports. A single block can contain up to 16 proposer slashing reports and up to 2 attester slashing reports.
+
+Note that no new issuance is required to pay for this reward. The proposer reward is much less than the initial slashing applied to the validator, so the net issuance due to a slashing event is always negative.
+
+##### The whistleblower reward
+
+In the [code](/part3/helper/mutators#def_slash_validator) implementing the reward for reporting slashing evidence there is provision for a "whistleblower reward", with the whistleblower receiving $\frac{7}{8}$ of the above reward and the proposer $\frac{1}{8}$.
+
+The idea is to incentivise nodes that search for and discover evidence of slashable behaviour, which can be an intensive process.
+
+However, this functionality is not currently used on the beacon chain, and the proposer receives both the whistleblower reward and the proposer reward, as above. The challenge is that it is too easy for a proposer just to steal a slashing report, so there's no point incentivising them separately. It's not an ideal situation, but so far there seem to be sufficient altruistic slashing detectors running on the beacon chain for slashings to be reported swiftly. There only needs to be one in practice.
+
+This functionality may become useful in future upgrades.
+
+#### Remarks on diversity
+
+It is not unintentional that both the [inactivity leak](/part2/economics/inactivity) and the slashing [correlation penalty](#the-correlation-penalty) provide an impetus to diversify the network as much as possible.
+
+The inactivity leak is much more likely to occur on a network on which a single client implementation is used to run over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak which penalises those running the majority client most harshly.
+
+The situation becomes potentially much worse when there is a majority client with over 66% of the validators. In the case of a consensus bug that went unfixed for some time (several weeks), the inactivity leak could lead to the beacon chain becoming irrecoverably partitioned as each side of the fork independently regains finality.
+
+As for slashing, once again running a majority client could be an act of self-harm. Should that client have a bug that led to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
+
+This is not just a theoretical issue. It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet and led to a great many validators being slashed (due to not running effective slashing protection).
+
+#### See also
+
+ - In the Serenity Design Rationale Vitalik gives some further background on why Ehereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
@@ -1439,10 +1545,16 @@ For this work, I have consolidated the two specifications into one, omitting par
 
 #### References
 
+The main references:
   - [The Phase&nbsp;0](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md) beacon chain specification.
   - [Altair updates](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/beacon-chain.md) to the beacon chain specification.
-  - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
   - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
+
+Other excellent, but in places outdated references:
+  - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view)
+  - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB?type=view)
+  - [Phase 0 design notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr) (Justin Drake)
+  - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
 
 ## Types, Constants, Presets, and Configuration <!-- /part3/config -->
 
@@ -3993,7 +4105,7 @@ There is a chance of the same proposer being selected in two consecutive slots, 
 |||
 |-|-|
 | Used&nbsp;by | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`process_block_header()`](/part3/transition/block#def_process_block_header), [`process_randao()`](/part3/transition/block#def_process_randao), [`process_attestation()`](/part3/transition/block#def_process_attestation), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) |
-| Uses | [`get_seed(#def_get_seed)`](#def_get_seed), [`uint_to_bytes()`](/part3/helper/math#uint_to_bytes), [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) |
+| Uses | [`get_seed()`](#def_get_seed), [`uint_to_bytes()`](/part3/helper/math#uint_to_bytes), [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) |
 
 #### `get_total_balance`
 
@@ -4481,7 +4593,7 @@ Note that the `whistleblower_index` defaults to `None` in the parameter list. Th
 |||
 |-|-|
 | Used&nbsp;by | [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing`](/part3/transition/block#def_process_attester_slashing) |
-| Uses | `initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`decrease_balance()`](#def_decrease_balance), [`increase_balance()`](#def_increase_balance) |
+| Uses | [`initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`decrease_balance()`](#def_decrease_balance), [`increase_balance()`](#def_increase_balance) |
 | See&nbsp;also | [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair), [`process_slashings()`](/part3/transition/epoch#def_process_slashings) |
 
 ## Beacon Chain State Transition Function <!-- /part3/transition -->
