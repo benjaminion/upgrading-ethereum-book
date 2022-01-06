@@ -305,7 +305,7 @@ TODO
 
 TODO
 
-## Economics <!-- /part2/economics -->
+## Carrots and Sticks: the Incentive Layer <!-- /part2/incentives -->
 
 | Stage | Done |
 | - | - |
@@ -314,71 +314,74 @@ TODO
 
 ### Introduction
 
-Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics incentivises correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and we want the chain to give reasonable, non-contradictory results under all reasonable circumstances.
+Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics incentivises correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and we want the chain to give reliable, non-contradictory results under all reasonable circumstances.
 
-The tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
+This chapter describes the economic tools the beacon chain uses to incentivise its participants; the cryptography side is covered elsewhere. Broadly speaking, the tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
 
 One of the few attractive aspects of Proof of Work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penalties or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
 
 By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
 
-1. The most fundamental economic component is the [stake](/part2/economics/staking) itself.
-2. Within the protocol, the stake is represented as an [effective balance](/part2/economics/effective_balance) that is the actual measure of the influence a validator has on the protocol.
-3. [Rewards](/part2/economics/rewards) incentivise desirable behaviours such as publishing beacon blocks and timely attestations.
-4. [Penalties](/part2/economics/penalties) disincentivise undesirable behaviours such as failing to make attestations, or making late or incorrect attestations.
-5. The [inactivity leak](/part2/economics/inactivity) is a special regime that the beacon chain may enter in which rewards and penalties are modified to much more heavily penalise non-participation.
-6. [Slashings](/part2/economics/slashing) are punishments for breaking the protocol rules in very specific ways that look like attacks.
-
-As we shall see, every validator has a beacon chain balance that represents its stake. All beacon chain protocol rewards come from new issuance of Ether and are added to validators' beacon chain balances. Penalties and slashings are subtracted from validators' beacon chain balances and thus reduce the issuance rate of Ether, or even burn Ether if they exceed the rewards.
-
-<!-- 
-The three ongoing mechanisms in Ethereum's proof of stake designed to encourage economically rational validators to act in the protocol's best interests are rewards, penalties, and punishments.
-
-  - Rewards are provided to validators that participate in the protocol by attesting to blocks, proposing blocks, or participating in sync committees. Rewards are tuned so that more valuable contributions (such as timely votes, or well-assembled blocks) receive a greater amount.
-  - Penalties are taken from validators that fail to participate in the protocol, for example if they are offline, or following a different fork.
-  - Punishments are also known as slashings and apply only in very specific cases of rule-breaking in the protocol.
-
--->
+1. The most fundamental economic component is the [stake](/part2/incentives/staking) itself.
+2. Within the protocol, the stake is represented in validator [balances](/part2/incentives/balances)) in particular a quantity called the "effective balance" that is the actual measure of the influence a particular validator has on the protocol.
+3. Similarly to proof of work, the protocol issues new coins to provide the incentives we are discussing. We'll look at this in the section on [issuance](/part2/incentives/issuance).
+4. An array of [rewards](/part2/incentives/rewards) is used to incentivise desirable behaviours such as publishing beacon blocks and timely attestations.
+5. [Penalties](/part2/incentives/penalties) are used to disincentivise undesirable behaviours such as failing to make attestations, or making late or incorrect attestations.
+6. The [inactivity leak](/part2/incentives/inactivity) is a special regime that the beacon chain may enter in which rewards and penalties are modified to much more heavily penalise non-participation.
+7. [Slashings](/part2/incentives/slashing) are punishments for breaking the protocol rules in very specific ways that look like attacks.
+8. Finally, we close with a note on how aspects of these incentives combine to make [diversity](/part2/incentives/diversity) of deployment of beacon chain infrastructure the safest strategy.
 
 #### Further reading
 
  - Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the background to many of the design decisions that led, eventually, to the protocol we see today. [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9), [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780), [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc), [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e), [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58).
 
-### Staking <!-- /part2/economics/staking -->
+### Staking <!-- /part2/incentives/staking -->
+
+#### Summary
+
+ - The stake in proof of stake provides three things: an anti-Sybil mechanism, an accountability mechanism, and an incentive alignment mechanism.
+ - The 32&nbsp;ETH stake size is a trade-off between network overhead, number of validators, and time to finality.
+ - Combined with the Casper FFG rules, the stakes provide economic finality: a quantifiable measure of the security of the chain.
+
+#### Introduction
 
 A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
-The stake in Ethereum&nbsp;2 has three key roles.
+In Ethereum&nbsp;2 the stake has three key roles.
 
-First, the stake is an anti-Sybil mechanism. Ethereum&nbsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to to allocate influence among their participants. There must be some cost to creating an identity that participates in the protocol, otherwise individuals could cheaply create large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hash power, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
+First, the stake is an anti-Sybil mechanism. Ethereum&nbsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to to allocate influence among their participants. There must be some cost to creating an identity in the protocol, otherwise individuals could cheaply create vast numbers of duplicate identities and overwhelm the chain. In Proof of Work chains a participant's influence is proportional to its hash power, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
 
 [^fn-one-cpu-one-vote]: In the Bitcoin white paper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
 
-Second, the stake aligns incentives. Stakers necessarily own some of what they are guarding, and are incentivised to guard it well.
+Second, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely in a process called [slashing](/part2/incentives/slashing). This allows us to quantify the [economic security](#economic-finality) of the protocol in terms of what it would cost an attacker to do something harmful.
 
-Third, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely. This allows us to quantify the [economic security](#economic-finality] of the protocol in terms of what it would cost an attacker to do something harmful.
+Third, the stake aligns incentives. Stakers necessarily own some of what they are guarding, and are incentivised to guard it well.
 
 #### Stake size
 
-The size of the stake in Ethereum&nbsp;2 is 32 ETH per validator.
+The size of the stake in Ethereum&nbsp;2 is 32&nbsp;ETH per validator.
 
-This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwidth networks, thus increasing the forces of centralisation.
+This value is a compromise. It tries to be as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwidth networks, thus increasing the forces of centralisation.
 
-The main practical constraint on the number of validators in a monolithic[^fn-monolithic] L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
+The main practical constraint on the number of validators in a monolithic[^fn-monolithic] L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality. That is, for all nodes to agree on a block that will never be reverted.
 
 [^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
     - More the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
     - More on modularity: [The lay of the modular blockchain land](https://polynya.medium.com/the-lay-of-the-modular-blockchain-land-d937f7df4884) by Polynya.
 
-Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and desire a time to finality of $f$, then we can have participation from at most $n$ validators, where
+Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and we want a time to finality of $f$, then we can have participation from at most $n$ validators, where
 
 $$
 n \le \frac{\omega f}{2}
 $$
 
-We would like to keep $\omega$ small to allow the broadest possible participation by validators, including those on slower networks. And we would like $f$ to be as short as possible. Taken together, these requirements imply a cap on $n$, the total number of validators.
+We would like to keep $\omega$ small to allow the broadest possible participation by validators, including those on slower networks. And we would like $f$ to be as short as possible since a shorter time to finality is much more useful than a longer time[^fn-finality-utility]. Taken together, these requirements imply a cap on $n$, the total number of validators.
 
-This is the classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
+[^fn-finality-utility]: In an [unfinished paper](https://github.com/ethereum/research/blob/master/papers/casper-economics/casper_economics_basic.pdf) Vitalik attempts to quantify the "protocol utility" for different times to finality.
+    > ...a blockchain with some finality time $f$ has utility roughly $-\log(f)$, or in other words increasing the finality time of a blockchain by a constant factor causes a constant loss of utility. The utility difference between 1 minute and 2 minute finality is the same as the utility difference between 1 hour and 2 hour finality.
+    He goes on to make a justification for this (p.10).
+
+This is a classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
 <a id="img_scalability_trilemma"></a>
 <div class="image" style="width: 60%">
@@ -386,47 +389,47 @@ This is the classic scalability trilemma. Personally, I don't find these picture
 <span>A version of the scalability trilemma: pick any two.</span>
 </div>
 
-1. Our ideal would be to have high participation (large $n$) with low overhead (low $\omega$) &ndash; lots of stakers on low-spec machines &ndash;, but finality would take a long time since message exchange would be slow.
+1. Our ideal might be to have high participation (large $n$) with low overhead (low $\omega$) &ndash; lots of stakers on low-spec machines &ndash;, but finality would take a long time since message exchange would be slow.
 2. We could have very fast finality and high participation, but would need to mandate that stakers run high spec machines on high bandwidth networks in order to participate.
-3. Or we could have fast finality on reasonably specced machines by severely limiting the number of participants.
+3. Or we could have fast finality on reasonably modest machines by severely limiting the number of participants.
 
 It's not clear exactly how to place Ethereum&nbsp;2 on such a diagram, but we definitely favour participation over time to finality: maybe "x" marks the spot. One complexity is that participation and overhead are not entirely independent: we could decrease the stake to encourage participation, but that would increase the hardware and networking requirements (the overhead), which will tend to reduce the number of people able or willing to participate.[^fn-exercise-triangle]
 
-[^fn-exercise-triangle]: Exercise for the reader: try placing some of the other L1 blockchains within the trade-off space.
+[^fn-exercise-triangle]: Exercise for the reader: try placing some of the other monolithic L1 blockchains within the trade-off space.
 
-To put this in more concrete terms, the hard limit on the number of validators is the total Ether supply divided by the stake size. With a 32 ETH stake, that's about 3.6 million validators today, which is consistent with a time to finality of 768 seconds (two epochs), and a message overhead of 9375 messages per second[^fn-message-overhead]. That's a substantial number of messages per second to handle. However, we don't ever expect _all_ Ether to be staked, perhaps around 10-20%. In addition, due to the use of BLS aggregate signatures, messages are highly compressed to an asymptotic 1-bit per validator.
+To put this in concrete terms, the hard limit on the number of validators is the total Ether supply divided by the stake size. With a 32 ETH stake, that's about 3.6 million validators today, which is consistent with a time to finality of 768 seconds (two epochs), and a message overhead of 9375 messages per second[^fn-message-overhead]. That's a substantial number of messages per second to handle. However, we don't ever expect _all_ Ether to be staked, perhaps around 10-20%. In addition, due to the use of BLS aggregate signatures, messages are highly compressed to an asymptotic 1-bit per validator.
 
 [TODO: link to BLS signatures]::
 
 [^fn-message-overhead]: Vitalik's [estimate](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) of 5461 is too low since he omits the factor of two in the calculation.
 
-Given the capacity of current p2p networks, 32 ETH per stake is about as low as we can go while delivering finality in two epochs.
+Given the capacity of current p2p networks, 32 ETH per stake is about as low as we can go while delivering finality in two epochs. Anecdotally, my staking node continually consumes about 3.5mb/s in up and down bandwidth. That's about 30% of my upstream bandwidth on residential ADSL. If the protocol were more any chatty it would rule out home staking for many.
 
-An alternative approach might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the number of messages exchanged. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate, but participating only on a part-time basis.
+An alternative approach might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the number of messages exchanged. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate, but each participating only on a part-time basis.
 
-Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (many of which might be hosted by a single node). A design goal of the Ethereum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we should apply the analysis to the most distributed case, that of one-validator per node.
+Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (a large number of which can be hosted by a single node). A design goal of the Ethereum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we ought to be careful to apply our analyses to the most distributed case, that of one-validator per node.
 
 Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) called for a minimum deposit size of 1500 ETH as the system design could handle up to around 900 active validators. While 32 ETH now represents a great deal of money for most people, decentralised staking pools that can take less than 32 ETH are now becoming available.
 
 #### Economic finality
 
-The requirement for validators to lock up stakes and the introduction of slashing conditions allows us to quantify the security of the beacon chain in some sense.
+The requirement for validators to lock up stakes, and the introduction of slashing conditions allows us to quantify the security of the beacon chain in some sense.
 
-The primary attack that we wish to avoid is one that rewrites the history of the chain. The cost of such an attack parameterises the security of the chain. In proof of work, this is the cost of acquiring an overwhelming (51%) of hash power for a period of time. Interestingly, a successful 51% attack in proof of work costs essentially nothing, since the attacker claims all of the block rewards on the rewritten chain.
+The main attack we wish to prevent is one that rewrites the history of the chain. The cost of such an attack parameterises the security of the chain. In proof of work, this is the cost of acquiring an overwhelming (51%) of hash power for a period of time. Interestingly, a successful 51% attack in proof of work costs essentially nothing, since the attacker claims all of the block rewards on the rewritten chain.
 
 In Ethereum's proof of stake protocol we can measure security in terms of _economic finality_. That is, if an attacker wished to revert a finalised block on the chain, what would be the cost?
 
-This is easy to quantify. To quote Vitalik's [Parametrizing Casper](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735),
+This turns out to be easy to quantify. To quote Vitalik's [Parametrizing Casper](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735),
 
 > State $H_1$ is economically finalized if enough validators sign a message attesting to $H_1$, with the property that if both $H_1$ and a conflicting $H_2$ are finalized, then there is evidence that can be used to prove that at least $\frac{1}{3}$ of validators were malicious and therefore destroy their entire deposits.
 
 Ethereum's proof of stake protocol has this property. In order to finalise a checkpoint ($H_1$), two-thirds of the validators must have attested to it. To finalise a conflicting checkpoint ($H_2$) requires two-thirds of validators to attest to that as well. Thus, at least one-third of validators must have attested to both checkpoints. Since individual validators sign their attestations, this is both detectable and attributable: it's easy to submit the evidence on-chain that those validators contradicted themselves, and they can be punished by the protocol.
 
-In the Altair implementation, if one-third of validators were to be slashed simultaneously, they would have around two-thirds of their stake burned (20 ETH). The plan is to increase this later to their full stake (32 ETH). At that point, with, say, nine million Ether staked, the cost of reverting a finalised block would be three million of the attackers' Ether being permanently burned, and the attackers being expelled from the network.
+In the Altair implementation, if one-third of validators were to be slashed simultaneously, they would have around two-thirds of their stake burned (20 ETH each). The plan is to increase this later to their full stake (32 ETH each). At that point with, say, nine million Ether staked, the cost of reverting a finalised block would be three million of the attackers' Ether being permanently burned and the attackers being expelled from the network.
 
-It is obligatory at this point to quote Vlad Zamfir. Comparing proof of stake to proof of work, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
+It is obligatory at this point to quote (or paraphrase) Vlad Zamfir: comparing proof of stake to proof of work, "it’s as though your ASIC farm burned down if you participated in a 51% attack".
 
-For more on the mechanics of economic finality, see below under [Slashing](/part2/economics/slashing), and for more on the rationale and justification, see the section on Casper FFG.
+For more on the mechanics of economic finality, see below under [Slashing](/part2/incentives/slashing), and for more on the rationale and justification, see the section on Casper FFG.
 
 [TODO: link to Casper FFG when written]
 
@@ -435,7 +438,7 @@ For more on the mechanics of economic finality, see below under [Slashing](/part
  - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs for different stake sizes. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
  - [Why 32 ETH validator sizes?](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) from Vitalik's Serenity Design Rationale.
 
-### Effective Balance <!-- /part2/economics/effective_balance -->
+### Balances <!-- /part2/incentives/balances -->
 
 #### Summary
 
@@ -454,7 +457,7 @@ A validator's effective balance is derived from its actual balance in such a way
 
 Using the effective balance achieves two goals, one to do with economics, the other purely engineering.
 
-#### Economic aspects
+#### Economic aspects of effective balance
 
 The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made, a validator would start with an actual balance of 64 ETH, but an effective balance of only 32 ETH.
 
@@ -556,7 +559,7 @@ From the spec:
   - The function [`process_effective_balance_updates()`](/part3/transition/epoch#def_process_effective_balance_updates) for the actual calculation and application of hysteresis.
   - [`Validator`](/part3/containers/dependencies#validator) objects store the effective balances. The [registry](/part3/containers/state#registry) in the beacon state contains the list of validators alongside a separate list of the actual balances.
 
-### Issuance, expected, and actual rewards <!-- /part2/economics/issuance -->
+### Issuance <!-- /part2/incentives/issuance -->
 
 #### Introduction
 
@@ -564,7 +567,7 @@ There are three views we can take of the rewards given to validators to incentiv
 
 First, there is "issuance", which is the overall amount of new Ether generated by the protocol to pay rewards. Second there is the expected reward a validator might earn over the long run. And, third, there is the actual reward that any particular validator earns.
 
-We'll look at each of these in the big picture below, and in the [next section](/part2/economics/rewards) will dig into the details.
+We'll look at each of these in the big picture below, and in the [next section](/part2/incentives/rewards) will dig into the details.
 
 But first we must define the fundamental unit of reward, which is the "base reward per increment".
 
@@ -669,7 +672,7 @@ Adopting a concave function is attractive as it allows an equilibrium number of 
 
 That would rule out the first, $p=0$, option. The danger with $p = 0$ is, if the reward rate is set lower than the perceived risk, then all rational validators will exit. If we set it too high, then we end up paying for more security than we need (too many validators). Frequent manual tuning via hard-forks could be required to adjust the rate.
 
-The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/economics/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
+The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/incentives/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
 
 As noted above, after the Merge, validators' income will include a significant component from transaction tips and MEV, which will have the effect of pushing $p$ closer to $1$, and much of this reasoning will become moot. Discouragement attacks in that regime are an unsolved problem.
 
@@ -681,7 +684,7 @@ As noted above, after the Merge, validators' income will include a significant c
     - Vitalik's [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Base-rewards), and
     - the [Discouragement Attacks](https://github.com/ethereum/research/blob/master/papers/discouragement/discouragement.pdf) paper.
 
-### Rewards in detail <!-- /part2/economics/rewards -->
+### Rewards <!-- /part2/incentives/rewards -->
 
 #### Introduction
 
@@ -715,13 +718,13 @@ These proportions are set by the [incentivisation weights](/part3/config/constan
 | `PROPOSER_WEIGHT`      | `uint64(8)`  | 12.5% | $W_p$ |
 | `WEIGHT_DENOMINATOR`   | `uint64(64)` | 100%  | $W_{\Sigma}$ |
 
-One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare and we will ignore it in this section (see [Slashing](/part2/economics/slashing) for more on this).
+One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare and we will ignore it in this section (see [Slashing](/part2/incentives/slashing) for more on this).
 
 #### Rewards scale with effective balance
 
 All of the above rewards are scaled in proportion to a validator's effective balance. This reflects the fact that a validator's influence (weight) in the protocol is proportional to its effective balance.
 
-If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/economics/issuance#the-base-reward-per-increment).
+If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment).
 
 For the regular attestations that occur every epoch, this is achieved explicitly by scaling the base reward in [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward).
 
@@ -752,7 +755,7 @@ The full matrix of possible weights for an attestation reward is as follows. In 
 | Correct source and target       | $W_s + W_t$       | $W_s + W_t$ | $W_t$ | 0 |
 | Correct source, target and head | $W_s + W_t + W_h$ | $W_s + W_t$ | $W_t$ | 0 |
 
-But this is not the whole picture: we will also need to account for [penalties](/part2/economics/penalties) for incorrect or late attestations.
+But this is not the whole picture: we will also need to account for [penalties](/part2/incentives/penalties) for incorrect or late attestations.
 
 The maximum total issuance per epoch across all validators is
 
@@ -879,7 +882,7 @@ This congruence ensures that the interests of validators and proposers aligned.
 
 #### Total issuance
 
-To check that the calculations above are consistent with our [claim](/part2/economics/issuance#overall-issuance) that the maximum issuance by the beacon chain per epoch is $Tb$ Gwei, let us sum up the issuance due to the four rewards: attester rewards, proposer rewards in respect of attestation inclusion, sync committee rewards, and proposer rewards in respect of sync committee inclusion. The total maximum issuance per epoch is
+To check that the calculations above are consistent with our [claim](/part2/incentives/issuance#overall-issuance) that the maximum issuance by the beacon chain per epoch is $Tb$ Gwei, let us sum up the issuance due to the four rewards: attester rewards, proposer rewards in respect of attestation inclusion, sync committee rewards, and proposer rewards in respect of sync committee inclusion. The total maximum issuance per epoch is
 
 $$
 \begin{aligned}
@@ -907,7 +910,7 @@ HERE
 
 One interesting side-effect of this is that, if participation drops by 10% (due to 10% of validators being offline, say), then total issuance of rewards due to attestations will fall by 19%, in addition to a further reduction from penalties.
 
-We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/economics/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
+We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/incentives/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
 
 Note that the proposer reward is not scaled like this &ndash; proposers are already well incentivised to include all relevant attestations &ndash; and neither are sync committee rewards. Penalties do not scale with participation, either.
 
@@ -944,13 +947,13 @@ The detailed rewards calculations are defined in the spec in these functions:
   - Proposer rewards for attestations are calculated in [`process_attestation()`](/part3/transition/block#def_process_attestation) as part of [block processing](/part3/transition/block#block-processing).
   - Both validator and proposer rewards for sync committee participation are calculated in [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) as part of [block processing](/part3/transition/block#block-processing).
 
-### Penalties <!-- /part2/economics/penalties -->
+### Penalties <!-- /part2/incentives/penalties -->
 
 #### Introduction
 
 Incentivisation of validators on the beacon chain is a combination of carrot and stick. Validators are rewarded for contributing to the chain's security, and penalised for failing to contribute. As we shall see, penalties are quite mild. Nonetheless they provide good motivation for stakers to ensure that their validator deployments are running well.
 
-It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being [slashed](/part2/economics/slashing) is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed.
+It's common to hear of the penalties for being offline being referred to as "getting slashed". This is incorrect. Being [slashed](/part2/incentives/slashing) is a severe punishment for very specific misbehaviours, and results in the validator being ejected from the protocol in addition to some or all of its stake being removed.
 
 Penalties are subtracted from validators' balances on the beacon chain and effectively burned, so they reduce the net issuance of the beacon chain.
 
@@ -960,7 +963,7 @@ Attestations are penalised for being missing, late, or incorrect. We'll lump the
 
 Attesters are penalised for missed CASPER FFG votes, that is, missed source or target votes. But there is no penalty for a missed head vote. If a source vote is incorrect, then the target vote is missed; if the source or target vote is incorrect then the head vote is missed.
 
-Let's update our [rewards matrix](/part2/economics/rewards#rewards-table) to give the full picture of penalties and rewards for attestations. Recall that this shows the weights; we need to multiply by $\frac{nb}{W_{\Sigma}}$ to get the actual reward.
+Let's update our [rewards matrix](/part2/incentives/rewards#rewards-table) to give the full picture of penalties and rewards for attestations. Recall that this shows the weights; we need to multiply by $\frac{nb}{W_{\Sigma}}$ to get the actual reward.
 
 <a id="penalties-rewards-table"></a>
 
@@ -992,7 +995,7 @@ A useful rule of thumb is that it takes about a day of uptime to recover from a 
 
 #### Sync committee penalties
 
-The small group of validators currently on sync committee duty receive a [reward](/part2/economics/rewards#sync-committee-rewards) in each slot that they sign off on the correct head block (correct from the proposer's point of view).
+The small group of validators currently on sync committee duty receive a [reward](/part2/incentives/rewards#sync-committee-rewards) in each slot that they sign off on the correct head block (correct from the proposer's point of view).
 
 Validators that don't participate (sign the wrong head block or don't show up at all) receive a penalty exactly equal to the reward they would have earned for being correct. And the block proposer receives nothing for the missing contribution.
 
@@ -1000,7 +1003,7 @@ Historical note: Since sync committee participation is rare for any given valida
 
 One [suggested approach](https://github.com/ethereum/consensus-specs/pull/2450) to reducing the variance was not to reward sync committee participation at all, but rather to raise overall reward levels for everyone and to penalise the sync committee validators if they did not participate. Ultimately the [approach adopted](https://github.com/ethereum/consensus-specs/pull/2453) was to reduce the length of sync committees (meaning lower rewards, but more often), reduce the proportion of total reward for participation, and introduce a penalty for non-participation &ndash; kind of half-way to the other proposal.
 
-The main reasons[^fn-sync-penalties] for not adopting the former proposal, although it is elegant, seem to be around the psychology of being explicitly penalised but never explicitly rewarded. The penalty for not participating in a sync committee would be substantially bigger than the attestation reward over an epoch. In addition, participation is not entirely in the validator's own hands: it depends on the next block proposer being on the right fork. There were also concerns about changing the [clean relationship](/part2/economics/rewards#remarks-on-proposer-rewards) between proposer rewards and the value of the duties they include in blocks.
+The main reasons[^fn-sync-penalties] for not adopting the former proposal, although it is elegant, seem to be around the psychology of being explicitly penalised but never explicitly rewarded. The penalty for not participating in a sync committee would be substantially bigger than the attestation reward over an epoch. In addition, participation is not entirely in the validator's own hands: it depends on the next block proposer being on the right fork. There were also concerns about changing the [clean relationship](/part2/incentives/rewards#remarks-on-proposer-rewards) between proposer rewards and the value of the duties they include in blocks.
 
 [^fn-sync-penalties]: The quite interesting discussion remains on the [Ethereum R&D Discord](https://discord.com/channels/595666850260713488/595701319793377299/847063172174577744).
 
@@ -1010,7 +1013,7 @@ There are no explicit penalties related to block proposers.
 
 In particular, there is no explicit penalty for failing to include deposits from the Eth1 chain, nor any direct incentive for including them. However, if a block proposer does not include deposits that the rest of the network knows about, then its block is invalid. This provides a powerful incentive to include outstanding deposits.
 
-Also note that penalties are not scaled with participation as [rewards are](/part2/economics/rewards#rewards-scale-with-participation).
+Also note that penalties are not scaled with participation as [rewards are](/part2/incentives/rewards#rewards-scale-with-participation).
 
 #### See also
 
@@ -1018,7 +1021,7 @@ The detailed penalty calculations are defined in the spec in these functions:
   - Penalties for missed attestations are calculated in [`get_flag_index_deltas()`](/part3/helper/accessors#def_get_flag_index_deltas) as part of [epoch processing](/part3/transition/epoch).
   - Penalties for missed sync committee participation are calculated in [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) as part of [block processing](/part3/transition/block#block-processing).
 
-### Inactivity leak <!-- /part2/economics/inactivity -->
+### Inactivity leak <!-- /part2/incentives/inactivity -->
 
 #### Introduction
 
@@ -1130,7 +1133,7 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 
 We can see that the new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a buffer that should mitigate such behaviour.
 
-### Slashing <!-- /part2/economics/slashing -->
+### Slashing <!-- /part2/incentives/slashing -->
 
 #### Introduction
 
@@ -1140,7 +1143,7 @@ Validators' stakes can be slashed for two distinct behaviours:
 1. as attesters, for breaking the Casper commandments, the two rules on voting for source and target checkpoints; and
 2. as proposers, for proposing two different blocks at the same height (equivocation).
 
-The slashing of misbehaving attesters is what underpins Ethereum&nbsp;2.0's [economic finality](/part2/economics/staking#economic-finality) guarantee by enforcing the Casper FFG protocol rules.
+The slashing of misbehaving attesters is what underpins Ethereum&nbsp;2.0's [economic finality](/part2/incentives/staking#economic-finality) guarantee by enforcing the Casper FFG protocol rules.
 
 Proposer slashing, however, is not part of the Casper FFG protocol, and is not directly related to economic finality. It punishes a proposer that spams the block tree with multiple blocks that could partition the network, for example in a [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079).
 
@@ -1195,7 +1198,7 @@ The intention is to raise the proportional slashing multiplier from 2 to 3 aroun
 
 Validators that exit normally (by sending a voluntary exit message) are expected to participate only until their exit epoch, which is normally only a couple of epochs later.
 
-A validator that is slashed continues to receive attestation penalties until its withdrawable epoch, which is set to 8192 epochs (36 days) after the slashing, and they are unable to receive any attestation rewards during this time. They are also subject for this entire period to any [inactivity leak](/part2/economics/inactivity) that might be in operation. It's not clear to me why there is this large hang-over from being slashed during which validators continue to receive penalties[^fn-slashed-validators]; it seems like a cruel and unusual punishment, especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty.
+A validator that is slashed continues to receive attestation penalties until its withdrawable epoch, which is set to 8192 epochs (36 days) after the slashing, and they are unable to receive any attestation rewards during this time. They are also subject for this entire period to any [inactivity leak](/part2/incentives/inactivity) that might be in operation. It's not clear to me why there is this large hang-over from being slashed during which validators continue to receive penalties[^fn-slashed-validators]; it seems like a cruel and unusual punishment, especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty.
 
 [^slashed-validators]: Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit. The exit mechanics are the same in each case.
 
@@ -1227,9 +1230,15 @@ However, this functionality is not currently used on the beacon chain, and the p
 
 This functionality may become useful in future upgrades.
 
-#### Remarks on diversity
+#### See also
 
-It is not unintentional that both the [inactivity leak](/part2/economics/inactivity) and the slashing [correlation penalty](#the-correlation-penalty) provide an impetus to diversify the network as much as possible.
+ - In the Serenity Design Rationale Vitalik gives some further background on why Ethereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
+
+### Diversity <!-- /part2/incentives/diversity -->
+
+#### Diversity makes you stronger
+
+It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](#the-correlation-penalty) provide a direct encouragement to diversify the network as much as possible.
 
 The inactivity leak is much more likely to occur on a network on which a single client implementation is used to run over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak which penalises those running the majority client most harshly.
 
@@ -1238,10 +1247,6 @@ The situation becomes potentially much worse when there is a majority client wit
 As for slashing, once again running a majority client could be an act of self-harm. Should that client have a bug that led to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
 
 This is not just a theoretical issue. It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet and led to a great many validators being slashed (due to not running effective slashing protection).
-
-#### See also
-
- - In the Serenity Design Rationale Vitalik gives some further background on why Ethereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
@@ -2450,7 +2455,7 @@ When not in an inactivity leak, validators' inactivity scores are reduced by `IN
 
 The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
 
-See the section on the [Inactivity Leak](/part2/economics/inactivity) for some more analysis of the inactivity score and some graphs of its effect.
+See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some more analysis of the inactivity score and some graphs of its effect.
 
 ## Containers <!-- /part3/containers -->
 
