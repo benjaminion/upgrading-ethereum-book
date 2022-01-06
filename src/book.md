@@ -256,7 +256,7 @@ TODO
 
 TODO
 
-### Deposit processing <!-- /part2/deposits/processing* -->
+### Deposit Processing <!-- /part2/deposits/processing* -->
 
 TODO
 
@@ -372,6 +372,7 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
+<a id="img_shuffling_0"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_0.svg" /><br />
 <span>The pivot and the first mirror index.</span>
@@ -387,6 +388,7 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
+<a id="img_shuffling_1"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_1.svg" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
@@ -398,6 +400,7 @@ The decision as to whether to swap or not is based on hashing together the rando
 
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
+<a id="img_shuffling_2"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_2.svg" /><br />
 <span>The second mirror index.</span>
@@ -407,6 +410,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
+<a id="img_shuffling_3"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_3.svg" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
@@ -418,6 +422,7 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
+<a id="img_shuffling_4"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_4.svg" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
@@ -848,6 +853,7 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
+<a id="img_weights"></a>
 <div class="image" style="width:50%">
 <img src="md/images/diagrams/weights.svg" /><br />
 <span>The proportion of the total reward derived from each of the micro-rewards.</span>
@@ -1487,19 +1493,7 @@ When not in an inactivity leak, validators' inactivity scores are reduced by `IN
 
 The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
 
-Vitalik illustrates some scenarios for individual validators in his [annotated Altair spec](https://github.com/ethereum/annotated-spec/blob/master/altair/beacon-chain.md):
-
-<div class="image">
-<img src="md/images/inactivity_0.png" /><br />
-<span>Inactivity scores per validator in different scenarios. With the x-axis in epochs, the y-axis is the inactivity score.</span>
-</div>
-
-<div class="image">
-<img src="md/images/inactivity_1.png" /><br />
-<span>Balances per validator in different scenarios. The x-axis is in epochs. It's not clear what the y-axis is, but it is not percentage.</span>
-</div>
-
-TODO: re-do graph with clearer y-axis.
+See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some more analysis of the inactivity score and some graphs of its effect.
 
 ## Containers <!-- /part3/containers -->
 
@@ -3646,7 +3640,7 @@ Note that the `whistleblower_index` defaults to `None` in the parameter list. Th
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_proposer_slashing`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing`](/part3/transition/block#def_process_attester_slashing) |
+| Used&nbsp;by | [`process_proposer_slashing()`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) |
 | Uses | [`initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`decrease_balance()`](#def_decrease_balance), [`increase_balance()`](#def_increase_balance) |
 | See&nbsp;also | [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair), [`process_slashings()`](/part3/transition/epoch#def_process_slashings) |
 
@@ -3902,8 +3896,9 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
+<a id="img_k_finality"></a>
 <div class="image" style="width: 80%">
-<img src="md/images/diagrams/k-finality.svg" /><br />
+<img src="md/images/diagrams/k_finality.svg" /><br />
 <span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
 </div>
 
@@ -3945,8 +3940,9 @@ With Altair, each validator has an individual inactivity score in the beacon sta
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
+<a id="img_inactivity_scores_flow"></a>
 <div class="image">
-<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
+<img src="md/images/diagrams/inactivity_scores_flow.svg" /><br />
 <span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
 </div>
 
