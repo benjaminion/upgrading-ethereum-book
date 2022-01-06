@@ -1,0 +1,538 @@
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <title>Charts</title>
+    <script src="./roughviz.min.js">
+      <!-- This library can be built from https://github.com/benjaminion/roughViz -->
+    </script>
+    <style>
+      div.svg {border: solid black 1px; margin: 1ex 0;}
+      div.all {width: 1200px; margin: 10ex auto;}
+    </style>
+  </head>
+  <body>
+
+<div class="all">
+
+<script>
+  // set some defaults
+  opts = {
+    width: 1200,
+    height: 600,
+    roughness: 1,
+    bowing: 0,
+    simplification: 0.2,
+    axisRoughness: 1,
+    axisStrokeWidth: 1.0,
+    axisFontSize: 20,
+    labelFontSize: 30,
+    legend: false,
+    interactive: false,
+  };
+
+  // Make a right-click download link forthe SVG data
+  function makeLink(chart, id) {
+    const svg = chart.svg;
+    const serializer = new XMLSerializer();
+    var source = serializer.serializeToString(svg.node());
+
+    source = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">' + source + '</svg>';
+
+    //convert svg source to URI data scheme.
+    const url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+
+    //set url value to a element's href attribute.
+    const div = document.getElementById(id);
+    if (div !== null) {
+      const anchor = document.createElement('a');
+      anchor.appendChild(document.createTextNode('Download'));
+      anchor.href = url;
+      anchor.download = id + '.svg'
+      div.appendChild(anchor);
+    }
+  }
+
+</script>
+
+<!-- Issuance Curve ------------------------------------------------ -->
+
+<div class="svg" id="issuance_curve"></div>
+<script>
+  {
+    const nPoints = 12;
+    const xVals = [];
+    const yVals = [];
+
+    const epochsPerYear = 365.25 * 225;
+    const xFunc = i => (1 + i) * 50;
+    const yFunc = x => epochsPerYear * 32 * x * 64 / Math.floor(Math.sqrt(1000000000 * 32 * x));
+
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = xFunc(i);
+      yVals[i] = yFunc(1000 * xVals[i]) / 1000;
+    }
+
+    const chart = new roughViz.Line({
+      element: '#issuance_curve',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y: yVals,
+      },
+      x: xVals,
+      xLabel: "Number of active validators (thousands)",
+      yLabel: "Annual issuance (thousand ETH)",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["curve"],
+
+      circle: true,
+      circleRadius: 6,
+      circleRoughness: 1,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 30, right: 20, bottom: 80, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart, 'issuance_curve');
+  }
+</script>
+
+<!-- Issuance Curve ------------------------------------------------ -->
+
+<div class="svg" id="rewards_curve"></div>
+<script>
+  {
+    const nPoints = 12;
+    const xVals = [];
+    const yVals = [];
+
+    const epochsPerYear = 365.25 * 225;
+    const xFunc = i => (1 + i) * 50;
+    const yFunc = x => epochsPerYear * 64 / Math.floor(Math.sqrt(1000000000 * 32 * x));
+
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = xFunc(i);
+      yVals[i] = yFunc(1000 * xVals[i]) * 100;
+    }
+
+    const chart = new roughViz.Line({
+      element: '#rewards_curve',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y: yVals,
+      },
+      x: xVals,
+      xLabel: "Number of active validators (thousands)",
+      yLabel: "Annual return on 32 ETH stake (%)",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["curve"],
+
+      circle: true,
+      circleRadius: 6,
+      circleRoughness: 1,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 30, right: 20, bottom: 80, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart, 'rewards_curve');
+  }
+</script>
+
+<!-- Reward Variance ----------------------------------------------- -->
+
+<div class="svg" id="reward_variance"></div>
+<script>
+  {
+    const chart = new roughViz.Bar({
+      element: '#reward_variance',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        labels: [1.4, 1.425, 1.45, 1.475, 1.5, 1.525, 1.55, 1.575, 1.6, 1.625, 1.65, 1.675, 1.7, 1.725, 1.75, 1.775, 1.8, 1.825, 1.85, 1.875, 1.9, 1.925, 1.95, 1.975],
+        values: [0, 9.012097147132001e-05, 0.0007900030693065276, 0.0034625936780776404, 0.010117724758439453, 0.022222501861968585, 0.03930741130795962, 0.05869508559787125, 0.07667608389578497, 0.09011582615639349, 0.097360246574628, 0.0982297322584306, 0.0935787996300737, 0.08483788991116106, 0.07363622456242747, 0.06149378860071459, 0.04961300241343375, 0.03880057869052064, 0.029494711073457386, 0.021843117625188306, 0.015791505923118995, 0.011164359278243946, 0.007730431979276688, 0],
+      },
+      xLabel: "Annual reward (ETH, 300k validators)",
+      yLabel: "Proportion of validators",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+
+      roughness: opts.roughness,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      color: 'black',
+      fillStyle: 'hachure',
+      fillWeight: 0.2,
+      strokeWidth: 1.5,
+      padding: 0.01,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 30, right: 20, bottom: 90, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart, 'reward_variance');
+}
+</script>
+
+<!-- Reward Timeliness against exponential ------------------------- -->
+
+<div class="svg" id="reward_timeliness"></div>
+<script>
+  {
+    const nPoints = 40;
+    const xVals = [];
+    const y1Vals = [];
+    const y2Vals = [];
+
+    const y1Func = i => {
+      if (i == 0) return 0.844;
+      if (i <= 4) return 0.625;
+      if (i <= 31) return 0.188;
+      return -0.625;
+    }
+    const y2Func = i => -0.6 + 1.44 * Math.exp(-0.1 * i);
+
+    for (let i = 0; i < nPoints; i++) {
+      xVals[i] = (1 + i);
+      y1Vals[i] = y1Func(i);
+      y2Vals[i] = y2Func(i);
+    }
+    xVals[0] = "";
+
+    const chart = new roughViz.Line({
+      element: '#reward_timeliness',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Vals,
+        y2: y2Vals,
+      },
+      x: xVals,
+      xLabel: "Slots delay",
+      yLabel: "Net attestation reward weight",
+      xLabelDelta: -190,
+      yLabelDelta: -40,
+
+      roughness: 0.7,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      interpolation: ["straight", "curve"],
+      dash: [[0], [8, 6]],
+      strokeWidth: 1.5,
+
+      circle: false,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      margin: {top: 30, right: 20, bottom: 30, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart, 'reward_timeliness');
+  }
+</script>
+
+<!-- Hysteresis ---------------------------------------------------- -->
+
+<div class="svg" id="hysteresis"></div>
+<script>
+  {
+    const xVals = [0];
+    const y1Vals = [32.0, 32.2, 32.4, 32.6, 32.8, 33.0, 33.2, 33.4, 33.2, 33.0, 32.8, 32.6, 32.4, 32.2, 32.0, 31.8, 31.6, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.2, 32.0, 31.8, 32.0, 32.2, 32.4, 32.6];
+    const y2Vals = [32.0];
+    const nPoints = y1Vals.length;
+
+    const y2Func = (eb, y) => {
+      if (y > eb + 1.25) return eb == 32 ? 32 : eb + 1;
+      if (y < eb - 0.25) return eb - 1;
+      return eb;
+    }
+
+    for (let i = 1; i < nPoints; i++) {
+      xVals[i] = i;
+      y2Vals[i] = y2Func(y2Vals[i - 1], y1Vals[i]);
+    }
+
+    const chart = new roughViz.Line({
+      element: '#hysteresis',
+      width: opts.width,
+      height: opts.height,
+
+      x: xVals,
+      data: {
+        y1: y1Vals,
+        y2: y2Vals,
+      },
+      yDomain: [30, 34],
+      yLabel: "Balance / Effective Balance (ETH)",
+      yLabelDelta: -40,
+      xAxis: false,
+
+      roughness: 0.7,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      interpolation: ["straight"],
+      dash: [[0], [10, 10]],
+      strokeWidth: 1.5,
+
+      circle: false,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      yLines: [
+        {y: 31.75, dash: [2, 6]},
+        {y: 32.25, dash: [2, 6]},
+      ],
+
+      margin: {top: 30, right: 20, bottom: 30, left: 100},
+
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart, 'hysteresis');
+  }
+</script>
+
+<!-- Leak Scores and Balances -------------------------------------- -->
+
+<div class="svg" id="inactivity_scores"></div>
+<div class="svg" id="inactivity_balances">
+<script>
+  {
+    const nEpochs = 150;
+    const xInterval = 5;
+    const xVals = [];
+    const y1Score = []; // Always online
+    const y2Score = []; // 90% online
+    const y3Score = []; // 70% online
+    const y4Score = []; // Offline
+    const y5Score = []; // Temporarily offline
+
+    const y1Balance = []; // Always online
+    const y2Balance = []; // 90% online
+    const y3Balance = []; // 70% online
+    const y4Balance = []; // Offline
+    const y5Balance = []; // Temporarily offline
+
+    const leakEnd = 100;
+    const offlineStart = 50;
+    const offlineEnd = 75;
+
+    const scoreUpdate = (score, inLeak, isOnline) => {
+      return Math.max(0, score + (isOnline ? -1 : 4) + (inLeak ? 0 : -16));
+    }
+
+    const balanceUpdate = (balance, score) => {
+      const inactivity_penalty_quotient = 50331648; // 3 * 2**24 (Altair)
+      const inactivity_score_bias = 4;
+      // Assume effective balance does not fall below 32 (i.e. balance remains above 31.75)
+      return balance - 32 * score / (inactivity_score_bias * inactivity_penalty_quotient);
+    }
+
+    var y1s = y2s = y3s = y4s = y5s = 0;
+    var y1b = y2b = y3b = y4b = y5b = 32;
+    for (let i = 0; i < nEpochs; i++) {
+      var inLeak = (i < leakEnd);
+      if (i % xInterval === 0) {
+        var idx = i / xInterval;
+        xVals[idx] = i;
+        y1Score[idx] = y1s;
+        y2Score[idx] = y2s;
+        y3Score[idx] = y3s;
+        y4Score[idx] = y4s;
+        y5Score[idx] = y5s;
+        y1Balance[idx] = y1b;
+        y2Balance[idx] = y2b;
+        y3Balance[idx] = y3b;
+        y4Balance[idx] = y4b;
+        y5Balance[idx] = y5b;
+      }
+      y1s = scoreUpdate(y1s, inLeak, true);
+      y2s = scoreUpdate(y2s, inLeak, i % 10 < 9);
+      y3s = scoreUpdate(y3s, inLeak, i % 10 < 7);
+      y4s = scoreUpdate(y4s, inLeak, false);
+      y5s = scoreUpdate(y5s, inLeak, (i < offlineStart) || (i >= offlineEnd));
+      y1b = balanceUpdate(y1b, y1s);
+      y2b = balanceUpdate(y2b, y2s);
+      y3b = balanceUpdate(y3b, y3s);
+      y4b = balanceUpdate(y4b, y4s);
+      y5b = balanceUpdate(y5b, y5s);
+    }
+    xVals[leakEnd / xInterval] = "End";
+    xVals[offlineStart / xInterval] = "A";
+    xVals[offlineEnd / xInterval] = "B";
+
+    const dashPattern = [[2, 6], [6, 6], [10, 6], [0], [10, 6, 4, 6]];
+    const margin = {top: 30, right: 20, bottom: 80, left: 120};
+
+    const xLines = [
+      {x: leakEnd, dash: [4, 8]},
+      {x: offlineStart, dash: [2, 10]},
+      {x: offlineEnd, dash: [2, 10]},
+    ];
+
+    const chart_1 = new roughViz.Line({
+      element: '#inactivity_scores',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Score,
+        y2: y2Score,
+        y3: y3Score,
+        y4: y4Score,
+        y5: y5Score,
+      },
+      x: xVals,
+      xLabel: "Epochs since leak start",
+      yLabel: "Inactivity score",
+      xLabelDelta: 0,
+      yLabelDelta: -40,
+      yDomain: [-40, 420],
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["straight"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 200, y: 270, text: "Always offline"},
+        {x: 454, y: 350, text: "Temporarily"},
+        {x: 430, y: 375, text: "offline"},
+        {x: 620, y: 390, text: "70% online"},
+        {x: 620, y: 436, text: "90% online"},
+        {x: 630, y: 473, text: "Always online"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      xLines: xLines,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart_1, 'inactivity_scores');
+
+    const chart_2 = new roughViz.Line({
+      element: '#inactivity_balances',
+      width: opts.width,
+      height: opts.height,
+
+      data: {
+        y1: y1Balance,
+        y2: y2Balance,
+        y3: y3Balance,
+        y4: y4Balance,
+        y5: y5Balance,
+      },
+      x: xVals,
+      yValueFormat: ".4f",
+      xLabel: "Epochs since leak start",
+      yLabel: "Balance (ETH)",
+      xLabelDelta: 0,
+      yLabelDelta: -60,
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: ["black"],
+      strokeWidth: 1.5,
+      interpolation: ["straight"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 170, y: 80, text: "Always offline"},
+        {x: 876, y: 105, text: "Temporarily offline"},
+        {x: 840, y: 62, text: "70% online"},
+        {x: 1000, y: 47, text: "90% online"},
+        {x: 990, y: 13, text: "Always online"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      xLines: xLines,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+
+    makeLink(chart_2, 'inactivity_balances');
+  }
+</script>
+
+</div>
+</body>
