@@ -318,13 +318,13 @@ Permissionless blockchains are cryptoeconomic systems: cryptography enforces cor
 
 The tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
 
-One of the few attractive aspects of Proof of Work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penaltes or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
+One of the few attractive aspects of Proof of Work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penalties or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
 
 By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
 
 1. The most fundamental economic component is the [stake](/part2/economics/staking) itself.
 2. Within the protocol, the stake is represented as an [effective balance](/part2/economics/effective_balance) that is the actual measure of the influence a validator has on the protocol.
-3. [Rewards](/part2/economics/rewards) incentivise desirable behviours such as publishing beacon blocks and timely attestations.
+3. [Rewards](/part2/economics/rewards) incentivise desirable behaviours such as publishing beacon blocks and timely attestations.
 4. [Penalties](/part2/economics/penalties) disincentivise undesirable behaviours such as failing to make attestations, or making late or incorrect attestations.
 5. The [inactivity leak](/part2/economics/inactivity) is a special regime that the beacon chain may enter in which rewards and penalties are modified to much more heavily penalise non-participation.
 6. [Slashings](/part2/economics/slashing) are punishments for breaking the protocol rules in very specific ways that look like attacks.
@@ -350,9 +350,9 @@ A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol m
 
 The stake in Ethereum&nbsp;2 has three key roles.
 
-First, the stake is an anti-sybil mechanism. Ethereum&bnsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to to allocate influence among their participants. There must be some cost to creating an identity that partipates in the protocol, otherwise individuals could cheaply create large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hashpower, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
+First, the stake is an anti-Sybil mechanism. Ethereum&nbsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to to allocate influence among their participants. There must be some cost to creating an identity that participates in the protocol, otherwise individuals could cheaply create large numbers of duplicate identities and overwhelm the chain. In Proof of Work chains, a participant's influence is proportional to its hash power, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains, participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
 
-[^fn-one-cpu-one-vote]: In the Bitcoin whitepaper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
+[^fn-one-cpu-one-vote]: In the Bitcoin white paper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
 
 Second, the stake aligns incentives. Stakers necessarily own some of what they are guarding, and are incentivised to guard it well.
 
@@ -362,7 +362,7 @@ Third, the stake provides accountability. There is a direct cost to acting in a 
 
 The size of the stake in Ethereum&nbsp;2 is 32 ETH per validator.
 
-This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwith networks, thus increasing the forces of centralisation.
+This value is a compromise that is as small as possible to allow wide participation, while remaining large enough that we don't end up with too many validators. In short, if we reduced the stake, we would potentially be forcing stakers to run more expensive hardware on higher bandwidth networks, thus increasing the forces of centralisation.
 
 The main practical constraint on the number of validators in a monolithic[^fn-monolithic] L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality: that is, for all nodes to agree on a block that will never be reverted.
 
@@ -380,8 +380,9 @@ We would like to keep $\omega$ small to allow the broadest possible participatio
 
 This is the classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
+<a id="img_scalability_trilemma"></a>
 <div class="image" style="width: 60%">
-<img src="md/images/diagrams/scalability-trilemma.svg" /><br />
+<img src="md/images/diagrams/scalability_trilemma.svg" /><br />
 <span>A version of the scalability trilemma: pick any two.</span>
 </div>
 
@@ -403,7 +404,7 @@ Given the capacity of current p2p networks, 32 ETH per stake is about as low as 
 
 An alternative approach might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the number of messages exchanged. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate, but participating only on a part-time basis.
 
-Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (many of which might be hosted by a single node). A design goal of the Etherum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we should apply the analysis to the most distributed case, that of one-validator per node.
+Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (many of which might be hosted by a single node). A design goal of the Ethereum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we should apply the analysis to the most distributed case, that of one-validator per node.
 
 Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) called for a minimum deposit size of 1500 ETH as the system design could handle up to around 900 active validators. While 32 ETH now represents a great deal of money for most people, decentralised staking pools that can take less than 32 ETH are now becoming available.
 
@@ -411,7 +412,7 @@ Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github
 
 The requirement for validators to lock up stakes and the introduction of slashing conditions allows us to quantify the security of the beacon chain in some sense.
 
-The primary attack that we wish to avoid is one that rewrites the history of the chain. The cost of such an attack parametrises the security of the chain. In proof of work, this is the cost of acquiring an overwhelming (51%) of hashpower for a period of time. Interestingly, a successful 51% attack in proof of work costs essentially nothing, since the attacker claims all of the block rewards on the rewritten chain.
+The primary attack that we wish to avoid is one that rewrites the history of the chain. The cost of such an attack parameterises the security of the chain. In proof of work, this is the cost of acquiring an overwhelming (51%) of hash power for a period of time. Interestingly, a successful 51% attack in proof of work costs essentially nothing, since the attacker claims all of the block rewards on the rewritten chain.
 
 In Ethereum's proof of stake protocol we can measure security in terms of _economic finality_. That is, if an attacker wished to revert a finalised block on the chain, what would be the cost?
 
@@ -447,7 +448,7 @@ For more on the mechanics of economic finality, see below under [Slashing](/part
 
 Each validator maintains two records of its balance on the beacon chain: its actual balance and its effective balance.
 
-A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee particpants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$ ETH.
+A validator's actual balance is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee participants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$ ETH.
 
 A validator's effective balance is derived from its actual balance in such a way that it changes much more slowly. To achieve this, the units of effective balance are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
 
@@ -482,9 +483,9 @@ For one thing, effective balances are [updated](/part3/transition/epoch#def_proc
 
 But the main feature of effective balances is that they are designed to change very rarely. This is achieved by making them very [granular](#increments), and by applying [hysteresis](#hysteresis) to changes.
 
-One of the big performance challenges of the beacon chain state transition is calculating the hash tree root of the entire state. The Merkleisation process allows parts of the state that have not been changed to be cached, providing a significant performance boost.
+One of the big performance challenges of the beacon chain state transition is calculating the hash tree root of the entire state. The Merkleization process allows parts of the state that have not been changed to be cached, providing a significant performance boost.
 
-[TODO: link to hash tree root description and merkleisation in the above when done]::
+[TODO: link to hash tree root description and Merkleization in the above when done]::
 
 The list of validator records in the state is a large data structure. Were we to store the validators' actual balances within those records they would be frequently changing and the whole list would often need to be re-hashed.
 
@@ -524,6 +525,7 @@ The following chart illustrates the behaviour.
   - Eventually the actual balance rises above 32.25 ETH, and the effective balance is updated to 32 ETH.
   - Despite the actual balance falling again, it does not fall below 31.75 ETH, so the effective balance remains at 32 ETH.
 
+<a id="img_hysteresis"></a>
 <div class="image">
 <img src="md/images/charts/hysteresis.svg" /><br />
 <span>Illustration of the relationship between the actual balance (solid line) and the effective balance (dashed line) of a validator. The dotted lines are the thresholds at which the effective balance gets updated - the hysteresis.</span>
@@ -604,6 +606,7 @@ With 300,000 validators this equates to 515,333 ETH per year, plus change. For c
 
 We can graph the maximum issuance as a function of the number of validators. It's just a scaled square root curve.
 
+<a id="img_issuance_curve"></a>
 <div class="image">
 <img src="md/images/charts/issuance_curve.svg" /><br />
 <span>Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.</span>
@@ -625,6 +628,7 @@ For example, with 300,000 validators participating, this amounts to an expected 
 
 Graphing this give us an inverse square root curve.
 
+<a id="img_rewards_curve"></a>
 <div class="image">
 <img src="md/images/charts/rewards_curve.svg" /><br />
 <span>Expected annual percentage rewards for stakers as a function of the number of active validators.</span>
@@ -636,6 +640,7 @@ Actual individual validator returns, even on an optimally running beacon chain, 
 
 The following chart shows the expected distribution of rewards for 300,000 validators, all participating perfectly, each with 32 ETH of effective balance. The mean reward is 1.7177 ETH/year (the 5.37% number from above), and the median 1.7188 ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.596 ETH over the year, and 10% more than 1.866 ETH, due solely to randomness in assigning duties.
 
+<a id="img_reward_variance"></a>
 <div class="image">
 <img src="md/images/charts/reward_variance.svg" /><br />
 <span>Distribution of rewards for 300,000 validators with 32 ETH staked.</span>
@@ -664,7 +669,7 @@ Adopting a concave function is attractive as it allows an equilibrium number of 
 
 That would rule out the first, $p=0$, option. The danger with $p = 0$ is, if the reward rate is set lower than the perceived risk, then all rational validators will exit. If we set it too high, then we end up paying for more security than we need (too many validators). Frequent manual tuning via hard-forks could be required to adjust the rate.
 
-The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/economics/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themeselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
+The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/economics/rewards#discouragement-attack). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want rewards to increase too much for validators if they succeed in making other validators exit the beacon chain.
 
 As noted above, after the Merge, validators' income will include a significant component from transaction tips and MEV, which will have the effect of pushing $p$ closer to $1$, and much of this reasoning will become moot. Discouragement attacks in that regime are an unsolved problem.
 
@@ -693,6 +698,7 @@ The first of these, making attestations, happens regularly every epoch and accou
 
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
+<a id="img_weights"></a>
 <div class="image">
 <img src="md/images/diagrams/weights.svg" style="width:50%" /><br />
 <span>The proportion of a validator's total reward derived from each activity.</span>
@@ -770,6 +776,7 @@ The new timeliness reward better reflects the relative importance of the votes. 
 
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.
 
+<a id="img_reward_timeliness"></a>
 <div class="image">
 <img src="md/images/charts/reward_timeliness.svg" /><br />
 <span>It is plausible that setting the inclusion distance for correct source to 5 gives a kind of exponential reduction in reward with time. This graph shows the net reward (reward + penalty) for a completely correct attestation as it gets older, plotted against an exponential curve for comparison.</span>
@@ -788,7 +795,7 @@ The choice of distance for including the source vote is interesting. It is chose
 
 Note that the attester does not have full control over whether it receives rewards or not. An attester may behave perfectly, but if the next block is skipped because the proposer is offline, then it will not receive the correct head block reward. Or if the next proposer happens to be on a minority fork, the attester will again forgo rewards. Or if the next proposer's block is late and gets orphaned: subsequent proposers are supposed to pick up the orphaned attestations, but there can be considerable delays if block space is tight. There are countless failure modes outside the attester's control.
 
-It often perplexes stakers when, to all intents and purposes, their validators seem to be working perfectly but they still miss out on rewards or receive penalties. But this is the nature of permissionless, global, peer-to-peer networks. It is a testament to the quality of the protocol and the various client impementations that missed rewards have been surprisingly rare on the beacon chain so far.
+It often perplexes stakers when, to all intents and purposes, their validators seem to be working perfectly but they still miss out on rewards or receive penalties. But this is the nature of permissionless, global, peer-to-peer networks. It is a testament to the quality of the protocol and the various client implementations that missed rewards have been surprisingly rare on the beacon chain so far.
 
 #### Proposer rewards for attestations
 
@@ -862,6 +869,7 @@ This factor works out to be $\frac{8}{56} = \frac{1}{7}$ which means that $\frac
 
 In the following chart, I have separated out the validator rewards from the proposer rewards, and we can see that they are split exactly equally between the duties.
 
+<a id="img_reward_split"></a>
 <div class="image">
 <img src="md/images/diagrams/reward_split.svg" /><br />
 <span>On the left, the breakdown of expected rewards for validators for performing duties. On the right, the breakdown of rewards for proposers for including evidence of those duties.</span>
@@ -887,13 +895,13 @@ as expected.
 
 #### Rewards scale with participation
 
-One surprising aspect of attestation rewards not so far mentioned is that they are scaled in proportion to partipation. That is, for each duty (source, target, head vote) the attester's reward is scaled by the proportion of the total stake that made the same vote.
+One surprising aspect of attestation rewards not so far mentioned is that they are scaled in proportion to participation. That is, for each duty (source, target, head vote) the attester's reward is scaled by the proportion of the total stake that made the same vote.
 
 For example, if I made a correct head vote, and validators with 75% of the total effective balance increments made the same head vote, then I would receive $0.75 \times \frac{W_h}{W_{\Sigma}}nb$ reward for that vote.
 
 A hand-wavy reason for this is that this scaling makes it to my advantage to help other validators get their attestations included. Several aspects of the protocol are not explicitly incentivised yet are somewhat expensive, such as forwarding gossip messages and attestation aggregation duty. This scaling provides me with an implicit reward for helping out other validators by providing these services: if they perform better, then I perform better.
 
-For a more quantitative analysis, we return to the discussion of [discourgagement attacks](TODO). 
+For a more quantitative analysis, we return to the discussion of [discouragement attacks](TODO). 
 
 HERE
 
@@ -990,11 +998,11 @@ Validators that don't participate (sign the wrong head block or don't show up at
 
 Historical note: Since sync committee participation is rare for any given validator, and since rewards are significant, there were [concerns](https://github.com/ethereum/consensus-specs/issues/2448) with earlier designs that the resulting [variance in rewards](TODO) for validators would be quite unfair. Small stakers might prefer to join staking pools rather than solo stake in order to smooth out the variance, similarly to how proof of work mining pools have sprung up.
 
-One [suggested approach](https://github.com/ethereum/consensus-specs/pull/2450) to reducing the variance was not to reward sync committee participation at all, but rather to raise overall reward levels for everyone and to penalise the sync committee validators if they did not participate. Ultimately the [approach adopted](https://github.com/ethereum/consensus-specs/pull/2453) was to reduce the length of sync committees (meaning lower rewards, but more often), reduce the proportion of total reward for participation, and introduce a penalty for non-partipcation &ndash; kind of half-way to the other proposal.
+One [suggested approach](https://github.com/ethereum/consensus-specs/pull/2450) to reducing the variance was not to reward sync committee participation at all, but rather to raise overall reward levels for everyone and to penalise the sync committee validators if they did not participate. Ultimately the [approach adopted](https://github.com/ethereum/consensus-specs/pull/2453) was to reduce the length of sync committees (meaning lower rewards, but more often), reduce the proportion of total reward for participation, and introduce a penalty for non-participation &ndash; kind of half-way to the other proposal.
 
 The main reasons[^fn-sync-penalties] for not adopting the former proposal, although it is elegant, seem to be around the psychology of being explicitly penalised but never explicitly rewarded. The penalty for not participating in a sync committee would be substantially bigger than the attestation reward over an epoch. In addition, participation is not entirely in the validator's own hands: it depends on the next block proposer being on the right fork. There were also concerns about changing the [clean relationship](/part2/economics/rewards#remarks-on-proposer-rewards) between proposer rewards and the value of the duties they include in blocks.
 
-[^fn-sync-penalities]: The quite interesting discussion remains on the [Ethereum R&D Discord](https://discord.com/channels/595666850260713488/595701319793377299/847063172174577744).
+[^fn-sync-penalties]: The quite interesting discussion remains on the [Ethereum R&D Discord](https://discord.com/channels/595666850260713488/595701319793377299/847063172174577744).
 
 #### Remarks on penalties
 
@@ -1066,8 +1074,9 @@ To improve this, the Altair upgrade introduced individual validator inactivity s
 
 Graphically, the flow-chart looks like this.
 
+<a id="img_inactivity_scores_flow"></a>
 <div class="image">
-<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
+<img src="md/images/diagrams/inactivity_scores_flow.svg" /><br />
 <span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
 </div>
 
@@ -1087,6 +1096,7 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 4. Generally online, but offline between epochs 50 and 75: the inactivity score is zero during the initial online period; grows linearly and fairly rapidly while offline during the leak; declines slowly when back online during the leak; and declines rapidly once the leak is over.
 5. Always offline: the inactivity score increases rapidly during the leak, and declines even more rapidly once the leak is over.
 
+<a id="img_inactivity_scores"></a>
 <div class="image">
 <img src="md/images/charts/inactivity_scores.svg" /><br />
 <span>The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.</span>
@@ -1094,7 +1104,7 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 
 #### Inactivity penalties
 
-The inactivity penalty is applied to all validators at every epoch based on their individual inactivity scores, irrespective of whether a leak is in progress or not. When there is no leak, the scores return to zero (rapidly for active validators, less rapidly for inactive onces), so most of the time this is a no-op.
+The inactivity penalty is applied to all validators at every epoch based on their individual inactivity scores, irrespective of whether a leak is in progress or not. When there is no leak, the scores return to zero (rapidly for active validators, less rapidly for inactive ones), so most of the time this is a no-op.
 
 The penalty for validator $i$ is calculated as
 
@@ -1112,6 +1122,7 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 4. Generally online, but offline between epochs 50 and 75: a growing penalty during the leak, that rapidly stops when the leak ends.
 5. Always offline: we can clearly see the quadratic nature of the penalty in the initial parabolic shape of the curve. After the end of the leak it takes around 35 epochs for the penalties to return to zero.
 
+<a id="img_inactivity_balances"></a>
 <div class="image">
 <img src="md/images/charts/inactivity_balances.svg" /><br />
 <span>The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.</span>
@@ -1230,7 +1241,7 @@ This is not just a theoretical issue. It is instructive to revisit the [major in
 
 #### See also
 
- - In the Serenity Design Rationale Vitalik gives some further background on why Ehereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
+ - In the Serenity Design Rationale Vitalik gives some further background on why Ethereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
@@ -1318,6 +1329,7 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
+<a id="img_shuffling_0"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_0.svg" /><br />
 <span>The pivot and the first mirror index.</span>
@@ -1333,6 +1345,7 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
+<a id="img_shuffling_1"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_1.svg" /><br />
 <span>Swapping or not from the first mirror up to the pivot.</span>
@@ -1344,6 +1357,7 @@ The decision as to whether to swap or not is based on hashing together the rando
 
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
+<a id="img_shuffling_2"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_2.svg" /><br />
 <span>The second mirror index.</span>
@@ -1353,6 +1367,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
+<a id="img_shuffling_3"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_3.svg" /><br />
 <span>Swapping or not from the pivot to the second mirror.</span>
@@ -1364,6 +1379,7 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
+<a id="img_shuffling_4"></a>
 <div class="image" style="width:80%">
 <img src="md/images/diagrams/shuffling_4.svg" /><br />
 <span>The whole process running from one mirror to the other in a single round.</span>
@@ -1794,6 +1810,7 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
+<a id="img_weights"></a>
 <div class="image" style="width:50%">
 <img src="md/images/diagrams/weights.svg" /><br />
 <span>The proportion of the total reward derived from each of the micro-rewards.</span>
@@ -2433,19 +2450,7 @@ When not in an inactivity leak, validators' inactivity scores are reduced by `IN
 
 The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
 
-Vitalik illustrates some scenarios for individual validators in his [annotated Altair spec](https://github.com/ethereum/annotated-spec/blob/master/altair/beacon-chain.md):
-
-<div class="image">
-<img src="md/images/inactivity_0.png" /><br />
-<span>Inactivity scores per validator in different scenarios. With the x-axis in epochs, the y-axis is the inactivity score.</span>
-</div>
-
-<div class="image">
-<img src="md/images/inactivity_1.png" /><br />
-<span>Balances per validator in different scenarios. The x-axis is in epochs. It's not clear what the y-axis is, but it is not percentage.</span>
-</div>
-
-TODO: re-do graph with clearer y-axis.
+See the section on the [Inactivity Leak](/part2/economics/inactivity) for some more analysis of the inactivity score and some graphs of its effect.
 
 ## Containers <!-- /part3/containers -->
 
@@ -4848,8 +4853,9 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
+<a id="img_k_finality"></a>
 <div class="image" style="width: 80%">
-<img src="md/images/diagrams/k-finality.svg" /><br />
+<img src="md/images/diagrams/k_finality.svg" /><br />
 <span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
 </div>
 
@@ -4891,8 +4897,9 @@ With Altair, each validator has an individual inactivity score in the beacon sta
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
+<a id="img_inactivity_scores_flow"></a>
 <div class="image">
-<img src="md/images/diagrams/inactivity-scores-flow.svg" /><br />
+<img src="md/images/diagrams/inactivity_scores_flow.svg" /><br />
 <span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
 </div>
 
