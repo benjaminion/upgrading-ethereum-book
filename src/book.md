@@ -933,11 +933,11 @@ Quoting from Vitalik's [Discouragement Attacks paper](https://github.com/ethereu
 
 Attackers might do this to gain more rewards with fewer participants in the system. Or they might do it as preparation for an attack on the chain: by reducing the number of validators they decrease their own cost of attack.
 
-The paper goes into some quantitative analysis of different kinds of discouragement attacks. I would _encourage_ you to read it and think through these things. As per the conclusion:
+The paper goes into some quantitative analysis of different kinds of discouragement attacks. I would _en_courage you to read it and think through these things. As per the conclusion:
 
 > In general, this is still an active area of research, and more research on counter-strategies is desired.
 
-Some of areas in the beacon chain design that have already been influenced by a desire to avoid discouragement attacks are:
+Some parts of the beacon chain design that have already been influenced by a desire to avoid discouragement attacks are:
   - the [inverse square root scaling](/part2/incentives/issuance#inverse-square-root-scaling) of validator rewards;
   - the [scaling of rewards](#rewards-scale-with-participation) with participation;
   - the zeroing of attestation rewards during an [inactivity leak](/part2/incentives/inactivity); and
