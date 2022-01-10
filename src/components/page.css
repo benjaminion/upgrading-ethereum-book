@@ -3,9 +3,9 @@
 html, body {
   margin: 0;
   padding: 0;
-  color: #24292e;
+  color: black;
   text-rendering: optimizeLegibility;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";  
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
@@ -29,22 +29,22 @@ div.main-content {
   box-sizing: border-box;
   margin: 0px;
   margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
-  /* margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(700px,30vw));*/
   width: var(--main-width);
   max-width: var(--main-max-width);
   min-width: var(--main-min-width);
   padding: 0px 64px 0 96px;
   overflow-y: auto;
+  font-family: "Computer Modern Serif", serif;
+  font-size: 20px;
 }
 
 code, pre, tt {
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  font-family: "Computer Modern Typewriter", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
 p {
   margin-top: 0px;
   margin-bottom: 16px;
-  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -194,13 +194,6 @@ pre[class^="language-"] {
 
 pre[class^="language-"] code {
   font-size: 0.9em;
-}
-
-/*** Displyed equations ***/
-
-/* Make larger than the default size */
-div.math-display {
-  font-size: 1.1em;
 }
 
 /*** Footnotes ***/

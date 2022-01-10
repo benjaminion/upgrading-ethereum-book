@@ -35,7 +35,14 @@ module.exports = {
         plugins: [
           `gatsby-remark-autolink-headers`,
           'gatsby-remark-numbered-footnotes',
-          `gatsby-remark-mathjax3`,
+          {
+            resolve: `gatsby-remark-mathjax3`,
+            options: {
+              MathJax: {
+                mtextInheritFont: true,
+              },
+            },
+          },
           {
             resolve: "gatsby-remark-external-links",
             options: {

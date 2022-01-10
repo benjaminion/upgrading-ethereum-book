@@ -736,7 +736,7 @@ All unslashed validators that are between their activation epoch and their withd
 
 As described [earlier](/part2/incentives/balances#economic-aspects-of-effective-balance), all rewards are scaled in proportion to a validator's effective balance. This reflects the fact that a validator's influence (weight) in the protocol is proportional to its effective balance.
 
-If a validator has $n$ increments (that is, an effective balance of $n \times \tt{EFFECTIVE\_BALANCE\_INCREMENT}$, or $n \mbox{ ETH}$ in other words) then its expected[^fn-expected-value] income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment).
+If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected[^fn-expected-value] income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment).
 
 [^fn-expected-value]: I'm using the word "expected" in its [technical sense](https://en.wikipedia.org/wiki/Expected_value) here. Due to [randomness](#individual-validator-rewards-vary) there is a chance that some validators earn less and a chance that some validators earn more. The averagely lucky validator can expect their rewards to average out to $nb$ Gwei per epoch over the long term.
 
@@ -915,18 +915,18 @@ as expected.
 The following calculations are based on 300 thousand active validators, all performing perfectly and all with 32 ETH of effective balance.
 
   - Base reward per increment
-    - $b = 653 \mbox{ Gwei}$
+    - $b = 653$ Gwei
   - Value of a single attestation
-    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631 \mbox{ Gwei}$
+    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631$ Gwei
   - Value of a single sync committee contribution
-    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957 \mbox{ Gwei}$
+    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957$ Gwei
   - Value of a block proposal due to attestations
-    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946 \mbox{ Gwei}$
+    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946$ Gwei
     - Note: this can actually be higher if the chain is not performing perfectly, as after a skip slot the proposer can include high value attestations from the missed slot.
   - Value of a block proposal due to sync committee contributions
-    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569 \mbox{ Gwei}$
+    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569$ Gwei
 
-Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000 \mbox{ Gwei}$ (to 5 significant figures)
+Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000$ Gwei (to 5 significant figures)
 
 Finally, as a check-sum, $Tb = 300{,}000 \times 32b = 6{,}268{,}800{,}000 \mbox{ Gwei} = 6.268 \mbox{ ETH}$.
 
