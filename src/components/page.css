@@ -45,7 +45,7 @@ code, pre, tt {
 p {
   margin-top: 0px;
   margin-bottom: 16px;
-  line-height: 1.5;
+  line-height: 1.4128;
 }
 
 a {
@@ -194,6 +194,18 @@ pre[class^="language-"] {
 
 pre[class^="language-"] code {
   font-size: 0.9em;
+}
+
+/*** Equations ***/
+
+/* Keep inline equations the same size as surrounding text */
+.math-inline .katex {
+  font-size: inherit!important;
+}
+
+/* Make displayed equations a little larger than the default size */
+.math-display .katex{
+  font-size: 1.1em!important;
 }
 
 /*** Footnotes ***/

@@ -34,17 +34,10 @@ module.exports = {
         gfm: true,
         plugins: [
           `gatsby-remark-autolink-headers`,
-          'gatsby-remark-numbered-footnotes',
+          `gatsby-remark-numbered-footnotes`,
+          `gatsby-remark-katex`,
           {
-            resolve: `gatsby-remark-mathjax3`,
-            options: {
-              MathJax: {
-                mtextInheritFont: true,
-              },
-            },
-          },
-          {
-            resolve: "gatsby-remark-external-links",
+            resolve: `gatsby-remark-external-links`,
             options: {
               target: "_blank",
               rel: "external noopener"

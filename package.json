@@ -21,15 +21,14 @@
     "gatsby-remark-copy-linked-files": "^5.4.0",
     "gatsby-remark-external-links": "^0.0.4",
     "gatsby-remark-images": "^6.4.0",
+    "gatsby-remark-katex": "^6.4.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
     "gatsby-remark-prismjs": "^6.4.0",
     "gatsby-source-filesystem": "^4.4.0",
     "gatsby-transformer-remark": "^5.4.0",
     "gatsby-transformer-sharp": "^4.4.0",
+    "katex": "^0.15.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "rehype-mathjax": "^3.1.0",
-    "remark-math": "^4.0.0",
-    "remark-rehype": "^8.1.0"
+    "react-dom": "^17.0.1"
   }
 }
