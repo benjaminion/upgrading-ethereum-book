@@ -6,6 +6,9 @@ html, body {
   color: black;
   text-rendering: optimizeLegibility;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+}
+
+body {
   overflow-y: hidden;
   overflow-x: auto;
 }
@@ -142,7 +145,7 @@ th:empty {
 }
 
 div.section li {
-  line-height: 1.5;
+  line-height: 1.4128;
   padding-bottom: 3px;
 }
 
@@ -190,11 +193,14 @@ div.gatsby-highlight {
 }
 
 pre[class^="language-"] {
+  padding: 1ex 1em;
   border-radius: 1ex;
+  line-height: 1.0;
 }
 
 pre[class^="language-"] code {
-  font-size: 0.9em;
+  font-size: 0.8em;
+  line-height: 1.0;
 }
 
 /*** Equations ***/
@@ -204,9 +210,9 @@ pre[class^="language-"] code {
   font-size: inherit!important;
 }
 
-/* Make displayed equations a little larger than the default size */
-.math-display .katex{
-  font-size: 1.1em!important;
+/* Control size of the displayed equations - this makes them a little smaller */
+.math-display .katex {
+  font-size: 1em!important;
 }
 
 /*** Footnotes ***/
