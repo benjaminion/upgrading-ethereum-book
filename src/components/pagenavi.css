@@ -1,5 +1,6 @@
 div.page-navi {
   box-sizing: border-box;
+  flex-grow: 1;
   height: 100%;
   padding: 0 1em 0 2em;
   margin: 0px;

@@ -6,6 +6,8 @@ html, body {
   color: black;
   text-rendering: optimizeLegibility;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
@@ -18,7 +20,6 @@ main {
   flex-direction: row;
   width: 100vw;
   height: 100vh;
-  flex-direction: row;
   margin: 0px;
   padding: 0px;
   overflow-y: hidden;
@@ -156,7 +157,7 @@ blockquote {
 
 div.title-page {
   display: flex;
-  margin:6ex 20%;
+  margin: 0 20%;
   height: 80vh;
   text-align:center;
   flex-direction: column;
