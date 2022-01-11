@@ -3,9 +3,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  color: #24292e;
+  color: black;
   text-rendering: optimizeLegibility;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";  
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
@@ -18,7 +20,6 @@ main {
   flex-direction: row;
   width: 100vw;
   height: 100vh;
-  flex-direction: row;
   margin: 0px;
   padding: 0px;
   overflow-y: hidden;
@@ -29,23 +30,23 @@ div.main-content {
   box-sizing: border-box;
   margin: 0px;
   margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
-  /* margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(700px,30vw));*/
   width: var(--main-width);
   max-width: var(--main-max-width);
   min-width: var(--main-min-width);
   padding: 0px 64px 0 96px;
   overflow-y: auto;
+  font-family: "Computer Modern Serif", serif;
+  font-size: 20px;
 }
 
 code, pre, tt {
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  font-family: "Computer Modern Typewriter", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
 p {
   margin-top: 0px;
   margin-bottom: 16px;
-  font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.4128;
 }
 
 a {
@@ -156,7 +157,7 @@ blockquote {
 
 div.title-page {
   display: flex;
-  margin:6ex 20%;
+  margin: 0 20%;
   height: 80vh;
   text-align:center;
   flex-direction: column;
@@ -196,11 +197,16 @@ pre[class^="language-"] code {
   font-size: 0.9em;
 }
 
-/*** Displyed equations ***/
+/*** Equations ***/
 
-/* Make larger than the default size */
-div.math-display {
-  font-size: 1.1em;
+/* Keep inline equations the same size as surrounding text */
+.math-inline .katex {
+  font-size: inherit!important;
+}
+
+/* Make displayed equations a little larger than the default size */
+.math-display .katex{
+  font-size: 1.1em!important;
 }
 
 /*** Footnotes ***/

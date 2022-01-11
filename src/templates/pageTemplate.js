@@ -8,6 +8,8 @@ import PrevNext from "../components/prevnext"
 import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
 
+import "katex/dist/katex.min.css"
+
 export default function Template({
   data,
 }) {

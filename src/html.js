@@ -37,6 +37,7 @@ export default function HTML(props) {
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-TileImage" content="https://benjaminion.xyz/f/ms-icon-144x144.png" />
         <meta name="theme-color" content="#ffffff" />
+        <link rel="stylesheet" type="text/css" href="https://benjaminion.xyz/fonts/fonts.css" />
         {props.headComponents}
       </head>
       <body {...props.bodyAttributes}>

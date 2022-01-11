@@ -42,7 +42,6 @@ You'll also need a working `gawk` (GNU awk) installed at _/usr/bin/gawk_ so that
 Clone this repo. `cd` into it, then:
 
 ```
-git submodule update --init --recursive
 npm install
 gatsby build
 ```

@@ -566,7 +566,7 @@ Under the ideal conditions we are assuming, the beacon chain is designed to issu
 With $365.25 \times 225 = 82181.25$ epochs per year, and [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) $= 64$,
 
 $$
-\mbox{Max issuance per year} = 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \mbox{ETH}
+\text{Max issuance per year} = 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \text{ETH}
 $$
 
 With 300,000 validators this equates to 515,333 ETH per year, plus change. For comparison, the Eth1 block and uncle rewards currently amount to almost five million ETH per year.
@@ -588,7 +588,7 @@ Thus, a well-performing validator with a 32&nbsp;ETH effective balance can expec
 Similarly to the issuance calculation, we can calculate the expected annual percentage reward for a validator due to participating in the beacon chain protocol:
 
 $$
-\mbox{APR} = 100 \times 82181.25 \times \frac{64}{\sqrt{32 \times 10^9 \times N}}
+\text{APR} = 100 \times 82181.25 \times \frac{64}{\sqrt{32 \times 10^9 \times N}}
 $$
 
 For example, with 300,000 validators participating, this amounts to an expected return of 5.37% on a validator's effective balance.
@@ -695,7 +695,7 @@ All unslashed validators that are between their activation epoch and their withd
 
 As described [earlier](/part2/incentives/balances#economic-aspects-of-effective-balance), all rewards are scaled in proportion to a validator's effective balance. This reflects the fact that a validator's influence (weight) in the protocol is proportional to its effective balance.
 
-If a validator has $n$ increments (that is, an effective balance of $n \times \tt{EFFECTIVE\_BALANCE\_INCREMENT}$, or $n \mbox{ ETH}$ in other words) then its expected[^fn-expected-value] income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment).
+If a validator has $n$ increments (that is, an effective balance of $n \times$ `EFFECTIVE_BALANCE_INCREMENT`, or $n$ ETH in other words) then its expected[^fn-expected-value] income per epoch is $nb$, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment).
 
 [^fn-expected-value]: I'm using the word "expected" in its [technical sense](https://en.wikipedia.org/wiki/Expected_value) here. Due to [randomness](#individual-validator-rewards-vary) there is a chance that some validators earn less and a chance that some validators earn more. The averagely lucky validator can expect their rewards to average out to $nb$ Gwei per epoch over the long term.
 
@@ -733,9 +733,7 @@ But this is not the whole picture: we will also need to account for [penalties](
 The maximum total issuance per epoch across all validators is
 
 $$
-\begin{flalign}
-I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}Tb &&
-\end{flalign}
+I_A = \frac{W_s + W_t + W_h}{W_{\Sigma}}Tb
 $$
 
 where, once again, $T$ is the total number of increments of active validators (the sum of their effective balances in ETH terms).
@@ -778,17 +776,13 @@ It often perplexes stakers when, to all intents and purposes, their validators s
 If the attestations in a block are worth a total of $R$ in rewards to the attesters, then the proposer that includes the attestations in a block receives a reward of
 
 $$
-\begin{flalign}
-R_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}R &&
-\end{flalign}
+R_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}R
 $$
 
 Thus, over an epoch, the maximum total issuance due to proposer rewards in respect of attestations is
 
 $$
-\begin{flalign}
-I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A &&
-\end{flalign}
+I_{A_P} = \frac{W_p}{W_{\Sigma} - W_p}I_A
 $$
 
 with $I_A$ being the maximum issuance to attesters per epoch, as above.
@@ -804,9 +798,7 @@ Once every [256](/part3/config/preset#epochs_per_sync_committee_period) epochs (
 Sync committee participants receive a reward every slot that they correctly perform their duties. With 512 members in the committee, and 32 slots per epoch, the reward per validator per slot for correct participation is
 
 $$
-\begin{flalign}
-R_Y = \frac{W_y}{32 \times 512 \times W_{\Sigma}}Tb &&
-\end{flalign}
+R_Y = \frac{W_y}{32 \times 512 \times W_{\Sigma}}Tb
 $$
 
 The $T$ here is the total increments of the whole active validator set, so this is a large number. The per-epoch per-validator reward is 32 times this.
@@ -814,9 +806,7 @@ The $T$ here is the total increments of the whole active validator set, so this 
 The maximum issuance per epoch to sync committee members is then
 
 $$
-\begin{flalign}
-I_Y = \frac{W_y}{W_{\Sigma}}Tb &&
-\end{flalign}
+I_Y = \frac{W_y}{W_{\Sigma}}Tb
 $$
 
 #### Proposer rewards for sync committees
@@ -824,17 +814,13 @@ $$
 As with attestations, the block proposer that includes the sync committee's output receives a reward proportional to the reward of the whole committee:
 
 $$
-\begin{flalign}
-R_{Y_P} = 512\frac{W_p}{W_{\Sigma} - W_p}R_Y &&
-\end{flalign}
+R_{Y_P} = 512\frac{W_p}{W_{\Sigma} - W_p}R_Y
 $$
 
 So the maximum issuance per epoch to sync committee proposers is
 
 $$
-\begin{flalign}
-I_{Y_P} = \frac{W_p}{W_{\Sigma} - W_p}I_Y &&
-\end{flalign}
+I_{Y_P} = \frac{W_p}{W_{\Sigma} - W_p}I_Y
 $$
 
 #### Remarks on proposer rewards
@@ -874,20 +860,20 @@ as expected.
 The following calculations are based on 300 thousand active validators, all performing perfectly and all with 32 ETH of effective balance.
 
   - Base reward per increment
-    - $b = 653 \mbox{ Gwei}$
+    - $b = 653$ Gwei
   - Value of a single attestation
-    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631 \mbox{ Gwei}$
+    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631$ Gwei
   - Value of a single sync committee contribution
-    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957 \mbox{ Gwei}$
+    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957$ Gwei
   - Value of a block proposal due to attestations
-    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946 \mbox{ Gwei}$
+    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946$ Gwei
     - Note: this can actually be higher if the chain is not performing perfectly, as after a skip slot the proposer can include high value attestations from the missed slot.
   - Value of a block proposal due to sync committee contributions
-    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569 \mbox{ Gwei}$
+    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569$ Gwei
 
-Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000 \mbox{ Gwei}$ (to 5 significant figures)
+Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000$ Gwei (to 5 significant figures)
 
-Finally, as a check-sum, $Tb = 300{,}000 \times 32b = 6{,}268{,}800{,}000 \mbox{ Gwei} = 6.268 \mbox{ ETH}$.
+Finally, as a check-sum, $Tb = 300{,}000 \times 32b = 6{,}268{,}800{,}000 \text{ Gwei} = 6.268 \text{ ETH}$.
 
 #### Individual validator rewards vary
 
@@ -921,7 +907,7 @@ For a more quantitative analysis, see on [discouragement attacks](#discouragemen
 
 One interesting side-effect of this is that, if participation drops by 10% (due to 10% of validators being offline, say), then total issuance of rewards due to attestations will fall by 19%, in addition to a further reduction from penalties.
 
-We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/incentives/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
+We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7\%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/incentives/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
 
 Note that the proposer reward is not scaled like this &ndash; proposers are already well incentivised to include all relevant attestations &ndash; and neither are sync committee rewards. Penalties do not scale with participation, either.
 
@@ -1000,7 +986,7 @@ Stakers sometimes worry that downtime will be very expensive. To examine this, w
 
 We'll assume that, when online, the validator's performance is perfect, and that the rest of the validators are performing well (both of which are pretty good approximations to the beacon chain's actual performance over its first year).
 
-If $p$ is the proportion of time the validator is online, then its net income is, $0.844p - 0.625(1-p) = 1.469p - 0.625$. This is positive for $p > 42.5%$. So, if your validator is online more than 42.5% of the time, you will be earning a positive return.
+If $p$ is the proportion of time the validator is online, then its net income is, $0.844p - 0.625(1-p) = 1.469p - 0.625$. This is positive for $p > 42.5\%$. So, if your validator is online more than 42.5% of the time, you will be earning a positive return.
 
 A useful rule of thumb is that it takes about a day of uptime to recover from a day of downtime.
 
@@ -1123,7 +1109,10 @@ The inactivity penalty is applied to all validators at every epoch based on thei
 The penalty for validator $i$ is calculated as
 
 $$
-s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) = \frac{s_iB_i}{4 \times 50{,}331{,}648}
+\begin{split}
+s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) \\
+= \frac{s_iB_i}{4 \times 50{,}331{,}648}
+\end{split}
 $$
 
 where $s_i$ is the validator's inactivity score, and $B_i$ is the validator's effective balance.
@@ -1209,9 +1198,7 @@ The correlated penalty is calculated as follows.
 The slashing multiplier in Altair is set to 2. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
 
 $$
-\begin{flalign}
-\mbox{Correlation penalty} = \min(B, \frac{2SB}{T}) &&
-\end{flalign}
+\text{Correlation penalty} = \min(B, \frac{2SB}{T})
 $$
 
 Interestingly, [due to](https://github.com/ethereum/consensus-specs/issues/1322) the way the integer arithmetic is constructed in [the implementation](/part3/transition/epoch#def_process_slashings) the result of this calculation will be zero if $2SB < T$. Effectively, the penalty is rounded down to the nearest whole amount of Ether. As a consequence, when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
@@ -1226,7 +1213,7 @@ A validator that is slashed continues to receive attestation penalties until its
 
 [^fn-slashed-validators]: Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit. The exit mechanics are the same in each case.
 
-So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 106{,}987{,}520 \mbox{ Gwei} = 0.107 \mbox{ ETH}$, based on 300k validators, assuming that the chain is not in an inactivity leak. And (much) more if it is.
+So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 106{,}987{,}520 \text{ Gwei} = 0.107 \text{ ETH}$, based on 300k validators, assuming that the chain is not in an inactivity leak. And (much) more if it is.
 
 Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to skip slashed validators, but that is not how it is implemented currently.)
 
