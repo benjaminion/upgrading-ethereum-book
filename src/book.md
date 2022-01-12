@@ -1508,6 +1508,33 @@ TODO
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz* -->
 
+#### Introduction
+
+[Serialisation](https://en.wikipedia.org/wiki/Serialization) is the process of taking structured information (a data structure) and transforming it into a representation that can be stored or transmitted.
+
+Writing down a recipe is a kind of serialisation. I can take a potentially complex method for cooking something and write it down in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Recreating the recipe from the written or spoken form is deserialisation.
+
+Serialisation is used primarily for three purposes on the beacon chain.
+1. Consensus: if you and I each have a datastructure in memory, such as the beacon state, how can we know if both our datastructures are the same or not? This is bound up with merkleization as well. All clients must use the same consensus serialisation.
+2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it needs to be serialised to be transmitted and then deserialised at the other end. All clients must use the same P2P serialisation, but it doesn't need to be the same as the consensus serialisation.
+3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clientsare free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
+
+In addition, data must be serialised before being written to disk. Each client is free to do this internally however they wish.
+
+#### History
+
+Ethereum&nbsp;1 has always used a serialisation format called [RLP](https://eth.wiki/fundamentals/rlp) (recursive length prefix). This was deemed unsuitable for Ethereum&nbsp;2, largely because it is regarded as [overly complex](https://eth.wiki/en/concepts/wishlist#rlp).[^fn-rlp-complexity]
+
+[^fn-rlp-complexity]: [Vitalik](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205): "As the inventor of RLP, I'm inclined to prefer SSZ".
+
+
+
+#### See also
+
+TODO
+
+### Merkleization <!-- /part2/building_blocks/merkleization* -->
+
 TODO
 
 ### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
