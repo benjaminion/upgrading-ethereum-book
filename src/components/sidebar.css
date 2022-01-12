@@ -57,3 +57,9 @@ nav.sidebar div.sidebar-title {
 nav.sidebar div.sidebar-title a:hover {
   text-decoration: none;
 }
+
+@media print {
+  nav.sidebar {
+    display: none;
+  }
+}

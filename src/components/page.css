@@ -226,3 +226,28 @@ div.footnotes hr {
 div.footnotes {
   font-size: 85%;
 }
+
+@media print {
+  html, body, main, div.main-content {
+    overflow: visible !important;
+    width: initial !important;
+    max-width: initial !important;
+    min-width: initial !important;
+    margin: initial !important;
+    padding: initial !important;
+    font-size: initial !important;
+  }
+  td, th {
+    color: inherit;
+    border: solid #999999 1px;
+  }
+  a {
+    color: black;
+  }
+  a[rel*="external"] {
+    color: blue;
+  }
+  a[rel*="external"]::after {
+    content: "";
+  }
+}

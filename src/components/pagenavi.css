@@ -32,3 +32,9 @@ div.page-navi > ul > li {
   padding-top: 1ex;
   font-weight: bold;
 }
+
+@media print {
+  div.page-navi {
+    display: none;
+  }
+}

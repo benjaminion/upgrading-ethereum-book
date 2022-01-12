@@ -26,3 +26,9 @@ div.prevnext span.next {
 div.prevnext span.next a {
   padding-left: 100%;
 }
+
+@media print {
+  div.prevnext {
+    display: none;
+  }
+}
