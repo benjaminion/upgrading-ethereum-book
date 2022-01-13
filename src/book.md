@@ -309,7 +309,7 @@ TODO
 
 |||||
 |-|-|-|-|
-| First cut | &#x2714; | Revision | TODO |
+| First cut | $\checkmark$ | Revision | TODO |
 
 ### Carrots and Sticks and Sudden Death
 
