@@ -156,7 +156,7 @@ TODO
 
 [TODO: That paper is a great starting place for an exposition of PoS]::
 
-<-- What problems are we solving?
+<!-- What problems are we solving?
 
 #### Nothing at stake
 
