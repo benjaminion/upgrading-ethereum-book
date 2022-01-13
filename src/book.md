@@ -942,6 +942,8 @@ Discouragement Attacks attacks are analysed in a [paper](https://github.com/ethe
 
 ### Penalties <!-- /part2/incentives/penalties -->
 
+#### Summary
+
  - Validators are penalised by losing small amounts of stake when they do not fulfil duties that they have been assigned.
  - Receiving a penalty is not being slashed!
  - Break-even uptime for a validator is around 43%.
@@ -1131,7 +1133,7 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 <span>The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.</span>
 </div>
 
-We can see that the new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just two-thirds of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to two-thirds and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than two-thirds, providing a buffer that should mitigate such behaviour.
+We can see that the new scoring system means that some validators will continue to be penalised due to the leak even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just two-thirds of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to two-thirds and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than two-thirds, providing a buffer that should mitigate such behaviour.
 
 #### See also
 
@@ -1142,6 +1144,8 @@ From the spec:
 For the original description of the mechanics of the inactivity leak, see the [Casper paper](https://arxiv.org/abs/1710.09437), section 4.2.
 
 ### Slashing <!-- /part2/incentives/slashing -->
+
+#### Summary
 
  - Validators are slashed for breaking very specific protocol rules that could be part of an attack on the chain.
  - Slashed validators are exited from the beacon chain and receive three types of penalty.
@@ -1251,17 +1255,29 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 
 ### Diversity <!-- /part2/incentives/diversity -->
 
-#### Diversity makes you stronger
+#### Summary
 
-It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](/part2/incentives/slashing#the-correlation-penalty) provide a direct encouragement to diversify the network as much as possible.
+ - Beacon chain incentives strongly encourage diversity among client deployments, hosting infrastructure, and staking pools.
+ - Lack of diversity puts at risk both the chain in general and all those going with the majority.
+ - The greater the share of validators hosted by a single client implementation the greater the risk.
 
-The inactivity leak is much more likely to occur on a network on which a single client implementation is used to run over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak which penalises those running the majority client most harshly.
+#### Diversity makes everyone stronger
 
-The situation becomes potentially much worse when there is a majority client with over 66% of the validators. In the case of a consensus bug that went unfixed for some time (several weeks), the inactivity leak could lead to the beacon chain becoming irrecoverably partitioned as each side of the fork independently regains finality.
+It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](/part2/incentives/slashing#the-correlation-penalty) provide a strong encouragement to diversify the network as much as possible.
 
-As for slashing, once again running a majority client could be an act of self-harm. Should a client implementation have a bug that leads to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
+The inactivity leak is much more likely to occur on a network in which a single client implementation runs over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak that penalises those running the majority (offline) client most harshly.
 
-This is not just a theoretical issue. It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet.
+The situation becomes potentially much worse when a single client hosts half or more of the validators. In the case of a consensus bug that were to go unfixed for some time (on the order of a week), the inactivity leak could lead to the beacon chain becoming irrecoverably partitioned as each side of the fork independently regains finality.
+
+A single client approaching[^fn-approaches-67] hosting 67% of the validators is potentially catastropic. A bug in that client would very quickly finalise a broken version of the chain, leaving the community with a horrible dilemma: modify the other clients (and the specification) to reproduce the bug, or slash all the validators on the incorrect chain. There are no good outcomes here, which is why it is critical that we do not end up in such a situation.[^fn-client-diversity-220112]
+
+[^fn-approaches-67]: If the share is less than 67% the incorrect chain won't finalise immediately, but very soon the inactivity leak will raise the proportion above 67% on that chain and it will then finalise.
+
+[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appears to have](https://twitter.com/sproulM_/status/1481109509544513539) 68.1% of the validators.
+
+As for slashing, once again running a majority client could be another act of self-harm. Should a client implementation have a bug that leads to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
+
+This is not just a theoretical issue. It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet, in which an issue in the majority client caused a high degree of chaos and led to large numbers of slashings.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
