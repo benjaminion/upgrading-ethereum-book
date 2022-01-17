@@ -295,11 +295,13 @@ By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of d
 
 ### Staking <!-- /part2/incentives/staking -->
 
-#### Summary
+<div class="summary">
 
  - The stake in proof of stake provides three things: an anti-Sybil mechanism, an accountability mechanism, and an incentive alignment mechanism.
  - The 32&nbsp;ETH stake size is a trade-off between network overhead, number of validators, and time to finality.
  - Combined with the Casper FFG rules, stakes provide economic finality: a quantifiable measure of the security of the chain.
+
+</div>
 
 #### Introduction
 
@@ -396,12 +398,14 @@ For more on the mechanics of economic finality, see below under [Slashing](/part
 
 ### Balances <!-- /part2/incentives/balances -->
 
-#### Summary
+<div class="summary">
 
  - Each validator maintains an _effective balance_ in addition to its actual balance.
  - The validator's influence in the protocol is proportional to its effective balance, as are its rewards and penalties.
  - The effective balance tracks the validator's actual balance, but is designed to change much more rarely. This is an optimisation.
  - A validator's effective balance is capped at 32 ETH.
+
+</div>
 
 #### Introduction
 
@@ -519,11 +523,13 @@ From the spec:
 
 ### Issuance <!-- /part2/incentives/issuance -->
 
-#### Summary
+<div class="summary">
 
  - Issuance is the amount of new Ether created by the protocol in order to incentivise its participants.
  - An ideally running beacon chain issues a set amount of Ether per epoch, which is a multiple of the base reward per increment.
  - Total issuance is proportional to the square root of the number of validators. This is not a completely arbitrary choice.
+
+</div>
 
 #### Introduction
 
@@ -627,7 +633,7 @@ For more background to the $\frac{1}{\sqrt{N}}$ reward curve, see
 
 ### Rewards <!-- /part2/incentives/rewards -->
 
-#### Summary
+<div class="summary">
 
  - Validators receive rewards for making attestations according to their view of the chain, proposing blocks, and participating in sync committees in varying proportions.
  - Votes that make up attestations must be both correct and timely in order to be rewarded.
@@ -635,6 +641,8 @@ For more background to the $\frac{1}{\sqrt{N}}$ reward curve, see
  - A validator's expected long-term reward is $nb$ per epoch (number of increments times the base reward per increment), but there is significant variance around that due to the randomness of proposer and sync committee assignments.
  - Rewards are scaled both with a validator's effective balance and with the total participation rate of the validator set.
  - The need to defend against discouragement attacks has shaped various aspects of the protocol.
+
+</div>
 
 #### Introduction
 
@@ -942,11 +950,13 @@ Discouragement Attacks attacks are analysed in a [paper](https://github.com/ethe
 
 ### Penalties <!-- /part2/incentives/penalties -->
 
-#### Summary
+<div class="summary">
 
  - Validators are penalised by losing small amounts of stake when they do not fulfil duties that they have been assigned.
  - Receiving a penalty is not being slashed!
  - Break-even uptime for a validator is around 43%.
+
+</div>
 
 #### Introduction
 
@@ -1022,11 +1032,13 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 ### Inactivity leak <!-- /part2/incentives/inactivity -->
 
-#### Summary
+<div class="summary">
 
  - When the beacon chain is not finalising it enters a special "inactivity leak mode".
  - Attesters receive no rewards. Non-participating validators receive increasingly large penalties based on their track records.
  - This is designed to eventually restore finality in the event of a permanent failure of large numbers of validators.
+
+</div>
 
 #### Introduction
 
@@ -1145,12 +1157,14 @@ For the original description of the mechanics of the inactivity leak, see the [C
 
 ### Slashing <!-- /part2/incentives/slashing -->
 
-#### Summary
+<div class="summary">
 
  - Validators are slashed for breaking very specific protocol rules that could be part of an attack on the chain.
  - Slashed validators are exited from the beacon chain and receive three types of penalty.
  - Correlated penalties mean that punishment is light for isolated incidents, but severe when many validators are slashed in a short time period.
  - Block proposers receive rewards for reporting evidence of slashable offences.
+
+</div>
 
 #### Introduction
 
@@ -1255,11 +1269,13 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 
 ### Diversity <!-- /part2/incentives/diversity -->
 
-#### Summary
+<div class="summary">
 
  - Beacon chain incentives strongly encourage diversity among client deployments, hosting infrastructure, and staking pools.
  - Lack of diversity puts at risk both the chain in general and all those going with the majority.
  - The greater the share of validators hosted by a single client implementation the greater the risk.
+
+</div>
 
 #### Diversity makes everyone stronger
 

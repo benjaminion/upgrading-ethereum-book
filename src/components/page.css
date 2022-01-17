@@ -73,7 +73,6 @@ code {
 
 h3 {
   padding-bottom: 6px;
-  border-bottom: 1px solid #cccccc;
   margin-bottom: 3ex;
 }
 
@@ -226,6 +225,15 @@ div.footnotes hr {
 div.footnotes {
   font-size: 85%;
 }
+
+/*** Summary boxes ***/
+div.summary {
+  width: 80%;
+  margin: 1ex auto;
+  padding: 1ex 1em;
+  border: double #999 3px;
+}
+
 
 @media print {
   html, body, main, div.main-content {
