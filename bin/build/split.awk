@@ -90,9 +90,21 @@ BEGIN{
     print "index: [" idx "]" > filename
     print "sequence: " n > filename
     print "---" > filename
-    print "\n# " h_part > filename
-    if (h_chapter != "") print "\n## " h_chapter > filename
-    if (h_section != "") print "\n### " h_section > filename
+
+    if (h_section != "") {
+        print "\n<div class=\"section-header\">\n" > filename
+        print "# " h_part > filename
+        print "## " h_chapter > filename
+        print "\n</div>\n" > filename
+        print "### " h_section > filename
+    } else if (h_chapter != "") {
+        print "\n<div class=\"chapter-header\">\n" > filename
+        print "# " h_part > filename
+        print "\n</div>\n" > filename
+        print "## " h_chapter > filename
+    } else {
+        print "# " h_part > filename
+    }
 
     next
 }
