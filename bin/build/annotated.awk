@@ -34,8 +34,8 @@ in_part_3 {
     }
 
     # Rewrite links to images
-    if ($0 ~ /<img src="md.*"/) {
-        sub(/src="md\//, "src=\"", $0)
+    if ($0 ~ /!\[.*\]\(md.+\)/) {
+        sub(/md\//, "", $0)
     }
 
     # Rewrite urls that are internal to the chapter

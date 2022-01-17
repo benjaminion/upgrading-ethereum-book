@@ -117,6 +117,8 @@ in_code { next }
             # Do nothing
         } else if (match(partial, /\[[^]]+\]\(http[^)]+\)/)) {
             print ("HTTP link, line " FNR)
+        } else if (match(partial, /\[[^]]+\]\(md\/images\/[^)]+\)/)) {
+            # Do nothing - assume it's a well-formed image link
         } else {
             print ("Suspicious link, line " FNR)
         }
