@@ -176,6 +176,32 @@ div.title-page img {
   margin: 0 auto;
 }
 
+/*** Headings for chapters ***/
+div.chapter-header h1 {
+  display:inline;
+  font-size: 90%;
+}
+div.chapter-header h1 a {
+  display: none;
+}
+
+/*** Headings for sections ***/
+div.section-header h1, div.section-header h2 {
+  display:inline;
+  font-size: 0.9em;
+}
+div.section-header h1::after {
+  content: " | ";
+}
+div.section-header h1 a, div.section-header h2 a {
+  display: none;
+}
+
+div.section-header, div.chapter-header {
+  padding: 0;
+  border-bottom: solid 1px #999;
+}
+
 /*** Code prettifier ***/
 
 pre.language-text {
