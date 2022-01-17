@@ -97,7 +97,17 @@ BEGIN{
     next
 }
 
-# Rewrite image paths to reflect the directory hierarchy
+# Rewrite image paths to reflect the directory hierarchy: Markdown format
+/!\[.*\]\(md.+\)/ {
+    prefix = substr(h_path, 2)
+    gsub(/[^/]*/, "..", prefix)
+    sub(/\(md/, "(" prefix, $0)
+    print > filename
+
+    next
+}
+
+# Rewrite image paths to reflect the directory hierarchy: HTML format (deprecated)
 /<img src="md.*"/ {
     prefix = substr(h_path, 2)
     gsub(/[^/]*/, "..", prefix)

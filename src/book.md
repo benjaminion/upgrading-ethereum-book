@@ -345,8 +345,10 @@ This is a classic scalability trilemma. Personally, I don't find these pictures 
 
 <a id="img_scalability_trilemma"></a>
 <div class="image" style="width: 60%">
-<img src="md/images/diagrams/scalability_trilemma.svg" /><br />
-<span>A version of the scalability trilemma: pick any two.</span>
+
+![A version of the scalability trilemma](md/images/diagrams/scalability_trilemma.svg)
+A version of the scalability trilemma: pick any two.
+
 </div>
 
 1. Our ideal might be to have high participation (large $n$) with low overhead (low $\omega$) &ndash; lots of stakers on low-spec machines &ndash;, but finality would take a long time since message exchange would be slow.
@@ -492,8 +494,10 @@ The following chart illustrates the behaviour.
 
 <a id="img_hysteresis"></a>
 <div class="image">
-<img src="md/images/charts/hysteresis.svg" /><br />
-<span>Illustration of the relationship between the actual balance (solid line) and the effective balance (dashed line) of a validator. The dotted lines are the thresholds at which the effective balance gets updated - the hysteresis.</span>
+
+![A graph illustrating actual balance versus effective balance](md/images/charts/hysteresis.svg)
+Illustration of the relationship between the actual balance (solid line) and the effective balance (dashed line) of a validator. The dotted lines are the thresholds at which the effective balance gets updated - the hysteresis.
+
 </div>
 
 The hysteresis levels are controlled by the [hysteresis parameters](/part3/config/preset#hysteresis-parameters) in the spec:
@@ -581,8 +585,10 @@ We can graph the maximum issuance as a function of the number of validators. It'
 
 <a id="img_issuance_curve"></a>
 <div class="image">
-<img src="md/images/charts/issuance_curve.svg" /><br />
-<span>Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.</span>
+
+![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](md/images/charts/issuance_curve.svg)
+Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.
+
 </div>
 
 #### Validator rewards
@@ -603,8 +609,10 @@ Graphing this give us an inverse square root curve.
 
 <a id="img_rewards_curve"></a>
 <div class="image">
-<img src="md/images/charts/rewards_curve.svg" /><br />
-<span>Expected annual percentage rewards for stakers as a function of the number of active validators.</span>
+
+![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](md/images/charts/rewards_curve.svg)
+The expected annual percentage rewards for stakers as a function of the number of active validators.
+
 </div>
 
 #### Inverse square root scaling
@@ -662,9 +670,11 @@ The first of these, making attestations, happens regularly every epoch and accou
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
 <a id="img_weights"></a>
-<div class="image">
-<img src="md/images/diagrams/weights.svg" style="width:50%" /><br />
-<span>The proportion of a validator's total reward derived from each activity.</span>
+<div class="image" style="width:50%">
+
+![A piechart of the proportion of a validator's total reward derived from each activity](md/images/diagrams/weights.svg)
+The proportion of a validator's total reward derived from each activity.
+
 </div>
 
 These proportions are set by the [incentivisation weights](/part3/config/constants#incentivization-weights) in the spec. For convenience, I've assigned a symbol to each weight in the last column.
@@ -688,7 +698,9 @@ There are three relevant milestones in a validator's lifecycle: its activation e
 
 <a id="img_rewards_eligibility"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/rewards_eligibility.svg" /><br />
+
+![A timeline of the eligibility of validators for rewards](md/images/diagrams/rewards_eligibility.svg)
+
 </div>
 
 Validators may receive rewards only between their activation and exit epochs. Note that, after submitting a voluntary exit, there may be a delay while the validator moves through the exit queue until its exit epoch is passed. The validator is expected to participate as usual during this period.
@@ -760,8 +772,10 @@ The choice of distance for including the source vote is interesting. It is chose
 
 <a id="img_reward_timeliness"></a>
 <div class="image">
-<img src="md/images/charts/reward_timeliness.svg" /><br />
-<span>It is plausible that setting the inclusion distance for correct source to 5 gives a kind of exponential reduction in reward with time. This graph shows the net reward (reward + penalty) for a completely correct attestation as it gets older, plotted against an exponential curve for comparison.</span>
+
+![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](md/images/charts/reward_timeliness.svg)
+It is plausible that setting the inclusion distance for correct source to 5 gives a kind of exponential reduction in reward with time. This graph shows the net reward (reward + penalty) for a completely correct attestation as it gets older plotted against an exponential curve for comparison.
+
 </div>
 
 [^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
@@ -841,8 +855,10 @@ In the following charts, I have separated out the validator rewards from the pro
 
 <a id="img_reward_split"></a>
 <div class="image">
-<img src="md/images/diagrams/reward_split.svg" /><br />
-<span>On the left, the breakdown of expected rewards for validators for performing duties. On the right, the breakdown of rewards for proposers for including evidence of those duties.</span>
+
+![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](md/images/diagrams/reward_split.svg)
+On the left, the breakdown of expected rewards for validators for performing duties. On the right, the breakdown of rewards for proposers for including evidence of those duties.
+
 </div>
 
 This equivalence ensures that the interests of attesters and proposers are aligned.
@@ -891,8 +907,10 @@ The following chart shows the expected distribution of rewards for 300,000 valid
 
 <a id="img_reward_variance"></a>
 <div class="image">
-<img src="md/images/charts/reward_variance.svg" /><br />
-<span>Distribution of rewards for 300,000 validators with 32 ETH staked.</span>
+
+![A bar chart of the distribution of rewards for 300,000 validators with 32 ETH staked](md/images/charts/reward_variance.svg)
+Distribution of rewards for 300,000 validators with 32 ETH staked.
+
 </div>
 
 A few remarks on this.
@@ -1090,8 +1108,10 @@ Graphically, the flow-chart looks like this.
 
 <a id="img_inactivity_scores_flow"></a>
 <div class="image">
-<img src="md/images/diagrams/inactivity_scores_flow.svg" /><br />
-<span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
+
+![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+How each validator's inactivity score is updated. The happy flow is right through the middle.
+
 </div>
 
 Note that there is a floor of zero on the score.
@@ -1112,8 +1132,10 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 
 <a id="img_inactivity_scores"></a>
 <div class="image">
-<img src="md/images/charts/inactivity_scores.svg" /><br />
-<span>The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.</span>
+
+![A graph illustrating inctivity score scenarios](md/images/charts/inactivity_scores.svg)
+The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.
+
 </div>
 
 #### Inactivity penalties
@@ -1141,8 +1163,10 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 
 <a id="img_inactivity_balances"></a>
 <div class="image">
-<img src="md/images/charts/inactivity_balances.svg" /><br />
-<span>The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.</span>
+
+![A graph showing the effect of the inactivity leak in five different scenarios](md/images/charts/inactivity_balances.svg)
+The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.
+
 </div>
 
 We can see that the new scoring system means that some validators will continue to be penalised due to the leak even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just two-thirds of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to two-thirds and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than two-thirds, providing a buffer that should mitigate such behaviour.
@@ -1383,8 +1407,10 @@ With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$
 
 <a id="img_shuffling_0"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/shuffling_0.svg" /><br />
-<span>The pivot and the first mirror index.</span>
+
+![A diagram showing the pivot and the first mirror index](md/images/diagrams/shuffling_0.svg)
+The pivot and the first mirror index.
+
 </div>
 
 ##### 2. Traverse first mirror to pivot, swapping or not
@@ -1399,8 +1425,10 @@ We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
 <a id="img_shuffling_1"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/shuffling_1.svg" /><br />
-<span>Swapping or not from the first mirror up to the pivot.</span>
+
+![A diagram showing swapping or not from the first mirror up to the pivot](md/images/diagrams/shuffling_1.svg)
+Swapping or not from the first mirror up to the pivot.
+
 </div>
 
 The decision as to whether to swap or not is based on hashing together the random seed, the round number, and some position data. A single bit is extracted from this hash for each index, and the swap is made or not according to whether this bit is one or zero.
@@ -1411,8 +1439,10 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 
 <a id="img_shuffling_2"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/shuffling_2.svg" /><br />
-<span>The second mirror index.</span>
+
+![A diagram showing the second mirror index](md/images/diagrams/shuffling_2.svg)
+The second mirror index.
+
 </div>
 
 ##### 4. Traverse pivot to second mirror, swapping or not
@@ -1421,8 +1451,10 @@ Finally, we repeat the swap-or-not process, considering all the points $j$ from 
 
 <a id="img_shuffling_3"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/shuffling_3.svg" /><br />
-<span>Swapping or not from the pivot to the second mirror.</span>
+
+![A diagram showing swapping or not from the pivot to the second mirror](md/images/diagrams/shuffling_3.svg)
+Swapping or not from the pivot to the second mirror.
+
 </div>
 
 ##### Putting it all together
@@ -1433,8 +1465,10 @@ The next round begins by incrementing (or decrementing for a reverse shuffle) th
 
 <a id="img_shuffling_4"></a>
 <div class="image" style="width:80%">
-<img src="md/images/diagrams/shuffling_4.svg" /><br />
-<span>The whole process running from one mirror to the other in a single round.</span>
+
+![A diagram showing the whole process running from one mirror to the other in a single round](md/images/diagrams/shuffling_4.svg)
+The whole process running from one mirror to the other in a single round.
+
 </div>
 
 #### Discussion
@@ -1864,8 +1898,10 @@ The apportioning of rewards was overhauled in the Altair upgrade to better refle
 
 <a id="img_weights"></a>
 <div class="image" style="width:50%">
-<img src="md/images/diagrams/weights.svg" /><br />
-<span>The proportion of the total reward derived from each of the micro-rewards.</span>
+
+![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](md/images/diagrams/weights.svg)
+The proportion of the total reward derived from each of the micro-rewards.
+
 </div>
 
 #### Withdrawal Prefixes
@@ -4907,8 +4943,10 @@ On the beacon chain we are using $2$-finality, since target votes may be include
 
 <a id="img_k_finality"></a>
 <div class="image" style="width: 80%">
-<img src="md/images/diagrams/k_finality.svg" /><br />
-<span>The four k-finality scenarios. Checkpoint numbers are along the bottom.</span>
+
+![A diagram of the four k-finality scenarios](md/images/diagrams/k_finality.svg)
+The four k-finality scenarios. Checkpoint numbers are along the bottom.
+
 </div>
 
 Almost always we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the 2/3rds participation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 3 to immediately finalise $C_{n-1}$, for example.
@@ -4951,8 +4989,10 @@ With Altair, each validator has an individual inactivity score in the beacon sta
 
 <a id="img_inactivity_scores_flow"></a>
 <div class="image">
-<img src="md/images/diagrams/inactivity_scores_flow.svg" /><br />
-<span>How each validator's inactivity score is updated. The happy flow is right through the middle.</span>
+
+![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+How each validator's inactivity score is updated. The happy flow is right through the middle.
+
 </div>
 
 There is a floor of zero on the score. So, outside a leak, validators' scores will rapidly return to zero and stay there, since `INACTIVITY_SCORE_RECOVERY_RATE` is greater than `INACTIVITY_SCORE_BIAS`.
