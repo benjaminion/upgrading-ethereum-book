@@ -22,11 +22,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v16.11.1
+v16.13.2
 > npm --version
-8.3.0
+8.3.1
 > gatsby --version
-Gatsby CLI version: 4.4.0
+Gatsby CLI version: 4.5.1
 ```
 
 `gatsby-cli` can be installed with,
@@ -82,14 +82,4 @@ Append a `*` to the path:
 
 ```
 ## Heading <!-- /unlinked/page/path* -->
-```
-
-### Insert an image
-
-Insert SVG images with
-```
-<div class="image">
-<img src="images/image_0.svg" /><br />
-<span>Image caption, centred and italic.</span>
-</div>
 ```
