@@ -6290,13 +6290,214 @@ TODO
 
 TODO
 
-## Reference <!-- /appendices/reference* -->
+## Reference <!-- /appendices/reference -->
 
 TODO
 
-### Running the spec <!-- /appendices/running* -->
+### Running the spec <!-- /appendices/running -->
 
-TODO
+#### Introduction
+
+Being written in Python, the spec itself is executable. This is wonderful for generating test cases and there is a whole [infrastructure](https://github.com/ethereum/consensus-specs/tree/dev/tests/generators) in the specs repo for doing just that.
+
+We can also run the spec ourselves to do interesting things. In this exercise we will calculate the minimum and maximum sizes of the various [containers](/part3/containers) defined by the spec. The following code is from [Protolambda](https://gist.github.com/protolambda/db75c7faa1e94f2464787a480e5d613e#file-compute_bounds-py), lightly modified to simplify and update it.
+
+```python
+from inspect import getmembers, isclass
+from eth2spec.utils.ssz.ssz_typing import Container, uint64, Bitvector
+from eth2spec.altair import mainnet
+from eth2spec.altair.mainnet import ForkDigest, Root, Slot, Epoch
+
+def get_spec_ssz_types():
+    return [
+        value for (_, value) in getmembers(mainnet, isclass)
+        if issubclass(value, Container) and value != Container  # only the subclasses, not the imported base class
+    ]
+
+type_bounds = {
+    value.__name__: ({
+        'size': value.type_byte_length()
+    } if value.is_fixed_byte_length() else {
+        'min_size': value.min_byte_length(),
+        'max_size': value.max_byte_length(),
+    }) for value in get_spec_ssz_types()
+}
+
+import json
+
+print(json.dumps(type_bounds))
+```
+
+#### Set up
+
+We have a bunch of hoops to jump through to get things installed for the first time. The below works well for me on Linux, but I haven't tested extensive variations. Just use the commands prefixed with `>`, I've included some of the output so you can check whether things are on the right lines.
+
+First, set up a Python virtual environment.
+
+```bash
+> git clone https://github.com/ethereum/consensus-specs.git
+Cloning into 'consensus-specs'...
+...
+> cd consensus-specs/
+> python3 -m venv .
+> source bin/activate
+(consensus-specs) > python --version
+Python 3.8.10
+```
+
+Now we install and build all the dependencies required for the actual specs.
+
+```bash
+(consensus-specs) > python setup.py install
+... tons of output ...
+(consensus-specs) > make install_test
+... some initial failures reported but it installs cytoolz and sorts itself out ...
+(consensus-specs) > python setup.py pyspecdev
+running pyspecdev
+running build_py command
+running pyspec
+...
+```
+
+#### Run
+
+Finally we can simply run the Python script from above. Copy it into a file called `sizes.py` and run it as follows.
+
+```bash
+(consensus-specs) > python sizes.py | jq
+{
+  "AggregateAndProof": {
+    "min_size": 337,
+    "max_size": 593
+  },
+...
+```
+
+The pipe to `jq` is optional, you will just get less pretty output without it.
+
+#### Full output
+
+Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` turns out to be 139TiB!
+
+```none
+{
+  "AggregateAndProof": {
+    "min_size": 337,
+    "max_size": 593
+  },
+  "Attestation": {
+    "min_size": 229,
+    "max_size": 485
+  },
+  "AttestationData": {
+    "size": 128
+  },
+  "AttesterSlashing": {
+    "min_size": 464,
+    "max_size": 33232
+  },
+  "BeaconBlock": {
+    "min_size": 464,
+    "max_size": 157816
+  },
+  "BeaconBlockBody": {
+    "min_size": 380,
+    "max_size": 157732
+  },
+  "BeaconBlockHeader": {
+    "size": 112
+  },
+  "BeaconState": {
+    "min_size": 2736629,
+    "max_size": 152832656015861
+  },
+  "Checkpoint": {
+    "size": 40
+  },
+  "ContributionAndProof": {
+    "size": 264
+  },
+  "Deposit": {
+    "size": 1240
+  },
+  "DepositData": {
+    "size": 184
+  },
+  "DepositMessage": {
+    "size": 88
+  },
+  "Eth1Block": {
+    "size": 48
+  },
+  "Eth1Data": {
+    "size": 72
+  },
+  "Fork": {
+    "size": 16
+  },
+  "ForkData": {
+    "size": 36
+  },
+  "HistoricalBatch": {
+    "size": 524288
+  },
+  "IndexedAttestation": {
+    "min_size": 228,
+    "max_size": 16612
+  },
+  "LightClientUpdate": {
+    "size": 25364
+  },
+  "PendingAttestation": {
+    "min_size": 149,
+    "max_size": 405
+  },
+  "ProposerSlashing": {
+    "size": 416
+  },
+  "SignedAggregateAndProof": {
+    "min_size": 437,
+    "max_size": 693
+  },
+  "SignedBeaconBlock": {
+    "min_size": 564,
+    "max_size": 157916
+  },
+  "SignedBeaconBlockHeader": {
+    "size": 208
+  },
+  "SignedContributionAndProof": {
+    "size": 360
+  },
+  "SignedVoluntaryExit": {
+    "size": 112
+  },
+  "SigningData": {
+    "size": 64
+  },
+  "SyncAggregate": {
+    "size": 160
+  },
+  "SyncAggregatorSelectionData": {
+    "size": 16
+  },
+  "SyncCommittee": {
+    "size": 24624
+  },
+  "SyncCommitteeContribution": {
+    "size": 160
+  },
+  "SyncCommitteeMessage": {
+    "size": 144
+  },
+  "Validator": {
+    "size": 121
+  },
+  "VoluntaryExit": {
+    "size": 16
+  }
+}
+```
 
 ### Sizes of containers <!-- /appendices/reference/sizes* -->
 
