@@ -6304,9 +6304,8 @@ We can also run the spec ourselves to do interesting things. In this exercise we
 
 ```python
 from inspect import getmembers, isclass
-from eth2spec.utils.ssz.ssz_typing import Container, uint64, Bitvector
+from eth2spec.utils.ssz.ssz_typing import Container
 from eth2spec.altair import mainnet
-from eth2spec.altair.mainnet import ForkDigest, Root, Slot, Epoch
 
 def get_spec_ssz_types():
     return [
@@ -6324,7 +6323,6 @@ type_bounds = {
 }
 
 import json
-
 print(json.dumps(type_bounds))
 ```
 
