@@ -13,7 +13,6 @@ module.exports = {
     title: "Upgrading Ethereum",
     description: "A technical handbook on Ethereum's move to proof of stake and beyond",
     author: "Ben Edgington",
-    copyright: "© Copyright 2021 ConsenSys",
     gitHash: getGitHash(),
     gitUrl: "https://github.com/benjaminion/upgrading-ethereum-book",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
