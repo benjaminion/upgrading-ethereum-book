@@ -46,6 +46,7 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 The "Ethereum 2.0" terminology is out of favour in some circles, but I don't really care. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
+<a id="british-english"></a>
 You will notice too that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
 ## Acknowledgements
@@ -1011,8 +1012,8 @@ Discouragement Attacks attacks are analysed in a [paper](https://github.com/ethe
 
 <div class="summary">
 
- - Validators are penalised by losing small amounts of stake when they do not fulfil duties that they have been assigned.
- - Receiving a penalty is not being slashed!
+ - Validators that do not fulfil their assigned duties are penalised by losing small amounts of stake.
+ - Receiving a penalty is not the same as being slashed!
  - Break-even uptime for a validator is around 43%.
 
 </div>
@@ -1572,32 +1573,70 @@ TODO
 
 TODO
 
-### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz* -->
+### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
 
 #### Introduction
 
-[Serialisation](https://en.wikipedia.org/wiki/Serialization) is the process of taking structured information (a data structure) and transforming it into a representation that can be stored or transmitted.
+[Serialisation](https://en.wikipedia.org/wiki/Serialization) is the process of taking structured information (in our case, a data structure) and transforming it into a representation that can be stored or transmitted.
 
-Writing down a recipe is a kind of serialisation. I can take a potentially complex method for cooking something and write it down in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Recreating the recipe from the written or spoken form is deserialisation.
+A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Recreating the recipe from the written or spoken form is deserialisation.
 
-Serialisation is used primarily for three purposes on the beacon chain.
+Serialisation is used for three main purposes on the beacon chain.
 1. Consensus: if you and I each have a datastructure in memory, such as the beacon state, how can we know if both our datastructures are the same or not? This is bound up with merkleization as well. All clients must use the same consensus serialisation.
 2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it needs to be serialised to be transmitted and then deserialised at the other end. All clients must use the same P2P serialisation, but it doesn't need to be the same as the consensus serialisation.
 3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clientsare free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
 
 In addition, data must be serialised before being written to disk. Each client is free to do this internally however they wish.
 
+Ethereum&nbsp;2.0 uses a bespoke serialisation scheme called Simple Serialize, or more commonly just "SSZ"[^fn-ssz-z], for all of these purposes.
+
+[^fn-ssz-z]: Thus enshrining that ugly "z" in the full name, and the ghastly "ess-ess-zee" pronunciation. See [here](/preface#british-english) for why this upsets me.
+
 #### History
+
+It seems like we spent most of late 2018 and early 2019 talking about serialisation.
 
 Ethereum&nbsp;1 has always used a serialisation format called [RLP](https://eth.wiki/fundamentals/rlp) (recursive length prefix). This was deemed unsuitable for Ethereum&nbsp;2, largely because it is regarded as [overly complex](https://eth.wiki/en/concepts/wishlist#rlp).[^fn-rlp-complexity]
 
 [^fn-rlp-complexity]: [Vitalik](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205): "As the inventor of RLP, I'm inclined to prefer SSZ".
 
+So we had the freedom to choose a new serialisation protocol. What kind of decision points did we consider?
 
+##### Serialisation for consensus
+
+Starting with serialisation in the consensus protocol, the fist big question was whether to adopt an existing off-the-shelf protocol or to roll our own?
+
+One major issue with many [existing schemes](https://notes.ethereum.org/15_FcGc0Rq-GuxaBV5SP2Q?view) is that they do not guarantee that the serialisation is deterministic: they sometimes re-order fields in unpredictable ways. This makes them totally unsuitable for consensus; we need the same data to result in the same hash every time.
+
+A less tangible concern was around using third-party libraries in general in a consensus-critical situation. Back in 2014, Vitalik wrote a justification, titled [Why not use X?](https://blog.ethereum.org/2014/02/09/why-not-just-use-x-an-instructive-example-from-bitcoin/), of Ethereum implementing its own technology (such as RLP) for so many things. Here's an excerpt.
+
+> One of our core principles in Ethereum is simplicity; the protocol should be as simple as possible, and the protocol should not contain any black boxes. Every single feature of every single sub-protocol should be precisely 100% documented on the whitepaper or wiki, and implemented using that as a specification (ie. test-driven development).
+
+Certainly, with respect to serialisation, third-party libraries are far more generic than we need, which can lead to issues.
+
+However, it was the development of [Merkleization](/part2/building_blocks/merkleization) on top of SSZ that really sealed the deal, making SSZ (in some form) the clear leader for consensus serialisation.
+
+##### Serialisation for communications
+
+That decision made, the next big question was whether to use the same scheme for both consensus serialisation and peer-to-peer communications serialisation. This turned out to be finely balanced, and [good arguments](https://github.com/ethereum/consensus-specs/issues/129) were made in favour of using protobufs for p2p communication and SSZ for consensus.
+
+Discussion around this was extensive (see the references [below](#see-also)), but we eventually [decided](https://github.com/ethereum/eth2.0-pm/blob/master/eth2.0-implementers-calls/call_003.md#tentative-decisions) to use SSZ for p2p communications.
+
+The factors that tipped the balance in favour of SSZ were (1) a desire to maintain only one serialisation library, and (2) some possible performance benefit.
+
+On the first of these, [TODO: We favour "simplicity over efficiency" - https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205]
+
+On the second, when we receive a message over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a de-serialise/re-serialise round trip.
+
+
+HERE
 
 #### See also
 
-TODO
+Some of the hostorical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not:
+  - [Possibly the first](https://ethresear.ch/t/discussion-p2p-message-serialization-standard/2781?u=benjaminion) substantial discussion around which serialisation scheme to adopt. It covers various alternatives, touches on the p2p vs. consensus issues, and rehearses some of the desirable properties.
+  - An [early discussion of SSZ](https://github.com/ethereum/beacon_chain/issues/94) went over some of the issues and led into the discussion below.
+  - [Proposal to use SSZ for consensus only](https://github.com/ethereum/consensus-specs/issues/129).
 
 ### Merkleization <!-- /part2/building_blocks/merkleization* -->
 
