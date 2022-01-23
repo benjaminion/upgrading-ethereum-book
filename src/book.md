@@ -1296,28 +1296,69 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 <div class="summary">
 
  - Beacon chain incentives strongly encourage diversity among client deployments, hosting infrastructure, and staking pools.
- - Lack of diversity puts at risk both the chain in general and all those going with the majority.
+ - Lack of diversity puts at risk both the chain in general and all those running the majority client.
  - The greater the share of validators hosted by a single client implementation the greater the risk.
+ - The beacon chain is at its most robust and fault-tolerant when no single client type manages more than one-third (33%) of validators.
 
 </div>
 
-#### Diversity makes everyone stronger
+#### Diversity makes us all stronger
 
 It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](/part2/incentives/slashing#the-correlation-penalty) provide a strong encouragement to diversify the network as much as possible.
 
-The inactivity leak is much more likely to occur on a network in which a single client implementation runs over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak that penalises those running the majority (offline) client most harshly.
+For example, the inactivity leak is much more likely to occur on a network in which a single client implementation runs over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak that penalises those running the majority (offline) client most harshly.
 
-The situation becomes potentially much worse when a single client hosts half or more of the validators. In the case of a consensus bug that were to go unfixed for some time (on the order of a week), the inactivity leak could lead to the beacon chain becoming irrecoverably partitioned as each side of the fork independently regains finality. In this scenario there is at least some time for users of the buggy majority client to migrate to other client implementations in order to side-step the problem.
+#### Scenarios
 
-A single client approaching[^fn-approaches-67] hosting 67% of the validators is potentially catastropic. A bug in that client would very quickly finalise a broken version of the chain, leaving the community with a horrible dilemma: modify the other clients (and the specification) to reproduce the bug, or slash all the validators on the incorrect chain. There are no good outcomes here, which is why it is critical that we do not end up in such a situation.[^fn-client-diversity-220112]
+Let's consider some scenarios. For the sake of this exercise you are running the beacon chain client X. In each scenario you and others using client X host validators managing a certain fraction of the total stake. We will consider what happens if client X has a bug that takes it down. It might be a consensus bug or another kind of bug that takes the client off the network: we saw examples of both of these on the pre-launch testnets.
+
+##### 1. Client X has less than one-third of the stake
+
+When a client managing less than one-third of the total stake goes down, the consequences are minimal. The beacon chain can continue to finalise as normal. Users of client X will suffer only the normal offline penalties until the bug is fixed, though rewards will be lower across the board for the other validators. But this is not catastrophic and there is time to recover without a panic, either by fixing the bug or swapping to a different client.
+
+_The beacon chain is at its most robust and fault-tolerant when no single client type manages more than one-third (33%) of validators._
+
+##### 2. Client X has more than one-third of the stake
+
+When client X managing more than one-third of the total stake goes down, the beacon chain will be unable to finalise and will enter the [inactivity leak](/part2/incentives/inactivity).
+
+In this case no validators will receive rewards for attesting. Users of non-X clients will not lose stake, but users of client X will suffer much bigger losses than usual due to the quadratically increasing leak. There is strong time pressure to get the issue with client X resolved either by fixing the bug or swapping to a different client.
+
+##### 3. Client X has around half of the stake
+
+The situation becomes potentially much worse when X hosts around half of the validators. If X were to have a consensus bug but otherwise keep running, we would have two similarly sized chains. Each chain would see half its validators missing and start leaking out the stakes of the missing validators. Within three to four weeks each chain would have leaked out enough of the stake of the missing validators that the present validators would control two-thirds and the chains could each finalise separately. It would be extremely difficult &ndash; effectively impossible &ndash; to reunite these chains ever again since they would contain conflicting finalised checkpoints. The beacon chain would be permanently partitioned.
+
+Hopefully, 3-4 weeks is sufficient time for client X to fix its bug or for users of X to migrate to other clients. Meanwhile users of X are suffering large inactivity penalties as per scenario 2.
+
+##### 4. Client X approaches or exceeds two-thirds of the stake
+
+A scenario in which a single client approaches[^fn-approaches-67] hosting two-thirds (66%) of the validators is potentially catastrophic. A consensus bug in that client would very quickly &ndash; possibly within 13 minutes &ndash; finalise a broken version of the chain with no chance to intervene.
+
+That would leave the Ethereum community with a horrible dilemma.
+
+One possible response would be to modify the other clients (and the specification) to reproduce the bug and allow them to join X's chain. The feasibility of this would depend on the nature of the consensus bug. For something trivial it might be possible, but it would be very unfair to the non-X clients since they would suffer penalties despite having acted perfectly correctly. In any case, many types of consensus bug would make this infeasible: one way or another X's chain is broken and now incompatible with the entirety of the rest of the ecosystem.
+
+The correct &ndash; but nuclear &ndash; option would be to fix the bug in client X. Unfortunately, however, there would be no way for the stakers on the incorrect X chain to rejoin the correct chain. Any that tried would be slashed, having previously finalised a checkpoint on the incorrect chain. The only reasonable strategy for (former) users of client X would be to stop validating and voluntarily exit their stakes. Exiting could take a long time due to the queuing mechanism, resulting in large penalties from the inactivity leak. Many of the affected stakers are likely to try to start validating again and would surely be slashed.
+
+There are no good outcomes here, which is why it is critical that we never have a client with a two-thirds or more supermajority.[^fn-client-diversity-220112]
 
 [^fn-approaches-67]: If the share is less than 67% the incorrect chain won't finalise immediately, but very soon the inactivity leak will raise the proportion above 67% on that chain and it will then finalise.
 
 [^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appears to have](https://twitter.com/sproulM_/status/1481109509544513539) 68.1% of the validators.
 
-As for slashing, once again running a majority client could be another act of self-harm. Should a client implementation have a bug that leads to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
+#### Slashing
 
-This is not just a theoretical issue. It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet, in which an issue in the majority client caused a high degree of chaos and led to large numbers of slashings.
+As for slashing, once again running a majority client could be act of self-harm. Should a client implementation have a bug that leads to its validators becoming slashed en-masse the correlated slashing penalties would be much more severe than if the same thing happened to those running a minority client.
+
+#### Epilogue
+
+Let me emphasise that _these scenarios are far from theoretical_. It is of existential importance to the Ethereum network that stakers pay attention to the distribution of client software and avoid adding to the share of the majority client.
+
+It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that occurred on the Medalla testnet, in which an issue in the majority client caused a high degree of chaos and led to large numbers of slashings. Had that client managed a smaller proportion of the network, the consequences for everybody would have been much less severe.
+
+#### See also
+
+  - [What Happens If Beacon Chain Consensus Fails?](https://www.symphonious.net/2021/09/23/what-happens-if-beacon-chain-consensus-fails/), a blog post by Adrian Sutton.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
