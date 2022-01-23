@@ -423,7 +423,7 @@ Using the effective balance achieves two goals, one to do with economics, the ot
 
 The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32 ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64 ETH but an effective balance of only 32 ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.
 
-The scope of effective balance quickly grew, and now the it completely represents the weight of a validator in the consensus protocol.
+The scope of effective balance quickly grew, and now it completely represents the weight of a validator in the consensus protocol.
 
 All of the following consensus-related matters are proportional to the effective balance of a validator:
   - the probability of being [selected](/part3/helper/misc#def_compute_proposer_index) as the beacon block proposer;
@@ -442,7 +442,7 @@ However, the block proposer reward is not scaled in proportion to the proposer's
 
 #### Engineering aspects of effective balance
 
-We could achieve all of the above simply by using using validators' actual balances as their weights, capped at 32 ETH. However, we can gain significant performance benefits by basing everything on effective balances instead.
+We could achieve all of the above simply by using validators' actual balances as their weights, capped at 32 ETH. However, we can gain significant performance benefits by basing everything on effective balances instead.
 
 For one thing, effective balances are [updated](/part3/transition/epoch#def_process_effective_balance_updates) only once per epoch, which means that we need only calculate things like the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment) once and we can cache the result for the whole epoch, irrespective of any changes in actual balances.
 
