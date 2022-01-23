@@ -1631,6 +1631,38 @@ On the second, when we receive a message over the wire, often the first thing we
 
 HERE
 
+#### Examples
+
+##### Basic types
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint64, boolean
+>>> uint64(0x0123456789abcdef).encode_bytes().hex()
+'efcdab8967452301'
+>>> boolean(True).encode_bytes().hex()
+'01'
+```
+
+##### Composite types
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint32, uint64, List
+>>> List[uint64, 16](1, 2, 3).encode_bytes().hex()
+'010000000000000002000000000000000300000000000000'
+>>> List[uint32, 16](1, 0, 2, 0, 3, 0).encode_bytes().hex()
+'010000000000000002000000000000000300000000000000'
+```
+
+##### Lists vs vectors
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint64, List, Vector
+>>> List[uint64, 3](1, 2, 3).encode_bytes().hex()
+'010000000000000002000000000000000300000000000000'
+>>> Vector[uint64, 3](1, 2, 3).encode_bytes().hex()
+'010000000000000002000000000000000300000000000000'
+```
+
 #### See also
 
 Some of the hostorical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not:
