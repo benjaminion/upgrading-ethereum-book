@@ -1362,15 +1362,15 @@ _The beacon chain is at its most robust and fault-tolerant when no single client
 
 ##### 2. Client X has more than one-third of the stake
 
-When client X managing more than one-third of the total stake goes down, the beacon chain will be unable to finalise and will enter the [inactivity leak](/part2/incentives/inactivity).
+If client X manages more than one-third of the total stake and goes down, the beacon chain will be unable to finalise and will enter the [inactivity leak](/part2/incentives/inactivity).
 
 In this case no validators will receive rewards for attesting. Users of non-X clients will not lose stake, but users of client X will suffer much bigger losses than usual due to the quadratically increasing leak. There is strong time pressure to get the issue with client X resolved either by fixing the bug or swapping to a different client.
 
 ##### 3. Client X has around half of the stake
 
-The situation becomes potentially much worse when X hosts around half of the validators. If X were to have a consensus bug but otherwise keep running, we would have two similarly sized chains. Each chain would see half its validators missing and start leaking out the stakes of the missing validators. Within three to four weeks each chain would have leaked out enough of the stake of the missing validators that the present validators would control two-thirds and the chains could each finalise separately. It would be extremely difficult &ndash; effectively impossible &ndash; to reunite these chains ever again since they would contain conflicting finalised checkpoints. The beacon chain would be permanently partitioned.
+The situation becomes potentially much worse when X hosts around half of the validators. If X were to have a consensus bug but otherwise keep running, we would have two similarly sized chains. Each chain would see half its validators missing and start leaking out the stakes of the missing validators. Within three to four weeks each chain would have leaked out enough of the stake of the missing validators that the present validators would control two-thirds, meaning that the chains could each finalise separately. It would be extremely difficult &ndash; effectively impossible &ndash; to reunite these chains ever again since they would contain conflicting finalised checkpoints. The beacon chain would be permanently partitioned.
 
-Hopefully, 3-4 weeks is sufficient time for client X to fix its bug or for users of X to migrate to other clients. Meanwhile users of X are suffering large inactivity penalties as per scenario 2.
+Hopefully, 3-4 weeks is sufficient time for client X to fix its bug or for users of X to migrate to other clients. Meanwhile users of X are suffering large inactivity penalties on the correct chain as per scenario 2.
 
 ##### 4. Client X approaches or exceeds two-thirds of the stake
 
@@ -1378,9 +1378,9 @@ A scenario in which a single client approaches[^fn-approaches-67] hosting two-th
 
 That would leave the Ethereum community with a horrible dilemma.
 
-One possible response would be to modify the other clients (and the specification) to reproduce the bug and allow them to join X's chain. The feasibility of this would depend on the nature of the consensus bug. For something trivial it might be possible, but it would be very unfair to the non-X clients since they would suffer penalties despite having acted perfectly correctly. In any case, many types of consensus bug would make this infeasible: one way or another X's chain is broken and now incompatible with the entirety of the rest of the ecosystem.
+One possible response would be to modify the other clients (and the specification) to reproduce the bug and allow them to join X's chain. The feasibility of this would depend on the nature of the consensus bug. For a trivial bug it might be possible, but it would be very unfair to the non-X clients since they would suffer penalties despite having acted perfectly correctly. In any case, many types of consensus bug would make this infeasible: one way or another X's chain is broken and now incompatible with the entirety of the rest of the ecosystem.
 
-The correct &ndash; but nuclear &ndash; option would be to fix the bug in client X. Unfortunately, however, there would be no way for the stakers on the incorrect X chain to rejoin the correct chain. Any that tried would be slashed, having previously finalised a checkpoint on the incorrect chain. The only reasonable strategy for (former) users of client X would be to stop validating and voluntarily exit their stakes. Exiting could take a long time due to the queuing mechanism, resulting in large penalties from the inactivity leak. Many of the affected stakers are likely to try to start validating again and would surely be slashed.
+The correct &ndash; but nuclear &ndash; option would be to fix the bug in client X. Unfortunately, however, there would be no way for the stakers on the incorrect X chain to rejoin the correct chain. Any that tried to do so would be slashed, having previously finalised a checkpoint on the incorrect chain. The only reasonable strategy for (former) users of client X would be to stop validating and voluntarily exit their stakes. Exiting could take a long time due to the queuing mechanism, resulting in large penalties from the inactivity leak. Many of the affected stakers are likely to try to start validating again and would surely be slashed.
 
 There are no good outcomes here, which is why it is critical that we never have a client with a two-thirds or more supermajority.[^fn-client-diversity-220112]
 
@@ -1620,57 +1620,85 @@ TODO
 
 [Serialisation](https://en.wikipedia.org/wiki/Serialization) is the process of taking structured information (in our case, a data structure) and transforming it into a representation that can be stored or transmitted.
 
-A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Recreating the recipe from the written or spoken form is deserialisation.
+A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Using the recipe to cook something is deserialisation.
 
 Serialisation is used for three main purposes on the beacon chain.
-1. Consensus: if you and I each have a datastructure in memory, such as the beacon state, how can we know if both our datastructures are the same or not? This is bound up with merkleization as well. All clients must use the same consensus serialisation.
-2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it needs to be serialised to be transmitted and then deserialised at the other end. All clients must use the same P2P serialisation, but it doesn't need to be the same as the consensus serialisation.
+1. Consensus: if you and I each have a datastructure in memory, such as the beacon state, how can we know if our datastructures are the same or not? All clients must use the same consensus serialisation. Note that this is also bound up with [merkleization](/part2/building_blocks/merkleization).
+2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it must be serialised for transmission and deserialised at the other end. All clients must use the same p2p serialisation, but it doesn't need to be the same as the consensus serialisation.
 3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clientsare free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
 
 In addition, data must be serialised before being written to disk. Each client is free to do this internally however they wish.
 
 Ethereum&nbsp;2.0 uses a bespoke serialisation scheme called Simple Serialize, or more commonly just "SSZ"[^fn-ssz-z], for all of these purposes.
 
-[^fn-ssz-z]: Thus enshrining that ugly "z" in the full name, and the ghastly "ess-ess-zee" pronunciation. See [here](/preface#british-english) for why this upsets me.
+[^fn-ssz-z]: Thus enshrining that ugly "z" in the full name, and the [ghastly](/preface#british-english) "ess-ess-zee" pronunciation.
 
 #### History
 
-It seems like we spent most of late 2018 and early 2019 talking about serialisation.
+It seems like we spent most of late 2018 and early 2019 talking about serialisation, and the story below is highly simplified. But I think it's worth recording some of the considerations and design decisions.
 
 Ethereum&nbsp;1 has always used a serialisation format called [RLP](https://eth.wiki/fundamentals/rlp) (recursive length prefix). This was deemed unsuitable for Ethereum&nbsp;2, largely because it is regarded as [overly complex](https://eth.wiki/en/concepts/wishlist#rlp).[^fn-rlp-complexity]
 
-[^fn-rlp-complexity]: [Vitalik](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205): "As the inventor of RLP, I'm inclined to prefer SSZ".
+[^fn-rlp-complexity]: [Vitalik](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205), "As the inventor of RLP, I'm inclined to prefer SSZ", and [again](https://ethresear.ch/t/replacing-ssz-with-rlp-zip-and-sha256/5706/12?u=benjaminion), "RLP honestly sucks" (with some explanation of why!).
 
 So we had the freedom to choose a new serialisation protocol. What kind of decision points did we consider?
 
 ##### Serialisation for consensus
 
-Starting with serialisation in the consensus protocol, the fist big question was whether to adopt an existing off-the-shelf protocol or to roll our own?
+Starting with serialisation in the consensus protocol, the fist big question was whether to adopt an existing off-the-shelf protocol or to roll our own.
 
-One major issue with many [existing schemes](https://notes.ethereum.org/15_FcGc0Rq-GuxaBV5SP2Q?view) is that they do not guarantee that the serialisation is deterministic: they sometimes re-order fields in unpredictable ways. This makes them totally unsuitable for consensus; we need the same data to result in the same hash every time.
+One major issue with many [existing schemes](https://notes.ethereum.org/15_FcGc0Rq-GuxaBV5SP2Q?view) is that they do not guarantee that the serialisation is deterministic: they sometimes re-order fields in unpredictable ways. This makes them totally unsuitable for consensus; we need the same data to result in the same output every time.
 
-A less tangible concern was around using third-party libraries in general in a consensus-critical situation. Back in 2014, Vitalik wrote a justification, titled [Why not use X?](https://blog.ethereum.org/2014/02/09/why-not-just-use-x-an-instructive-example-from-bitcoin/), of Ethereum implementing its own technology (such as RLP) for so many things. Here's an excerpt.
+A more general concern was around using third-party libraries in a consensus-critical situation. Back in 2014, Vitalik wrote a justification, titled [Why not use X?](https://blog.ethereum.org/2014/02/09/why-not-just-use-x-an-instructive-example-from-bitcoin/), of Ethereum implementing its own technology (such as RLP) for so many things. Here's an excerpt:
 
 > One of our core principles in Ethereum is simplicity; the protocol should be as simple as possible, and the protocol should not contain any black boxes. Every single feature of every single sub-protocol should be precisely 100% documented on the whitepaper or wiki, and implemented using that as a specification (ie. test-driven development).
 
-Certainly, with respect to serialisation, third-party libraries are far more generic than we need, which can lead to issues.
+Certainly, with respect to serialisation, some third-party libraries are far more generic than we need, which can lead to issues. Others don't map easily to the data types that we use.
 
-However, it was the development of [Merkleization](/part2/building_blocks/merkleization) on top of SSZ that really sealed the deal, making SSZ (in some form) the clear leader for consensus serialisation.
+In view of these concerns momentum was in favour of adopting a bespoke, tightly specified serialisation method. It was the development of [Merkleization](/part2/building_blocks/merkleization) on top of SSZ that really sealed the deal, making SSZ (in some form) the clear leader for consensus serialisation.
 
 ##### Serialisation for communications
 
-That decision made, the next big question was whether to use the same scheme for both consensus serialisation and peer-to-peer communications serialisation. This turned out to be finely balanced, and [good arguments](https://github.com/ethereum/consensus-specs/issues/129) were made in favour of using protobufs for p2p communication and SSZ for consensus.
+That decision made, the next big question was whether to use the same scheme for both consensus serialisation and peer-to-peer communications serialisation (the "wire-protocol"). This turned out to be finely balanced, and [good arguments](https://github.com/ethereum/consensus-specs/issues/129) were made in favour of using protobufs for p2p communication and SSZ for consensus.
 
 Discussion around this was extensive (see the references [below](#see-also)), but we eventually [decided](https://github.com/ethereum/eth2.0-pm/blob/master/eth2.0-implementers-calls/call_003.md#tentative-decisions) to use SSZ for p2p communications.
 
-The factors that tipped the balance in favour of SSZ were (1) a desire to maintain only one serialisation library, and (2) some possible performance benefit.
+The factors that tipped the balance in favour of SSZ for communications were (1) a desire to maintain only one serialisation library, and (2) some possible performance benefit.
 
-On the first of these, [TODO: We favour "simplicity over efficiency" - https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205]
+On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205) "simplicity over efficiency". Maintaining two serialisation libraries is arguable more overhead than any potential gain from using different ones. Having said that, RLP is [still used](https://github.com/ethresearch/p2p/issues/15) in Eth2's discovery layer (since it is shared Eth1), so this argument loses some of its force.
 
 On the second, when we receive a message over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a de-serialise/re-serialise round trip.
 
+In the end, any concerns about inefficiencies caused by using SSZ for communications were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#encoding-strategies) on the wire.
 
-HERE
+#### Overview
+
+SSZ is [based on](https://ethresear.ch/t/replacing-ssz-with-rlp-zip-and-sha256/5706/12?u=benjaminion) Ethereum's smart contract [ABI](https://docs.soliditylang.org/en/v0.8.11/abi-spec.html), so will immediately feel familiar to anyone who know has fiddled with that.
+
+The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is maintained in the main Eth2 specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
+
+The ultimate goal of SSZ is to be able to represent complex internal datastructures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
+
+The formal properties that we require for SSZ to be useful for both consensus and communications areas defined in the [formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
+  1. involutive: deserialise<$T$>(serialise<$T$>($O_1$)) = $O_1$  (required for communications), and
+  2. injective: serialise<$T$>($O_1$) = serialise<$T$>($O_2$) implies that $O_1 = O_2$ (required for consensus).
+
+Beyond those basic functional requirements, other goals for SSZ are to be (relatively) simple, to create (fairly) compact serialisations, and to be compatible with [Merkleization](/part2/building_blocks/merkleization).
+
+It is also useful to be able to quickly access specific bits of data within the serialisation without deserialising the entire object. The earliest versions of SSZ did not have this property HERE.
+
+Adoption of SOS: https://github.com/ethereum/consensus-specs/pull/787
+
+
+
+<!--
+
+ - Not self-describing! - schema-less (is it a word?)
+ - Traversing with SOS?
+
+-->
+
+
 
 #### Examples
 
@@ -1706,10 +1734,19 @@ HERE
 
 #### See also
 
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source.
+
 Some of the hostorical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not:
   - [Possibly the first](https://ethresear.ch/t/discussion-p2p-message-serialization-standard/2781?u=benjaminion) substantial discussion around which serialisation scheme to adopt. It covers various alternatives, touches on the p2p vs. consensus issues, and rehearses some of the desirable properties.
   - An [early discussion of SSZ](https://github.com/ethereum/beacon_chain/issues/94) went over some of the issues and led into the discussion below.
   - [Proposal to use SSZ for consensus only](https://github.com/ethereum/consensus-specs/issues/129).
+  - Piper Merriam's [Everything You Never Wanted To Know About Serialization](https://notes.ethereum.org/QF8jgOQbRTWUhK1zoi8D4Q#) remains a good summary of many of the considerations.
+
+Related resources:
+  - An [SSZ encoding diagram](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
+  - Formal verification of the SSZ specification:
+    - [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md)
+    - [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz)
 
 ### Merkleization <!-- /part2/building_blocks/merkleization* -->
 
@@ -6371,6 +6408,8 @@ TODO
 TODO
 
 ### Protocol <!-- /part4/light_clients/protocol* -->
+
+TODO
 
 ## Sharding <!-- /part4/sharding* -->
 
