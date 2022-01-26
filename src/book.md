@@ -1673,9 +1673,21 @@ On the second, when we receive a message over the wire, often the first thing we
 
 In the end, any concerns about inefficiencies caused by using SSZ for communications were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#encoding-strategies) on the wire.
 
-#### Overview
+##### SSZ development
 
-SSZ is [based on](https://ethresear.ch/t/replacing-ssz-with-rlp-zip-and-sha256/5706/12?u=benjaminion) Ethereum's smart contract [ABI](https://docs.soliditylang.org/en/v0.8.11/abi-spec.html), so will immediately feel familiar to anyone who know has fiddled with that.
+SSZ is [based on](https://ethresear.ch/t/replacing-ssz-with-rlp-zip-and-sha256/5706/12?u=benjaminion) Ethereum's smart contract [ABI](https://docs.soliditylang.org/en/v0.8.11/abi-spec.html), but with 4-byte position and size records rather than 32-byte, and different basic data types. It will immediately feel familiar to anyone who know has fiddled with that. The rudiments of SSZ were laid down by Vitalik in [August 2017](https://github.com/ethereum/research/tree/master/py_ssz).
+
+The initial, more developed, spec for SSZ was merged into the beacon chain repository in [October 2018](https://github.com/ethereum/consensus-specs/pull/18), with the Container type being added [a month later](https://github.com/ethereum/consensus-specs/pull/102/files).
+
+A big step forward in the utility of SSZ, and what cemented it as the serialisation protocol of choice for consensus, was the development of [Merkleization](/part2/building_blocks/merkleization) (also known as tree hashing), first discussed in [October 2018](https://github.com/ethereum/consensus-specs/issues/54) and adopted into the spec in [November](https://github.com/ethereum/consensus-specs/pull/120).
+
+Also in [November 2018](https://github.com/ethereum/consensus-specs/pull/139) we agreed to switch the byte ordering for integer types from big-endian to little-endian at the request of the Nimbus team. This means that the 32-bit number representing 66 decimal would is now serialised as `0x42000000` rather than `0x00000042`. The main motivation for the change was to map better to byte-ordering in microprocessors.
+
+The last major change to SSZ was the implementation of offsets in [April 2019](https://github.com/ethereum/consensus-specs/pull/787). [SOS](https://gist.github.com/karalabe/3a25832b1413ee98daad9f0c47be3632)
+
+HERE
+
+#### Overview
 
 The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is maintained in the main Eth2 specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
 
@@ -1749,6 +1761,8 @@ Related resources:
   - Formal verification of the SSZ specification:
     - [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md)
     - [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz)
+  - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
+  - Interactive SSZ serialiser/deserialiser [by ChainSafe](https://simpleserialize.com/) with all the containers for Phase&nbsp;0 and Altair available to play with.
 
 ### Merkleization <!-- /part2/building_blocks/merkleization* -->
 
