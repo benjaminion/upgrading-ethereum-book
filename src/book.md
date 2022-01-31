@@ -1683,9 +1683,7 @@ A big step forward in the utility of SSZ, and what cemented it as the serialisat
 
 Also in [November 2018](https://github.com/ethereum/consensus-specs/pull/139) we agreed to switch the byte ordering for integer types from big-endian to little-endian at the request of the Nimbus team. This means that the 32-bit number representing 66 decimal would is now serialised as `0x42000000` rather than `0x00000042`. The main motivation for the change was to map better to byte-ordering in microprocessors.
 
-The last major change to SSZ was the implementation of offsets in [April 2019](https://github.com/ethereum/consensus-specs/pull/787). [SOS](https://gist.github.com/karalabe/3a25832b1413ee98daad9f0c47be3632)
-
-HERE
+The last major change to SSZ was the adoption of offsets in [April 2019](https://github.com/ethereum/consensus-specs/pull/787). This came from a scheme, [Simple Offset Serialisation](https://gist.github.com/karalabe/3a25832b1413ee98daad9f0c47be3632), previously proposed by Péter Szilágyi. The idea is to split the objects we are serialising according to whether they are fixed length or variable length. The serialisation then has two sections. The first section contains both actual serialisations of any fixed length objects, and pointers to the serialisations of any variable length objects. The second section contains the serialisations of the variable length objects. The motivation for this is to allow fast access to arbitrary parts of the serialised data without having to deserialise the whole structure.
 
 #### Overview
 
@@ -1697,22 +1695,17 @@ The formal properties that we require for SSZ to be useful for both consensus an
   1. involutive: deserialise<$T$>(serialise<$T$>($O_1$)) = $O_1$  (required for communications), and
   2. injective: serialise<$T$>($O_1$) = serialise<$T$>($O_2$) implies that $O_1 = O_2$ (required for consensus).
 
-Beyond those basic functional requirements, other goals for SSZ are to be (relatively) simple, to create (fairly) compact serialisations, and to be compatible with [Merkleization](/part2/building_blocks/merkleization).
+The first property says that when we serialise an object of a certain type, and then do the deserialisation, we end up with an identical object to the one we started with. This is important for the communications protocol.
 
-It is also useful to be able to quickly access specific bits of data within the serialisation without deserialising the entire object. The earliest versions of SSZ did not have this property HERE.
+The second says that if we serialise two objects of the same type and get the same result then the two objects are identical. Equivalently, if we have two different objects of the same type then their serialisations will differ. This is important for the consensus protocol.
 
-Adoption of SOS: https://github.com/ethereum/consensus-specs/pull/787
+Beyond those basic functional requirements, other goals for SSZ are to be (relatively) simple, to create (fairly) compact serialisations, and to be compatible with [Merkleization](/part2/building_blocks/merkleization). It is also useful to be able to quickly access specific bits of data within the serialisation without deserialising the entire object. The adoption of offsets into SSZ improved it sperformance in this last respect.
 
+Unlike RLP, SSZ is not self-describing. You can decode the RLP data into a structured object without knowing in advance what that object looks like. This is not the case for SSZ: you must know in advance exactly what you are deserialising. In practice this has not been a problem in Eth2: we always know in advance what class of object a particular derialised blob of data corresponds to. A conseqauence of this is that, while in RLP two objects of different types cannot serialise to the same output, in SSZ they can. We'll see an example of this shortly.
 
+#### Specification
 
-<!--
-
- - Not self-describing! - schema-less (is it a word?)
- - Traversing with SOS?
-
--->
-
-
+The [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) 
 
 #### Examples
 
