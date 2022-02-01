@@ -1714,9 +1714,66 @@ Unlike RLP, SSZ is not self-describing. You can decode the RLP data into a struc
 
 #### Specification
 
-The [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) 
+I don't plan to go into all details of SSZ, that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is for. We'll take a general overview and then dive into some examples.
+
+The building blocks of SSZ are its basic types and its composite types.
+
+##### Basic types
+
+SSZ's basic types are very simple and limited, comprising only the following two classes.
+  - Unsigned integers: a `uintN` is an `N`-bit unsigned integer, where `N` can be 8, 16, 32, 64, 128 or 256.
+  - Booleans: a `boolean` is either `True` or `False`.
+  
+The serialistion of basic types is very simple.
+
+`uintN` types are encoded as the little-endian representation in `N/8` bytes. For example, the decimal number 12345 (`0x3039` in hexadecimal) as a `uint16` type is serialised as `0x3930` (two bytes). The same number as a `uint32` type is serialised as `0x39300000` (four bytes).
+
+Boolean types are always one byte and serialised as `0x01` for true and `0x00` for false.
+
+##### Composite types
+
+Composite types hold combinations of or multiples of smaller types. The spec defines the following composite types (omitting `union` since it is not currently used in Eth2)
+
+* **vector**: ordered fixed-length homogeneous collection, with `N` values
+    * notation `Vector[type, N]`, e.g. `Vector[uint64, N]`
+* **list**: ordered variable-length homogeneous collection, limited to `N` values
+    * notation `List[type, N]`, e.g. `List[uint64, N]`
+* **bitvector**: ordered fixed-length collection of `boolean` values, with `N` bits
+    * notation `Bitvector[N]`
+* **bitlist**: ordered variable-length collection of `boolean` values, limited to `N` bits
+    * notation `Bitlist[N]`
+
+###### `Container`
+
+A `Container` is an "ordered heterogeneous collection of values". Basically, a `Container` can contain any arbitrary mix of types, including `Container`s.
+
+We define `Container`s using Python's dataclass notation with key&ndash;type pairs. For example, this is a [`Deposit`](/part3/containers/operations#deposit) container.
+
+```python
+class Deposit(Container):
+    proof: Vector[Bytes32, DEPOSIT_CONTRACT_TREE_DEPTH + 1] # Vector[Vector[uint8, 32], N]
+    data: DepositData
+```
+
+It contains [`DepositData`](/part3/containers/dependencies#depositdata) which is defined as follows (the comments show the underlying basic types).
+
+```python
+class DepositData(Container):
+    pubkey: BLSPubkey                # Vector[uint8, 48]
+    withdrawal_credentials: Bytes32  # Vector[uint8, 32]
+    amount: Gwei                     # uint64
+    signature: BLSSignature          # Vector[uint8, 96]
+```
+
+The `vector` and `bitvector` types have a fixed length, they contain exactly `N` items, whereas the `list` and `bitlist` types have a variable length and contain up to `N` items.
+
+##### Variable and fixed size
+
+TODO
 
 #### Examples
+
+We can play with SSZ by taking advantage of the executable specification
 
 ##### Basic types
 
@@ -1740,12 +1797,22 @@ The [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simpl
 
 ##### Lists vs vectors
 
+*Note*: Both `Vector[boolean, N]` and `Bitvector[N]` are valid, yet distinct due to their different serialization requirements. Similarly, both `List[boolean, N]` and `Bitlist[N]` are valid, yet distinct. Generally `Bitvector[N]`/`Bitlist[N]` are preferred because of their serialization efficiencies.
+
 ```python
 >>> from eth2spec.utils.ssz.ssz_typing import uint64, List, Vector
 >>> List[uint64, 3](1, 2, 3).encode_bytes().hex()
 '010000000000000002000000000000000300000000000000'
 >>> Vector[uint64, 3](1, 2, 3).encode_bytes().hex()
 '010000000000000002000000000000000300000000000000'
+```
+
+#### Example
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import *
+>>> from eth2spec.altair import mainnet
+>>> from eth2spec.altair.mainnet import *
 ```
 
 #### See also
