@@ -1394,6 +1394,15 @@ There are no good outcomes here, which is why it is critical that we never have 
 
 As for slashing, once again running a majority client could be act of self-harm. In the unlikely event that a client implementation has a bug that leads to its validators becoming slashed en-masse, the [correlated slashing penalties](/part2/incentives/slashing#the-correlation-penalty) would be much more severe than if the same thing happened to those running a minority client.
 
+#### Another view
+
+Danny Ryan has presented a slightly [different angle](https://blog.ethereum.org/2022/01/31/finalized-no-33/) on client diversity that's insightful:
+
+> If a single client:
+>  - Does not exceed 66.6%, a fault/bug in a single client cannot be finalized.
+>  - Does not exceed 50%, a fault/bug in a single client’s forkchoice cannot dominate the head of the chain.
+>  - Does not exceed 33.3%, a fault/bug in a single client cannot disrupt finality.
+
 #### Epilogue
 
 Let me emphasise that _these scenarios are far from theoretical_. It is of existential importance to the Ethereum network that stakers pay attention to the distribution of client software and avoid adding to the share of the majority client.
