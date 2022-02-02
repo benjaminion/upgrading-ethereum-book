@@ -1723,25 +1723,96 @@ The building blocks of SSZ are its basic types and its composite types.
 SSZ's basic types are very simple and limited, comprising only the following two classes.
   - Unsigned integers: a `uintN` is an `N`-bit unsigned integer, where `N` can be 8, 16, 32, 64, 128 or 256.
   - Booleans: a `boolean` is either `True` or `False`.
-  
+
 The serialistion of basic types is very simple.
+  - `uintN` types are encoded as the little-endian representation in `N/8` bytes. For example, the decimal number 12345 (`0x3039` in hexadecimal) as a `uint16` type is serialised as `0x3930` (two bytes). The same number as a `uint32` type is serialised as `0x39300000` (four bytes).
+  - `boolean` types are always one byte and serialised as `0x01` for true and `0x00` for false.
 
-`uintN` types are encoded as the little-endian representation in `N/8` bytes. For example, the decimal number 12345 (`0x3039` in hexadecimal) as a `uint16` type is serialised as `0x3930` (two bytes). The same number as a `uint32` type is serialised as `0x39300000` (four bytes).
+I will embed quite a few examples in the following descriptions. You can run them yourself if you set up the Eth2 spec as per the [instructions](/appendices/running) in the Appendices. The examples can be run via the Python REPL or by putting the commands in a file (I'll be showing both).
 
-Boolean types are always one byte and serialised as `0x01` for true and `0x00` for false.
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint64, boolean
+>>> uint64(0x0123456789abcdef).encode_bytes().hex()
+'efcdab8967452301'
+>>> boolean(True).encode_bytes().hex()
+'01'
+>>> boolean(False).encode_bytes().hex()
+'00'
+```
 
 ##### Composite types
 
-Composite types hold combinations of or multiples of smaller types. The spec defines the following composite types (omitting `union` since it is not currently used in Eth2)
+Composite types hold combinations of or multiples of smaller types. The spec defines the composite types vector, list, bitvector, bitlist, union, and container. I will skip unions in the following as they are not currently used in Ethereum&nbsp;2.
 
-* **vector**: ordered fixed-length homogeneous collection, with `N` values
-    * notation `Vector[type, N]`, e.g. `Vector[uint64, N]`
-* **list**: ordered variable-length homogeneous collection, limited to `N` values
-    * notation `List[type, N]`, e.g. `List[uint64, N]`
+###### `Vector`
+
+A vector is an ordered fixed-length homogeneous collection with exactly `N` values. "Homogeneous" means that all the elements of a vector must be of the same type, but they do not need to be of the same size. For example, we could have a vector containing lists that each have different numbers of elements.
+
+In the SSZ spec a vector is denoted `Vector[type, N]`. For example `Vector[uint8, 32]` is a 32 element list of `uint8` types (bytes). The type can be anything, including other vectors or even containers.
+
+Vectors provide a good example of needing to know what kind of object you are deserialising before you attempt it. In the following example, the same string of bytes encodes both a four element set of two-byte integers, and an eight element set of one-byte integers. When we deserialise this we need to know which of these (or many other possibilities) we are expecting to get.
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint8, uint16, Vector
+>>> Vector[uint16, 4](1, 2, 3, 4).encode_bytes().hex()
+'0100020003000400'
+>>> Vector[uint8, 8](1, 0, 2, 0, 3, 0, 4, 0).encode_bytes().hex()
+'0100020003000400'
+```
+
+Fun fact: in early versions of the SSZ spec, vectors were called [tuples](https://github.com/ethereum/consensus-specs/pull/794).
+
+###### `List`
+
+A list is an ordered variable-length homogeneous collection with a maximum of `N` values.
+
+In the SSZ spec a list is denoted `List[type, N]`. For example, `List[uint64, 100]` is a list containing zero to one hundred `uint64` types.
+
+TODO: Length is required during Merkleization and Merkle proof generation with [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/merkle-proofs.md#generalized-merkle-tree-index).
+See: https://github.com/ethereum/consensus-specs/pull/1180
+
+[Proto comment](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216)
+
+> Lists have a "length" now. But artificial, serialization is still the same. It's a limit imposed on lists, and padded to (virtually) when doing hash-tree-root. The result is that we have simple balanced binary trees with fixed depth everywhere: we can index everything we like with static generalized indices! This should enable the SSZ partials to be simple and consistent.
+
+TODO: Plain lists and vectors serialise the same
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint64, List, Vector
+>>> List[uint8, 3](1, 2, 3).encode_bytes().hex()
+'010203'
+>>> Vector[uint8, 3](1, 2, 3).encode_bytes().hex()
+'010203'
+```
+
+TODO: overhead of using Lists over Vectors.
+
+```python
+>>> class Foo(Container):
+...     x: List[uint8, 3]
+>>> class Bar(Container):
+...     x: Vector[uint8, 3]
+>>> Foo(x = [1, 2, 3]).encode_bytes().hex()
+'04000000010203'
+>>> Bar(x = [1, 2, 3]).encode_bytes().hex()
+'010203'
+```
+
+
+
+###### `Bitvector`
+
 * **bitvector**: ordered fixed-length collection of `boolean` values, with `N` bits
     * notation `Bitvector[N]`
+
+###### `Bitlist`
+
 * **bitlist**: ordered variable-length collection of `boolean` values, limited to `N` bits
     * notation `Bitlist[N]`
+
+TODO: Need sentinal bit to know the exact bit count (we know the byte count from the length).
+
+*Note*: Both `Vector[boolean, N]` and `Bitvector[N]` are valid, yet distinct due to their different serialization requirements. Similarly, both `List[boolean, N]` and `Bitlist[N]` are valid, yet distinct. Generally `Bitvector[N]`/`Bitlist[N]` are preferred because of their serialization efficiencies.
 
 ###### `Container`
 
@@ -1769,6 +1840,14 @@ The `vector` and `bitvector` types have a fixed length, they contain exactly `N`
 
 ##### Variable and fixed size
 
+```
+>>> Vector[List[uint8,3],2]([1,2],[1,2,3]).encode_bytes().hex()
+'080000000a0000000102010203
+```
+
+See https://github.com/ethereum/consensus-specs/pull/484
+
+
 TODO
 
 ##### Aliases
@@ -1778,44 +1857,6 @@ TODO
 ##### Default values
 
 TODO
-
-#### Simple examples
-
-We can play with SSZ by taking advantage of the executable specification
-
-TODO
-
-##### Basic types
-
-```python
->>> from eth2spec.utils.ssz.ssz_typing import uint64, boolean
->>> uint64(0x0123456789abcdef).encode_bytes().hex()
-'efcdab8967452301'
->>> boolean(True).encode_bytes().hex()
-'01'
-```
-
-##### Composite types
-
-```python
->>> from eth2spec.utils.ssz.ssz_typing import uint32, uint64, List
->>> List[uint64, 16](1, 2, 3).encode_bytes().hex()
-'010000000000000002000000000000000300000000000000'
->>> List[uint32, 16](1, 0, 2, 0, 3, 0).encode_bytes().hex()
-'010000000000000002000000000000000300000000000000'
-```
-
-##### Lists vs vectors
-
-*Note*: Both `Vector[boolean, N]` and `Bitvector[N]` are valid, yet distinct due to their different serialization requirements. Similarly, both `List[boolean, N]` and `Bitlist[N]` are valid, yet distinct. Generally `Bitvector[N]`/`Bitlist[N]` are preferred because of their serialization efficiencies.
-
-```python
->>> from eth2spec.utils.ssz.ssz_typing import uint64, List, Vector
->>> List[uint64, 3](1, 2, 3).encode_bytes().hex()
-'010000000000000002000000000000000300000000000000'
->>> Vector[uint64, 3](1, 2, 3).encode_bytes().hex()
-'010000000000000002000000000000000300000000000000'
-```
 
 #### Worked example
 
