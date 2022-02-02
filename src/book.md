@@ -1634,7 +1634,7 @@ TODO
 A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Using the recipe to cook something is deserialisation.
 
 Serialisation is used for three main purposes on the beacon chain.
-1. Consensus: if you and I each have a datastructure in memory, such as the beacon state, how can we know if our datastructures are the same or not? All clients must use the same consensus serialisation. Note that this is also bound up with [merkleization](/part2/building_blocks/merkleization).
+1. Consensus: if you and I each have a data structure in memory, such as the beacon state, how can we know if our data structures are the same or not? All clients must use the same consensus serialisation. Note that this is also bound up with [merkleization](/part2/building_blocks/merkleization).
 2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it must be serialised for transmission and deserialised at the other end. All clients must use the same p2p serialisation, but it doesn't need to be the same as the consensus serialisation.
 3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clientsare free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
 
@@ -1698,7 +1698,7 @@ The last major change to SSZ was the adoption of offsets in [April 2019](https:/
 
 The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is maintained in the main Eth2 specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
 
-The ultimate goal of SSZ is to be able to represent complex internal datastructures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
+The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
 The formal properties that we require for SSZ to be useful for both consensus and communications areas defined in the [formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
   1. involutive: deserialise<$T$>(serialise<$T$>($O_1$)) = $O_1$  (required for communications), and
@@ -1747,7 +1747,7 @@ Composite types hold combinations of or multiples of smaller types. The spec def
 
 A `Container` is an "ordered heterogeneous collection of values". Basically, a `Container` can contain any arbitrary mix of types, including `Container`s.
 
-We define `Container`s using Python's dataclass notation with key&ndash;type pairs. For example, this is a [`Deposit`](/part3/containers/operations#deposit) container.
+We define `Container`s using Python's dataclass notation with key&ndash;type pairs. For example, this is a [`Deposit`](/part3/containers/operations#deposit) container. In the following examples I have indicated the underlying types in the appended comments.
 
 ```python
 class Deposit(Container):
@@ -1755,14 +1755,14 @@ class Deposit(Container):
     data: DepositData
 ```
 
-It contains [`DepositData`](/part3/containers/dependencies#depositdata) which is defined as follows (the comments show the underlying basic types).
+It contains [`DepositData`](/part3/containers/dependencies#depositdata) which is defined as follows.
 
 ```python
 class DepositData(Container):
-    pubkey: BLSPubkey                # Vector[uint8, 48]
+    pubkey: BLSPubkey                # Bytes48 / Vector[uint8, 48]
     withdrawal_credentials: Bytes32  # Vector[uint8, 32]
     amount: Gwei                     # uint64
-    signature: BLSSignature          # Vector[uint8, 96]
+    signature: BLSSignature          # Bytes96 / Vector[uint8, 96]
 ```
 
 The `vector` and `bitvector` types have a fixed length, they contain exactly `N` items, whereas the `list` and `bitlist` types have a variable length and contain up to `N` items.
@@ -1771,9 +1771,19 @@ The `vector` and `bitvector` types have a fixed length, they contain exactly `N`
 
 TODO
 
-#### Examples
+##### Aliases
+
+TODO
+
+##### Default values
+
+TODO
+
+#### Simple examples
 
 We can play with SSZ by taking advantage of the executable specification
+
+TODO
 
 ##### Basic types
 
@@ -1807,19 +1817,170 @@ We can play with SSZ by taking advantage of the executable specification
 '010000000000000002000000000000000300000000000000'
 ```
 
-#### Example
+#### Worked example
+
+To gather all of this together let's explore a worked example. I'd rather use a real example that make up a synthetic object, so we are going to look at the aggregate [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) which was included in the [block at slot 3080831](https://beaconcha.in/block/3080831#attestations) at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent `IndexedAttestation`.)
+
+##### The data structures
+
+The `IndexedAttestation` container looks like this.
 
 ```python
->>> from eth2spec.utils.ssz.ssz_typing import *
->>> from eth2spec.altair import mainnet
->>> from eth2spec.altair.mainnet import *
+class IndexedAttestation(Container):
+    attesting_indices: List[ValidatorIndex, MAX_VALIDATORS_PER_COMMITTEE]
+    data: AttestationData
+    signature: BLSSignature
 ```
+
+It contains an `AttestationData` container,
+
+```python
+class AttestationData(Container):
+    slot: Slot
+    index: CommitteeIndex
+    beacon_block_root: Root
+    source: Checkpoint
+    target: Checkpoint
+```
+
+which in turn contains two `Checkpoint` containers,
+
+```python
+class Checkpoint(Container):
+    epoch: Epoch
+    root: Root
+```
+
+##### The serialisation
+
+Now we have enough information to build the `IndexedAttestation` object and output its SSZ serialisation.
+
+```python
+from eth2spec.utils.ssz.ssz_typing import *
+from eth2spec.altair import mainnet
+from eth2spec.altair.mainnet import *
+
+attestation = IndexedAttestation(
+    attesting_indices = [33652, 59750, 92360],
+    data = AttestationData(
+        slot = 3080829,
+        index = 9,
+        beacon_block_root = '0x4f4250c05956f5c2b87129cf7372f14dd576fc152543bf7042e963196b843fe6',
+        source = Checkpoint (
+            epoch = 96274,
+            root = '0xd24639f2e661bc1adcbe7157280776cf76670fff0fee0691f146ab827f4f1ade'
+        ),
+        target = Checkpoint(
+            epoch = 96275,
+            root = '0x9bcd31881817ddeab686f878c8619d664e8bfa4f8948707cba5bc25c8d74915d'
+        )
+    ),
+    signature = '0xaaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437'
+)
+
+print(attestation.encode_bytes().hex())
+```
+
+The serialised blob of data that we get as output is (in hexadecimal):
+
+```
+e40000007d022f000000000009000000000000004f4250c05956f5c2b87129cf7372f14dd576fc15
+2543bf7042e963196b843fe61278010000000000d24639f2e661bc1adcbe7157280776cf76670fff
+0fee0691f146ab827f4f1ade13780100000000009bcd31881817ddeab686f878c8619d664e8bfa4f
+8948707cba5bc25c8d74915daaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3ac
+c888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a
+78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437748300000000000066e90000
+00000000c868010000000000
+```
+
+This can be transmitted as a string of bytes over the wire and, knowing at the other end that it represents an `IndexedAttestation`, reconstituted into an identical copy of the object.
+
+##### The serialisation unpacked
+
+Let's break down the serialisation into its parts. The first column is the byte-offset from the start of the byte string (in hexadecimal). Before each line I've indicated which part of the data structure it corresponds to, and I've translated the type aliases into their basic underlying datatypes. Remember that all integer types are little-endian, so `7d022f0000000000` is the hexadecimal number `0x2f027d`, which is 3080829 in decimal (the slot number).
+
+```
+Start of Part 1 (fixed size elements)
+   4-byte pointer to the variable length attestation.attesting_indices starting at 0xe4
+00 e4000000
+
+   attestation.data.slot: Slot / uint64
+04 7d022f0000000000
+
+   attestation.data.index: CommitteeIndex / uint64
+0c 0900000000000000
+
+   attestation.data.beacon_block_root: Root / Bytes32 / Vector[uint8, 32]
+14 4f4250c05956f5c2b87129cf7372f14dd576fc152543bf7042e963196b843fe6
+
+   attestation.data.source.epoch: Epoch / uint64
+34 1278010000000000
+
+   attestation.data.source.root: Root / Bytes32 / Vector[uint8, 32]
+3c d24639f2e661bc1adcbe7157280776cf76670fff0fee0691f146ab827f4f1ade
+
+   attestation.data.target.epoch: Epoch / uint64
+5c 1378010000000000
+
+   attestation.data.target.root: Root / Bytes32 / Vector[uint8, 32]
+64 9bcd31881817ddeab686f878c8619d664e8bfa4f8948707cba5bc25c8d74915d
+
+   attestation.signature: BLSSignature / Bytes96 / Vector[uint8, 96]
+84 aaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437
+
+Start of Part 2 (variable size elements)
+   attestation.attesting_indices: List[uint64, MAX_VALIDATORS_PER_COMMITTEE]
+e4 748300000000000066e9000000000000c868010000000000
+```
+
+The first thing to notice is that the `attesting_indices` list is variable size, so it is represented in Part&nbsp;1 by a placeholder pointing to where the actual data is. In this case, at 0xe4 bytes (228 bytes) from the start of the serialised data. The actual length of the list can be calculated as the length of the whole string (252 bytes) minus 228 bytes (the start of the list) divided by 8 bytes, one per element. Thus we recover our list of three validator indices.
+
+All the remaining items are fixed size, and are encoded in-place, including recursively encoding the fixed size `AttestationData` object, and its fixed size `Checkpoint` children.
+
+##### Multiple variable size objects
+
+It is instructive to see how container with multiple variable sized child objects is serialised. For this example we will make an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) object that contains two of the above `IndexAttestation` objects. This is a contrived example; this slashing report is not valid since the contents are duplicates.
+
+An `AttesterSlashing` container is defined as follows,
+
+```python
+class AttesterSlashing(Container):
+    attestation_1: IndexedAttestation
+    attestation_2: IndexedAttestation
+```
+
+and we can populate it and serialise it like this, using our previously defined `IndexedAttestation`, `attestation`.
+
+```python
+slashing = AttesterSlashing(
+    attestation_1 = attestation,
+    attestation_2 = attestation
+)
+
+print(slashing.encode_bytes().hex())
+```
+
+From this we get the following, again with the first column being the byte-offset within the byte string.
+
+```
+Start of Part 1 (fixed size elements)
+0000 08000000
+0004 04010000
+
+Start of Part 2 (variable size elements)
+0008 e40000007d022...
+0104 e40000007d022...
+```
+
+This time we have two variable length types, so they are both replaced by pointers to the start of the actual variable length data which appears in Part 2. The length of `attestation_1` is calculated as the difference between the two offsets, and the length of `attestation_2` is calculated as the length from its offset to the end of the string.
+
+The other thing to note is that, since `attestation_1` and `attestation_2` are identical, their serialisations within this compound object are identical, _including_ their internal offsets to their own variable length parts. That is, both attestations have variable length data at offset `0xe4` within their own serialisations. This offset is relative to the start of each sub-object's serialisation, not the entire string. This property simplifies recursive serialisation and deserialisation: a given object will have the same serialisation no matter what context it is found in.
 
 #### See also
 
 The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source.
 
-Some of the hostorical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not:
+Some of the historical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not:
   - [Possibly the first](https://ethresear.ch/t/discussion-p2p-message-serialization-standard/2781?u=benjaminion) substantial discussion around which serialisation scheme to adopt. It covers various alternatives, touches on the p2p vs. consensus issues, and rehearses some of the desirable properties.
   - An [early discussion of SSZ](https://github.com/ethereum/beacon_chain/issues/94) went over some of the issues and led into the discussion below.
   - [Proposal to use SSZ for consensus only](https://github.com/ethereum/consensus-specs/issues/129).
@@ -1827,9 +1988,7 @@ Some of the hostorical discussion threads around whether to use SSZ for both con
 
 Related resources:
   - An [SSZ encoding diagram](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
-  - Formal verification of the SSZ specification:
-    - [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md)
-    - [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz)
+  - Formal verification of the SSZ specification:[Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md), [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - Interactive SSZ serialiser/deserialiser [by ChainSafe](https://simpleserialize.com/) with all the containers for Phase&nbsp;0 and Altair available to play with.
 
@@ -2918,7 +3077,7 @@ class Validator(Container):
     withdrawable_epoch: Epoch  # When validator can withdraw funds
 ```
 
-This is the datastructure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
+This is the data structure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
 
 [TODO: link to effective balance]::
 
@@ -3582,7 +3741,7 @@ The hash function serves two purposes within the protocol. The main use, computa
 
 The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
 
-The naive way to create a digest of a datastructure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
+The naive way to create a digest of a data structure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
 
 At first sight, this all looks quite inefficient. Twice as much data needs to be hashed when tree hashing, and actual speeds are [4-6 times slower](https://github.com/ethereum/consensus-specs/pull/120) compared with the linear hash. However, it is good for [supporting light clients](https://github.com/ethereum/consensus-specs/issues/54), because it allows Merkle proofs to be constructed easily for subsets of the full state.
 
