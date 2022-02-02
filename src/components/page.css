@@ -96,7 +96,7 @@ h6 + p {
 
 h4 code {font-size: inherit; }
 
-h5 code {
+h5 code, h6 code {
   font-size: 110%;
 }
 
