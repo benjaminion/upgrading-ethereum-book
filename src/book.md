@@ -46,6 +46,7 @@ This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon 
 
 The "Ethereum 2.0" terminology is out of favour in some circles, but I don't really care. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction).
 
+<a id="british-english"></a>
 You will notice too that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
 ## Acknowledgements
@@ -1351,6 +1352,15 @@ There are no good outcomes here, which is why it is critical that we never have 
 #### Slashing
 
 As for slashing, once again running a majority client could be act of self-harm. In the unlikely event that a client implementation has a bug that leads to its validators becoming slashed en-masse, the [correlated slashing penalties](/part2/incentives/slashing#the-correlation-penalty) would be much more severe than if the same thing happened to those running a minority client.
+
+#### Another view
+
+Danny Ryan has presented a slightly [different angle](https://blog.ethereum.org/2022/01/31/finalized-no-33/) on client diversity that's insightful:
+
+> If a single client:
+>  - Does not exceed 66.6%, a fault/bug in a single client cannot be finalized.
+>  - Does not exceed 50%, a fault/bug in a single client’s forkchoice cannot dominate the head of the chain.
+>  - Does not exceed 33.3%, a fault/bug in a single client cannot disrupt finality.
 
 #### Epilogue
 
@@ -2659,7 +2669,7 @@ class Validator(Container):
     withdrawable_epoch: Epoch  # When validator can withdraw funds
 ```
 
-This is the datastructure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
+This is the data structure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
 
 [TODO: link to effective balance]::
 
@@ -3323,7 +3333,7 @@ The hash function serves two purposes within the protocol. The main use, computa
 
 The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
 
-The naive way to create a digest of a datastructure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
+The naive way to create a digest of a data structure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
 
 At first sight, this all looks quite inefficient. Twice as much data needs to be hashed when tree hashing, and actual speeds are [4-6 times slower](https://github.com/ethereum/consensus-specs/pull/120) compared with the linear hash. However, it is good for [supporting light clients](https://github.com/ethereum/consensus-specs/issues/54), because it allows Merkle proofs to be constructed easily for subsets of the full state.
 
