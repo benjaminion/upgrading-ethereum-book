@@ -1429,6 +1429,14 @@ TODO
 
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
 
+<div class="summary">
+
+ - TODO
+
+</div>
+
+#### Introduction
+
 Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
 Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
@@ -1627,6 +1635,16 @@ TODO
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
 
+<div class="summary">
+
+ - The beacon chain uses a novel serialisation method called Simple Serialize (SSZ).
+ - After much debate we chose to use SSZ for both consensus and communication.
+ - SSZ is not self-describing; you need to know in advance what you are deserialising.
+ - An offset scheme allows fast access to subsets of the data.
+ - SSZ plays nicely with Merkleization and generalised indices in Merkle proofs.
+
+</div>
+
 #### Introduction
 
 [Serialisation](https://en.wikipedia.org/wiki/Serialization) is the process of taking structured information (in our case, a data structure) and transforming it into a representation that can be stored or transmitted.
@@ -1634,9 +1652,9 @@ TODO
 A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Using the recipe to cook something is deserialisation.
 
 Serialisation is used for three main purposes on the beacon chain.
-1. Consensus: if you and I each have a data structure in memory, such as the beacon state, how can we know if our data structures are the same or not? All clients must use the same consensus serialisation. Note that this is also bound up with [merkleization](/part2/building_blocks/merkleization).
+1. Consensus: if you and I each have a data structure in memory, such as the beacon state, how can we know if our data structures are the same or not? All clients must use the same consensus serialisation. Note that this is also bound up with [Merkleization](/part2/building_blocks/merkleization).
 2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it must be serialised for transmission and deserialised at the other end. All clients must use the same p2p serialisation, but it doesn't need to be the same as the consensus serialisation.
-3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clientsare free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
+3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clients are free to choose their own API serialisation (for example, Prysm's original implementation used [Protocol Buffers](https://developers.google.com/protocol-buffers), but we have now agreed a [common format](https://github.com/ethereum/beacon-APIs).
 
 In addition, data must be serialised before being written to disk. Each client is free to do this internally however they wish.
 
@@ -1670,7 +1688,7 @@ In view of these concerns momentum was in favour of adopting a bespoke, tightly 
 
 ##### Serialisation for communications
 
-That decision made, the next big question was whether to use the same scheme for both consensus serialisation and peer-to-peer communications serialisation (the "wire-protocol"). This turned out to be finely balanced, and [good arguments](https://github.com/ethereum/consensus-specs/issues/129) were made in favour of using protobufs for p2p communication and SSZ for consensus.
+That decision made, the next big question was whether to use the same scheme for both consensus serialisation and peer-to-peer communications serialisation (the "wire-protocol"). This turned out to be finely balanced, and [good arguments](https://github.com/ethereum/consensus-specs/issues/129) were made in favour of using Protocol Buffers for p2p communication and SSZ for consensus.
 
 Discussion around this was extensive (see the references [below](#see-also)), but we eventually [decided](https://github.com/ethereum/eth2.0-pm/blob/master/eth2.0-implementers-calls/call_003.md#tentative-decisions) to use SSZ for p2p communications.
 
@@ -1678,7 +1696,7 @@ The factors that tipped the balance in favour of SSZ for communications were (1)
 
 On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205) "simplicity over efficiency". Maintaining two serialisation libraries is arguable more overhead than any potential gain from using different ones. Having said that, RLP is [still used](https://github.com/ethresearch/p2p/issues/15) in Eth2's discovery layer (since it is shared Eth1), so this argument loses some of its force.
 
-On the second, when we receive a message over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a de-serialise/re-serialise round trip.
+On the second, when we receive a message over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a deserialise/reserialise round trip.
 
 In the end, any concerns about inefficiencies caused by using SSZ for communications were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#encoding-strategies) on the wire.
 
@@ -1710,13 +1728,13 @@ The first property says that when we serialise an object of a certain type, and 
 
 The second says that if we serialise two objects of the same type and get the same result then the two objects are identical. Equivalently, if we have two different objects of the same type then their serialisations will differ. This is important for the consensus protocol.
 
-Beyond those basic functional requirements, other goals for SSZ are to be (relatively) simple, to create (fairly) compact serialisations, and to be compatible with [Merkleization](/part2/building_blocks/merkleization). It is also useful to be able to quickly access specific bits of data within the serialisation without deserialising the entire object. The adoption of offsets into SSZ improved it sperformance in this last respect.
+Beyond those basic functional requirements, other goals for SSZ are to be (relatively) simple, to create (fairly) compact serialisations, and to be compatible with [Merkleization](/part2/building_blocks/merkleization). It is also useful to be able to quickly access specific bits of data within the serialisation without deserialising the entire object. The adoption of offsets into SSZ improved its performance in this last respect.
 
-Unlike RLP, SSZ is not self-describing. You can decode the RLP data into a structured object without knowing in advance what that object looks like. This is not the case for SSZ: you must know in advance exactly what you are deserialising. In practice this has not been a problem in Eth2: we always know in advance what class of object a particular derialised blob of data corresponds to. A conseqauence of this is that, while in RLP two objects of different types cannot serialise to the same output, in SSZ they can. We'll see an example of this shortly.
+Unlike RLP, SSZ is not self-describing. You can decode the RLP data into a structured object without knowing in advance what that object looks like. This is not the case for SSZ: you must know in advance exactly what you are deserialising. In practice this has not been a problem in Eth2: we always know in advance what class of object a particular deserialised blob of data corresponds to. A consequence of this is that, while in RLP two objects of different types cannot serialise to the same output, in SSZ they can. We'll see an example of this shortly.
 
 #### Specification
 
-I don't plan to go into all details of SSZ, that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is for. We'll take a general overview and then dive into some examples.
+I don't plan to go into every last detail of SSZ &ndash; that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is for &ndash; rather, we'll take a general overview and then dive into a [worked example](#worked-example).
 
 The building blocks of SSZ are its basic types and its composite types.
 
@@ -1726,7 +1744,7 @@ SSZ's basic types are very simple and limited, comprising only the following two
   - Unsigned integers: a `uintN` is an `N`-bit unsigned integer, where `N` can be 8, 16, 32, 64, 128 or 256.
   - Booleans: a `boolean` is either `True` or `False`.
 
-The serialistion of basic types is very simple.
+The serialisation of basic types lives up to the "simple" name:
   - `uintN` types are encoded as the little-endian representation in `N/8` bytes. For example, the decimal number 12345 (`0x3039` in hexadecimal) as a `uint16` type is serialised as `0x3930` (two bytes). The same number as a `uint32` type is serialised as `0x39300000` (four bytes).
   - `boolean` types are always one byte and serialised as `0x01` for true and `0x00` for false.
 
@@ -1827,7 +1845,7 @@ The same consideration applies for lists and bitlists.
 
 A bitlist is an ordered variable-length collection of `boolean` values with a maximum of `N` bits. In the SSZ spec, a bitlist is denoted by `Bitlist[N]`.
 
-An interesting feature of bitlists is that they use a sentinal bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would know that the list length is between 9 and 16 bits, but that's all.
+An interesting feature of bitlists is that they use a sentinel bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would know that the list length is between 9 and 16 bits, but that's all.
 
 To resolve this problem, bitlist serialisation adds an extra `1` bit at the end of the list (which becomes the highest-order bit in the little-endian encoding). The exact length of the bitlist can then be found by ignoring any consecutive high-order zero bits and then stripping off the single sentinel bit.
 
@@ -1858,9 +1876,9 @@ As a consequence of the sentinel, we require an extra byte to serialise a bitlis
 
 ###### `Container`
 
-A `Container` is an "ordered heterogeneous collection of values". Basically, a `Container` can contain any arbitrary mix of types, including `Container`s.
+A container is an ordered heterogeneous collection of values. Basically, a `Container` can contain any arbitrary mix of types, including `Container`s.
 
-We define `Container`s using Python's dataclass notation with key&ndash;type pairs. For example, this is a [`Deposit`](/part3/containers/operations#deposit) container. In the following examples I have indicated the underlying types in the appended comments.
+We define containers using Python's dataclass notation with key&ndash;type pairs. For example, this is a [`Deposit`](/part3/containers/operations#deposit) container. In the following examples I have indicated the underlying types in the appended comments.
 
 ```python
 class Deposit(Container):
@@ -1868,7 +1886,7 @@ class Deposit(Container):
     data: DepositData
 ```
 
-It contains [`DepositData`](/part3/containers/dependencies#depositdata) which is defined as follows.
+The `Deposit` container contains [`DepositData`](/part3/containers/dependencies#depositdata) which is defined as follows.
 
 ```python
 class DepositData(Container):
@@ -1878,35 +1896,96 @@ class DepositData(Container):
     signature: BLSSignature          # Bytes96 / Vector[uint8, 96]
 ```
 
-The `vector` and `bitvector` types have a fixed length, they contain exactly `N` items, whereas the `list` and `bitlist` types have a variable length and contain up to `N` items.
+We'll see how containers are serialised in the [worked example](#worked-example), below.
 
-##### Variable and fixed size
+##### Variable and fixed size types
+
+First we need to know about fixed size and variable size types.
+  - Variable size types are lists, bitlists, and any type that contains a variable sized type.
+  - Fixed size types are everything else.
+
+This distinction is important when we serialise a compound type. The serialised output is created in two parts, as follows.
+  1. The serialisation of fixed length objects plus 32-bit pointers to any variable length objects.
+  2. The serialisation of any variable length objects.
+
+This split into fixed length parts and variable length parts came about as a result of the offset encoding described earlier: it allows fast access to specific fields within a serialised data structure without needing to deserialise the whole thing.
+
+As an example, consider the following container. It has a single fixed length `uint8` type, followed by a variable length `List[uint8,10]` type, followed again by a fixed length `uint8`.
 
 ```python
->>> Vector[List[uint8,3],2]([1,2],[1,2,3]).encode_bytes().hex()
-'080000000a0000000102010203
+>>> from eth2spec.utils.ssz.ssz_typing import uint8, List, Container
+>>> class Baz(Container):
+...     x: uint8
+...     y: List[uint8, 10]
+...     z: uint8
+>>> Baz(x = 1, y = [2, 3], z = 4).encode_bytes().hex()
+'0106000000040203'
 ```
 
-See https://github.com/ethereum/consensus-specs/pull/484
+We see that the serialisation contains an unexpected `06` byte and some zero bytes. To see where they come from I'll break down the output like this, where the first column is the byte number in the serialised string.
 
+```
+Start of Part 1 (fixed size elements)
+00 01       - The serialisation of x = uint8(3)
+01 06000000 - A 32-bit pointer to byte 6 (in little-endian format),
+              the start of the serialisation of y
+05 04       - The serialisation of z = uint8(4)
 
-TODO
+Start of Part 2 (variable size elements)
+06 0203     - The serialisation of y = List[uint8, N]([2, 3])
+```
+
+<a id="img_ssz_example_0"></a>
+<div class="image" style="width:60%">
+
+![Diagram of the serialisation of the Baz container](md/images/diagrams/ssz_example_0.svg)
+Serialisation of the `Baz` container. Fixed parts are done first with a pointer to the variable `List` data.
+
+</div>
+
+In Part&nbsp;1, instead of directly encoding the variable size list, it is replaced with a pointer to its serialisation in Part&nbsp;2. So, for any container, the size of Part&nbsp;1 is known and fixed no matter what kinds of variable size objects it contains. In addition, the lengths of the variable size objects can be deduced from the pointers in Part&nbsp;2 and the overall length of the serialisation string.
+
+It's not only containers that use this format, it applies to any type that contains variable size types. Here's a vector that contains list elements. I'll leave you to decode what's going on here as an exercise for the reader.
+
+```python
+>>> Vector[List[uint8,3],4]([1,2],[3,4,5],[],[6]).encode_bytes().hex()
+'10000000120000001500000015000000010203040506'
+```
 
 ##### Aliases
 
-TODO
+Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#aliases) here for completeness:
+
+> For convenience we alias:
+> 
+> * `bit` to `boolean`
+> * `byte` to `uint8` (this is a basic type)
+> * `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is *not* a basic type)
+> * `ByteList[N]` to `List[byte, N]`
+
+In the main beacon chain spec, a bunch of [custom types](/part3/config/types#table_custom_types) are also defined in terms of the standard SSZ types and aliases. For example, `Slot` is an SSZ `uint64` type, `BLSPubkey` is an SSZ `Bytes48` type, and so on.
 
 ##### Default values
 
-TODO
+Finally, each type has a default value. Once again directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#default-values):
+
+| Type | Default Value |
+| ---- | ------------- |
+| `uintN` | `0` |
+| `boolean` | `False` |
+| `Container` | `[default(type) for type in container]` |
+| `Vector[type, N]` | `[default(type)] * N` |
+| `Bitvector[N]` | `[False] * N` |
+| `List[type, N]` | `[]` |
+| `Bitlist[N]` | `[]` |
 
 #### Worked example
 
-To gather all of this together let's explore a worked example. I'd rather use a real example that make up a synthetic object, so we are going to look at the aggregate [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) which was included in the [block at slot 3080831](https://beaconcha.in/block/3080831#attestations) at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent `IndexedAttestation`.)
+To gather all of this together let's explore a worked example. I'd rather use a real example that make up a synthetic object, so we are going to look at the aggregate `IndexedAttestation` which was included in the [block at slot 3080831](https://beaconcha.in/block/3080831#attestations) at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation).)
 
 ##### The data structures
 
-The `IndexedAttestation` container looks like this.
+The [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) container looks like this.
 
 ```python
 class IndexedAttestation(Container):
@@ -1915,7 +1994,7 @@ class IndexedAttestation(Container):
     signature: BLSSignature
 ```
 
-It contains an `AttestationData` container,
+It contains an [`AttestationData`](/part3/containers/dependencies#attestationdata) container,
 
 ```python
 class AttestationData(Container):
@@ -1926,7 +2005,7 @@ class AttestationData(Container):
     target: Checkpoint
 ```
 
-which in turn contains two `Checkpoint` containers,
+which in turn contains two [`Checkpoint`](/part3/containers/dependencies#checkpoint) containers,
 
 ```python
 class Checkpoint(Container):
@@ -1936,7 +2015,7 @@ class Checkpoint(Container):
 
 ##### The serialisation
 
-Now we have enough information to build the `IndexedAttestation` object and output its SSZ serialisation.
+Now we have enough information to build the `IndexedAttestation` object and calculate its SSZ serialisation.
 
 ```python
 from eth2spec.utils.ssz.ssz_typing import *
@@ -1980,7 +2059,7 @@ This can be transmitted as a string of bytes over the wire and, knowing at the o
 
 ##### The serialisation unpacked
 
-Let's break down the serialisation into its parts. The first column is the byte-offset from the start of the byte string (in hexadecimal). Before each line I've indicated which part of the data structure it corresponds to, and I've translated the type aliases into their basic underlying datatypes. Remember that all integer types are little-endian, so `7d022f0000000000` is the hexadecimal number `0x2f027d`, which is 3080829 in decimal (the slot number).
+Let's break down the serialisation into its parts. The first column is the byte-offset from the start of the byte string (in hexadecimal). Before each line I've indicated which part of the data structure it corresponds to, and I've translated the type aliases into their basic underlying SSZ types. Remember that all integer types are little-endian, so `7d022f0000000000` is the hexadecimal number `0x2f027d`, which is 3080829 in decimal (the slot number).
 
 ```
 Start of Part 1 (fixed size elements)
@@ -2022,7 +2101,7 @@ All the remaining items are fixed size, and are encoded in-place, including recu
 
 ##### Multiple variable size objects
 
-It is instructive to see how container with multiple variable sized child objects is serialised. For this example we will make an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) object that contains two of the above `IndexAttestation` objects. This is a contrived example; this slashing report is not valid since the contents are duplicates.
+It is instructive to see how container with multiple variable sized child objects is serialised. For this example we will make an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) object that contains two of the above `IndexedAttestation` objects. This is a contrived example; this slashing report is not valid since the contents are duplicates.
 
 An `AttesterSlashing` container is defined as follows,
 
@@ -2071,7 +2150,7 @@ Some of the historical discussion threads around whether to use SSZ for both con
 
 Related resources:
   - An [SSZ encoding diagram](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
-  - Formal verification of the SSZ specification:[Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md), [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
+  - Formal verification of the SSZ specification: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md), [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - Interactive SSZ serialiser/deserialiser [by ChainSafe](https://simpleserialize.com/) with all the containers for Phase&nbsp;0 and Altair available to play with.
 
@@ -2225,6 +2304,8 @@ Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`
 Regarding "unsigned", there was [much discussion](https://github.com/ethereum/consensus-specs/issues/626) around whether Eth2 should use signed or unsigned integers, and eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertently causing underflows since negative numbers are forbidden.
 
 And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](https://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`, and is really a `byte` type.
+
+<a id="table_custom_types"></a>
 
 | Name                 | SSZ equivalent | Description                                                |
 | -                    | -              | -                                                          |
@@ -3810,7 +3891,7 @@ SHA256 was [chosen](https://github.com/ethereum/consensus-specs/pull/779) as the
 
 There was a lot of [discussion](https://github.com/ethereum/consensus-specs/issues/612) about this choice early in the design process. The [original plan](https://github.com/ethereum/consensus-specs/pull/11) had been to use the BLAKE2b-512 hash function &ndash; that being a modern hash function that's faster than SHA3 &ndash; and to move to a STARK/SNARK friendly hash function at some point (such as [MiMC](https://ethresear.ch/t/hash-based-vdfs-mimc-and-starks/2337)). However, to keep interoperability with Eth1, in particular for the implementation of the deposit contract, the hash function was [changed to Keccak256](https://github.com/ethereum/consensus-specs/issues/151). Finally, we [settled on SHA256](https://github.com/ethereum/consensus-specs/pull/779) as having even broader compatibility.
 
-The hash function serves two purposes within the protocol. The main use, computationally, is in Merleization, the computation of hash tree roots, which is ubiquitous in the protocol. Its other use is to harden the randomness used in various places.
+The hash function serves two purposes within the protocol. The main use, computationally, is in Merkleization, the computation of hash tree roots, which is ubiquitous in the protocol. Its other use is to harden the randomness used in various places.
 
 |||
 |-|-|
