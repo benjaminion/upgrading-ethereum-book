@@ -1694,6 +1694,8 @@ Also in [November 2018](https://github.com/ethereum/consensus-specs/pull/139) we
 
 The last major change to SSZ was the adoption of offsets in [April 2019](https://github.com/ethereum/consensus-specs/pull/787). This came from a scheme, [Simple Offset Serialisation](https://gist.github.com/karalabe/3a25832b1413ee98daad9f0c47be3632), previously proposed by Péter Szilágyi. The idea is to split the objects we are serialising according to whether they are fixed length or variable length. The serialisation then has two sections. The first section contains both actual serialisations of any fixed length objects, and pointers to the serialisations of any variable length objects. The second section contains the serialisations of the variable length objects. The motivation for this is to allow fast access to arbitrary parts of the serialised data without having to deserialise the whole structure.
 
+There was one big subsequent re-work of the SSZ spec in [June 2019](https://github.com/ethereum/consensus-specs/pull/1180) where SSZ lists were required to have a maximum length specified, and bitlist and bitvector types [were added](https://github.com/ethereum/consensus-specs/pull/1224).
+
 #### Overview
 
 The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is maintained in the main Eth2 specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
@@ -1748,7 +1750,7 @@ Composite types hold combinations of or multiples of smaller types. The spec def
 
 A vector is an ordered fixed-length homogeneous collection with exactly `N` values. "Homogeneous" means that all the elements of a vector must be of the same type, but they do not need to be of the same size. For example, we could have a vector containing lists that each have different numbers of elements.
 
-In the SSZ spec a vector is denoted `Vector[type, N]`. For example `Vector[uint8, 32]` is a 32 element list of `uint8` types (bytes). The type can be anything, including other vectors or even containers.
+In the SSZ spec a vector is denoted by `Vector[type, N]`. For example `Vector[uint8, 32]` is a 32 element list of `uint8` types (bytes). The type can be anything, including other vectors or even containers.
 
 Vectors provide a good example of needing to know what kind of object you are deserialising before you attempt it. In the following example, the same string of bytes encodes both a four element set of two-byte integers, and an eight element set of one-byte integers. When we deserialise this we need to know which of these (or many other possibilities) we are expecting to get.
 
@@ -1766,26 +1768,23 @@ Fun fact: in early versions of the SSZ spec, vectors were called [tuples](https:
 
 A list is an ordered variable-length homogeneous collection with a maximum of `N` values.
 
-In the SSZ spec a list is denoted `List[type, N]`. For example, `List[uint64, 100]` is a list containing zero to one hundred `uint64` types.
+In the SSZ spec a list is denoted by `List[type, N]`. For example, `List[uint64, 100]` is a list containing anywhere between zero and one hundred `uint64` types.
 
-TODO: Length is required during Merkleization and Merkle proof generation with [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/merkle-proofs.md#generalized-merkle-tree-index).
-See: https://github.com/ethereum/consensus-specs/pull/1180
+Note that the maximum length parameter, `N`, on lists is [not used](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216) in serialisation or deserialisation. It is used, however, in Merkleization, and in particular enables [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/merkle-proofs.md#generalized-merkle-tree-index) in Merkle proof generation.
 
-[Proto comment](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216)
+[TODO: link to Merkleization and generalised indices]::
 
-> Lists have a "length" now. But artificial, serialization is still the same. It's a limit imposed on lists, and padded to (virtually) when doing hash-tree-root. The result is that we have simple balanced binary trees with fixed depth everywhere: we can index everything we like with static generalized indices! This should enable the SSZ partials to be simple and consistent.
-
-TODO: Plain lists and vectors serialise the same
+Both vectors and lists have the same serialisation when they are stand-alone objects:
 
 ```python
->>> from eth2spec.utils.ssz.ssz_typing import uint64, List, Vector
->>> List[uint8, 3](1, 2, 3).encode_bytes().hex()
+>>> from eth2spec.utils.ssz.ssz_typing import uint8, List, Vector
+>>> List[uint8, 100](1, 2, 3).encode_bytes().hex()
 '010203'
 >>> Vector[uint8, 3](1, 2, 3).encode_bytes().hex()
 '010203'
 ```
 
-TODO: overhead of using Lists over Vectors.
+So why not use lists everywhere? Well, since lists are variable sized objects in SSZ, they are encoded differently from fixed sized vectors when contained within another object, so there is a small overhead. The container `Foo` holding the variable sized list is encoded with an extra four byte offset at the start.
 
 ```python
 >>> class Foo(Container):
@@ -1798,21 +1797,64 @@ TODO: overhead of using Lists over Vectors.
 '010203'
 ```
 
-
-
 ###### `Bitvector`
 
-* **bitvector**: ordered fixed-length collection of `boolean` values, with `N` bits
-    * notation `Bitvector[N]`
+A bitvector is an ordered fixed-length collection of `boolean` values with `N` bits. In the SSZ spec, a bitvector is denoted by `Bitvector[N]`.
+
+It's not obvious from the spec, but bitvectors use little-endian bit format:
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import Bitvector
+>>> Bitvector[8]([0,0,0,0,0,0,0,1]).encode_bytes().hex()
+'80'
+```
+
+Bitvectors are encoded into the minimum necessary number of whole bytes (`N // 8`) and padded with zeroes in the high bits if `N` is not a multiple of 8.
+
+As noted in the spec, functionally we could use either `Vector[boolean, N]` or `Bitvector[N]` to represent a list of bits. However, the latter will have a serialisation up to eight times shorter in practice since the former will use a whole byte per bit.
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import Vector, Bitvector, boolean
+>>> Bitvector[5]([1,0,1,0,1]).encode_bytes().hex()
+'15'
+>>> Vector[boolean,5]([1,0,1,0,1]).encode_bytes().hex()
+'0100010001'
+```
+
+The same consideration applies for lists and bitlists.
 
 ###### `Bitlist`
 
-* **bitlist**: ordered variable-length collection of `boolean` values, limited to `N` bits
-    * notation `Bitlist[N]`
+A bitlist is an ordered variable-length collection of `boolean` values with a maximum of `N` bits. In the SSZ spec, a bitlist is denoted by `Bitlist[N]`.
 
-TODO: Need sentinal bit to know the exact bit count (we know the byte count from the length).
+An interesting feature of bitlists is that they use a sentinal bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would know that the list length is between 9 and 16 bits, but that's all.
 
-*Note*: Both `Vector[boolean, N]` and `Bitvector[N]` are valid, yet distinct due to their different serialization requirements. Similarly, both `List[boolean, N]` and `Bitlist[N]` are valid, yet distinct. Generally `Bitvector[N]`/`Bitlist[N]` are preferred because of their serialization efficiencies.
+To resolve this problem, bitlist serialisation adds an extra `1` bit at the end of the list (which becomes the highest-order bit in the little-endian encoding). The exact length of the bitlist can then be found by ignoring any consecutive high-order zero bits and then stripping off the single sentinel bit.
+
+As an example, this bitlist with three elements is encoded into a single byte. To deserialise this, we take the total length in bits (eight), skip the four high-order zero bits, skip the sentinel bit, and then our list comprises the remaining three bits.
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import Bitlist
+>>> Bitlist[100]([0,0,0]).encode_bytes().hex()
+'08'
+```
+
+<a id="img_bitlist"></a>
+<div class="image" style="width: 60%">
+
+![A diagram showing how the bitlist sentinel works](md/images/diagrams/bitlist.svg)
+The sentinel bit indicates the end of the bitlist. All bits beyond the sentinel are zero.
+
+</div>
+
+As a consequence of the sentinel, we require an extra byte to serialise a bitlist if its actual length is a multiple of eight (irrespective of the maximum length). This is not the case for a bitvector.
+
+```python
+>>> Bitlist[8]([0,0,0,0,0,0,0,0]).encode_bytes().hex()
+'0001'
+>>> Bitvector[8]([0,0,0,0,0,0,0,0]).encode_bytes().hex()
+'00'
+```
 
 ###### `Container`
 
@@ -1840,7 +1882,7 @@ The `vector` and `bitvector` types have a fixed length, they contain exactly `N`
 
 ##### Variable and fixed size
 
-```
+```python
 >>> Vector[List[uint8,3],2]([1,2],[1,2,3]).encode_bytes().hex()
 '080000000a0000000102010203
 ```
