@@ -96,7 +96,7 @@ h6 + p {
 
 h4 code {font-size: inherit; }
 
-h5 code {
+h5 code, h6 code {
   font-size: 110%;
 }
 
@@ -104,15 +104,11 @@ div.image {
   text-align: center;
   padding: 0;
   margin: 3ex auto;
+  font-style: italic;
 }
 
 div.image img {
   width: 100%;
-}
-
-div.image span {
-  display: inline;
-  font-style: italic;
 }
 
 table {
