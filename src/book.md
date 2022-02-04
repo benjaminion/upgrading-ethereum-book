@@ -1629,7 +1629,7 @@ So, we had the freedom to choose a new serialisation protocol. What kind of deci
 
 ##### Serialisation for consensus
 
-Starting with serialisation in the consensus protocol, the fist big question was whether to adopt an existing off-the-shelf protocol or to roll our own.
+Starting with serialisation in the consensus protocol, the first big question was whether to adopt an existing off-the-shelf protocol or to roll our own.
 
 One major issue with many [existing schemes](https://notes.ethereum.org/15_FcGc0Rq-GuxaBV5SP2Q?view) is that they do not guarantee that the serialisation is deterministic: they sometimes re-order fields in unpredictable ways. This makes them totally unsuitable for consensus; the same data must result in the same output every time.
 
