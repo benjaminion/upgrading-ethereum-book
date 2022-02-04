@@ -276,12 +276,21 @@ div.summary {
 @media print {
   html, body, main, div.main-content {
     overflow: visible !important;
-    width: initial !important;
+    width: 100% !important;
     max-width: initial !important;
     min-width: initial !important;
     margin: initial !important;
     padding: initial !important;
-    font-size: initial !important;
+  }
+  div.main-content {
+    display: block !important;
+    font-size: 12pt !important;
+    padding: 0 12mm !important;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    position: initial !important;
+    break-after: avoid; /* Not working with Chrome? */
+    page-break-after: avoid;
   }
   td, th {
     color: inherit;
@@ -295,5 +304,8 @@ div.summary {
   }
   a[rel*="external"]::after {
     content: "";
+  }
+  a.anchor {
+    display: none;
   }
 }
