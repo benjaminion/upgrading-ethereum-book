@@ -1935,10 +1935,10 @@ Start of Part 2 (variable size elements)
 06 0203     - The serialisation of y = List[uint8, N]([2, 3])
 ```
 
-<a id="img_ssz_example_0"></a>
+<a id="img_ssz_examples_baz"></a>
 <div class="image" style="width:60%">
 
-![Diagram of the serialisation of the Baz container](md/images/diagrams/ssz_example_0.svg)
+![Diagram of the serialisation of the Baz container](md/images/diagrams/ssz_examples_Baz.svg)
 Serialisation of the `Baz` container. Fixed parts are done first with a pointer to the variable `List` data.
 
 </div>
@@ -2043,7 +2043,7 @@ attestation = IndexedAttestation(
 print(attestation.encode_bytes().hex())
 ```
 
-The serialised blob of data that we get as output is (in hexadecimal):
+The resulting serialised blob of data that represents this `IndexedAttestation` object is (in hexadecimal):
 
 ```
 e40000007d022f000000000009000000000000004f4250c05956f5c2b87129cf7372f14dd576fc15
@@ -2055,7 +2055,7 @@ c888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a
 00000000c868010000000000
 ```
 
-This can be transmitted as a string of bytes over the wire and, knowing at the other end that it represents an `IndexedAttestation`, reconstituted into an identical copy of the object.
+This can be transmitted as a string of bytes over the wire and, knowing at the other end that it represents an `IndexedAttestation`, reconstituted into an identical copy.
 
 ##### The serialisation unpacked
 
@@ -2099,6 +2099,14 @@ The first thing to notice is that the `attesting_indices` list is variable size,
 
 All the remaining items are fixed size, and are encoded in-place, including recursively encoding the fixed size `AttestationData` object, and its fixed size `Checkpoint` children.
 
+<a id="img_ssz_examples_indexedattestation"></a>
+<div class="image" style="width:72%">
+
+![Diagram of the serialisation of the IndexedAttestation container](md/images/diagrams/ssz_examples_IndexedAttestation.svg)
+Serialisation of the `IndexedAttestation` container.
+
+</div>
+
 ##### Multiple variable size objects
 
 It is instructive to see how container with multiple variable sized child objects is serialised. For this example we will make an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) object that contains two of the above `IndexedAttestation` objects. This is a contrived example; this slashing report is not valid since the contents are duplicates.
@@ -2137,6 +2145,14 @@ Start of Part 2 (variable size elements)
 This time we have two variable length types, so they are both replaced by pointers to the start of the actual variable length data which appears in Part 2. The length of `attestation_1` is calculated as the difference between the two offsets, and the length of `attestation_2` is calculated as the length from its offset to the end of the string.
 
 The other thing to note is that, since `attestation_1` and `attestation_2` are identical, their serialisations within this compound object are identical, _including_ their internal offsets to their own variable length parts. That is, both attestations have variable length data at offset `0xe4` within their own serialisations. This offset is relative to the start of each sub-object's serialisation, not the entire string. This property simplifies recursive serialisation and deserialisation: a given object will have the same serialisation no matter what context it is found in.
+
+<a id="img_ssz_examples_indexedattestation"></a>
+<div class="image" style="width:60%">
+
+![Diagram of the serialisation of the AttestaterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
+Serialisation of the `AttestaterSlashing` container.
+
+</div>
 
 #### See also
 
