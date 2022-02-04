@@ -275,6 +275,7 @@ div.summary {
 
 @media print {
   html, body, main, div.main-content {
+    display: block !important;
     overflow: visible !important;
     width: 100% !important;
     max-width: initial !important;
@@ -283,7 +284,6 @@ div.summary {
     padding: initial !important;
   }
   div.main-content {
-    display: block !important;
     font-size: 12pt !important;
     padding: 0 12mm !important;
   }
