@@ -308,4 +308,19 @@ div.summary {
   a.anchor {
     display: none;
   }
+  a.footnote-backref {
+    display: none;
+  }
+  /* Undo code styling */
+  pre[class*="language-"] {
+    background: none;
+    overflow: hidden;
+  }
+  pre[class*="language-"] code {
+    color: black !important;
+    font-size: 75% !important;
+  }
+  pre[class*="language-"] code span {
+    color: black !important;
+  }
 }
