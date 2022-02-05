@@ -157,31 +157,6 @@ TODO
 
 [TODO: That paper is a great starting place for an exposition of PoS]::
 
-<!-- What problems are we solving?
-
-#### Nothing at stake
-
-One of the issues that had to be solved in order to make Proof of Stake practical was the "nothing at stake" problem. Under Proof of Work, creating a block is expensive, requiring a huge amount of hash power. Under Proof of Stake, building a block is essentially free. This means that, if the network forks, a staker might as well build blocks on top of every fork: there is nothing to lose and perhaps much to gain - you never want to be building on a fork that later gets orphaned.
-
-#### Long-range attacks
-
-The benefits of knowing your validator set
-
-#### Other stuff
-
-Types of participant.
-  - Honest
-  - Economically rational
-  - Attacker
-
-One type of attack:
- - Vlad "A pile of external capital would have to come into the system to attack the blockchain"
-
-Bribing attack:
- - Vlad: "With the bribe attack, the question became “what is the price of bribing the currently existing nodes to get the desired outcome?”"
-
--->
-
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
 TODO
@@ -194,23 +169,7 @@ TODO
 
 TODO
 
-#### Resources
-
- - The original [Casper FFG paper](https://arxiv.org/abs/1710.09437) covers the Ethereum&nbsp;2 implementation fairly closely, although it was originally intended to be an overlay on the PoW chain.
- - Although this does not reflect the current implementation, it contains some good insights and background: [Minimal Slashing Conditions](https://medium.com/@VitalikButerin/minimal-slashing-conditions-20f0b500fc6c). In particular, the relationship between Casper FFG and traditional BFT consensus is more evident.
-
 ### Finality <!-- /part2/consensus/finality* -->
-
-<!--
-
-(my take) Finality requires two rounds as we need to agree, then we need to agree that we have agreed.
-
- - hear from M validators that they vote for red
- - but did each of them hear from M validators that they vote for red?
- - can only know once you've heard from M validators that they heard from M validators that they voted for red.
- - Blue eyes problem: https://www.popularmechanics.com/science/math/a26557/riddle-of-the-week-27-blue-eyed-islanders/ or https://xkcd.com/blue_eyes.html (solution - but give it a couple of hours thought first! https://xkcd.com/solution.html)
-
--->
 
 TODO
 
@@ -1428,14 +1387,6 @@ TODO
 TODO
 
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
-
-<div class="summary">
-
- - TODO
-
-</div>
-
-#### Introduction
 
 Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
@@ -7153,28 +7104,3 @@ TODO
 ## Glossary <!-- /appendices/reference/glossary* -->
 
 TODO
-
-Gwei
-
-Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, transaction fees burned and so forth is sometimes referred to as inflation.
-
-Increment (rewards contect)
-
- - Merkleise/ize
- - beacon state
- - slashed
- - validator
- - effective balance
- - Eth1
- - Eth2
- - Deposit contract
- - Phase&nbsp;0
- - Altair
- - Fork
- - Light client
- - Sync committee
- - Aggregate signature
- - Execution client
- - Beacon node
- - Validator client
- - Remote signer
