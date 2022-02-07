@@ -1307,6 +1307,8 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 
 #### Diversity makes us all stronger
 
+Just as diversity in biological ecosystems makes them more resilient, and monocultures make them very fragile &ndash; yes, I've been watching David Attenborough &ndash;, so it is with Ethereum staking.
+
 It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](/part2/incentives/slashing#the-correlation-penalty) provide a strong encouragement to diversify the network as much as possible.
 
 For example, the inactivity leak is much more likely to occur on a network in which a single client implementation runs over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak that penalises those running the majority (offline) client most harshly.
