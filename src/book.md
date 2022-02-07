@@ -1307,6 +1307,8 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 
 #### Diversity makes us all stronger
 
+Just as diversity in biological ecosystems makes them more resilient, and monocultures make them very fragile &ndash; yes, I've been watching David Attenborough &ndash;, so it is with Ethereum staking.
+
 It is not unintentional that both the [inactivity leak](/part2/incentives/inactivity) and the slashing [correlation penalty](/part2/incentives/slashing#the-correlation-penalty) provide a strong encouragement to diversify the network as much as possible.
 
 For example, the inactivity leak is much more likely to occur on a network in which a single client implementation runs over 33% of validators, or a single staking operator controls over 33% of validators, or over 33% of validators are deployed to the same hosting infrastructure. All these scenarios constitute single points of failure that could prevent the beacon chain from finalising and lead to a leak that penalises those running the majority (offline) client most harshly.
@@ -1914,7 +1916,7 @@ It's not only containers that use this format, it applies to any type that conta
 Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#aliases) here for completeness:
 
 > For convenience we alias:
-> 
+>
 > * `bit` to `boolean`
 > * `byte` to `uint8` (this is a basic type)
 > * `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is *not* a basic type)
@@ -2127,9 +2129,49 @@ Other SSZ resources:
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
-### Merkleization <!-- /part2/building_blocks/merkleization* -->
+### Magical Merkleization <!-- /part2/building_blocks/merkleization -->
 
-TODO
+<div class="summary">
+
+ - TODO
+
+</div>
+
+#### Introduction
+
+When discussing [SSZ](/part2/building_blocks/ssz), I asserted that serialisation is important for consensus without going into the details. In this section we will unpack that and take a deep dive into how Ethereum&nbsp;2 nodes know that they share a view of the world.
+
+Let's say that you and I want to compare our beacon states to see if we have identical views of the world or not. One way we could do this is to serialise our respective beacon states and send them to each other, and then to a byte-by-byte comparison. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the network. This is completely impractical for a global consensus protocol.
+
+What we need is a _digest_ of the state: a short version that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. If we are to go down this route, then the digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
+
+Thankfully, such digests exist in the form of [cryptographic hash functions](https://en.wikipedia.org/wiki/Cryptographic_hash_function). These take a (potentially) large amount of input data and mangle it up into a small number of bytes, typically 32, that for all practical purposes uniquely fingerprint the data.
+
+Armed with such a hash function we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending the data over the network. Now we only need to exchange and compare our very short, 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
+
+This process is very common, and was an early candidate for consensus purposes in Ethereum&nbsp;2, though it was apparent [fairly early](https://github.com/ethereum/consensus-specs/blame/24c8a53b5c7be0248015413b6c0f8586e79d6b67/specs/casper_sharding_v2.1.md#L588) that there might be better approaches.
+
+One problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially an enormous overhead, and was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
+
+Ultimately, that approach was abandoned in favour of an approach called "tree hashing", which later became known as Merkleization[^fn-merkleization-name].
+
+[^fn-merkleization-name]: The name derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
+
+    I believe the noun version "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+
+TODO: define the term state root in the above.
+
+For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
+  1. Caching
+  2. Light client firendly
+
+TODO: Link to array of hash functions considered, /part3/helper/crypto#hash
+
+#### Development
+
+  - https://github.com/ethereum/consensus-specs/issues/54
+  - https://github.com/ethereum/consensus-specs/pull/120
+
 
 ### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
 
