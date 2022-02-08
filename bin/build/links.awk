@@ -20,6 +20,8 @@
 #   ../bin/build/links.awk book.md book.md
 #
 
+@load "filefuncs"
+
 BEGIN {
     # /contents is OK as a page, but will not be picked up automatically
     anchors["/contents"] = 1
@@ -28,6 +30,10 @@ BEGIN {
 
     # Used for skipping code blocks
     in_code = 0
+
+    # For checking image links
+    filepath = ARGV[1]
+    gsub(/[^/]+$/, "", filepath)
 }
 
 # Path needs to be set on both passes
@@ -80,12 +86,20 @@ in_code { next }
 
 # Any empty links
 /\[[^]]+\]\(\)/ {
-    print("Empty link, line " FNR)
+    print "Empty link, line " FNR
 }
 
 # Anything pointing to localhost (oops)
 /\[[^]]+\]\([^)]*localhost[^)]*\)/ {
-    print("Link to localhost, line " FNR)
+    print "Link to localhost, line " FNR
+}
+
+# Check for existence of linked image files
+/!\[[^]]+\]\([^)]+\)/ {
+    imagelink = gensub(/!\[[^]]+\]\(([^)]+)\)/, "\\1", "1")
+    if (stat(filepath imagelink, fdata) != 0) {
+        print "Nonexistant image file: " imagelink ", line " FNR
+    }
 }
 
 # Check anchors exist
@@ -111,16 +125,16 @@ in_code { next }
             }
 
             if (anchors[anchor] != 1) {
-                print("Anchor not found, line " FNR ": " name)
+                print "Anchor not found, line " FNR ": " name
             }
         } else if (match(partial, /\[[^]]+\]\(https[^)]+\)/)) {
             # Do nothing
         } else if (match(partial, /\[[^]]+\]\(http[^)]+\)/)) {
-            print ("HTTP link, line " FNR)
+            print "HTTP link, line " FNR
         } else if (match(partial, /\[[^]]+\]\(md\/images\/[^)]+\)/)) {
             # Do nothing - assume it's a well-formed image link
         } else {
-            print ("Suspicious link, line " FNR)
+            print "Suspicious link, line " FNR
         }
 
         $0 = substr($0, rstart + rlength)
