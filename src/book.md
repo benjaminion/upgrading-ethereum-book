@@ -2173,6 +2173,36 @@ TODO: Link to array of hash functions considered, /part3/helper/crypto#hash
   - https://github.com/ethereum/consensus-specs/pull/120
 
 
+#### Chunks
+
+TODO
+
+#### `merkleize()`
+
+Takes a series of chunks and forms them into a Merkle tree, returning the root of that tree.
+
+Not actually rigorously defined in the spec - the description of the `merkleize()` function presupposes that you know how to make a Merkle tree.
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import *
+>>> from eth2spec.utils.merkle_minimal import zerohashes, merkleize_chunks, get_merkle_root
+>>> from eth2spec.utils.hash_function import hash
+>>> a = uint256(1)
+>>> b = a.to_bytes(length = 32, byteorder='little')
+>>> merkleize_chunks([b], 1).hex()
+'0100000000000000000000000000000000000000000000000000000000000000'
+
+>>> merkleize_chunks([b], 2).hex()
+'16abab341fb7f370e27e4dadcf81766dd0dfd0ae64469477bb2cf6614938b2af'
+>>> hash(b + zero).hex()
+'16abab341fb7f370e27e4dadcf81766dd0dfd0ae64469477bb2cf6614938b2af'
+
+>>> merkleize_chunks([b], 4).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+>>> hash(hash(b + zero) + hash(zero + zero)).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+```
+
 ### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
 
 TODO
