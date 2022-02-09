@@ -282,7 +282,7 @@ One of the few attractive aspects of Proof of Work is the simplicity of its econ
 By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
 
 1. The most fundamental economic component is the [stake](/part2/incentives/staking) itself.
-2. Within the protocol, the stake is represented in validator [balances](/part2/incentives/balances)) in particular a quantity called the "effective balance" that is the actual measure of the influence a particular validator has on the protocol.
+2. Within the protocol, the stake is represented in validator [balances](/part2/incentives/balances), in particular a quantity called the "effective balance" that is the actual measure of the influence a particular validator has on the protocol.
 3. Similarly to proof of work, the protocol issues new coins to provide the incentives we are discussing. We'll look at this in the section on [issuance](/part2/incentives/issuance).
 4. An array of [rewards](/part2/incentives/rewards) is used to incentivise desirable behaviours such as publishing beacon blocks and timely attestations.
 5. [Penalties](/part2/incentives/penalties) are used to disincentivise undesirable behaviours such as failing to make attestations, or making late or incorrect attestations.
