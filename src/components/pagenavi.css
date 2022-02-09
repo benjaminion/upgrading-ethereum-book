@@ -38,3 +38,9 @@ div.page-navi > ul > li {
     display: none;
   }
 }
+
+@media screen and (max-width: 1200px) {
+  div.page-navi {
+    display: none;
+  }
+}

@@ -63,3 +63,9 @@ nav.sidebar div.sidebar-title a:hover {
     display: none;
   }
 }
+
+@media screen and (max-width: 1200px) {
+  nav.sidebar {
+    display: none;
+  }
+}
