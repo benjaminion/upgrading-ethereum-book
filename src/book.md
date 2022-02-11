@@ -1055,7 +1055,7 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 <div class="summary">
 
- - When the beacon chain is not finalising it enters a special "inactivity leak mode".
+ - When the beacon chain is not finalising it enters a special "inactivity leak" mode.
  - Attesters receive no rewards. Non-participating validators receive increasingly large penalties based on their track records.
  - This is designed to eventually restore finality in the event of a permanent failure of large numbers of validators.
 
