@@ -2108,8 +2108,8 @@ Another thing to note is that, since `attestation_1` and `attestation_2` are ide
 <a id="img_ssz_examples_indexedattestation"></a>
 <div class="image" style="width:60%">
 
-![Diagram of the serialisation of the AttestaterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
-Serialisation of the `AttestaterSlashing` container.
+![Diagram of the serialisation of the AttesterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
+Serialisation of the `AttesterSlashing` container.
 
 </div>
 
