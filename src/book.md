@@ -2141,29 +2141,84 @@ Other SSZ resources:
 
 When discussing [SSZ](/part2/building_blocks/ssz), I asserted that serialisation is important for consensus without going into the details. In this section we will unpack that and take a deep dive into how Ethereum&nbsp;2 nodes know that they share a view of the world.
 
-Let's say that you and I want to compare our beacon states to see if we have identical views of the world or not. One way we could do this is to serialise our respective beacon states and send them to each other, and then to a byte-by-byte comparison. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the network. This is completely impractical for a global consensus protocol.
+Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the network. This is completely impractical for a global consensus protocol.
 
 What we need is a _digest_ of the state: a short version that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. If we are to go down this route, then the digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
 
 Thankfully, such digests exist in the form of [cryptographic hash functions](https://en.wikipedia.org/wiki/Cryptographic_hash_function). These take a (potentially) large amount of input data and mangle it up into a small number of bytes, typically 32, that for all practical purposes uniquely fingerprint the data.
 
-Armed with such a hash function we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending the data over the network. Now we only need to exchange and compare our very short, 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
+Armed with such a hash function[^fn-hash-function-search] we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending the data over the network. Now we only need to exchange and compare our very short, 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
 
-This process is very common, and was an early candidate for consensus purposes in Ethereum&nbsp;2, though it was apparent [fairly early](https://github.com/ethereum/consensus-specs/blame/24c8a53b5c7be0248015413b6c0f8586e79d6b67/specs/casper_sharding_v2.1.md#L588) that there might be better approaches.
+[^fn-hash-function-search]: See the [Annotated Spec](/part3/helper/crypto#hash) for the saga of Eth2's hash function, and how we ended up with SHA256.
 
-One problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially an enormous overhead, and was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
+This process is very common, and was an early candidate for consensus purposes in Ethereum&nbsp;2, though it was apparent [fairly early](https://github.com/ethereum/consensus-specs/blame/24c8a53b5c7be0248015413b6c0f8586e79d6b67/specs/casper_sharding_v2.1.md#L588) that there might be better ways.
 
-Ultimately, that approach was abandoned in favour of an approach called "tree hashing", which later became known as Merkleization[^fn-merkleization-name].
+One problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially an enormous overhead. It was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state that would rarely need re-hashing, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
+
+Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which later became known as Merkleization[^fn-merkleization-name]. That's the subject of this section.
 
 [^fn-merkleization-name]: The name derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
     I believe the noun version "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
 
-TODO: define the term state root in the above.
+#### Merkle Trees
+
+To understand Merkleization we first need to understand Merkle trees. These are not new, and actually date back to the 1970s.
+
+The idea is that we have a set of "leaves", which is our data, and we iteratively reduce those leaves down to a single, short root via hashing. We will only be dealing in structures that have a power of two number of leaves, so we can picture the process as a binary tree.
+
+In the following example, the leaves are our four blobs of data, $A$, $B$, $C$, and $D$. These can be any string of data, though in Merkleization they will be 32 byte "chunks". The function $H$ is our hash function, and the operator $+$ concatenates strings. So $H(A+B)$ is the hash of the concatenation of strings $A$ and $B$[^fn-roots-and-leaves].
+
+[^fn-roots-and-leaves]: Traditionally Merkle trees are depicted the other way up. Call me eccentric, but I like my trees to have their leaves at the top and their roots at the bottom.
+
+<a id="img_merkle_tree"></a>
+<div class="image" style="width:80%">
+
+![Diagram of a Merkle tree](md/images/diagrams/merkle_tree.svg)
+Example of a Merkle tree.
+
+</div>
+
+In our formulation each box in the diagram is a 32-byte string of data, either a 32-byte leaf, or the 32-byte output of the hash function. Thus we obtain the 32-byte root of the tree, which is a "digest" of the data represented by the leaves: for all practical purposes the root uniquely represents the data in the leaves; any change in the leaves leads to a different root.
+
+The Merkle tree construction is a fairly common way to calculate a digest of a bunch of data, such as a blockchain state. Ethereum&nbsp;1 uses a more sophisticated version of this called a hexary Merkle&ndash;Patricia trie (in Eth1 it's a "trie" not a "tree" for [complicated reasons](https://en.wikipedia.org/wiki/Trie)), though there are proposals to [simplify that](https://eips.ethereum.org/EIPS/eip-3102).
+
+An extremely useful feature of Merkle trees is that it is quite efficient to construct inclusion proofs using them. This is critical functionality for light clients, and we will discuss it in depth when we look at Merkle proofs.
+
+[TODO: Link to Merkle proofs section]::
+
+#### Merkleization
+
+Generally an implementation will maintain the whole Merkle tree structure in memory or on disk, including all its intermediate levels between the leaves and the root. As leaves are updated the affected nodes in the tree are updated: changing $A$ means updating $H(A+B)$ and then the root; everything else is unchanged.
+
+The difference with Merkleization is that the Merkle tree is computed on-the-fly from the input object in order to calculate its "hash tree root".
+
+The process of calculating the hash tree root involves several parts working together, and is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
+
+Terminology: calculating the hash tree root means the same thing as Merkleization.
+
+Merkleization operates on "chunks", which are 32-byte blobs of data. Chunks are generated from the input data either by packing, or by previous Merkleization rounds.
+
+Merkleization of SSZ objects is recursive. We keep descending through the structure of the object until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we climb back throught the structure using the calculated hash tree roots as chunks themselves.
+
+In simplified form, once again ignoring the SSZ union type), there are basically two paths to choose from when Merkleizing an object. For basic types or collections of basic types, we just pack and Merklieze. For containers and collections of composite types, we recursively Merkleize.
+ 1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bit vector, then `hash_tree_root(X) = merkleize(pack(X))`. The packing function returns a list of chunks.
+ 2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize([hash_tree_root(x) for x in X])`. The list comprehension returns a list of hash tree roots, which is equivalent to a list of chunks.
+
+
+TODO: mixin length for lists.
+
+Collectively these are referred to as Merkelization, while the actual construction of the Merkle tree (the last step) is also called Merkleization.
+
+##### Packing 
+  
+  given ordered objects of basic types (that is, lists and vectors of booleans or uints), 
+
+
 
 For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
   1. Caching
-  2. Light client firendly
+  2. Light client friendly
 
 TODO: Link to array of hash functions considered, /part3/helper/crypto#hash
 
