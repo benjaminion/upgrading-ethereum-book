@@ -48,6 +48,9 @@ const PrevNext = (props) => {
         <span className="prev">
           <PrevNextLink page={prevPage} rel="prev">Back</PrevNextLink>
         </span>
+        <span className="contents">
+          <Link to="/contents">Contents</Link>
+        </span>
         <span className="next">
           <PrevNextLink page={nextPage} rel="next">Next</PrevNextLink>
         </span>

@@ -7,7 +7,6 @@ div.prevnext {
 }
 
 div.prevnext span {
-  width: 40%;
   display: flex;
 }
 
@@ -15,20 +14,23 @@ div.prevnext span.prev {
   justify-content: flex-start;
 }
 
-div.prevnext span.prev a {
-  padding-right: 100%;
-}
-
 div.prevnext span.next {
   justify-content: flex-end;
 }
 
-div.prevnext span.next a {
-  padding-left: 100%;
+div.prevnext span.contents {
+  display: none;
 }
 
 @media print {
   div.prevnext {
     display: none;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  div.prevnext span.contents {
+    display: flex;
+    justify-content: center;
   }
 }
