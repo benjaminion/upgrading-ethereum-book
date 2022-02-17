@@ -4,6 +4,12 @@ bin/priv/
 # roughViz library - build it from https://github.com/benjaminion/roughViz
 src/charts/roughviz.min.js
 
+# svg-text-to-path library - get it from https://github.com/paulzi/svg-text-to-path/tree/master/dist
+src/charts/svg-text-to-path.js
+
+# Download and unpack the font file from https://fonts.google.com/specimen/Gaegu
+src/charts/font/*
+
 # Files generated during the build process
 src/md/pages/
 src/md/annotated.md
