@@ -62,6 +62,13 @@
     const serializer = new XMLSerializer();
     var source = serializer.serializeToString(svg);
 
+    // Reduce precision of coords to a max of 1dp to save space
+    source = source.replace(/\d+\.\d+/g, s =>
+                         {
+                           const f1dp = parseFloat(s).toFixed(1);
+                           return f1dp.slice(-1) === '0' ? f1dp.slice(0, -2) : f1dp;
+                         });
+
     // Top and tail for file format
     source = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">' + source + '</svg>';
 
