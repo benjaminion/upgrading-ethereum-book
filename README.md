@@ -83,3 +83,24 @@ Append a `*` to the path:
 ```
 ## Heading <!-- /unlinked/page/path* -->
 ```
+
+## Images
+
+All images are SVG, and text elements are replaced by paths for maximum compatibility: it seems that a lot of applications have trouble with embedded fonts.
+
+### Diagrams
+
+Diagrams have been created in [diagrams.net](https://www.diagrams.net/) and exported to SVG with the following options:
+  - Border width: 10 (some of the sketched elements go out of bounds)
+  - Text settings: Convert labels to SVG
+  
+Source files for all diagrams are in the _src/diagrams_ directory. The font used is the _Gloria Hallelujah_ Google font.
+
+### Charts
+
+Charts (graphs, barcharts) are generated using my ~~hacked~~extended version of the [roughViz](https://github.com/benjaminion/roughViz) library. Load the _src/charts/charts.html_ file in a browser (you might need to fiddle with some browser security settings to allow it to load local files). The charts are downloaded via the link that should appear on each image. If the download link doesn't appear check the browser console for errors.
+
+Pre-requisites:
+  - _roughviz.min.js_ needs to be [downloaded](https://raw.githubusercontent.com/benjaminion/roughViz/master/dist/roughviz.min.js) from my repo and put in the _charts_ directory.
+  - _svg-text-to-path.js_ needs to be [downloaded](https://raw.githubusercontent.com/paulzi/svg-text-to-path/master/dist/svg-text-to-path.js), also to the _charts_ directory.
+  - The _Gaegu-Light.ttf_ file needs to be extracted from the [Gaegu](https://fonts.google.com/specimen/Gaegu) Google font and put in the _charts/font_ directory.
