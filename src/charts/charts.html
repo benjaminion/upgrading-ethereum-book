@@ -50,12 +50,29 @@
     'merged': true
   }
 
+  function remove_attributes(elements) {
+    for (let e of elements) {
+      e.removeAttribute('font-size');
+      e.removeAttribute('style');
+    }
+  };
+
   // Make a download link for the SVG data
   async function makeLink(id) {
     const svg = document.getElementById(id).firstChild;
 
     // Convert text nodes to paths
     const result = await SvgTextToPath.replaceAll(svg, params);
+
+    // Get rid of some left-over cruft
+    remove_attributes(svg.getElementsByClassName('labelText'));
+    for (let tick of svg.getElementsByClassName('tick')) {
+      remove_attributes(tick.getElementsByTagName('path'));
+    }
+    remove_attributes(svg.getElementsByClassName('notesText'));
+    for (let node of svg.querySelectorAll('path[d=""]')) {
+      node.remove();
+    }
 
     // Stringify
     const serializer = new XMLSerializer();
