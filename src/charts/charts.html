@@ -50,12 +50,41 @@
     'merged': true
   }
 
+  function remove_attributes(elements, attr) {
+    for (let e of elements) {
+      e.removeAttribute(attr);
+    }
+  };
+
+  function remove_elements(elements) {
+    for (let e of elements) {
+      e.remove();
+    }
+  };
+
   // Make a download link for the SVG data
   async function makeLink(id) {
-    const svg = document.getElementById(id).firstChild;
+    const div = document.getElementById(id);
+
+    if (div === null) {
+      throw 'Error: Id "' + id + '" is missing.';
+    }
+
+    const svg = div.firstChild;
 
     // Convert text nodes to paths
     const result = await SvgTextToPath.replaceAll(svg, params);
+
+    // Get rid of some left-over cruft
+    remove_attributes(svg.getElementsByClassName('labelText'), 'style');
+    remove_attributes(svg.getElementsByClassName('notesText'), 'style');
+    remove_attributes(svg.querySelectorAll('g.tick > path'), 'style');
+    remove_attributes(svg.querySelectorAll('[font-size]'), 'font-size');
+    remove_attributes(svg.querySelectorAll('[font-family]'), 'font-family');
+    remove_attributes(svg.querySelectorAll('[text-anchor]'), 'text-anchor');
+    remove_attributes(svg.querySelectorAll('[class="' + id + '"]'), 'class');
+    remove_elements(svg.querySelectorAll('path[stroke="transparent"], path[stroke="none"]'));
+    remove_elements(svg.querySelectorAll('path[d=""]'));
 
     // Stringify
     const serializer = new XMLSerializer();
@@ -74,16 +103,16 @@
     // Convert to URI data scheme.
     const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
 
-    const div = document.getElementById(id);
-    if (div !== null) {
-      const anchor = document.createElement('a');
-      anchor.appendChild(document.createTextNode('Download'));
-      anchor.href = url;
-      anchor.download = id + '.svg'
-      div.appendChild(anchor);
-      if (result.total !== result.success) {
-        div.appendChild(document.createTextNode(' (but text replacement failed)'));
-      }
+    // Add download link
+    const filename = id + '.svg';
+    const anchor = document.createElement('a');
+    anchor.appendChild(document.createTextNode(filename));
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.style.paddingLeft = '0.5em';
+    div.appendChild(anchor);
+    if (result.total !== result.success) {
+      div.appendChild(document.createTextNode(' (warning: text replacement failed. Total: ' + result.total + ' Success: ' + result.success + ')'));
     }
   }
 </script>
