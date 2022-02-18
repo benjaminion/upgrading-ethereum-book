@@ -1,12 +1,13 @@
+<!DOCTYPE html>
 <html lang="en-GB">
   <head>
     <meta charset="utf-8">
     <title>Charts</title>
     <script src="./roughviz.min.js">
-      <!-- This library can be built from https://github.com/benjaminion/roughViz -->
+      // Get it from https://github.com/benjaminion/roughViz/tree/master/dist
     </script>
     <script src="./svg-text-to-path.js">
-      <!-- This library is from https://github.com/paulzi/svg-text-to-path/tree/master/dist -->
+      // Get it from https://github.com/paulzi/svg-text-to-path/tree/master/dist
     </script>
     <style>
       div.svg {border: solid black 1px; margin: 1ex 0;}
@@ -49,20 +50,18 @@
     'merged': true
   }
 
-  // Make a right-click download link forthe SVG data
+  // Make a download link for the SVG data
   async function makeLink(id) {
-
     const svg = document.getElementById(id).firstChild;
 
     // Convert text nodes to paths
     const result = await SvgTextToPath.replaceAll(svg, params);
-    //console.log(result);
 
     // Stringify
     const serializer = new XMLSerializer();
     var source = serializer.serializeToString(svg);
 
-    // Reduce precision of coords to a max of 1dp to save space
+    // Reduce precision of coords to a max of 1dp to save space (hackily)
     source = source.replace(/\d+\.\d+/g, s =>
                          {
                            const f1dp = parseFloat(s).toFixed(1);
@@ -72,10 +71,9 @@
     // Top and tail for file format
     source = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">' + source + '</svg>';
 
-    //convert svg source to URI data scheme.
-    const url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+    // Convert to URI data scheme.
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
 
-    //set url value to a element's href attribute.
     const div = document.getElementById(id);
     if (div !== null) {
       const anchor = document.createElement('a');
@@ -84,13 +82,13 @@
       anchor.download = id + '.svg'
       div.appendChild(anchor);
       if (result.total !== result.success) {
-        div.appendChild(document.createTextNode(' (but test replacement failed)'));
+        div.appendChild(document.createTextNode(' (but text replacement failed)'));
       }
     }
   }
 </script>
 
-<!-- Issuance Curve ------------------------------------------------ -->
+<!-- Issuance Curve - - - - - - - - - - - - - - - - - - - - - - - -  -->
 
 <div class="svg" id="issuance_curve"></div>
 <script>
@@ -149,7 +147,7 @@
   do_issuance_curve().then(makeLink('issuance_curve'));
 </script>
 
-<!-- Rewards Curve ------------------------------------------------- -->
+<!-- Rewards Curve - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 <div class="svg" id="rewards_curve"></div>
 <script>
@@ -208,7 +206,7 @@
   do_rewards_curve().then(makeLink('rewards_curve'));
 </script>
 
-<!-- Reward Variance ----------------------------------------------- -->
+<!-- Reward Variance - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 <div class="svg" id="reward_variance"></div>
 <script>
@@ -252,7 +250,7 @@
   do_reward_variance().then(makeLink('reward_variance'));
 </script>
 
-<!-- Reward Timeliness against exponential ------------------------- -->
+<!-- Reward Timeliness against exponential - - - - - - - - - - - - - -->
 
 <div class="svg" id="reward_timeliness"></div>
 <script>
@@ -318,7 +316,7 @@
   do_reward_timeliness().then(makeLink('reward_timeliness'));
 </script>
 
-<!-- Hysteresis ---------------------------------------------------- -->
+<!-- Hysteresis - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
 
 <div class="svg" id="hysteresis"></div>
 <script>
@@ -385,7 +383,7 @@
   do_hysteresis().then(makeLink('hysteresis'));
 </script>
 
-<!-- Leak Scores and Balances -------------------------------------- -->
+<!-- Leak Scores and Balances - - - - - - - - - - - - - - - - - - -  -->
 
 <div class="svg" id="inactivity_scores"></div>
 <div class="svg" id="inactivity_balances"></div>
@@ -571,3 +569,4 @@
 
 </div>
 </body>
+</html>
