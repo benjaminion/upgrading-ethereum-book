@@ -2167,7 +2167,7 @@ To understand Merkleization we first need to understand Merkle trees. These are 
 
 The idea is that we have a set of "leaves", which is our data, and we iteratively reduce those leaves down to a single, short root via hashing. We will only be dealing in structures that have a power of two number of leaves, so we can picture the process as a binary tree.
 
-In the following example, the leaves are our four blobs of data, $A$, $B$, $C$, and $D$. These can be any string of data, though in Merkleization they will be 32 byte "chunks". The function $H$ is our hash function, and the operator $+$ concatenates strings. So $H(A+B)$ is the hash of the concatenation of strings $A$ and $B$[^fn-roots-and-leaves].
+In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, and $D$. These can be any string of data, though in Merkleization they will be 32 byte "chunks". The function $H$ is our hash function, and the operator $+$ concatenates strings. So $H(A+B)$ is the hash of the concatenation of strings $A$ and $B$[^fn-roots-and-leaves].
 
 [^fn-roots-and-leaves]: Traditionally Merkle trees are depicted the other way up. Call me eccentric, but I like my trees to have their leaves at the top and their roots at the bottom.
 
@@ -2181,6 +2181,33 @@ Example of a Merkle tree.
 
 In our formulation each box in the diagram is a 32-byte string of data, either a 32-byte leaf, or the 32-byte output of the hash function. Thus we obtain the 32-byte root of the tree, which is a "digest" of the data represented by the leaves: for all practical purposes the root uniquely represents the data in the leaves; any change in the leaves leads to a different root.
 
+Here's the same thing again in code, assigning leaf values as $A=2$, $B=2$, $C=3$ and $D=4$.
+
+```python
+from eth2spec.utils.ssz.ssz_typing import uint256
+from eth2spec.utils.hash_function import hash
+from eth2spec.utils.merkle_minimal import get_merkle_root
+
+a = uint256(1).to_bytes(length = 32, byteorder='little')
+b = uint256(2).to_bytes(length = 32, byteorder='little')
+c = uint256(3).to_bytes(length = 32, byteorder='little')
+d = uint256(4).to_bytes(length = 32, byteorder='little')
+ab = hash(a + b)
+cd = hash(c + d)
+abcd = hash(ab + cd)
+
+print(abcd.hex())
+print(get_merkle_root([a, b, c, d], 4).hex())
+```
+
+With the result that the by-hand calculation and the Merkle root function are the same:
+
+```Python
+> python merkleize_demo.py 
+bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb
+bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb
+```
+
 The Merkle tree construction is a fairly common way to calculate a digest of a bunch of data, such as a blockchain state. Ethereum&nbsp;1 uses a more sophisticated version of this called a hexary Merkle&ndash;Patricia trie (in Eth1 it's a "trie" not a "tree" for [complicated reasons](https://en.wikipedia.org/wiki/Trie)), though there are proposals to [simplify that](https://eips.ethereum.org/EIPS/eip-3102).
 
 An extremely useful feature of Merkle trees is that it is quite efficient to construct inclusion proofs using them. This is critical functionality for light clients, and we will discuss it in depth when we look at Merkle proofs.
@@ -2189,32 +2216,43 @@ An extremely useful feature of Merkle trees is that it is quite efficient to con
 
 #### Merkleization
 
-Generally an implementation will maintain the whole Merkle tree structure in memory or on disk, including all its intermediate levels between the leaves and the root. As leaves are updated the affected nodes in the tree are updated: changing $A$ means updating $H(A+B)$ and then the root; everything else is unchanged.
+The normal way to implement Merkle trees is to store the entire tree structure in memory or on disk, including all its intermediate levels between the leaves and the root. As leaves are updated the affected nodes in the tree are updated: changing $A$ means updating $H(A+B)$ and then the root; everything else is unchanged.
 
 The difference with Merkleization is that the Merkle tree is computed on-the-fly from the input object in order to calculate its "hash tree root".
 
 The process of calculating the hash tree root involves several parts working together, and is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
 
-Terminology: calculating the hash tree root means the same thing as Merkleization.
+Merkleization of SSZ objects is recursive. Given a composite SSZ object, we keep descending through its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we climb back throught the structure using the calculated hash tree roots as chunks themselves.
 
-Merkleization operates on "chunks", which are 32-byte blobs of data. Chunks are generated from the input data either by packing, or by previous Merkleization rounds.
 
-Merkleization of SSZ objects is recursive. We keep descending through the structure of the object until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we climb back throught the structure using the calculated hash tree roots as chunks themselves.
 
 In simplified form, once again ignoring the SSZ union type), there are basically two paths to choose from when Merkleizing an object. For basic types or collections of basic types, we just pack and Merklieze. For containers and collections of composite types, we recursively Merkleize.
  1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bit vector, then `hash_tree_root(X) = merkleize(pack(X))`. The packing function returns a list of chunks.
  2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize([hash_tree_root(x) for x in X])`. The list comprehension returns a list of hash tree roots, which is equivalent to a list of chunks.
+
+Consider once again our friend, the [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation). In the following, `htr()` is the [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) function that we use for Merkleization.
+
+```
+htr(IndexedAttestation) = htr(List[ValidatorIndex, ...], AttestationData, BLSSignature)
+```
+
+Now, the list of validator indices is of basic objects 
 
 
 TODO: mixin length for lists.
 
 Collectively these are referred to as Merkelization, while the actual construction of the Merkle tree (the last step) is also called Merkleization.
 
-##### Packing 
+##### Packing and Chunking
   
+Merkleization operates on "chunks", which are 32-byte blobs of data. Chunks are generated from the input data either by packing, or by previous Merkleization rounds.
+
   given ordered objects of basic types (that is, lists and vectors of booleans or uints), 
 
+##### Merkleizing
 
+
+#### Other stuff
 
 For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
   1. Caching
@@ -2257,6 +2295,10 @@ Not actually rigorously defined in the spec - the description of the `merkleize(
 >>> hash(hash(b + zero) + hash(zero + zero)).hex()
 '553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
 ```
+
+#### See also
+
+TODO
 
 ### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
 
