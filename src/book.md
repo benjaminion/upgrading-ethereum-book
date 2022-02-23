@@ -2173,10 +2173,10 @@ In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, 
 
 [^fn-roots-and-leaves]: Traditionally Merkle trees are depicted the other way up. Call me eccentric, but I like my trees to have their leaves at the top and their roots at the bottom.
 
-<a id="img_merkle_tree"></a>
+<a id="img_merkleization_tree"></a>
 <div class="image" style="width:80%">
 
-![Diagram of a Merkle tree](md/images/diagrams/merkle_tree.svg)
+![Diagram of a Merkle tree](md/images/diagrams/merkleization_tree.svg)
 Example of a Merkle tree.
 
 </div>
@@ -2372,6 +2372,16 @@ The final part of the `IndexedAttestation` we need to deal with is the `signatur
 >>> a.signature.hash_tree_root().hex()
 'e7a174a4630c4bc6df053c424e2c97814de78e8928be4c73ab5845d4b09a486d'
 ```
+
+##### Illustrated example
+
+<a id="img_merkleization_IndexedAttestation"></a>
+<div class="image" style="width:100%">
+
+![Diagram of a Merkle tree](md/images/diagrams/merkleization_IndexedAttestation.svg)
+Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`.
+
+</div>
 
 #### Full example code
 
