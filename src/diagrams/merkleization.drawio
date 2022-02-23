@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-02-23T11:01:13.991Z" agent="5.0 (Windows)" etag="VPn3YMc3gvggnPOgiKc8" version="16.6.2" type="github" pages="2">
+<mxfile host="app.diagrams.net" modified="2022-02-23T11:07:38.149Z" agent="5.0 (Windows)" etag="zn0aRDpi9i9zoEbC0Lu4" version="16.6.2" type="github" pages="2">
   <diagram id="_kiuPmwyJj4kBi8NxYxS" name="tree">
     <mxGraphModel dx="1550" dy="824" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -115,7 +115,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="G-6Uuo27PKxnDHHl1JQ--30" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;R(indexed_attestation)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
-          <mxGeometry x="518" y="760" width="225" height="36" as="geometry" />
+          <mxGeometry x="474" y="760" width="225" height="36" as="geometry" />
         </mxCell>
         <mxCell id="G-6Uuo27PKxnDHHl1JQ--33" value="&lt;div style=&quot;font-size: 18px&quot; align=&quot;center&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;S(length(indices))&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
           <mxGeometry x="244" y="530" width="160" height="36" as="geometry" />
@@ -166,8 +166,8 @@
         </mxCell>
         <mxCell id="G-6Uuo27PKxnDHHl1JQ--54" value="" style="endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=14;" parent="EI5LFa18qx79L4KTmC3c-1" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="631" y="700" as="sourcePoint" />
-            <mxPoint x="631" y="760" as="targetPoint" />
+            <mxPoint x="587" y="700" as="sourcePoint" />
+            <mxPoint x="587" y="760" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="G-6Uuo27PKxnDHHl1JQ--55" value="Merkleize" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=14;" parent="G-6Uuo27PKxnDHHl1JQ--54" connectable="0" vertex="1">
