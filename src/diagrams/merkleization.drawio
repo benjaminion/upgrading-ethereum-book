@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-02-23T10:54:40.204Z" agent="5.0 (Windows)" etag="qJJON8nJYvqpOH1OJZ0B" version="16.6.2" type="github" pages="2">
+<mxfile host="app.diagrams.net" modified="2022-02-23T10:57:55.775Z" agent="5.0 (Windows)" etag="n2haVu4gZ0FOmEJK1fkU" version="16.6.2" type="github" pages="2">
   <diagram id="_kiuPmwyJj4kBi8NxYxS" name="merkle_tree">
     <mxGraphModel dx="1550" dy="824" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -70,7 +70,7 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="sBeIiljd5fq1MqVG8TIA" name="root_IndexedAttestation">
+  <diagram id="sBeIiljd5fq1MqVG8TIA" name="IndexedAttestation">
     <mxGraphModel dx="1550" dy="824" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="EI5LFa18qx79L4KTmC3c-0" />
