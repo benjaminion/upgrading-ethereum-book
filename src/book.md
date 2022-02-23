@@ -2131,7 +2131,7 @@ Other SSZ resources:
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
-### Magical Merkleization <!-- /part2/building_blocks/merkleization -->
+### Hash Tree Roots and Merkleization  <!-- /part2/building_blocks/merkleization -->
 
 <div class="summary">
 
@@ -2143,13 +2143,13 @@ Other SSZ resources:
 
 When discussing [SSZ](/part2/building_blocks/ssz), I asserted that serialisation is important for consensus without going into the details. In this section we will unpack that and take a deep dive into how Ethereum&nbsp;2 nodes know that they share a view of the world.
 
-Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the network. This is completely impractical for a global consensus protocol.
+Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the Internet. This is completely impractical for a global consensus protocol.
 
-What we need is a _digest_ of the state: a short version that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. If we are to go down this route, then the digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
+What we need is a _digest_ of the state: a short version that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. The digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
 
 Thankfully, such digests exist in the form of [cryptographic hash functions](https://en.wikipedia.org/wiki/Cryptographic_hash_function). These take a (potentially) large amount of input data and mangle it up into a small number of bytes, typically 32, that for all practical purposes uniquely fingerprint the data.
 
-Armed with such a hash function[^fn-hash-function-search] we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending the data over the network. Now we only need to exchange and compare our very short, 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
+Armed with such a hash function[^fn-hash-function-search] we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending all the data over the network. Now we only need to exchange and compare our very short 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
 
 [^fn-hash-function-search]: See the [Annotated Spec](/part3/helper/crypto#hash) for the saga of Eth2's hash function, and how we ended up with SHA256.
 
@@ -2157,11 +2157,13 @@ This process is very common, and was an early candidate for consensus purposes i
 
 One problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially an enormous overhead. It was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state that would rarely need re-hashing, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
 
-Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which later became known as Merkleization[^fn-merkleization-name]. That's the subject of this section.
+Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which is built on a technique called Merkleization[^fn-merkleization-name]. That's the subject of this section.
 
-[^fn-merkleization-name]: The name derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
+[^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
     I believe the noun version "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+
+Our approach will be first to recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal.
 
 #### Merkle Trees
 
@@ -2183,31 +2185,20 @@ Example of a Merkle tree.
 
 In our formulation each box in the diagram is a 32-byte string of data, either a 32-byte leaf, or the 32-byte output of the hash function. Thus we obtain the 32-byte root of the tree, which is a "digest" of the data represented by the leaves: for all practical purposes the root uniquely represents the data in the leaves; any change in the leaves leads to a different root.
 
-Here's the same thing again in code, assigning leaf values as $A=2$, $B=2$, $C=3$ and $D=4$.
+Here's the same thing again on the Python REPL, assigning leaf values as $A=1$, $B=2$, $C=3$ and $D=4$. We construct the root of the tree starting from the leaves and descending through its levels until reaching the root, $H(H(A + B) + H(C + D))$. Note that all the leaf values are padded to 32-bytes and are little-endian.
 
 ```python
-from eth2spec.utils.ssz.ssz_typing import uint256
-from eth2spec.utils.hash_function import hash
-from eth2spec.utils.merkle_minimal import get_merkle_root
-
-a = uint256(1).to_bytes(length = 32, byteorder='little')
-b = uint256(2).to_bytes(length = 32, byteorder='little')
-c = uint256(3).to_bytes(length = 32, byteorder='little')
-d = uint256(4).to_bytes(length = 32, byteorder='little')
-ab = hash(a + b)
-cd = hash(c + d)
-abcd = hash(ab + cd)
-
-print(abcd.hex())
-print(get_merkle_root([a, b, c, d], 4).hex())
-```
-
-With the result that the by-hand calculation and the Merkle root function are the same:
-
-```Python
-> python merkleize_demo.py 
-bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb
-bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb
+>>> from eth2spec.utils.ssz.ssz_typing import uint256
+>>> from eth2spec.utils.hash_function import hash
+>>> a = uint256(1).to_bytes(length = 32, byteorder='little')
+>>> b = uint256(2).to_bytes(length = 32, byteorder='little')
+>>> c = uint256(3).to_bytes(length = 32, byteorder='little')
+>>> d = uint256(4).to_bytes(length = 32, byteorder='little')
+>>> ab = hash(a + b)
+>>> cd = hash(c + d)
+>>> abcd = hash(ab + cd)
+>>> abcd.hex()
+'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
 ```
 
 The Merkle tree construction is a fairly common way to calculate a digest of a bunch of data, such as a blockchain state. Ethereum&nbsp;1 uses a more sophisticated version of this called a hexary Merkle&ndash;Patricia trie (in Eth1 it's a "trie" not a "tree" for [complicated reasons](https://en.wikipedia.org/wiki/Trie)), though there are proposals to [simplify that](https://eips.ethereum.org/EIPS/eip-3102).
@@ -2222,11 +2213,33 @@ The normal way to implement Merkle trees is to store the entire tree structure i
 
 The difference with Merkleization is that the Merkle tree is computed on-the-fly from the input object in order to calculate its "hash tree root".
 
-The process of calculating the hash tree root involves several parts working together, and is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
+We can pick up where we left off from the last REPL session as follows, 
+
+```python
+>>> from eth2spec.utils.merkle_minimal import merkleize_chunks
+>>> merkleize_chunks([a, b, c, d]).hex()
+'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
+```
+
+We get the same result as before, and can see that `merkleize_chunks()` (the Merkleization function) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
+
+The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks to make the total number of chunks the next whole power of two. So a list of three chunks gets padded with an extra zero chunk:
+
+```python
+>>> z = bytearray(32)
+>>> merkleize_chunks([a, b, c]).hex()
+'66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db'
+>>> merkleize_chunks([a, b, c, z]).hex()
+'66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db'
+```
+
+An implementation can do this zero padding "virtually", and can even optimise further by storing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. So we don't always need to build the whole tree to find the Merkle root.
+
+#### The Hash Tree Root
+
+The hash tree root is a generalisation of Merkleization that we can apply to the kind of compound datastructures we have in the beacon state. It is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
 
 Merkleization of SSZ objects is recursive. Given a composite SSZ object, we keep descending through its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we climb back throught the structure using the calculated hash tree roots as chunks themselves.
-
-
 
 In simplified form, once again ignoring the SSZ union type), there are basically two paths to choose from when Merkleizing an object. For basic types or collections of basic types, we just pack and Merklieze. For containers and collections of composite types, we recursively Merkleize.
  1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bit vector, then `hash_tree_root(X) = merkleize(pack(X))`. The packing function returns a list of chunks.
@@ -2379,7 +2392,7 @@ The final part of the `IndexedAttestation` we need to deal with is the `signatur
 <div class="image" style="width:100%">
 
 ![Diagram of a Merkle tree](md/images/diagrams/merkleization_IndexedAttestation.svg)
-Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`.
+Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`. The small digits are the number of leaves in each Merkleization operation.
 
 </div>
 
