@@ -2157,13 +2157,31 @@ This process is very common, and was an early candidate for consensus purposes i
 
 One problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially an enormous overhead. It was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state that would rarely need re-hashing, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
 
-Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which is built on a technique called Merkleization[^fn-merkleization-name]. That's the subject of this section.
+Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which is built on a technique called Merkleization[^fn-merkleization-name]. The remainder of this section explores this approach.
 
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
     I believe the noun version "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
 
-Our approach will be first to recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal.
+On the face of it, tree hashing is inefficient since it requires around double the number of hash operations to calculate the digest (the root) of a structure compared with the previous method of just hashing the entire serialisation. However, the way that hash trees are constructed in Ethereum&nbsp;2 allows us to cache the roots of entire subtrees that have not changed. So, for example, [by design](/part2/incentives/balances#engineering-aspects-of-effective-balance) the list of validator records in the state does not change frequently. As a result we can cache the hash tree root of this list and do not need to recalculate it every time we recalculate the entire beacon state root. This results in a huge reduction in the total amount of hashing required to calculate state roots, and is an important part of making the beacon chain protocol usable in practice.
+
+We will first to recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal. But first, as ever, some of the history.
+
+#### History
+
+#### Other stuff [revise]
+
+For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
+  1. Caching
+  2. Light client friendly
+
+#### Development [todo]
+
+  - https://github.com/ethereum/consensus-specs/issues/54
+  - https://github.com/ethereum/consensus-specs/pull/120
+
+
+
 
 #### Merkle Trees
 
@@ -2203,17 +2221,13 @@ Here's the same thing again on the Python REPL, assigning leaf values as $A=1$, 
 
 The Merkle tree construction is a fairly common way to calculate a digest of a bunch of data, such as a blockchain state. Ethereum&nbsp;1 uses a more sophisticated version of this called a hexary Merkle&ndash;Patricia trie (in Eth1 it's a "trie" not a "tree" for [complicated reasons](https://en.wikipedia.org/wiki/Trie)), though there are proposals to [simplify that](https://eips.ethereum.org/EIPS/eip-3102).
 
-An extremely useful feature of Merkle trees is that it is quite efficient to construct inclusion proofs using them. This is critical functionality for light clients, and we will discuss it in depth when we look at Merkle proofs.
-
-[TODO: Link to Merkle proofs section]::
+An extremely useful feature of Merkle trees is that it is quite efficient to construct inclusion proofs using them. This is critical functionality for light clients, and we will discuss it in depth when we look at [Merkle proofs](/part2/building_blocks/merkle_proofs).
 
 #### Merkleization
 
 The normal way to implement Merkle trees is to store the entire tree structure in memory or on disk, including all its intermediate levels between the leaves and the root. As leaves are updated the affected nodes in the tree are updated: changing $A$ means updating $H(A+B)$ and then the root; everything else is unchanged.
 
-The difference with Merkleization is that the Merkle tree is computed on-the-fly from the input object in order to calculate its "hash tree root".
-
-We can pick up where we left off from the last REPL session as follows, 
+The difference with Merkleization is that the Merkle tree is computed on-the-fly from the given leaves. We can pick up where we left off from the last REPL session as follows, 
 
 ```python
 >>> from eth2spec.utils.merkle_minimal import merkleize_chunks
@@ -2221,9 +2235,9 @@ We can pick up where we left off from the last REPL session as follows,
 'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
 ```
 
-We get the same result as before, and can see that `merkleize_chunks()` (the Merkleization function) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
+The Merkleization function, `merkleize_chunks()`, takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves. 
 
-The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks to make the total number of chunks the next whole power of two. So a list of three chunks gets padded with an extra zero chunk:
+The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks so that the total number of chunks is rounded up to the next whole power of two, such that we conceptually have a full binary tree. Thus a list of three chunks gets implicitly padded with an extra zero chunk:
 
 ```python
 >>> z = bytearray(32)
@@ -2233,29 +2247,54 @@ The list of chunks passed to `merkleize_chunks()` can be any length, but will be
 '66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db'
 ```
 
-An implementation can do this zero padding "virtually", and can even optimise further by storing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. So we don't always need to build the whole tree to find the Merkle root.
+A larger desired width of the binary tree can be provided as a parameter to `merkleize_chunks()`, and the list will be padded with zero chunks accordingly. This capability is used when dealing with lists and bitlists.
+
+```python
+>>> merkleize_chunks([a]).hex()
+'0100000000000000000000000000000000000000000000000000000000000000'
+>>> merkleize_chunks([a, z, z, z]).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+>>> merkleize_chunks([a], 4).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+```
+
+An implementation can do this zero padding "virtually", and can optimise further by storing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. So we don't always need to build the whole tree to find the Merkle root.
+
+Note that the Merkleization of a single chunk is always just the chunk itself. This cuts down on the overall amount of hashing needed.
 
 #### The Hash Tree Root
 
-The hash tree root is a generalisation of Merkleization that we can apply to the kind of compound datastructures we have in the beacon state. It is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
+The hash tree root is a generalisation of Merkleization that we can apply to the kind of complex, compound datastructures that occur in the beacon state. Calculating hash tree roots is tightly connected to they type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
 
-Merkleization of SSZ objects is recursive. Given a composite SSZ object, we keep descending through its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we climb back throught the structure using the calculated hash tree roots as chunks themselves.
+Merkleization of SSZ objects is recursive. Given a composite SSZ object, we iteratively move through the layers of its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we move back through the structure using the calculated hash tree roots as chunks themselves.
 
-In simplified form, once again ignoring the SSZ union type), there are basically two paths to choose from when Merkleizing an object. For basic types or collections of basic types, we just pack and Merklieze. For containers and collections of composite types, we recursively Merkleize.
+In simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when Merkleizing an object. For basic types or collections of basic types (lists and vectors), we just pack and Merklieze directly. For containers and collections of composite types, we recursively find the hash tree roots. The following two rules are a simplistic summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization).
  1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bit vector, then `hash_tree_root(X) = merkleize(pack(X))`. The packing function returns a list of chunks.
- 2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize([hash_tree_root(x) for x in X])`. The list comprehension returns a list of hash tree roots, which is equivalent to a list of chunks.
+ 2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize([hash_tree_root(x) for x in X])`. This list comprehension returns a list of hash tree roots, which is equivalent to a list of chunks.
 
-TODO: mixin length for lists.
-
-Collectively these are referred to as Merkelization, while the actual construction of the Merkle tree (the last step) is also called Merkleization.
+Note that the SSZ specification uses the term "Merkleization" to refer to both the Merkle tree construction process [above](#merkleization) and the process of finding the hash tree root. I've chosen to distinguish between them more precisely. Calculating the hash tree root of an object uses Merkleization, potentially multiple steps of it, but also involves other steps such as recursion, and packing and chunking. Nonetheless, hash tree roots are Merkle roots.
 
 ##### Packing and Chunking
-  
-Merkleization operates on "chunks", which are 32-byte blobs of data. Chunks are generated from the input data either by packing, or by previous Merkleization rounds.
 
-  given ordered objects of basic types (that is, lists and vectors of booleans or uints), 
+Merkleization operates on lists of "chunks", which are 32-byte blobs of data. Lists generated by means of step 2 above are already in this form. However, step 1 involving basic objects requires a "packing and chunking" operation prior to Merkleization, which is the `pack()` function.
 
-##### Merkleizing
+The [spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization) gives the precise rules for packing and chunking, but it basically looks like this:
+  - The object (a basic type, a list/vector of basic types, or a bitlist/bitvector) is serialised via SSZ. The sentinel bit is omitted from the serialisation of bitlist types.
+  - The serialisation is right-padded with zero bytes up to the next full chunk (32 byte boundary).
+  - The result is split into a list of 32 byte chunks.
+
+The Merkleization operation will right-pad the list of chunks with zero chunks where necessary up to the following lengths.
+   * All basic types give a single chunk; no basic type has a serialisation longer than 32 bytes.
+   * `Bitlist[N]` and `Bitvector[N]`: `(N + 255) // 256` (dividing by chunk size in bits and rounding up)
+   * `List[B, N]` and `Vector[B, N]`, where `B` is a basic type: `(N * size_of(B) + 31) // 32` (dividing by chunk size in bytes and rounding up)
+   * `List[C, N]` and `Vector[C, N]`, where `C` is a composite type: `N`, since the Merkleization comprises `N` hash tree roots.
+   * Containers: `len(fields)`, since there is one hash tree root per field.
+
+It may not be immediately obvious why lists and bitlists are padded with zero chunks up to their full maximum lengths, even if these are "virtual" chunks. However, this enables the use of generalised indices which provide a consistent way of creating Merkle proofs against hash tree roots, the topic of our [next section](/part2/building_blocks/merkle_proofs).
+
+##### Mixing in the length
+
+TODO: mixin length for lists.
 
 #### Worked example
 
@@ -2491,55 +2530,15 @@ assert(a.hash_tree_root() == merkleize_chunks(
 print("Success!")
 ```
 
-#### Other stuff
-
-For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
-  1. Caching
-  2. Light client friendly
-
-TODO: Link to array of hash functions considered, /part3/helper/crypto#hash
-
-#### Development
-
-  - https://github.com/ethereum/consensus-specs/issues/54
-  - https://github.com/ethereum/consensus-specs/pull/120
-
-
-#### Chunks
-
-TODO
-
-#### `merkleize()`
-
-Takes a series of chunks and forms them into a Merkle tree, returning the root of that tree.
-
-Not actually rigorously defined in the spec - the description of the `merkleize()` function presupposes that you know how to make a Merkle tree.
-
-```python
->>> from eth2spec.utils.ssz.ssz_typing import *
->>> from eth2spec.utils.merkle_minimal import zerohashes, merkleize_chunks, get_merkle_root
->>> from eth2spec.utils.hash_function import hash
->>> a = uint256(1)
->>> b = a.to_bytes(length = 32, byteorder='little')
->>> merkleize_chunks([b], 1).hex()
-'0100000000000000000000000000000000000000000000000000000000000000'
-
->>> merkleize_chunks([b], 2).hex()
-'16abab341fb7f370e27e4dadcf81766dd0dfd0ae64469477bb2cf6614938b2af'
->>> hash(b + zero).hex()
-'16abab341fb7f370e27e4dadcf81766dd0dfd0ae64469477bb2cf6614938b2af'
-
->>> merkleize_chunks([b], 4).hex()
-'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
->>> hash(hash(b + zero) + hash(zero + zero)).hex()
-'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
-```
-
 #### See also
 
 TODO
 
 [Potuz stuff](https://hackmd.io/@potuz/rJX9iD30u). Instantiated in [hashtree](https://github.com/prysmaticlabs/hashtree).
+
+### Generalised indices and Merkle proofs <!-- /part2/building_blocks/merkle_proofs* -->
+
+TODO
 
 ### Sync Committees <!-- /part2/building_blocks/sync_committees* -->
 
