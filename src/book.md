@@ -1803,7 +1803,9 @@ The same consideration applies for lists and bitlists.
 
 A bitlist is an ordered variable-length collection of `boolean` values with a maximum of `N` bits. In the SSZ spec, a bitlist is denoted by `Bitlist[N]`.
 
-An interesting feature of bitlists is that they use a sentinel bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would only know that the actual list length is somewhere between 9 and 16 bits.
+An interesting feature of bitlists[^fn-bitlist-sentinel] is that they use a sentinel bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would only know that the actual list length is somewhere between 9 and 16 bits.
+
+[^fn-bitlist-sentinel]: Though [not entirely](https://github.com/ethereum/consensus-specs/issues/1266) uncontroversial. Basically, if the application layer already knows what length of bitlist it expects &ndash; which it generally does in Eth2, since although committee sizes change, the sizes are known &ndash; then we could in principle dispense with the sentinel bit.
 
 To resolve this problem, bitlist serialisation adds an extra `1` bit at the end of the list (which becomes the highest-order bit in the little-endian encoding). The exact length of the bitlist can then be found by ignoring any consecutive high-order zero bits and then stripping off the single sentinel bit.
 
@@ -2163,25 +2165,13 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 
     I believe the noun version "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
 
-On the face of it, tree hashing is inefficient since it requires around double the number of hash operations to calculate the digest (the root) of a structure compared with the previous method of just hashing the entire serialisation. However, the way that hash trees are constructed in Ethereum&nbsp;2 allows us to cache the roots of entire subtrees that have not changed. So, for example, [by design](/part2/incentives/balances#engineering-aspects-of-effective-balance) the list of validator records in the state does not change frequently. As a result we can cache the hash tree root of this list and do not need to recalculate it every time we recalculate the entire beacon state root. This results in a huge reduction in the total amount of hashing required to calculate state roots, and is an important part of making the beacon chain protocol usable in practice.
+Tree hashing brings two significant advantages over other methods for creating a digest of the beacon state.
 
-We will first to recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal. But first, as ever, some of the history.
+The first advantage is performance. On the face of it, tree hashing is [quite inefficient](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) since it requires around double the number of hash operations to calculate the digest (the root) of a structure compared with the previous method of simply hashing the entire serialisation. However, the way that hash trees are constructed in Ethereum&nbsp;2 allows us to cache the roots of entire subtrees that have not changed. So, for example, [by design](/part2/incentives/balances#engineering-aspects-of-effective-balance) the list of validator records in the state does not change frequently. As a result we can cache the hash tree root of this list and do not need to recalculate it every time we recalculate the entire beacon state root. This feature results in a huge reduction in the total amount of hashing required to calculate state roots, and is an important part of making the beacon chain protocol usable in practice.
 
-#### History
+The second advantage is light-client support. Indeed, the [original motivation](https://github.com/ethereum/consensus-specs/issues/54) for implementing tree hashing was only about supporting light clients. Tree hashing enables efficient Merkle proofs that allow subsets of the beacon state to be provided to light clients. As long as a light client has the hash tree root it can use the proofs to verify that the provided data is correct.
 
-#### Other stuff [revise]
-
-For an arbitrary datastructure, Merkleization is [several times slower](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) than the naive state root calculation described above. However it has a couple of compelling advantages that made it a natural choice.
-  1. Caching
-  2. Light client friendly
-
-#### Development [todo]
-
-  - https://github.com/ethereum/consensus-specs/issues/54
-  - https://github.com/ethereum/consensus-specs/pull/120
-
-
-
+We will first recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal. But first, as ever, some of the history.
 
 #### Merkle Trees
 
@@ -2533,6 +2523,10 @@ print("Success!")
 #### See also
 
 TODO
+
+https://github.com/protolambda/remerkleable
+
+https://github.com/protolambda/ztyp (backing tree) What's the relevance of https://github.com/protolambda/eth-merkle-trees/blob/master/typing_partials.md ?
 
 [Potuz stuff](https://hackmd.io/@potuz/rJX9iD30u). Instantiated in [hashtree](https://github.com/prysmaticlabs/hashtree).
 
