@@ -2290,8 +2290,6 @@ TODO: mixin length for lists.
 
 For this section's worked example we shall revisit our friend, the [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation). This gives us nice instances of Merkleizing composite type, list types, and vector types, as well as demonstrating summaries and expansions.
 
-
-
 Recall that the `IndexedAttestation` type is defined as follows,
 
 ```python
@@ -2303,7 +2301,17 @@ class IndexedAttestation(Container):
 
 We will create an instance of this just as we did [previously](/part2/building_blocks/ssz#the-serialisation), only I shall call it `a` now, rather than `attestation` for brevity. We want to calculate the hash tree root of this `IndexedAttestation`, `a`.
 
-A container's hash tree root is the Merkleization of the list of hash tree roots of the objects it contains. Or, in code, we have the following:
+A container's hash tree root is the Merkleization of the list of hash tree roots of the objects it contains. Diagramatically we are building the following tree.
+
+<a id="img_merkleization_indexedattestation"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation.svg)
+Calculating the hash tree root of an `IndexedAttestation`. In this and the following diagrams, $R(X)$ is the Merkleization of $X$, $S(X)$ is the SSZ serialisation of $X$, each box is a 32 byte chunk, and the small digits are the number of leaves in the Merkleization operation.
+
+</div>
+
+Or, in code, we have the following.
 
 ```python
 assert(a.hash_tree_root() == merkleize_chunks(
@@ -2346,6 +2354,14 @@ If this were a vector then our work would be done. However, when working with li
 >>> a.attesting_indices.hash_tree_root().hex()
 '214cd7a61e14fd150b1b3cd8a1499851190f003f35714d590b780e5e91a36272'
 ```
+
+<a id="img_merkleization_attestingindices"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing how to calculate the hash tree root of a List type](md/images/diagrams/merkleization_AttestingIndices.svg)
+Calculating the hash tree root of the `attesting_indices`. This is a `List[uint256, 2048]` type, and our example list has three elements. Note the extra `mix_in_length` step that's applied to lists.
+
+</div>
 
 ##### The `data` root
 
@@ -2404,6 +2420,14 @@ assert(a.data.hash_tree_root() == merkleize_chunks(
     ]))
 ```
 
+<a id="img_merkleization_attestationdata"></a>
+<div class="image" style="width:80%">
+
+![Diagram showing how to calculate the hash tree root of an AttestationData type](md/images/diagrams/merkleization_AttestationData.svg)
+Calculating the hash tree root of an `AttestationData` container. It contains in turn two `Checkpoint` containers, `source` and `target`.
+
+</div>
+
 ##### The `signature` root
 
 The final part of the `IndexedAttestation` we need to deal with is the `signature` field. This is of type `Signature`, which is a `Vector[uint8, 96]`. This is simple to Merkleize as it is exactly three chunks when packed. The `merkleize_chunks()` function takes care of adding another virtual chunk to make a power-of-two number of leaves.
@@ -2415,17 +2439,27 @@ The final part of the `IndexedAttestation` we need to deal with is the `signatur
 'e7a174a4630c4bc6df053c424e2c97814de78e8928be4c73ab5845d4b09a486d'
 ```
 
-##### Illustrated example
+<a id="img_merkleization_signature"></a>
+<div class="image" style="width:60%">
 
-<a id="img_merkleization_IndexedAttestation"></a>
+![Diagram showing how to calculate the hash tree root of a Signature type](md/images/diagrams/merkleization_Signature.svg)
+Calculating the hash tree root of a `Signature`, which is really a `Bytes96`, or `Vector[uint8, 96]` type.
+
+</div>
+
+#### Putting it all together
+
+##### In diagram form
+
+<a id="img_merkleization_indexedattestation_all"></a>
 <div class="image" style="width:100%">
 
-![Diagram of a Merkle tree](md/images/diagrams/merkleization_IndexedAttestation.svg)
+![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation_all.svg)
 Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`. The small digits are the number of leaves in each Merkleization operation.
 
 </div>
 
-#### Full example code
+##### Full example code
 
 The following code illustrates all the points from the worked example. You can run it by setting up the executable spec as described in [the Appendix](/appendices/running). If everything goes well the only thing it should print is `Success!`.
 
