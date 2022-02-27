@@ -1,5 +1,7 @@
 const execSync = require('child_process').execSync;
 
+const date = new Date().toUTCString();
+
 function getGitHash() {
   try {
     return execSync('git log -1 --format="%h" 2>/dev/null', {encoding: 'utf8'}).replace(/(\r\n|\n|\r)/,"")
@@ -15,6 +17,7 @@ module.exports = {
     author: "Ben Edgington",
     gitHash: getGitHash(),
     gitUrl: "https://github.com/benjaminion/upgrading-ethereum-book",
+    date: date,
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
     licence: "CC BY-SA 4.0",
   },

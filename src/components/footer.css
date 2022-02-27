@@ -3,6 +3,7 @@ footer {
   border-top: solid 1px #999;
   padding-top: 1ex;
   margin-top: 10ex;
+  width: 100%;
 }
 
 footer a.githash {
