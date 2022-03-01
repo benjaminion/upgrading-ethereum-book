@@ -451,9 +451,7 @@ For one thing, effective balances are [updated](/part3/transition/epoch#def_proc
 
 But the main feature of effective balances is that they are designed to change much more rarely than that. This is achieved by making them very [granular](#increments), and by applying [hysteresis](#hysteresis) to any updates.
 
-One of the big performance challenges in calculating the beacon chain state transition is generating the hash tree root of the entire state. The Merkleization process allows parts of the state that have not been changed to be cached, providing a significant performance boost.
-
-[TODO: link to hash tree root description and Merkleization in the above when done]::
+One of the big performance challenges in calculating the beacon chain state transition is generating the hash tree root of the entire state. The [Merkleization](/part2/building_blocks/merkleization) process allows parts of the state that have not been changed to be cached, providing a significant performance boost.
 
 The list of validator records in the state is a large data structure. Were we to store the validators' actual balances within those records they would be frequently changing and the whole data structure would need to be re-hashed at least once per epoch.
 
@@ -1803,7 +1801,9 @@ The same consideration applies for lists and bitlists.
 
 A bitlist is an ordered variable-length collection of `boolean` values with a maximum of `N` bits. In the SSZ spec, a bitlist is denoted by `Bitlist[N]`.
 
-An interesting feature of bitlists is that they use a sentinel bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would only know that the actual list length is somewhere between 9 and 16 bits.
+An interesting feature of bitlists[^fn-bitlist-sentinel] is that they use a sentinel bit to indicate the length of the list. The number of whole bytes in the bitlist is easily derived from the offsets in the serialisation, but that doesn't give us the precise number of bits. For example, in a naive scheme 13 bits would be serialised into two bytes, so we would only know that the actual list length is somewhere between 9 and 16 bits.
+
+[^fn-bitlist-sentinel]: Though [not entirely](https://github.com/ethereum/consensus-specs/issues/1266) uncontroversial. Basically, if the application layer already knows what length of bitlist it expects &ndash; which it generally does in Eth2, since although committee sizes change, the sizes are known &ndash; then we could in principle dispense with the sentinel bit.
 
 To resolve this problem, bitlist serialisation adds an extra `1` bit at the end of the list (which becomes the highest-order bit in the little-endian encoding). The exact length of the bitlist can then be found by ignoring any consecutive high-order zero bits and then stripping off the single sentinel bit.
 
@@ -1996,7 +1996,9 @@ attestation = IndexedAttestation(
             root = '0x9bcd31881817ddeab686f878c8619d664e8bfa4f8948707cba5bc25c8d74915d'
         )
     ),
-    signature = '0xaaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437'
+    signature = '0xaaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af'
+                + '5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856'
+                + 'c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437'
 )
 
 print(attestation.encode_bytes().hex())
@@ -2129,7 +2131,516 @@ Other SSZ resources:
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
-### Merkleization <!-- /part2/building_blocks/merkleization* -->
+### Hash Tree Roots and Merkleization  <!-- /part2/building_blocks/merkleization -->
+
+|||||
+|-|-|-|-|
+| First cut | $\checkmark$ | Revision | TODO |
+
+<div class="summary">
+
+ - A hash tree root provides a succinct cryptographic digest of an SSZ data structure.
+ - Calculating the hash tree root involves recursively Merkleizing the data structure.
+ - Merkleization is tightly coupled to [SSZ](/part2/building_blocks/ssz) and is defined in the same spec.
+ - The use of hash tree roots enables large parts of the beacon state to be cached, making it practical to operate with a monolithic beacon state.
+ - Eth2's Merkleization approach facilitates [generalised indices and Merkle proofs](/part2/building_blocks/merkle_proofs) which are important for light clients.
+
+</div>
+
+#### Introduction
+
+While discussing [SSZ](/part2/building_blocks/ssz), I asserted that serialisation is important for consensus without going into the details. In this section we will unpack that and take a deep dive into how Ethereum&nbsp;2 nodes know that they share a view of the world.
+
+Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the Internet. This is completely impractical for a global consensus protocol.
+
+What we need is a _digest_ of the state: a brief summary that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. The digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
+
+Thankfully, such digests exist in the form of [cryptographic hash functions](https://en.wikipedia.org/wiki/Cryptographic_hash_function). These take a (potentially) large amount of input data and mangle it up into a small number of bytes, typically 32, that for all practical purposes uniquely fingerprint the data.
+
+Armed with such a hash function[^fn-hash-function-search] we can improve on the previous idea. You and I separately serialise our beacon states and then hash (apply the hash function to) the resulting strings. This is much faster than sending all the data over the network. Now we only need to exchange and compare our very short 32 byte hashes. If they match then we have the same state; if they don't match then our states differ.
+
+[^fn-hash-function-search]: See the [Annotated Spec](/part3/helper/crypto#hash) for the saga of Eth2's hash function, and how we ended up with SHA256.
+
+This process is very common, and was an early candidate for consensus purposes in Ethereum&nbsp;2, though it was apparent [fairly early](https://github.com/ethereum/consensus-specs/blame/24c8a53b5c7be0248015413b6c0f8586e79d6b67/specs/casper_sharding_v2.1.md#L588) that there might be better ways.
+
+A problem with this approach is that, if you modify any part of the state &ndash; even a single bit &ndash; then you need to recalculate the hash of the entire serialised state. This is potentially a huge overhead. It was dealt with in early versions of the spec by splitting the beacon state into [two parts](https://github.com/ethereum/consensus-specs/commit/0001b7b9de2bf87ff267547acdb99788cf9b463c#diff-4b26170476a5cef3886e7a1e74bb27a76abf80c7f4c4413d0ad1b47692571b6bR85): a slowly changing "crystallised" state that would rarely need re-hashing, and a smaller fast changing "active" state. However, this division of the state was a bit arbitrary and began to compromise some [other parts](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249) of the design.
+
+Ultimately, the split state approach was abandoned in favour of a method called "tree hashing", which is built on a technique called Merkleization[^fn-merkleization-name]. The remainder of this section explores this approach.
+
+[^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
+
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+
+Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
+
+The first advantage is performance. On the face of it, tree hashing is [quite inefficient](https://github.com/ethereum/consensus-specs/pull/120#issue-378791752) since it requires hashing around double the amount of data to calculate the digest (the root) of a structure compared with the other method of simply hashing the entire serialisation. However, the way that hash trees are constructed in Ethereum&nbsp;2 allows us to cache the roots of entire subtrees that have not changed. So, for example, [by design](/part2/incentives/balances#engineering-aspects-of-effective-balance) the list of validator records in the state does not change frequently. As a result we can cache the hash tree root of the list and do not need to recalculate it every time we recalculate the entire beacon state root. Overall this feature results in a huge reduction in the total amount of hashing required to calculate state roots, and is an important part of making the beacon chain protocol usable in practice.
+
+The second advantage is light-client support. Indeed, the [original motivation](https://github.com/ethereum/consensus-specs/issues/54) for implementing tree hashing was only about supporting light clients. Tree hashing enables efficient Merkle proofs that allow subsets of the beacon state to be provided to light clients. As long as a light client has the hash tree root by some means it can use the proofs to verify that the provided data is correct.
+
+We will first recap Merkle trees, then extend them to Merkleization, and finally look at the construction of the hash tree root, which is our ultimate goal.
+
+##### Terminology
+
+The SSZ specification uses the term "Merkleization" to refer to both
+ - the operation of finding the root of a Merkle tree given its leaves, and
+ - the operation of finding the hash tree root of an SSZ object.
+
+For didactic purposes I've chosen to distinguish between these more precisely. In the following sections I'll be calling the first "Merkleization", and the second "calculating a hash tree root".
+
+With these definitions, calculating the hash tree root of an SSZ object _uses_ Merkleization, potentially multiple steps of it, but also involves other steps such packing, chunking, and length mix-ins. Moreover, Merkleization always works with full binary trees (the number of leaves is a power of two), whereas hash tree roots can be derived from much more complex binary tree structures.
+
+#### Merkle Trees
+
+To understand Merkleization we first need to understand [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree). These are not at all new, and date back to the 1970s.
+
+The idea is that we have a set of "leaves", which is our data, and we iteratively reduce those leaves down to a single, short root via hashing. This reduction is done by hashing the leaves in pairs to make a "parent" node. We repeat the process on the parent nodes to make grand-parent nodes, and so on to build a binary tree structure that culminates in a single ancestral root. In Merkleization we will be dealing only with structures that have a power of two number of leaves, so we have a full binary tree.
+
+In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, and $D$. These can be any string of data, though in Merkleization they will be 32 byte "chunks". The function $H$ is our hash function, and the operator $+$ concatenates strings. So $H(A+B)$ is the hash of the concatenation of strings $A$ and $B$[^fn-roots-and-leaves].
+
+[^fn-roots-and-leaves]: For some reason, in computer science, trees are traditionally depicted the other way up. Call me eccentric, but I like my trees to have their leaves at the top and their roots at the bottom.
+
+<a id="img_merkleization_tree"></a>
+<div class="image" style="width:80%">
+
+![Diagram of a Merkle tree](md/images/diagrams/merkleization_tree.svg)
+Example of a Merkle tree.
+
+</div>
+
+In the Eth2 implementation, each box in the diagram is a 32-byte string of data: either a 32-byte leaf, or the 32-byte output of the hash function. Thus we obtain the 32-byte root of the tree, which is a "digest" of the data represented by the leaves. The root uniquely represents the data in the leaves; any change in the leaves leads to a different root.
+
+Here's the same thing again on the Python REPL, assigning leaf values as $A=1$, $B=2$, $C=3$ and $D=4$. We construct the root of the tree starting from the leaves and descending through its levels until reaching the root, $H(H(A + B) + H(C + D))$. Note that all the leaf values are padded to 32-bytes and are little-endian (as per their SSZ serialisation).
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint256
+>>> from eth2spec.utils.hash_function import hash
+>>> a = uint256(1).to_bytes(length = 32, byteorder='little')
+>>> b = uint256(2).to_bytes(length = 32, byteorder='little')
+>>> c = uint256(3).to_bytes(length = 32, byteorder='little')
+>>> d = uint256(4).to_bytes(length = 32, byteorder='little')
+>>> ab = hash(a + b)
+>>> cd = hash(c + d)
+>>> abcd = hash(ab + cd)
+>>> abcd.hex()
+'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
+```
+
+Merkle tree constructions are a fairly common way to calculate a digest of a bunch of data, such as a blockchain state. Ethereum&nbsp;1 uses a more sophisticated version of this called a hexary Merkle&ndash;Patricia trie (in Eth1 it's a "trie" not a "tree" for [complicated reasons](https://en.wikipedia.org/wiki/Trie)), though there are proposals to [simplify that](https://eips.ethereum.org/EIPS/eip-3102).
+
+An extremely useful feature of Merkle trees is that it is quite efficient to construct inclusion proofs using them. This is critical functionality for light clients, and we will discuss it in depth when we look at [Merkle proofs](/part2/building_blocks/merkle_proofs).
+
+#### Merkleization
+
+The normal way to implement a Merkle tree is to store the entire tree structure in memory or on disk, including all the intermediate levels between the leaves and the root. As leaves are updated the affected nodes in the tree are updated: changing $A$ means updating $H(A+B)$ and then the root, everything else is unchanged.
+
+The difference with Merkleization is that the Merkle tree is computed on-the-fly from the given leaves. We can pick up where we left off from the last REPL session as follows.
+
+```python
+>>> from eth2spec.utils.merkle_minimal import merkleize_chunks
+>>> merkleize_chunks([a, b, c, d]).hex()
+'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
+```
+
+The Merkleization function (called `merkleize()` in the SSZ spec, and [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) in the executable spec) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
+
+The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks so that the total number of chunks is rounded up to the next whole power of two, such that we conceptually have a full binary tree. Thus a list of three chunks gets implicitly padded with an extra zero chunk:
+
+```python
+>>> z = bytearray(32)
+>>> merkleize_chunks([a, b, c]).hex()
+'66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db'
+>>> merkleize_chunks([a, b, c, z]).hex()
+'66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db'
+```
+
+A larger tree width can be provided as a parameter to `merkleize_chunks()`, and the list will be padded with zero chunks accordingly. This capability is used when dealing with lists and bitlists.
+
+```python
+>>> merkleize_chunks([a]).hex()
+'0100000000000000000000000000000000000000000000000000000000000000'
+>>> merkleize_chunks([a], 4).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+>>> merkleize_chunks([a, z, z, z]).hex()
+'553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
+```
+
+An implementation can do this zero padding "virtually", and can optimise further by storing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. In this way we don't always need to build the whole tree to find the Merkle root.
+
+Note that the Merkleization of a single chunk is always just the chunk itself. This reduces the overall amount of hashing needed.
+
+#### The Hash Tree Root
+
+The hash tree root is a generalisation of Merkleization that we can apply to the kind of complex, compound data structures we have in the beacon state. Calculating hash tree roots is tightly connected to the type-scheme of [Simple Serialize](/part2/building_blocks/ssz).
+
+Calculating the hash tree root of an SSZ object is recursive. Given a composite SSZ object, we iteratively move through the layers of its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we move back through the structure using the calculated hash tree roots as chunks themselves.
+
+The process of calculating a hash tree root is defined in the [Simple Serialize specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization), and that's the place to go for the full details. However, in simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when finding an object's hash tree root.
+  - For basic types or collections of basic types (lists and vectors), we just pack and Merkleize directly.
+  - For containers and collections of composite types, we recursively find the hash tree roots of the contents.
+
+The following two rules are a simplified summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization).
+ 1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bitvector, then `hash_tree_root(X) = merkleize_chunks(pack(X))`. The `pack()` function returns a list of chunks that can be Merkleized directly.
+ 2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize_chunks([hash_tree_root(x) for x in X])`. The list comprehension is a list of hash tree roots, which is equivalent to a list of chunks.
+
+We'll see plenty of concrete applications of these two rules in the [worked example](#worked-example) below.
+
+##### Packing and Chunking
+
+Merkleization operates on lists of "chunks" which are 32-byte blobs of data. Lists generated by means of step 2 above are already in this form. However, step 1 involves basic objects that require a "packing and chunking" operation prior to Merkleization.
+
+The [spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization) gives the precise rules, but it basically looks like this:
+  - The object (a basic type, a list/vector of basic types, or a bitlist/bitvector) is serialised via SSZ. The sentinel bit is omitted from the serialisation of bitlist types.
+  - The serialisation is right-padded with zero bytes up to the next full chunk (32 byte boundary).
+  - The result is split into a list of 32 byte chunks.
+  - If necessary, further (virtual) zero chunks will be appended to reach the following total lengths (only lists and bitlists might actually need extra padding):
+     - All basic types give a single chunk; no basic type has a serialisation longer than 32 bytes.
+     - `Bitlist[N]` and `Bitvector[N]`: `(N + 255) // 256` (dividing by chunk size in bits and rounding up)
+     - `List[B, N]` and `Vector[B, N]`, where `B` is a basic type: `(N * size_of(B) + 31) // 32` (dividing by chunk size in bytes and rounding up)
+
+Containers and composite objects that result from rule 2 will have the following numbers of chunks, including zero-chunk padding where required for lists.
+   * `List[C, N]` and `Vector[C, N]`, where `C` is a composite type: `N`, since the Merkleization comprises `N` hash tree roots.
+   * Containers: `len(fields)`, since there is one hash tree root per field in the container.
+
+It is not immediately obvious why lists and bitlists are padded with zero chunks up to their full maximum lengths, even if these are "virtual" chunks. However, this enables the use of generalised indices which provide a consistent way of creating Merkle proofs against hash tree roots, the topic of our [next section](/part2/building_blocks/merkle_proofs).
+
+Recall that, in addition to any padding added here, the Merkleization process will further pad the list with zero chunks to make it up to a power of two in length.
+
+##### Mixing in the length
+
+We want objects that have the same type but different contents to have different hash tree roots. This presents a problem for lists. Consider the list `a` of three elements, and the list `b` which is the same three elements plus a fourth zero element on the end. These are different lists of the same type, but both Merkleize to the same value.
+
+```python
+>>> from eth2spec.utils.ssz.ssz_typing import uint256, List
+>>> from eth2spec.utils.merkle_minimal import merkleize_chunks
+>>> a = List[uint256, 4](1, 2, 3).encode_bytes()
+>>> b = List[uint256, 4](1, 2, 3, 0).encode_bytes()
+>>> merkleize_chunks([a[0:32], a[32:64], a[64:96]])
+0x66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db
+>>> merkleize_chunks([b[0:32], b[32:64], b[64:96], b[96:128]])
+0x66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db
+```
+
+We need to ensure that a list ending with a zero value has a different hash tree root from the same list without the zero value. To do this, we put lists (and bitlists) through an extra `mix_in_length()` process which involves hashing a concatenation of the Merkle root of the list and the length of the list. This is equivalent to the Merkleization of two chunks, the first being the Merkle root of the list, the second being its length.
+
+See the [diagram](#img_merkleization_attestingindices) for `attesting_indices` below for an illustration of this in practice.
+
+Bitlists require a similar treatment since we remove the sentinel bit before Merkleizing.
+
+#### Summaries and Expansions
+
+The SSZ spec describes features of Merkleization called [summaries and expansions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#summaries-and-expansions). These are not explicit functions of Merkleization, but implicitly arise as consequences of the design.
+
+Simply put, anywhere in the process, an entire SSZ object can be replaced with its hash tree root without affecting the final result.
+
+We make use of this in a number of ways. First and foremost is the ability to cache the hash tree roots of any unchanged parts of the state, which makes it practical to recalculate the hash tree root of the whole state when required. For example, if a validator record is unchanged we do not need to recalculate its hash tree root when finding the root of the validator registry. If the validator registry is unchanged, we do not need to recalculate its hash tree root when calculating the full state root.
+
+As another example, consider the [`BeaconBlock`](/part3/containers/blocks#beaconblock) and the [`BeaconBlockHeader`](/part3/containers/dependencies#beaconblockheader) types.
+
+```python
+class BeaconBlock(Container):
+    slot: Slot
+    proposer_index: ValidatorIndex
+    parent_root: Root
+    state_root: Root
+    body: BeaconBlockBody
+
+class BeaconBlockHeader(Container):
+    slot: Slot
+    proposer_index: ValidatorIndex
+    parent_root: Root
+    state_root: Root
+    body_root: Root
+```
+
+These differ only in their last fields, `body` and `body_root` respectively. If `body_root` is the hash tree root of the `BeaconBlockBody`, `body`, then these two objects will have exactly the same hash tree root. `BeaconBlock` is the expansion type of `BeaconBlockHeader`; `BeaconBlockHeader` is a summary type of `BeaconBlock`. [Proposer slashing](/part3/containers/operations#proposerslashing) reports make use of this fact to save space by stripping out the block bodies and replacing them with their hash tree roots.
+
+The Flashbots [MEV-Boost](https://ethresear.ch/t/mev-boost-merge-ready-flashbots-architecture/11177) design also makes use of this capability. In the MEV-Boost system validators are required to sign "blinded blocks". That is, blocks for which they do not have the bodies. Since the header is a summary of the block (in the sense we are using the word summary here) the same signature will be valid both for the `BeaconBlockHeader` and the corresponding full `BeaconBlock`. This simplifies the protocol design.
+
+#### Worked example
+
+For this section's worked example we shall revisit our friend, the [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation). This gives us nice instances of Merkleizing composite type, list types, and vector types, as well as demonstrating summaries and expansions.
+
+Recall that the `IndexedAttestation` type is defined as follows,
+
+```python
+class IndexedAttestation(Container):
+    attesting_indices: List[ValidatorIndex, MAX_VALIDATORS_PER_COMMITTEE]
+    data: AttestationData
+    signature: BLSSignature
+```
+
+We will create an instance of this just as we did [previously](/part2/building_blocks/ssz#the-serialisation), only for brevity I shall call it `a`, rather than `attestation`. We want to calculate the hash tree root of this `IndexedAttestation`, `a`.
+
+A container's hash tree root is the Merkleization of the list of hash tree roots of the objects it contains (by rule 2). Diagrammatically we are building the following tree and finding its root.
+
+<a id="img_merkleization_indexedattestation"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation.svg)
+Calculating the hash tree root of an `IndexedAttestation`. In this and the following diagrams, $R(X)$ is the Merkleization of $X$, $S(X)$ is the SSZ serialisation of $X$. Each box is a 32 byte chunk, and the small digits are the number of leaves in the Merkleization operation.
+
+</div>
+
+Alternatively, in code, we have the following.
+
+```python
+assert(a.hash_tree_root() == merkleize_chunks(
+    [
+        a.attesting_indices.hash_tree_root(),
+        a.data.hash_tree_root(),
+        a.signature.hash_tree_root()
+    ]))
+```
+
+The [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) function is provided by the `merkle_minimal.py` library. We can apply this function directly as the hash tree roots in the list already constitute chunks. (We could also use the [`get_merkle_root()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L30) function, but then we'd have to specify a `pad_to` value of 4 to get a tree of the correct depth.)
+
+##### The `attesting_indices` root
+
+Working down the members of the list, we need the hash tree root of the `attesting_indices` object, which has type `List[ValidatorIndex, MAX_VALIDATORS_PER_COMMITTEE]`. This is a list of basic types, namely `uint64` since that's the type of [`ValidatorIndex`](/part3/config/types#table_custom_types), and rule 1 applies.
+
+Our `attesting_indices` list has three elements, `[33652, 59750, 92360]`, which we need to chunk and pad. First we serialise the list as usual with SSZ, then we pad it up to 32 bytes:
+
+```python
+>>> serialize(a.attesting_indices).hex()
+'748300000000000066e9000000000000c868010000000000'
+>>> (serialize(a.attesting_indices) + bytearray(8)).hex()
+'748300000000000066e9000000000000c8680100000000000000000000000000'
+```
+
+This gives us our first chunk. However, the full number of chunks we need is `2048 // 4 = 512` (`MAX_VALIDATORS_PER_COMMITTEE` divided by `uint64`s per chunk), so we must add 511 zero chunks. In practice this padding is done "virtually". The `merkleize_chunks()` function allows us to specify the full number of chunks and takes care of adding the extras. Behind the scenes, it is creating a ten-layer deep Merkle tree with our 512 chunks as leaves and returning the tree's root.
+
+```python
+>>> merkleize_chunks([serialize(a.attesting_indices) + bytearray(8)], 512).hex()
+'04e3bf0951474a6b06dd506648fdf8e84866542614e1c14fa832cd4bebfda0e3'
+```
+
+If this were a vector then our work would be done. However, when working with lists, there is a little further wrinkle: as a final step we need to concatenate the root that we have with the actual length of the list and hash them together. This is the `mix_in_length()` function described [above](#mixing-in-the-length) which we implement here by Merkleizing the list's Merkle root with the list's length.
+
+```python
+assert(a.attesting_indices.hash_tree_root() ==
+       merkleize_chunks(
+           [
+               merkleize_chunks([a.attesting_indices.encode_bytes() + bytearray(8)], 512),
+               a.attesting_indices.length().to_bytes(32, 'little')
+           ]))
+```
+
+In diagram form the hash tree root calculation for the list looks like this.
+
+<a id="img_merkleization_attestingindices"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing how to calculate the hash tree root of a List type](md/images/diagrams/merkleization_AttestingIndices.svg)
+Calculating the hash tree root of the `attesting_indices`. This is a `List[uint256, 2048]` type, and our example list has three elements, comprising a single chunk. Note the extra `mix_in_length()` step that's applied to lists.
+
+</div>
+
+##### The `data` root
+
+The `data` field of the `IndexedAttestation` is another container, an [`AttestationData`](/part3/containers/dependencies#attestationdata) object, defined as,
+
+```python
+class AttestationData(Container):
+    slot: Slot
+    index: CommitteeIndex
+    beacon_block_root: Root
+    source: Checkpoint
+    target: Checkpoint
+```
+
+As before, to find the hash tree root of a container, by rule 2 we need the root of the roots it contains. That is,
+
+```python
+assert(a.data.hash_tree_root() == merkleize_chunks(
+    [
+        a.data.slot.hash_tree_root(),
+        a.data.index.hash_tree_root(),
+        a.data.beacon_block_root.hash_tree_root(),
+        a.data.source.hash_tree_root(),
+        a.data.target.hash_tree_root()
+    ]))
+```
+
+The `Slot` and the `CommitteeIndex` are just basic `uint64` types. Their hash tree roots are their little-endian 256-bit representations.
+
+```python
+>>> a.data.slot.hash_tree_root().hex()
+'7d022f0000000000000000000000000000000000000000000000000000000000'
+>>> a.data.index.hash_tree_root().hex()
+'0900000000000000000000000000000000000000000000000000000000000000'
+```
+
+The `Root` is `Bytes32` type, which is equivalent to a `Vector[unit8, 32]`. Handily, the hash tree root is just the `Root` value itself since its only a single chunk.
+
+```python
+>>> a.data.beacon_block_root.hex()
+'4f4250c05956f5c2b87129cf7372f14dd576fc152543bf7042e963196b843fe6'
+>>> a.data.beacon_block_root.hash_tree_root().hex()
+'4f4250c05956f5c2b87129cf7372f14dd576fc152543bf7042e963196b843fe6'
+```
+
+The `source` and `target` are once again containers, both having type [`Checkpoint`](/part3/containers/dependencies#checkpoint). The `Checkpoint` type is simple to Merkleize with the knowledge we have. So, putting everything together, we can find the hash tree root of the `data` field by hand as follows.
+
+```python
+assert(a.data.hash_tree_root() == merkleize_chunks(
+    [
+        a.data.slot.to_bytes(32, 'little'),
+        a.data.index.to_bytes(32, 'little'),
+        a.data.beacon_block_root,
+        merkleize_chunks([a.data.source.epoch.to_bytes(32, 'little'), a.data.source.root]),
+        merkleize_chunks([a.data.target.epoch.to_bytes(32, 'little'), a.data.target.root])
+    ]))
+```
+
+<a id="img_merkleization_attestationdata"></a>
+<div class="image" style="width:80%">
+
+![Diagram showing how to calculate the hash tree root of an AttestationData type](md/images/diagrams/merkleization_AttestationData.svg)
+Calculating the hash tree root of an `AttestationData` container. It contains in turn two `Checkpoint` containers, `source` and `target`.
+
+</div>
+
+##### The `signature` root
+
+The final part of the `IndexedAttestation` we need to deal with is the `signature` field. This is of type `Signature`, which is a `Vector[uint8, 96]` and rule 1 applies. This is simple to Merkleize as it is exactly three chunks when packed. The `merkleize_chunks()` function takes care of adding a single virtual zero chunk to make a power-of-two number of leaves.
+
+```python
+assert(a.signature.hash_tree_root() ==
+       merkleize_chunks([a.signature[0:32], a.signature[32:64], a.signature[64:96]]))
+```
+
+<a id="img_merkleization_signature"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing how to calculate the hash tree root of a Signature type](md/images/diagrams/merkleization_Signature.svg)
+Calculating the hash tree root of a `Signature`, which is really a `Bytes96`, or `Vector[uint8, 96]` type.
+
+</div>
+
+#### Putting it all together
+
+Assembling all these parts we can illustrate in both diagram form and code form how the hash tree root of the `IndexedAttestation` is calculated from the serialisation of the underlying basic types via repeated applications of Merkleization.
+
+##### In diagram form
+
+<a id="img_merkleization_indexedattestation_all"></a>
+<div class="image" style="width:100%">
+
+![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation_all.svg)
+Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`. The small digits are the number of leaves in each Merkleization operation.
+
+</div>
+
+##### Full example code
+
+The following code illustrates all the points from the worked example. You can run it by setting up the executable spec as described in [the Appendix](/appendices/running). If everything goes well the only thing it should print is `Success!`.
+
+```python
+from eth2spec.altair import mainnet
+from eth2spec.altair.mainnet import *
+from eth2spec.utils.ssz.ssz_typing import *
+from eth2spec.utils.merkle_minimal import merkleize_chunks
+
+# Initialise an IndexedAttestation type
+a = IndexedAttestation(
+    attesting_indices = [33652, 59750, 92360],
+    data = AttestationData(
+        slot = 3080829,
+        index = 9,
+        beacon_block_root = '0x4f4250c05956f5c2b87129cf7372f14dd576fc152543bf7042e963196b843fe6',
+        source = Checkpoint (
+            epoch = 96274,
+            root = '0xd24639f2e661bc1adcbe7157280776cf76670fff0fee0691f146ab827f4f1ade'
+        ),
+        target = Checkpoint(
+            epoch = 96275,
+            root = '0x9bcd31881817ddeab686f878c8619d664e8bfa4f8948707cba5bc25c8d74915d'
+        )
+    ),
+    signature = '0xaaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af'
+                + '5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856'
+                + 'c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437'
+)
+
+# A container's root is the merkleization of the roots of its fields.
+# This is IndexedAttestation.
+assert(a.hash_tree_root() == merkleize_chunks(
+    [
+        a.attesting_indices.hash_tree_root(),
+        a.data.hash_tree_root(),
+        a.signature.hash_tree_root()
+    ]))
+
+# A list is serialised then (virtually) padded to its full number of chunks before Merkleization.
+# Finally its actual length is mixed in via a further hash/merkleization.
+assert(a.attesting_indices.hash_tree_root() ==
+       merkleize_chunks(
+           [
+               merkleize_chunks([a.attesting_indices.encode_bytes() + bytearray(8)], 512),
+               a.attesting_indices.length().to_bytes(32, 'little')
+           ]))
+
+# A container's root is the merkleization of the roots of its fields.
+# This is AttestationData.
+assert(a.data.hash_tree_root() == merkleize_chunks(
+    [
+        a.data.slot.hash_tree_root(),
+        a.data.index.hash_tree_root(),
+        a.data.beacon_block_root.hash_tree_root(),
+        a.data.source.hash_tree_root(),
+        a.data.target.hash_tree_root()
+    ]))
+
+# Expanding the above AttestationData roots by "manually" calculating the roots of its fields.
+assert(a.data.hash_tree_root() == merkleize_chunks(
+    [
+        a.data.slot.to_bytes(32, 'little'),
+        a.data.index.to_bytes(32, 'little'),
+        a.data.beacon_block_root,
+        merkleize_chunks([a.data.source.epoch.to_bytes(32, 'little'), a.data.source.root]),
+        merkleize_chunks([a.data.target.epoch.to_bytes(32, 'little'), a.data.target.root]),
+    ]))
+
+# The Signature type has a simple Merkleization.
+assert(a.signature.hash_tree_root() ==
+       merkleize_chunks([a.signature[0:32], a.signature[32:64], a.signature[64:96]]))
+
+# Putting everything together, we have a "by-hand" Merkleization of the IndexedAttestation.
+assert(a.hash_tree_root() == merkleize_chunks(
+    [
+        # a.attesting_indices.hash_tree_root()
+        merkleize_chunks(
+            [
+                merkleize_chunks([a.attesting_indices.encode_bytes() + bytearray(8)], 512),
+                a.attesting_indices.length().to_bytes(32, 'little')
+            ]),
+        # a.data.hash_tree_root()
+        merkleize_chunks(
+            [
+                a.data.slot.to_bytes(32, 'little'),
+                a.data.index.to_bytes(32, 'little'),
+                a.data.beacon_block_root,
+                merkleize_chunks([a.data.source.epoch.to_bytes(32, 'little'), a.data.source.root]),
+                merkleize_chunks([a.data.target.epoch.to_bytes(32, 'little'), a.data.target.root]),
+            ]),
+        # a.signature.hash_tree_root()
+        merkleize_chunks([a.signature[0:32], a.signature[32:64], a.signature[64:96]])
+    ]))
+
+print("Success!")
+```
+
+#### See also
+
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
+
+The [Remerkleable](https://github.com/protolambda/remerkleable) library is a Python implementation that introduces some more advanced tools such as backing trees for the data structures. [Ztyp](https://github.com/protolambda/ztyp) is a further exploration of backing trees. Backing trees are a useful approach to representing and maintaining the beacon state within client implementations.
+
+[TODO: Link to backing trees section when done]::
+
+Given the limited type of hashing that's done during Merkleization (always hashing the concatenation of two 32 byte strings), it's worth looking into whether specific performance optimisations are available. Potuz has [done this](https://hackmd.io/@potuz/rJX9iD30u), and produced an optimised library, [Hashtree](https://github.com/prysmaticlabs/hashtree).
+
+### Generalised indices and Merkle proofs <!-- /part2/building_blocks/merkle_proofs* -->
 
 TODO
 
@@ -2205,14 +2716,6 @@ TODO
 
 TODO
 
-### Caching strategies? <!-- /part2/implementation/caches* -->
-
-TODO
-
-### Disk storage <!-- /part2/implementation/storage* -->
-
-TODO
-
 ### Checkpoint sync <!-- /part2/implementation/checkpoint_sync* -->
 
 TODO
@@ -2270,9 +2773,7 @@ Then &ndash; with constants, presets, and parameters &ndash; we will examine the
 
 The specification defines the following Python custom types, "for type hinting and readability": the data types defined here appear frequently throughout the spec; they are the building blocks for everything else.
 
-Each type has a name, an "SSZ equivalent", and a description. SSZ is the encoding method used to pass data between clients, among other things. Here it can be thought of as just a primitive data type.
-
-[TODO: link instead to SSZ section when written]::
+Each type has a name, an "SSZ equivalent", and a description. [SSZ](/part2/building_blocks/ssz) is the encoding method used to pass data between clients, among other things. Here it can be thought of as just a primitive data type.
 
 Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`, but this hasn't always been the case.
 
@@ -2823,8 +3324,7 @@ See also [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](#proportional_slashing_mult
 
 ##### `HISTORICAL_ROOTS_LIMIT`
 
-Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size
-`HISTORICAL_ROOTS_LIMIT` will be fine for the next few millennia, after which it will be somebody else's problem. The list grows at less than 10 KB per year.
+Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size `HISTORICAL_ROOTS_LIMIT` will be fine for the next few millennia, after which it will be somebody else's problem. The list grows at less than 10 KB per year.
 
 Storing past roots like this allows Merkle proofs to be constructed about anything in the beacon chain's history if required.
 
@@ -3146,9 +3646,7 @@ See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some 
 
 We are about to see our first Python code in the executable spec. For specification purposes, these Container data structures are just Python data classes that are derived from the base SSZ `Container` class.
 
-[TODO: link to SSZ]::
-
-SSZ is the serialisation and merkleisation format used everywhere in Ethereum&nbsp;2.0. It is not self-describing, so you need to know ahead of time what you are unpacking when deserialising. SSZ deals with basic types and composite types. Classes like the below are handled as SSZ containers, a composite type defined as an "ordered heterogeneous collection of values".
+[SSZ](/part2/building_blocks/ssz) is the serialisation and merkleisation format used everywhere in Ethereum&nbsp;2.0. It is not self-describing, so you need to know ahead of time what you are unpacking when deserialising. SSZ deals with basic types and composite types. Classes like the below are handled as SSZ containers, a composite type defined as an "ordered heterogeneous collection of values".
 
 Client implementations in different languages will obviously use their own paradigms to represent these data structures.
 
@@ -3660,7 +4158,7 @@ Past `block_roots` and `state_roots` are stored in lists here until the lists ar
     validators: List[Validator, VALIDATOR_REGISTRY_LIMIT]
     balances: List[Gwei, VALIDATOR_REGISTRY_LIMIT]
 
-The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes much more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with SSZ tree hashing, this results in a big saving in the amount of data to be rehashed on registry updates. See also validator inactivity scores under [Inactivity](#inactivity) which we treat similarly.
+The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes much more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with [SSZ tree hashing](/part2/building_blocks/merkleization), this results in a big saving in the amount of data to be rehashed on registry updates. See also validator inactivity scores under [Inactivity](#inactivity) which we treat similarly.
 
     # Randomness
     randao_mixes: Vector[Bytes32, EPOCHS_PER_HISTORICAL_VECTOR]
@@ -3707,7 +4205,7 @@ Sync committees were introduced in the Altair upgrade. The next sync committee i
 
 #### Historical Note
 
-There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of SSZ tree hashing, this was [no longer necessary](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
+There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of [SSZ tree hashing](/part2/building_blocks/merkleization), this was [no longer necessary](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
 
 ### Signed envelopes <!-- /part3/containers/envelopes -->
 
@@ -3748,7 +4246,7 @@ class SignedBeaconBlockHeader(Container):
 
 This is used only when reporting proposer slashing, within a [`ProposerSlashing`](/part3/containers/operations#proposerslashing) object.
 
-Through the magic of SSZ hash tree roots, a valid signature for a `SignedBeaconBlock` is also a valid signature for a `SignedBeaconBlockHeader`. Proposer slashing makes use of this to save space in slashing reports.
+Through the magic of [SSZ hash tree roots](/part2/building_blocks/merkleization), a valid signature for a `SignedBeaconBlock` is also a valid signature for a `SignedBeaconBlockHeader`. Proposer slashing makes use of this to save space in slashing reports.
 
 ## Helper Functions <!-- /part3/helper -->
 
@@ -3866,7 +4364,7 @@ SHA256 was [chosen](https://github.com/ethereum/consensus-specs/pull/779) as the
 
 There was a lot of [discussion](https://github.com/ethereum/consensus-specs/issues/612) about this choice early in the design process. The [original plan](https://github.com/ethereum/consensus-specs/pull/11) had been to use the BLAKE2b-512 hash function &ndash; that being a modern hash function that's faster than SHA3 &ndash; and to move to a STARK/SNARK friendly hash function at some point (such as [MiMC](https://ethresear.ch/t/hash-based-vdfs-mimc-and-starks/2337)). However, to keep interoperability with Eth1, in particular for the implementation of the deposit contract, the hash function was [changed to Keccak256](https://github.com/ethereum/consensus-specs/issues/151). Finally, we [settled on SHA256](https://github.com/ethereum/consensus-specs/pull/779) as having even broader compatibility.
 
-The hash function serves two purposes within the protocol. The main use, computationally, is in Merkleization, the computation of hash tree roots, which is ubiquitous in the protocol. Its other use is to harden the randomness used in various places.
+The hash function serves two purposes within the protocol. The main use, computationally, is in [Merkleization](/part2/building_blocks/merkleization), the computation of hash tree roots, which is ubiquitous in the protocol. Its other use is to harden the randomness used in various places.
 
 |||
 |-|-|
