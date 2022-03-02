@@ -2521,7 +2521,7 @@ Calculating the hash tree root of a `Signature`, which is really a `Bytes96`, or
 
 Assembling all these parts we can illustrate in both diagram form and code form how the hash tree root of the `IndexedAttestation` is calculated from the serialisation of the underlying basic types via repeated applications of Merkleization.
 
-##### In diagram form
+##### The full picture
 
 <a id="img_merkleization_indexedattestation_all"></a>
 <div class="image" style="width:100%">
@@ -2531,7 +2531,7 @@ Illustrating the steps required to calculate the hash tree root of an `IndexedAt
 
 </div>
 
-##### Full example code
+##### The full code
 
 The following code illustrates all the points from the worked example. You can run it by setting up the executable spec as described in [the Appendix](/appendices/running). If everything goes well the only thing it should print is `Success!`.
 
