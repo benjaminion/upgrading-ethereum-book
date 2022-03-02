@@ -1376,6 +1376,14 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 ### Introduction
 
+In this chapter we will explore some of the fundamental innovations that make the Ethereum&nbsp;2 protocol practical. None of them is absolutely brand new &ndash; they all build to a degree on existing technologies &ndash; but in each case some dimension of its application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
+
+As you read, be alert to the tradeoffs that underpin these design choices. It is always the tradeoffs that are the gateway to deep understanding. Some of them are quite interesting. For example, neither the [shuffling](/part2/building_blocks/shuffling) algorithm nor the [state root](/part2/building_blocks/merkleization) calculation algorithm are the most efficient that we could have chosen, at least in terms of pure speed. In both these cases we preferred algorithms that enable a light client ecosystem over algorithms that might be more performant for full nodes.
+
+The building blocks in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
+
+### BLS Signatures <!-- /part2/building_blocks/signatures* -->
+
 TODO
 
 ### Randomness <!-- /part2/building_blocks/randomness* -->
@@ -1575,10 +1583,6 @@ This property is important for light clients. Light clients are observers of the
  - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/consensus-specs/issues/323) on the specs repo.
  - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/consensus-specs/issues/563).
  - The original paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, ["An Enciphering Scheme Based on a Card Shuffle"](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). See the "generalized domain" algorithm on page 3.
-
-### BLS Signatures <!-- /part2/building_blocks/signatures* -->
-
-TODO
 
 ### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
 
