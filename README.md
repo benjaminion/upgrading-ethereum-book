@@ -26,7 +26,7 @@ v16.13.2
 > npm --version
 8.5.2
 > gatsby --version
-Gatsby CLI version: 4.8.1
+Gatsby CLI version: 4.9.0
 ```
 
 `gatsby-cli` can be installed with,
