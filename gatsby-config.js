@@ -1,6 +1,6 @@
 const execSync = require('child_process').execSync;
 
-const date = new Date().toUTCString();
+var date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
 
 function getGitHash() {
   try {
