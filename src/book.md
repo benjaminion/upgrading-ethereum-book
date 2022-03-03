@@ -1388,7 +1388,18 @@ TODO
 
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
 
-Shuffling is used to pseudo-randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
+<div class="summary">
+
+ - Shuffling is used to randomly assign validators to committees and choose block proposers.
+ - Ethereum&nbsp;2 uses a "swap-or-not" shuffle.
+ - Swap-or-not is an oblivious shuffle: it can be applied to single list elements and subsets.
+ - This makes it ideal for supporting light clients.
+
+</div>
+
+#### Introduction
+
+Shuffling is used to randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
 Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
 
@@ -1552,7 +1563,7 @@ The decision bits used to determine whether or not to swap elements are bits dra
 
 This shuffling algorithm is much slower than Fisher&ndash;Yates. That algorithm requires $N$ swaps. Our algorithm will require $90N/4$ swaps on average to shuffle $N$ elements.
 
-We should also consider  the generation of pseudo-randomness, which is the most expensive part of the algorithm. Fisher&ndash;Yates needs something like $N\log_2{N}$ bits of randomness, and we need $90(\log_2{N} + N/2)$ bits, which, for the range of $N$ we need in Eth2, is many more bits (about twice as many when $N$ is a million).
+We should also consider the generation of pseudo-randomness, which is the most expensive part of the algorithm. Fisher&ndash;Yates needs something like $N\log_2{N}$ bits of randomness, and we need $90(\log_2{N} + N/2)$ bits, which, for the range of $N$ we need in Eth2, is many more bits (about twice as many when $N$ is a million).
 
 #### Why swap-or-not?
 
@@ -1570,7 +1581,7 @@ In summary, we can compute the destination of element $i$ in $O(1)$ operations, 
 
 This property is important for light clients. Light clients are observers of the Eth2 beacon and shard chains that do not store the entire state, but do wish to be able to securely access data on the chains. As part of verifying that they have the correct data&mdash;that no-one has lied to them&mdash;it is necessary to compute the committees that attested to that data. This means shuffling, and we don't want light clients to have to hold and shuffle the entire list of validators. By using the swap-or-not shuffle, light clients need only to consider the small subset of validators that they are interested in, which is vastly more efficient overall.
 
-#### References
+#### See also
 
  - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/consensus-specs/issues/323) on the specs repo.
  - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/consensus-specs/issues/563).
@@ -4320,7 +4331,7 @@ For the most part, integers are integers and bytes are bytes, and they don't mix
  - in [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index) to mix the slot number into the per-epoch randao seed; and
  - in [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices).
 
-You'll note that in every case, the purpose of the conversion is for the integer to form part of a byte string that is hashed to create (pseudo-) randomness.
+You'll note that in every case, the purpose of the conversion is for the integer to form part of a byte string that is hashed to create (pseudo-)randomness.
 
 The result of this conversion is dependent on our arbitrary choice of endianness, that is, how we choose to represent integers as strings of bytes. For Eth2, we have chosen little-endian: see the discussion of [`ENDIANNESS`](/part3/config/constants#endianness) for more background.
 
