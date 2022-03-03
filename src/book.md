@@ -1386,6 +1386,17 @@ The building blocks in this chapter are those that are part of the protocol spec
 
 TODO
 
+https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105
+
+#### See also
+
+https://hackmd.io/@benjaminion/bls12-381
+
+https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04
+https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09
+
+https://github.com/supranational/blst
+
 ### Randomness <!-- /part2/building_blocks/randomness* -->
 
 TODO
