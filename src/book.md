@@ -1382,13 +1382,54 @@ As you read, be alert to the tradeoffs that underpin these design choices. It is
 
 The building blocks in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
 
-### BLS Signatures <!-- /part2/building_blocks/signatures* -->
+### BLS Signatures <!-- /part2/building_blocks/signatures -->
 
-TODO
+<div class="summary">
 
-https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105
+ - TODO
+
+</div>
+
+<!--
+Notes:
+  - Signing domains
+  - Batch verification (elsewhere)
+  - Rogue public key (and mitigation via deposits)
+-->
+
+#### Digital signatures
+
+Digital signatures are applied to messages to ensure two things: that the message has not been tampered with in any way; and that the sender of the message is who it claims to be.
+
+Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1. Under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined: nobody cares who actually mined the block, so no signature is needed.
+
+In Ethereum&nbsp;2, however, validators have identities and are accountable for their actions. In order to enforce the Casper FFG rules, and in order to be able to count votes for the LMD GHOST fork choice, we need to be able to uniquely identify the validators making individual attestations and blocks.
+
+Digital signatures find a couple of other uses within the Ethereum&nbsp;2 protocol in addition to signing blocks and attestations: they are used when contributing randomness to the [RANDAO](/part2/building_blocks/randomness), and they are used to select [subsets of committees](/part2/building_blocks/aggregator) for aggregation duty. We will discuss those usages in their respective sections and focus on the signing of protocol messages in this section.
+
+#### Background
+
+One of the characteristics of proof of stake protocols is the sheer number of protocol messages that need to be handled. For example, with 300,000 active validators, the current beacon chain design calls for over 780 attestations per second to be gossipped globally. That's a sustained average; the traffic will happen in much higher bursts in practice. Not only do these messages need to travel over the network, but each individual digital signature needs to be verified by every node, which is a CPU-intensive operation. Not to mention having to store all those signed messages in the block history. These challenging requirements have typically limited the scalability of participation in proof of stake or proof of authority networks. Pure PBFT-based consensus protocols tend to have validator sets that number in the dozens rather than the thousands.
+
+The prevailing work-in-progress design in early 2018 for Ethereum's (partial) move to proof of stake ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) estimated that the protocol could handle a maximum of around 900 validators due to this message overhead, and set a hefty stake size of 1500&nbsp;ETH accordingly.
+
+The turning point came in May 2018 with the publication by Justin Drake of an article on ethresear.ch called [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). This proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while still preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that need to be gossipped around the network, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
+
+[^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, using threshold signatures potentially makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues.
+
+[^fn-killing-of-hybrid-casper]
+
+[^fn-killing-of-hybrid-casper]: The last significant update to EIP-1011 was made on the [16th of May, 2018](https://github.com/ethereum/EIPs/commit/46927c516f6dda913cbabb0beb44a3f19f02c0bb). Justin Drake's post on signature aggregation was made just [two weeks later](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion).
+
+
+[Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
+
 
 #### See also
+
+[Compact Multi-Signatures for Smaller Blockchains](https://eprint.iacr.org/2018/483.pdf), Boneh, Drijvers, Neven. The original paper that described efficient BLS multi-signatures.
+
+https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion
 
 https://hackmd.io/@benjaminion/bls12-381
 
