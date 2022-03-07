@@ -76,6 +76,7 @@ module.exports = {
         siteUrl: 'https://eth2book.info/altair',
         matomoPhpScript: 'matomo.php',
         matomoJsScript: 'matomo.js',
+        disableCookies: true,
       },
     },
   ],
