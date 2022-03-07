@@ -68,5 +68,15 @@ module.exports = {
         ErrorDocument: `ErrorDocument 404 /altair/404.html`,
       },
     },
+    {
+      resolve: 'gatsby-plugin-matomo',
+      options: {
+        siteId: '1',
+        matomoUrl: 'https://eth2book.info/matomo',
+        siteUrl: 'https://eth2book.info/altair',
+        matomoPhpScript: 'matomo.php',
+        matomoJsScript: 'matomo.js',
+      },
+    },
   ],
 };
