@@ -2645,6 +2645,8 @@ print("Success!")
 
 The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
 
+A formal verification of Merkleization has been performed: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/merkleise-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/merkle).
+
 The [Remerkleable](https://github.com/protolambda/remerkleable) library is a Python implementation that introduces some more advanced tools such as backing trees for the data structures. [Ztyp](https://github.com/protolambda/ztyp) is a further exploration of backing trees. Backing trees are a useful approach to representing and maintaining the beacon state within client implementations.
 
 [TODO: Link to backing trees section when done]::
