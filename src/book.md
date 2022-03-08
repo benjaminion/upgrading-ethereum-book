@@ -1399,7 +1399,7 @@ Notes:
 
 #### Digital signatures
 
-Digital signatures are applied to messages to ensure two things: that the message has not been tampered with in any way; and that the sender of the message is who it claims to be.
+[Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are heavily used in blockchain technology. A digital signature is applied to a message to ensure two things: that the message has not been tampered with in any way; and that the sender of the message is who it claims to be. Digital signatures are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
 
 Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1. Under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined: nobody cares who actually mined the block, so no signature is needed.
 
@@ -1413,17 +1413,15 @@ One of the characteristics of proof of stake protocols is the sheer number of pr
 
 The prevailing work-in-progress design in early 2018 for Ethereum's (partial) move to proof of stake ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) estimated that the protocol could handle a maximum of around 900 validators due to this message overhead, and set a hefty stake size of 1500&nbsp;ETH accordingly.
 
-The turning point came in May 2018 with the publication by Justin Drake of an article on ethresear.ch called [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). This proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while still preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that need to be gossipped around the network, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
+The turning point came in May 2018 with the publication by Justin Drake of an article on ethresear.ch called [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). The article proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while still preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that must be gossipped around the network and the cost of verifying the integrity of those messages, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
 
-[^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, using threshold signatures potentially makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues.
+[^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, using threshold signatures makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues. Nonetheless, the name "beacon chain" that we still use today derives from Dfinity's "randomness beacon" described in that paper.
 
-[^fn-killing-of-hybrid-casper]
+This signature aggregation capability was the main breakthrough that prompted us to abandon the EIP-1011 on-chain PoS management mechanism enirely and move to the "beacon chain" model that we have today[^fn-killing-of-hybrid-casper].
 
 [^fn-killing-of-hybrid-casper]: The last significant update to EIP-1011 was made on the [16th of May, 2018](https://github.com/ethereum/EIPs/commit/46927c516f6dda913cbabb0beb44a3f19f02c0bb). Justin Drake's post on signature aggregation was made just [two weeks later](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion).
 
-
-[Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
-
+### BLS Signatures
 
 #### See also
 
@@ -2331,7 +2329,7 @@ A larger tree width can be provided as a parameter to `merkleize_chunks()`, and 
 '553c8ccfd20bb4db224b1ae47359e9968a5c8098c15d8bf728b19e55749c773b'
 ```
 
-An implementation can do this zero padding "virtually", and can optimise further by storing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. In this way we don't always need to build the whole tree to find the Merkle root.
+An implementation can do this zero padding "virtually", and can optimise further by pre-computing the various levels of hashes of zero chunks: $H(0 + 0)$, $H(H(0 + 0) + H(0 + 0))$, and so on. In this way we don't always need to build the whole tree to find the Merkle root.
 
 Note that the Merkleization of a single chunk is always just the chunk itself. This reduces the overall amount of hashing needed.
 
@@ -2387,7 +2385,7 @@ We want objects that have the same type but different contents to have different
 0x66c419026fee8793be7fd0011b9db46b98a79f9c9b640e25317865c358f442db
 ```
 
-We need to ensure that a list ending with a zero value has a different hash tree root from the same list without the zero value. To do this, we put lists (and bitlists) through an extra `mix_in_length()` process which involves hashing a concatenation of the Merkle root of the list and the length of the list. This is equivalent to the Merkleization of two chunks, the first being the Merkle root of the list, the second being its length.
+We need to ensure that a list ending with a zero value has a different hash tree root from the same list without the zero value. To do this, we put lists (and bitlists) through an extra `mix_in_length()` process that involves hashing a concatenation of the Merkle root of the list and the length of the list. This is equivalent to the Merkleization of two chunks, the first being the Merkle root of the list, the second being its length.
 
 See the [diagram](#img_merkleization_attestingindices) for `attesting_indices` below for an illustration of this in practice.
 
