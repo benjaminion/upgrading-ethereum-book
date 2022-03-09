@@ -1421,7 +1421,108 @@ This signature aggregation capability was the main breakthrough that prompted us
 
 [^fn-killing-of-hybrid-casper]: The last significant update to EIP-1011 was made on the [16th of May, 2018](https://github.com/ethereum/EIPs/commit/46927c516f6dda913cbabb0beb44a3f19f02c0bb). Justin Drake's post on signature aggregation was made just [two weeks later](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion).
 
-### BLS Signatures
+#### BLS Signatures
+
+Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve[^fn-bls-bls]. ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairings](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
+
+[^fn-bls-bls]: There is a curious naming collision here. The BLS trio of "BLS signatures" are Boneh, Lynn, and Shacham, whereas those of the "BLS12-381" elliptic curve are Barreto, Lynn, and Scott. Ben Lynn is the only common name between the two.
+
+Several other blockchain protocols have adopted or will adopt BLS signatures over the BLS12-381 curve, and throughout our implementation in Eth2 we have been mindful to follow whatever standards exist, and to participate in the defining of those standards where possible. This both helps interopability and supports the development of common libraries and tooling.
+
+The high-level workflow for creating and verifying a BLS signature is relatively straightforward. In the following paragraphs I'll first give a simplified description in prose, and then a more mathematical description which is quite optional.
+
+##### Components
+
+There are four component pieces of data within the BLS digital signature process.
+
+1. The _secret key_. Every entity acting within the protocol (that is, a validator in the context of Eth2) has a secret key, sometimes called a private key. The secret key is used to sign messages, and must be kept secret, as its name suggests.
+2. The _public key_. The public key is uniquely derived from the secret key, but the secret key cannot be reverse engineered from it (without impossibly huge amounts of work). A validator's public key represents its identity within the protocol, and is known to everybody.
+3. The _message_. We'll look later at the kinds of messages used in the Eth2 protocol and how they are constructed. For now, the message is just a string of bytes.
+4. The _signature_, which is the output of the signing process. The signature is created by combining the message with the secret key. Given a message, a signature for that message, and a public key, we can verify that the validator with that public key signed exactly that message. In other words, no-one else could have signed that message, and the message has not been changed since signing.
+
+[TODO: link to different message types etc.]::
+
+<a id="img_bls_inputs_outputs"></a>
+<div class="image" style="width:70%">
+
+![A diagram showing BLS signature inputs and outputs](md/images/diagrams/bls_inputs_outputs.svg)
+Relationships between the various BLS signature activities, and their inputs and outputs.
+
+</div>
+
+More mathematically, things look like this. We use two subgroups of the BLS12-381 elliptic curve: $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a very large prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
+
+1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, very small values of $sk$ would be hopelessly insecure).
+2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is a member of the $G_1$ group.
+3. The message, $m$ is a sequence of bytes. During the signing process this will be mapped to some point $H(m)$ that is a member of the $G_2$ group.
+4. The signature, $\sigma$, is also a member of the $G_2$ group, namely $[sk]H(m)$.
+
+##### Key pairs
+
+A key pair is a secret key along with its public key. Together these irrefutably link each validator with its actions.
+
+Every validator on the beacon chain has at least one key pair, the "signing key" that is used in daily operations (making attestations, producing blocks, etc.). Depending on which version of [withdrawal credentials](/part3/config/constants#withdrawal-prefixes) the validator is using, it may also have a second BLS key pair, the "withdrawal key", that is kept offline.
+
+The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IETF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
+
+The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/mikF5LkFQoqXM1EuplRj2Q?both#Point-compression) serialised form as a string of 48 bytes.
+ 
+##### Signing
+
+In the beacon chain protocol the only messages that get signed are [hash tree roots](/part2/building_blocks/merkleization) of objects: their so-called signing roots, which are 32 byte strings.
+
+The [`compute_signing_root()`](/part3/helper/misc#compute_signing_root) function combines the hash tree root of an object with a "domain". Ten [domain types](/part3/config/constants#domain-types) are defined in Altair that distinguish between different use cases for the signature. The idea is to avoid ever having a situation in which the signature of an object generated in one context is mis-used in a different context.
+
+Once we have the signing root it needs to be mapped onto an elliptic curve point in the $G_2$ group. If the message's signing root is $m$, then the point is $H(m)$ where $H()$ is a function that maps bytes to $G_2$. Performing this mapping is hard to do well and an entire [draft stadard](https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/) exists to define the process. Thankfully, we can ignore the details completely and leave them up to our cryptographic libraries[^fn-implement-h2g2].
+
+[^fn-implement-h2g2]: Unless you have to implement the thing, as I [ended up doing](https://github.com/ConsenSys/teku/commit/e927d9be89b64fe8297b74405f37aa0e6378024) in Java.
+
+Now that we have $H(m)$, the signing process itself is simple, being just a scalar multiplication of the $G_2$ point by the secret key:
+
+$$
+\sigma = [sk]H(m)
+$$
+
+Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it serialises to a 96 byte string in compressed form.
+
+##### Verifying
+
+To verify a signature we need to know the public key of the validator that signed it. Every validator's public key is stored in the beacon state and can be simply looked up via the validator's index which, by design, is always available by some means whenever it's required.
+
+Signature verification can be treated as a black-box: we send the message, the public key, and the signature to the verifier; if after some cryptographic magic the signature matches the public key and the message then we declare it valid. Otherwise, either the signature is corrupt, the incorrect secret key was used, or the message is no longer what was signed.
+
+More formally, signatures are verified using elliptic curve pairings.
+
+With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a paring $e$, $e:G_1\times G_2\rightarrow G_T$.
+
+Pairings are usually denoted $e(P,Q)$ and have very special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
+ - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
+ - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
+
+(Conventially $G_1$ and $G_2$ are written as additive groups, and $G_T$ as multiplicative, so the $\cdot$ operator is point multiplication in $G_T$.)
+
+From this, we can deduce that all of the following identities hold:
+ - $e([a]P,[b]Q)=e(P,[b]Q)^a=e(P,Q)^{ab}=e(P,[a]Q)^b=e([b]P,[a]Q)$.
+
+Armed with our pairing, verifying a signature is straightforward. The signature is valid if, and only if,
+
+$$
+e(g_1,\sigma)=e(pk,H(m))
+$$
+
+That is, given the message $m$, the public key $pk$, the signature $\sigma$, and the fixed public value $g_1$ (the generator of the $G_1$ group), we can verify that the message was signed by the secret key $sk$.
+
+This identity comes directly from the properties of pairings described above.
+
+$$
+e(pk,H(m)) = e([sk]g_1,H(m)) = e(g_1,H(m))^{(sk)} = e(g_1,[sk]H(m)) = e(g_1,\sigma)
+$$
+
+Note that elliptic curves supporting such a pairing function, $e()$, are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
+
+#### Aggregation
+
+HERE
 
 #### See also
 
@@ -1431,10 +1532,17 @@ https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjamini
 
 https://hackmd.io/@benjaminion/bls12-381
 
+Vitalik on pairings: https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627
+
 https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04
 https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09
 
-https://github.com/supranational/blst
+Several EIPs are intended to govern the generation and storage of keys in practice:
+  - [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) provides a method for deriving a tree-hierarchy of BLS12-381 keys based on an entropy seed. As a bonus, it also generates a set of [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature) that could be used as an emergency backup in case of a break in the BLS signature scheme.
+  - [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md) defines a deterministic account hierarchy for specifying the purpose of keys.
+  - [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) specifies a standard keystore format for storage and interchange of BLS12-381 keys.
+
+Implementation: https://github.com/supranational/blst (and the JS one?)
 
 ### Randomness <!-- /part2/building_blocks/randomness* -->
 
