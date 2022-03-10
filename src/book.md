@@ -1423,7 +1423,7 @@ This signature aggregation capability was the main breakthrough that prompted us
 
 #### BLS Signatures
 
-Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve[^fn-bls-bls]. ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairings](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
+Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
 
 [^fn-bls-bls]: There is a curious naming collision here. The BLS trio of "BLS signatures" are Boneh, Lynn, and Shacham, whereas those of the "BLS12-381" elliptic curve are Barreto, Lynn, and Scott. Ben Lynn is the only common name between the two.
 
@@ -1518,7 +1518,7 @@ $$
 e(pk,H(m)) = e([sk]g_1,H(m)) = e(g_1,H(m))^{(sk)} = e(g_1,[sk]H(m)) = e(g_1,\sigma)
 $$
 
-Note that elliptic curves supporting such a pairing function, $e()$, are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
+Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
 
 #### Aggregation
 
