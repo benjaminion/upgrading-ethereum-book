@@ -1415,7 +1415,7 @@ The prevailing work-in-progress design in early 2018 for Ethereum's (partial) mo
 
 The turning point came in May 2018 with the publication by Justin Drake of an article on ethresear.ch called [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). The article proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while still preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that must be gossipped around the network and the cost of verifying the integrity of those messages, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
 
-[^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, using threshold signatures makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues. Nonetheless, the name "beacon chain" that we still use today derives from Dfinity's "randomness beacon" described in that paper.
+[^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, their use of threshold signatures makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues. Nonetheless, the name "beacon chain" that we still use today derives from Dfinity's "randomness beacon" described in that paper.
 
 This signature aggregation capability was the main breakthrough that prompted us to abandon the EIP-1011 on-chain PoS management mechanism enirely and move to the "beacon chain" model that we have today[^fn-killing-of-hybrid-casper].
 
@@ -1537,77 +1537,167 @@ $$
 Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
 
 <a id="img_bls_verifying"></a>
-<div class="image" style="width:65%">
+<div class="image" style="width:80%">
 
 ![TODO](md/images/diagrams/bls_verifying.svg)
 TODO
 
 </div>
 
+The verification will return `True` if and only if the signature corresponds both to the public key (that is, the signature and the public key were both generated from the same secret key) and to the message (that is, the message is identical to the one that was signed originally). Otherwise it will return `False`.
+
 #### Aggregation
 
 So far we've looked at the basic set up of BLS signatures. In functional terms, what we've seen is very similar to any other digital signature scheme. Where the magic happens is in _aggregation_.
 
-Recall that public keys and signatures are elliptic curve points. Because of the bilinearity property of the pairing function, $e()$, it turns out that we can form linear combinations of public keys and signatures overt he same message, and verification still works as expected.
+Aggregation means that multiple signatures over the same message &ndash; potentially thousands of signatures &ndash; can be checked with a single verification operation. Furthermore, the aggregate signature has the same size as a regular signature, 96 bytes. This is a massive gain in scalability, and it is this gain that fundamentally makes the Ethereum&nbsp;2 consensus protocol viable.
+
+How does this work? Recall that public keys and signatures are elliptic curve points. Because of the bilinearity property of the pairing function, $e()$, it turns out that we can form linear combinations of public keys and signatures over the same message, and verification still works as expected.
 
 This statement is a little opaque; let's go step by step.
 
+##### Aggregating signatures
+
+In all of the following we will only consider aggregation of signatures over the same message[^fn-aggregation-terminology].
+
+[^fn-aggregation-terminology]: A note on terminology. The [original paper](https://eprint.iacr.org/2018/483.pdf) describing this scheme uses the term "multi-signature" when combining signatures over the same message, and "aggregate signature" when combining signatures over distinct messages. In Eth2 we only do the former, and just call it aggregation.
+
+The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like normal the addition of numbers that we are familiar with, but the operation is completely analagous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, thus the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
+
+<a id="img_bls_signature_aggregation"></a>
+<div class="image" style="width:60%">
+
+![Diagram showing aggregation of signatures](md/images/diagrams/bls_signature_aggregation.svg)
+Aggregation of signatures is simply group addition in the $G_2$ group.
+
+</div>
+
 ##### Aggregating public keys
+
+To verify an aggregate signature, we need an aggregate public key. As long as we know exactly which validators signed the original message, this is equally easy to construct. Once again we simply "add up" the public keys of the signers. This time the addition is the group operation of the $G_1$ elliptic curve group, and the result will also be a member of the $G_1$ group, so it is mathematically indistinguishable from a non-aggregated public key, and has the same 48 byte size.
 
 <a id="img_bls_pubkey_aggregation"></a>
 <div class="image" style="width:60%">
 
 ![Diagram of public key aggregation](md/images/diagrams/bls_pubkey_aggregation.svg)
-Aggregation of public keys. The keys' elliptic curve points are added, resulting in a new (aggregate) public key.
+Aggregation of public keys is simply group addition in the $G_1$ group.
 
 </div>
 
-##### Aggregating signatures
+##### Verifying aggregate signatures
 
-<a id="img_bls_signature_aggregation"></a>
-<div class="image" style="width:60%">
-
-![](md/images/diagrams/bls_signature_aggregation.svg)
-TODO
-
-</div>
-
-TODO: Same message
-
-##### Verifying aggregatated signatures
+Since aggregate signatures are indistinguishable from normal signatures, and aggregate public keys are indistinguishable from normal public keys, we can simply feed them into our normal verification algorithm.
 
 <a id="img_bls_aggregate_verify"></a>
-<div class="image" style="width:60%">
+<div class="image" style="width:70%">
 
-![](md/images/diagrams/bls_aggregate_verify.svg)
-TODO
+![Diagram of verification of an aggregate signature](md/images/diagrams/bls_aggregate_verify.svg)
+Verification of an aggregate signature is identical to verification of a normal signature as lokng as we use the corresponding aggregate public key.
 
 </div>
 
-TODO: verification can't tell the difference
+This miracle is due to the bilinearity of the pairing operation. With an aggregate signature $\sigma_{agg}$ and a corresponding aggregate public key $pk_{agg}$ (and common message $m$) we have the following identity, which is exactly the same as the verification identity for a single signature and public key.
 
-#### Benefits of aggregation
+$$
+\begin{aligned}
+e(pk_{agg},H(m)) &= e(pk_1 + pk_2 + \ldots + pk_n,H(m)) \\
+                 &= e([sk_1 + sk_2 + \ldots + sk_n]g_1,H(m)) \\
+                 &= e(g_1,H(m))^{(sk_1 + sk_2 + \ldots + sk_n)} \\
+                 &= e(g_1,[sk_1 + sk_2 + \ldots + sk_n]H(m)) \\
+                 &= e(g_1,\sigma_1 + \sigma_2 + \ldots + \sigma_n) \\
+                 &= e(g_1,\sigma_{agg})
+\end{aligned} 
+$$
 
-<!--
-enables large committees
-Marginal cost = 1 bit + 1 addition
--->
+##### Benefits of aggregation
 
-HERE
+Verification of a BLS signature is expensive (resource intensive) compared with verification of an ECDSA signature, perhaps an order of magnitude slower due to the pairing operation, so what benefits do we gain?
+
+The benefits accrue when we are able to aggregate significant numbers of signatures. This is exactly what we have with attestation committees: ideally, all the validators in the committee sign-off on the same attestation data, so all their signatures can be aggregated. In practice, there might be differences of opinion about the chain state between committee members resulting in two or three different attestations, but even so there will be many fewer aggregates compared with the total number of committee members.
+
+###### Speed benefits
+
+To a first approximation, then, we can verify all of the attestations of a whole committee &ndash; potentially hundreds &ndash; with a single signature verification operation.
+
+This is a first approximation because we also need to account for aggregating the the public keys and the signatures. But these aggregation operations involve only point additions in their respective elliptic curve groups, which are very cheap compared with the verification.
+
+In summary:
+  - we can verify a single signature with two pairings, and
+  - we can verify an aggregate of $N$ signatures with two pairings, $N-1$ additions in $G_1$ and $N-1$ additions in $G_2$. The cost of this is dominated by the cost of the pairings, the additions are almost free.
+
+###### Space benefits
+
+There is also a huge space saving when we aggregate signatures.
+
+An aggregate signature is 96 bytes as all BLS signatures are. So, to a first approximation, an aggregate of $N$ signatures occupies $\frac{1}{N}$ the space of the unaggregated signatures.
+
+Again, this is only a first approximation. The subtlety here is that, in order to construct the corresponding public key, we somehow need to keep track of which validators signed the message. We cannot assume that the whole committee participated, and we need to be careful not to include validators multiple times.
+
+If we know in advance who the members of the committee are and how they are ordered then this tracking can be done at the marginal cost of one bit per validator: true if the validator contributed to the aggregate, false if it did not.
+
+##### The full picture
+
+This diagram illustrates the full flow from signing, through aggregating, to verifying. There are three validators in this case, although there could be many more, and each is signing the same message contents. Each validator has its own unique secret key and public key pair. The workflow is entirely non-interactive, and any of the actions up to the verification can happen independently. Even the aggregation can be done incrementally.
 
 <a id="img_bls_aggregation"></a>
 <div class="image" style="width:80%">
 
-![](md/images/diagrams/bls_aggregation.svg)
-TODO
+![Diagram showing the end-to-end aggregate signature workflow](md/images/diagrams/bls_aggregation.svg)
+The end-to-end aggregate signature workflow.
 
 </div>
 
-#### Examples
+##### Examples
 
-TODO: Aggregate attestation
+Two examples of how aggregate signatures are used in practice are in aggregate attestations and in sync committee aggregates.
+
+###### Aggregate attestations
+
+This is how [`Attestation`](/part3/containers/operations#attestation) objects are constructed. The [`AttestationData`](/part3/containers/dependencies#attestationdata) they contain has enough information to reconstruct the signing committee, and the `aggregation_bits` bitlist identifies which of the committee members contributed.
+
+```python
+class Attestation(Container):
+    aggregation_bits: Bitlist[MAX_VALIDATORS_PER_COMMITTEE]
+    data: AttestationData
+    signature: BLSSignature
+```
+
+This is a very compact way to both store and prove which validators made a particular attestation.
+
+
+```python
+class AttestationData(Container):
+    slot: Slot
+    index: CommitteeIndex
+    beacon_block_root: Root
+...
+```
+
+TODO: public keys are stored in the state
+
+###### Sync aggregates
+
+[`SyncAggregate`](/part3/containers/operations#syncaggregate)
+
+```python
+class SyncAggregate(Container):
+    sync_committee_bits: Bitvector[SYNC_COMMITTEE_SIZE]
+    sync_committee_signature: BLSSignature
+```
+
+[`SyncCommittee`](/part3/containers/dependencies#synccommittee)
+
+```python
+class SyncCommittee(Container):
+    pubkeys: Vector[BLSPubkey, SYNC_COMMITTEE_SIZE]
+    aggregate_pubkey: BLSPubkey
+```
 
 TODO: Sync committee
+
+#### BLS library functions
+
+TODO
 
 #### How signatures are used
 
@@ -1618,10 +1708,6 @@ TODO: Sync committee
  - Randomness accumulation
  - Selection of subsets of committees
 
-#### Proof of possession
-
-TODO: rogue key attacks.
-
 #### Miscellaneous topics
 
 ##### Choice of groups
@@ -1630,10 +1716,15 @@ TODO: rogue key attacks.
 G1 vs G2 (intermediate): The BLS12-381 pairing is an asymmetric pairing over two different groups traditionally known as G1 and G2. Either group can host signatures, with the other hosting pubkeys. Elements in G2 are twice the size of elements in G1 (96 bytes vs 48 bytes—48 bytes is ~381 bits, hence the name). Elements in G2 are also more expensive to work with (addition is ~4,500ns vs ~1,350ns). Pubkeys are strategically chosen to be in G1 to reduce the cost of onchain pubkey aggregation (see bls_aggregate_pubkeys). (Notice signature aggregation is done offchain so the performance of G2 additions matters much less, but at the expense of larger messages on gossip channels.)
 -->
 
+##### Proof of possession
+
+TODO: rogue key attacks.
+
 TODO maybe:
   - Quantum security? (lack of)
   - N of M threshold: DVT, and distributed key storage
   - Batch verification as an implementation optimisation
+  - Subgroup checks
 
 #### See also
 
