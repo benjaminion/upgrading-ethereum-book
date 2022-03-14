@@ -15,6 +15,10 @@
 #  - Special characters are omitted: ".,?:'`/[]()" and probably others
 #  - Underscores and dashes are retained.
 #
+# Also checks that footnote references have corresponding definitions
+# and vice versa. There is currently a limitation of one footnote per
+# paragraph.
+#
 # Remember to pass the target file twice:
 #
 #   ../bin/build/links.awk book.md book.md
@@ -47,6 +51,14 @@ BEGIN {
 # First pass: build list of anchors
 FNR == NR {
 
+    # Don't look inside code blocks
+    if ($0 ~ /^```/) {
+        in_code = 1 - in_code
+        next
+    }
+    if (in_code)
+        next
+
     # Headings
     if ($0 ~ /^#/) {
         name = ""
@@ -58,7 +70,7 @@ FNR == NR {
         name = tolower(name)
         gsub(/ /, "-", name)
         gsub(/[^a-z0-9_-]/, "", name)
-        
+
         anchors[path "#" name] = 1
         # print path "#" name
     }
@@ -70,11 +82,23 @@ FNR == NR {
         anchors[path "#" name] = 1
         # print path "#" name
     }
-    
+
+    # Footnote references not at start of line, one per line limit
+    if ($0 ~ /^.+\[\^[^]]*\]/) {
+        fn = gensub(/^.+\[\^([^]]*)\].*$/, "\\1", "1")
+        fns[fn] = FNR
+    }
+
     next
 }
 
 #### Second pass
+
+FNR == 1 && in_code {
+    print "Error: unbalanced code block markers!"
+    exiting = 1
+    exit 1
+}
 
 # Don't look inside code blocks
 /^```/ {
@@ -83,6 +107,16 @@ FNR == NR {
 }
 
 in_code { next }
+
+# Footnote definitions at start of line
+/^\[\^[^]]*\]:/ {
+    fn = gensub(/^\[\^([^]]*)\]:.*$/, "\\1", "1")
+    if (fn in fns) {
+        delete fns[fn]
+    } else {
+        print "Unreferenced footnote: " fn ", line " FNR
+    }
+}
 
 # Any empty links
 /\[[^]]+\]\(\)/ {
@@ -107,7 +141,7 @@ in_code { next }
     # There may be multiple anchors on the line
     # This mess matches non-greedy [foo](...)
     while (match($0, /\[[^]]+\]\([^)]+\)/)) {
-        
+
         rstart = RSTART
         rlength = RLENGTH
         partial = substr($0, RSTART, RLENGTH)
@@ -138,5 +172,15 @@ in_code { next }
         }
 
         $0 = substr($0, rstart + rlength)
+    }
+}
+
+END {
+    if (!exiting) {
+        for (fn in fns) {
+            print "Missing footnote: " fn ", line " fns[fn]
+        }
+    } else {
+        print "Exiting..."
     }
 }
