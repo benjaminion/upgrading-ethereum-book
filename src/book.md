@@ -1442,20 +1442,20 @@ There are four component pieces of data within the BLS digital signature process
 
 [TODO: link to different message types etc.]::
 
-<a id="img_bls_inputs_outputs"></a>
-<div class="image" style="width:70%">
-
-![A diagram showing BLS signature inputs and outputs](md/images/diagrams/bls_inputs_outputs.svg)
-Relationships between the various BLS signature activities, and their inputs and outputs.
-
-</div>
-
 More mathematically, things look like this. We use two subgroups of the BLS12-381 elliptic curve: $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a very large prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
 
 1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, very small values of $sk$ would be hopelessly insecure).
 2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is a member of the $G_1$ group.
 3. The message, $m$ is a sequence of bytes. During the signing process this will be mapped to some point $H(m)$ that is a member of the $G_2$ group.
 4. The signature, $\sigma$, is also a member of the $G_2$ group, namely $[sk]H(m)$.
+
+<a id="img_bls_key"></a>
+<div class="image" style="width:80%">
+
+![Diagram showing how we will depict the various components in the diagrams below](md/images/diagrams/bls_key.svg)
+The key to the keys. This is how we will depict the various components in the diagrams below. Variants of the same object are hatched differently. The secret key is mathematically a scalar; public keys are $G_1$ group members; message roots are mapped to $G_2$ group members; and signatures are $G_2$ group members.
+
+</div>
 
 ##### Key pairs
 
@@ -1466,7 +1466,15 @@ Every validator on the beacon chain has at least one key pair, the "signing key"
 The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IETF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
 
 The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/mikF5LkFQoqXM1EuplRj2Q?both#Point-compression) serialised form as a string of 48 bytes.
- 
+
+<a id="img_bls_setup"></a>
+<div class="image" style="width:50%">
+
+![TODO](md/images/diagrams/bls_setup.svg)
+TODO
+
+</div>
+
 ##### Signing
 
 In the beacon chain protocol the only messages that get signed are [hash tree roots](/part2/building_blocks/merkleization) of objects: their so-called signing roots, which are 32 byte strings.
@@ -1484,6 +1492,14 @@ $$
 $$
 
 Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it serialises to a 96 byte string in compressed form.
+
+<a id="img_bls_signing"></a>
+<div class="image" style="width:65%">
+
+![TODO](md/images/diagrams/bls_signing.svg)
+TODO
+
+</div>
 
 ##### Verifying
 
@@ -1520,9 +1536,104 @@ $$
 
 Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
 
+<a id="img_bls_verifying"></a>
+<div class="image" style="width:65%">
+
+![TODO](md/images/diagrams/bls_verifying.svg)
+TODO
+
+</div>
+
 #### Aggregation
 
+So far we've looked at the basic set up of BLS signatures. In functional terms, what we've seen is very similar to any other digital signature scheme. Where the magic happens is in _aggregation_.
+
+Recall that public keys and signatures are elliptic curve points. Because of the bilinearity property of the pairing function, $e()$, it turns out that we can form linear combinations of public keys and signatures overt he same message, and verification still works as expected.
+
+This statement is a little opaque; let's go step by step.
+
+##### Aggregating public keys
+
+<a id="img_bls_pubkey_aggregation"></a>
+<div class="image" style="width:60%">
+
+![Diagram of public key aggregation](md/images/diagrams/bls_pubkey_aggregation.svg)
+Aggregation of public keys. The keys' elliptic curve points are added, resulting in a new (aggregate) public key.
+
+</div>
+
+##### Aggregating signatures
+
+<a id="img_bls_signature_aggregation"></a>
+<div class="image" style="width:60%">
+
+![](md/images/diagrams/bls_signature_aggregation.svg)
+TODO
+
+</div>
+
+TODO: Same message
+
+##### Verifying aggregatated signatures
+
+<a id="img_bls_aggregate_verify"></a>
+<div class="image" style="width:60%">
+
+![](md/images/diagrams/bls_aggregate_verify.svg)
+TODO
+
+</div>
+
+TODO: verification can't tell the difference
+
+#### Benefits of aggregation
+
+<!--
+enables large committees
+Marginal cost = 1 bit + 1 addition
+-->
+
 HERE
+
+<a id="img_bls_aggregation"></a>
+<div class="image" style="width:80%">
+
+![](md/images/diagrams/bls_aggregation.svg)
+TODO
+
+</div>
+
+#### Examples
+
+TODO: Aggregate attestation
+
+TODO: Sync committee
+
+#### How signatures are used
+
+ - Attestations and blocks and sync committee messages
+ - Protocol messages
+ - Deposits
+ - Withdrawals ?
+ - Randomness accumulation
+ - Selection of subsets of committees
+
+#### Proof of possession
+
+TODO: rogue key attacks.
+
+#### Miscellaneous topics
+
+##### Choice of groups
+
+<!--
+G1 vs G2 (intermediate): The BLS12-381 pairing is an asymmetric pairing over two different groups traditionally known as G1 and G2. Either group can host signatures, with the other hosting pubkeys. Elements in G2 are twice the size of elements in G1 (96 bytes vs 48 bytes—48 bytes is ~381 bits, hence the name). Elements in G2 are also more expensive to work with (addition is ~4,500ns vs ~1,350ns). Pubkeys are strategically chosen to be in G1 to reduce the cost of onchain pubkey aggregation (see bls_aggregate_pubkeys). (Notice signature aggregation is done offchain so the performance of G2 additions matters much less, but at the expense of larger messages on gossip channels.)
+-->
+
+TODO maybe:
+  - Quantum security? (lack of)
+  - N of M threshold: DVT, and distributed key storage
+  - Batch verification as an implementation optimisation
 
 #### See also
 
