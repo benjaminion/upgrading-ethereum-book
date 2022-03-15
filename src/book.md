@@ -1470,8 +1470,8 @@ The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a p
 <a id="img_bls_setup"></a>
 <div class="image" style="width:50%">
 
-![TODO](md/images/diagrams/bls_setup.svg)
-TODO
+![Diagram of the generation of the public key](md/images/diagrams/bls_setup.svg)
+A validator randomly generates its secret key. Its public key is then derived from that.
 
 </div>
 
@@ -1496,8 +1496,8 @@ Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it ser
 <a id="img_bls_signing"></a>
 <div class="image" style="width:65%">
 
-![TODO](md/images/diagrams/bls_signing.svg)
-TODO
+![Diagram of signing a message](md/images/diagrams/bls_signing.svg)
+A validator applies its secret key to a message to generate a unique digital signature.
 
 </div>
 
@@ -1520,7 +1520,7 @@ Pairings are usually denoted $e(P,Q)$ and have very special properties. In parti
 From this, we can deduce that all of the following identities hold:
  - $e([a]P,[b]Q)=e(P,[b]Q)^a=e(P,Q)^{ab}=e(P,[a]Q)^b=e([b]P,[a]Q)$.
 
-Armed with our pairing, verifying a signature is straightforward. The signature is valid if, and only if,
+Armed with our pairing, verifying a signature is straightforward. The signature is valid only if
 
 $$
 e(g_1,\sigma)=e(pk,H(m))
@@ -1539,8 +1539,8 @@ Note that elliptic curves supporting such a pairing function are very rare. Such
 <a id="img_bls_verifying"></a>
 <div class="image" style="width:80%">
 
-![TODO](md/images/diagrams/bls_verifying.svg)
-TODO
+![Diagram of verifying a signature](md/images/diagrams/bls_verifying.svg)
+To verify that a particular validator signed a particular message we use the validator's public key, the original message, and the signature. The verification operation outputs true if the signature is correct and false otherwise.
 
 </div>
 
@@ -1649,11 +1649,15 @@ The end-to-end aggregate signature workflow.
 
 ##### Examples
 
-Two examples of how aggregate signatures are used in practice are in aggregate attestations and in sync committee aggregates.
+Two useful examples of how aggregate signatures are used in practice are in aggregate attestations and in sync committee aggregates.
 
 ###### Aggregate attestations
 
 This is how [`Attestation`](/part3/containers/operations#attestation) objects are constructed. The [`AttestationData`](/part3/containers/dependencies#attestationdata) they contain has enough information to reconstruct the signing committee, and the `aggregation_bits` bitlist identifies which of the committee members contributed.
+
+Within each beacon chain committee at each slot
+
+HERE
 
 ```python
 class Attestation(Container):
@@ -1712,17 +1716,42 @@ TODO
 
 ##### Choice of groups
 
-<!--
-G1 vs G2 (intermediate): The BLS12-381 pairing is an asymmetric pairing over two different groups traditionally known as G1 and G2. Either group can host signatures, with the other hosting pubkeys. Elements in G2 are twice the size of elements in G1 (96 bytes vs 48 bytes—48 bytes is ~381 bits, hence the name). Elements in G2 are also more expensive to work with (addition is ~4,500ns vs ~1,350ns). Pubkeys are strategically chosen to be in G1 to reduce the cost of onchain pubkey aggregation (see bls_aggregate_pubkeys). (Notice signature aggregation is done offchain so the performance of G2 additions matters much less, but at the expense of larger messages on gossip channels.)
--->
+BLS signatures are based on two elliptic curve groups, $G_1$ and $G_2$. Elements of $G_1$ are small (48 bytes when serialised), and their group arithmetic is faster; elements of $G_2$ are large (96 bytes when serialised) and their group arithmetic is slower, perhaps three times slower.
+
+We can choose to use either group for public keys, as long as we use the other group for signatures: the pairing function doesn't care; everything still works if we swap the groups over. The [original paper](https://eprint.iacr.org/2018/483.pdf) describing BLS aggregate signatures has public keys in $G_2$ and signatures in $G_1$, while for Ethereum&nbsp;2 we made the opposite choice.
+
+The main reason for this is that we want public key aggregation to be as fast as possible. Signatures are verified much more often than they are aggregated &ndash; by far the main load on beacon chain clients currently is signature verification &ndash; and verification requires public key aggregation. So we choose to have our public keys to be in the faster $G_1$ group. This also has the benefit of reducing the size of the beacon state, since public keys are stored in validator records. If we were to use the $G_2$ group for public keys, the beacon state would be about 35% larger.
+
+The trade-off is that protocol messages (gossip) and beacon chain blocks are larger due to the larger signature size.
+
+Fundamentally, verification of aggregate signatures is an "on-chain" activity that we wish to be as light as possible, and signature aggregation is "off-chain" so can be more heavyweight.
 
 ##### Proof of possession
 
-TODO: rogue key attacks.
+There is a possible attack on the BLS signature scheme that we wish to avoid, the "rogue public key" attack.
+
+Say your public key is $pk_1$, and I have a secret key, $sk_2$. But instead of publishing my true public key, I publish $pk'_2=[sk_2]g_1-pk_1$ (that is, my real public key plus the inverse of yours). I can sign a message $H(m)$ with my secret key to make $\sigma=[sk_2]H(m)$. I then publish this claiming that it is an aggregate signature that both you and I have signed.
+
+Now, when verifying with my rogue public key and your actual public key, the claim checks out: it looks like you signed the message when you didn't: $e(g1,\sigma)=e(g_1,[sk_2]H(m))=e([sk_2]g_1,H(m))=e(pk_1+pk'_2,H(m))$.
+
+One relatively simple defence against this &ndash; the one we are using in Ethereum&nbsp;2 &ndash; is to force validators to register a "proof of possession" of the private key corresponding to their claimed public key. You see, the attacker doesn't have and cannot calculate the $sk'_2$ corresponding to $pk'_2$. This can be done simply by getting all validators to sign their public keys on registration. If the signature validates with that public key then all is well.
+
+##### Threshold signatures
+
+In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/2020/03/12/scalable-bls-threshold-signatures.html). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
+
+Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $M-N$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
+
+Threshold signatures also find a place in Distributed Validator Technology, which I plan to write about elsewhere.
+
+[TODO - link to DVT when done]::
+
+##### Batch verification
+
+TODO
 
 TODO maybe:
   - Quantum security? (lack of)
-  - N of M threshold: DVT, and distributed key storage
   - Batch verification as an implementation optimisation
   - Subgroup checks
 
@@ -2482,7 +2511,7 @@ This time we have two variable length types, so they are both replaced by offset
 
 Another thing to note is that, since `attestation_1` and `attestation_2` are identical, their serialisations within this compound object are identical, _including_ their internal offsets to their own variable length parts. That is, both attestations have variable length data at offset `0xe4` within their own serialisations; the offset is relative to the start of each sub-object's serialisation, not the entire string. This property simplifies recursive serialisation and deserialisation: a given object will have the same serialisation no matter what context it is found in.
 
-<a id="img_ssz_examples_indexedattestation"></a>
+<a id="img_ssz_examples_attesterslashing"></a>
 <div class="image" style="width:60%">
 
 ![Diagram of the serialisation of the AttesterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
