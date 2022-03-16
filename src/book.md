@@ -1705,7 +1705,7 @@ Finally, the aggregate signature, the aggregate public key, and the `data` are f
 
 ###### Sync aggregates
 
-[`SyncAggregate`](/part3/containers/operations#syncaggregate)
+[`SyncAggregate`](/part3/containers/operations#syncaggregate)s are produced by a sync committee of 512 members.
 
 ```python
 class SyncAggregate(Container):
@@ -1713,7 +1713,7 @@ class SyncAggregate(Container):
     sync_committee_signature: BLSSignature
 ```
 
-[`SyncCommittee`](/part3/containers/dependencies#synccommittee)
+The current members of the [`SyncCommittee`](/part3/containers/dependencies#synccommittee) are stored in the beacon state in the following form:
 
 ```python
 class SyncCommittee(Container):
@@ -1721,7 +1721,11 @@ class SyncCommittee(Container):
     aggregate_pubkey: BLSPubkey
 ```
 
-TODO: Sync committee
+Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
+
+The main points of interest are that the `SyncCommittee` object contains the actual public keys of all the members (possibly with duplicates), rather than validator indices. It also contains a pre-computed `aggregate_pubkey` field that is the aggregate of all the public keys.
+
+The idea of this is to reduce computation for light clients, who will be the ones needing to verify the `SyncAggregate` signatures. Sync committees are expected to have high participation, with, say, 90% of the validators contributing. To verify the aggregate signature we need to aggregate the public keys of all the contributors. Starting from an empty set, that would mean 461 elliptic curve point additions (90% of 512). However, if we start from the _full_ set, `aggregate_pubkey`, then we can achieve the same thing by _subtracting_ the 10% that did not participate. That's 51 elliptic curve subtractions (which have the same cost as additions) and nine times less work.
 
 #### BLS library functions
 
