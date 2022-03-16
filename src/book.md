@@ -1662,17 +1662,17 @@ The end-to-end aggregate signature workflow.
 
 </div>
 
-##### Examples
+##### Aggregation examples
 
 Two useful examples of how aggregate signatures are used in practice are in aggregate attestations and in sync committee aggregates.
 
 ###### Aggregate attestations
 
-This is how [`Attestation`](/part3/containers/operations#attestation) objects are constructed. The [`AttestationData`](/part3/containers/dependencies#attestationdata) they contain has enough information to reconstruct the signing committee, and the `aggregation_bits` bitlist identifies which of the committee members contributed.
+Aggregate attestations are a very compact way both to store and to prove which validators made a particular attestation.
 
-Within each beacon chain committee at each slot
+Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attesting).
 
-HERE
+An [`Attestation`](/part3/containers/operations#attestation) object looks like this:
 
 ```python
 class Attestation(Container):
@@ -1681,8 +1681,15 @@ class Attestation(Container):
     signature: BLSSignature
 ```
 
-This is a very compact way to both store and prove which validators made a particular attestation.
+When making its attestation, the validator sets a single bit in the `aggregation_bits` field to indicate which member of the committee it is. That is sufficient, in conjunction with the slot number and the committee index, to uniquely identify the attesting validator in the global validator set.
 
+The `signature` field is the validator's [signature](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregate-signature) over the `AttestationData` in the `data` field.
+
+This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
+
+This aggregate attestation will be gossipped around the network and eventually included in a block. At each step the aggregate signature will be checked.
+
+To verify the signature, a node needs to reconstruct the list of validators in the committee, which it can do from the information in the [`AttestationData`](/part3/containers/dependencies#attestationdata):
 
 ```python
 class AttestationData(Container):
@@ -1692,7 +1699,9 @@ class AttestationData(Container):
 ...
 ```
 
-TODO: public keys are stored in the state
+Given the reconstructed list of committee members, the validating node filters the list according to which `aggregation_bits` are set in the attestation. Now it has the indices of all the validators that contributed to this attestation. The node retrieves the public keys of those validators from the beacon state and aggregates those keys together (by elliptic curve addition).
+
+Finally, the aggregate signature, the aggregate public key, and the `data` are fed into the standard BLS signature verification function. If all is well this will return `True`, else the aggregate attestation is invalid.
 
 ###### Sync aggregates
 
@@ -1733,6 +1742,7 @@ TODO
  - Withdrawals ?
  - Randomness accumulation
  - Selection of subsets of committees
+ - Domain separation and forks.
 
 #### Miscellaneous topics
 
