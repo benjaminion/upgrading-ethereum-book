@@ -1390,45 +1390,52 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 In this chapter we will explore some of the fundamental innovations that make the Ethereum&nbsp;2 protocol practical. None of them is absolutely brand new &ndash; they all build to a degree on existing technologies &ndash; but in each case some dimension of its application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
 
-As you read, be alert to the tradeoffs that underpin these design choices. It is always the tradeoffs that are the gateway to deep understanding. Some of them are quite interesting. For example, neither the [shuffling](/part2/building_blocks/shuffling) algorithm nor the [state root](/part2/building_blocks/merkleization) calculation algorithm are the most efficient that we could have chosen, at least in terms of pure speed. In both these cases we preferred algorithms that enable a light client ecosystem over algorithms that might be more performant for full nodes.
+As you read, be alert to the trade-offs that underpin these design choices. It is always the trade-offs that are the gateway to deep understanding. Some of them are quite interesting. For example, neither the [shuffling](/part2/building_blocks/shuffling) algorithm nor the [state root](/part2/building_blocks/merkleization) calculation algorithm are the most efficient that we could have chosen, at least in terms of pure speed. In both these cases we preferred algorithms that enable a light client ecosystem over algorithms that might be more performant for full nodes.
 
 The building blocks in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
 
 ### BLS Signatures <!-- /part2/building_blocks/signatures -->
 
+|||||
+|-|-|-|-|
+| First cut | $\checkmark$ | Revision | TODO |
+
 <div class="summary">
 
- - TODO
+ - Proof of stake protocols use digital signatures to identify their participants and hold them accountable.
+ - BLS signatures can be aggregated together, making them efficient to verify at large scale.
+ - Signature aggregation allows the beacon chain to scale to hundreds of thousands of validators.
+ - Ethereum transaction signatures on the execution (Eth1) layer remain as-is.
 
 </div>
 
 #### Digital signatures
 
-[Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are heavily used in blockchain technology. A digital signature is applied to a message to ensure two things: that the message has not been tampered with in any way; and that the sender of the message is who it claims to be. Digital signatures are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
+[Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are heavily used in blockchain technology. A digital signature is applied to a message to ensure two things: (1) that the message has not been tampered with in any way; and (2) that the sender of the message is who it claims to be. Digital signatures are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
 
-Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1: under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined; nobody cares who actually mined the block, so no signature is needed.
+Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1 &ndash; Under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined, nobody cares who actually mined the block, so no signature is needed.
 
 In Ethereum&nbsp;2, however, validators have identities and are accountable for their actions. In order to enforce the Casper FFG rules, and in order to be able to count votes for the LMD GHOST fork choice, we need to be able to uniquely identify the validators making individual attestations and blocks.
 
 #### Digital signature usage
 
-The primary function of digital signatures is to irrevocably link the sender of a message with the contents of the message. This can be used, for example, to prove with certainty that a validator has published conflicting votes and thus is subject to being slashed.
+The primary function of a digital signature is to irrevocably link the sender of a message with the contents of the message. This can be used, for example, to prove with certainty that a validator has published conflicting votes and thus is subject to being slashed.
 
 The ability to tie messages to validators is also useful outside the protocol. For example, in the gossip layer, signatures are validated by nodes before they are forwarded as an anti-spam mechanism.
 
-Alongside their normal function of identifying message senders, digital signatures have a couple of novel uses within the Ethereum&nbsp;2 protocol. They are used when contributing randomness to the [RANDAO](/part2/building_blocks/randomness), and they are used to select [subsets of committees](/part2/building_blocks/aggregator) for aggregation duty. We will discuss those usages in their respective sections and focus on the signing of protocol messages in this section.
+Alongside their usual function of identifying message senders, digital signatures have a couple of fairly novel uses within the Ethereum&nbsp;2 protocol. They are used when contributing randomness to the [RANDAO](/part2/building_blocks/randomness), and they are used to select [subsets of committees](/part2/building_blocks/aggregator) for aggregation duty. We will discuss those usages in their respective sections and focus on the signing of protocol messages in this section.
 
 #### Background
 
-One of the characteristics of proof of stake protocols is the sheer number of protocol messages that need to be handled. For example, with 300,000 active validators, the current beacon chain design calls for over 780 attestations per second to be gossipped globally. That's a sustained average; there are much higher bursts in practice. Not only do these messages need to travel over the network, but each individual digital signature needs to be verified by every node, which is a CPU-intensive operation. Not to mention having to store all those signed messages in the block history. These challenging requirements have typically limited the scalability of participation in proof of stake or proof of authority networks. Pure PBFT-based consensus protocols tend to have validator sets that number in the dozens rather than the thousands.
+One of the characteristics of proof of stake protocols is the sheer number of protocol messages that need to be handled. With 300,000 active validators, the current beacon chain design calls for over 780 attestations per second to be gossiped globally. That's a sustained average, there are much higher bursts in practice. Not only do these messages need to travel over the network, but each individual digital signature needs to be verified by every node, which is a CPU-intensive operation. Not to mention having to store all those signed messages in the block history. These challenging requirements have typically limited the validator numbers in proof of stake or proof of authority networks. Pure PBFT-based consensus protocols tend to have validator sets that number in the dozens rather than the thousands.
 
-The prevailing work-in-progress design in early 2018 for Ethereum's (partial) move to proof of stake ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) estimated that the protocol could handle a maximum of around 900 validators due to this message overhead, and set a hefty stake size of 1500&nbsp;ETH accordingly.
+The prevailing work-in-progress design in early 2018 for Ethereum's (partial) move to proof of stake, [EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md), estimated that the protocol could handle a maximum of around 900 validators due to this message overhead, and accordingly set a hefty stake size of 1500&nbsp;ETH per validator.
 
-The turning point came in May 2018 with the publication by Justin Drake of an article on ethresear.ch called [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). The article proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while still preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that must be gossipped around the network and the cost of verifying the integrity of those messages, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
+The turning point came in May 2018 with the publication by Justin Drake of an article on the Ethresear.ch forum titled [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion). The article proposed using a new signature scheme that is able to _aggregate_ many digital signatures into one while preserving the individual accountability of each validator that signed. Aggregation provides a way to dramatically reduce the number of individual messages that must be gossiped around the network and the cost of verifying the integrity of those messages, and thus enables scaling to hundreds of thousands of participants.[^fn-dfinity-credit]
 
 [^fn-dfinity-credit]: To give credit where it is due, the Dfinity blockchain researchers had published [a white paper](https://dfinity.org/pdf-viewer/pdfs/viewer?file=../library/dfinity-consensus.pdf) a few months earlier proposing the use of BLS signatures in a threshold scheme. However, their use of threshold signatures makes the chain vulnerable to liveness failures, and also requires a tricky distributed key generation protocol. Ethereum's aggregation-based approach has neither of these issues. Nonetheless, the name "beacon chain" that we still use today derives from Dfinity's "randomness beacon" described in that paper.
 
-This signature aggregation capability was the main breakthrough that prompted us to abandon the EIP-1011 on-chain PoS management mechanism enirely and move to the "beacon chain" model that we have today[^fn-killing-of-hybrid-casper].
+This signature aggregation capability was the main breakthrough that prompted us to abandon the EIP-1011 on-chain PoS management mechanism entirely and move to the "beacon chain" model that we have today[^fn-killing-of-hybrid-casper].
 
 [^fn-killing-of-hybrid-casper]: The last significant update to EIP-1011 was made on the [16th of May, 2018](https://github.com/ethereum/EIPs/commit/46927c516f6dda913cbabb0beb44a3f19f02c0bb). Justin Drake's post on signature aggregation was made just [two weeks later](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion).
 
@@ -1438,25 +1445,23 @@ Digital signatures in the blockchain world are usually based on elliptic curve g
 
 [^fn-bls-bls]: There is a curious naming collision here. The BLS trio of "BLS signatures" are Boneh, Lynn, and Shacham, whereas those of the "BLS12-381" elliptic curve are Barreto, Lynn, and Scott. Ben Lynn is the only common name between the two.
 
-Several other blockchain protocols have adopted or will adopt BLS signatures over the BLS12-381 curve, and throughout our implementation in Eth2 we have been mindful to follow whatever standards exist, and to participate in the defining of those standards where possible. This both helps interopability and supports the development of common libraries and tooling.
+Several other blockchain protocols have adopted or will adopt BLS signatures over the BLS12-381 curve, and throughout our implementation in Eth2 we have been mindful to follow whatever standards exist, and to participate in the defining of those standards where possible. This both helps interoperability and supports the development of common libraries and tooling.
 
-The high-level workflow for creating and verifying a BLS signature is relatively straightforward. In the following paragraphs I'll first give a simplified description in prose, and then a more mathematical description which is quite optional.
+The high-level workflow for creating and verifying a BLS signature is relatively straightforward. In the sections that follow I'll describe how it all works with some words, some pictures, and some maths. Feel free to skip the maths if you wish, it's not compulsory and there's no test at the end. Though it is rather elegant.
 
 ##### Components
 
 There are four component pieces of data within the BLS digital signature process.
 
-1. The _secret key_. Every entity acting within the protocol (that is, a validator in the context of Eth2) has a secret key, sometimes called a private key. The secret key is used to sign messages, and must be kept secret, as its name suggests.
+1. The _secret key_. Every entity acting within the protocol (that is, a validator in the context of Eth2) has a secret key, sometimes called a private key. The secret key is used to sign messages and must be kept secret, as its name suggests.
 2. The _public key_. The public key is uniquely derived from the secret key, but the secret key cannot be reverse engineered from it (without impossibly huge amounts of work). A validator's public key represents its identity within the protocol, and is known to everybody.
 3. The _message_. We'll look later at the kinds of messages used in the Eth2 protocol and how they are constructed. For now, the message is just a string of bytes.
 4. The _signature_, which is the output of the signing process. The signature is created by combining the message with the secret key. Given a message, a signature for that message, and a public key, we can verify that the validator with that public key signed exactly that message. In other words, no-one else could have signed that message, and the message has not been changed since signing.
 
-[TODO: link to different message types etc.]::
-
-More mathematically, things look like this. We use two subgroups of the BLS12-381 elliptic curve: $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a very large prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
+More mathematically, things look like this. We use two subgroups of the BLS12-381 elliptic curve: $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a 77 digit prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
 
 1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, very small values of $sk$ would be hopelessly insecure).
-2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is a member of the $G_1$ group.
+2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is thus a member of the $G_1$ group.
 3. The message, $m$ is a sequence of bytes. During the signing process this will be mapped to some point $H(m)$ that is a member of the $G_2$ group.
 4. The signature, $\sigma$, is also a member of the $G_2$ group, namely $[sk]H(m)$.
 
@@ -1476,7 +1481,7 @@ Every validator on the beacon chain has at least one key pair, the "signing key"
 
 The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IETF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
 
-The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/mikF5LkFQoqXM1EuplRj2Q?both#Point-compression) serialised form as a string of 48 bytes.
+The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/@benjaminion/bls12-381#Point-compression) serialised form as a string of 48 bytes.
 
 <a id="img_bls_setup"></a>
 <div class="image" style="width:50%">
@@ -1488,11 +1493,9 @@ A validator randomly generates its secret key. Its public key is then derived fr
 
 ##### Signing
 
-In the beacon chain protocol the only messages that get signed are [hash tree roots](/part2/building_blocks/merkleization) of objects: their so-called signing roots, which are 32 byte strings.
+In the beacon chain protocol the only messages that get signed are [hash tree roots](/part2/building_blocks/merkleization) of objects: their so-called signing roots, which are 32 byte strings. The [`compute_signing_root()`](/part3/helper/misc#compute_signing_root) function always combines the hash tree root of an object with a "domain" as described [below](#domain-separation-and-forks).
 
-The [`compute_signing_root()`](/part3/helper/misc#compute_signing_root) function combines the hash tree root of an object with a "domain". Ten [domain types](/part3/config/constants#domain-types) are defined in Altair that distinguish between different use cases for the signature. The idea is to avoid ever having a situation in which the signature of an object generated in one context is mis-used in a different context.
-
-Once we have the signing root it needs to be mapped onto an elliptic curve point in the $G_2$ group. If the message's signing root is $m$, then the point is $H(m)$ where $H()$ is a function that maps bytes to $G_2$. Performing this mapping is hard to do well and an entire [draft stadard](https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/) exists to define the process. Thankfully, we can ignore the details completely and leave them up to our cryptographic libraries[^fn-implement-h2g2].
+Once we have the signing root it needs to be mapped onto an elliptic curve point in the $G_2$ group. If the message's signing root is $m$, then the point is $H(m)$ where $H()$ is a function that maps bytes to $G_2$. This mapping is hard to do well and an entire [draft standard](https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/) exists to define the process. Thankfully, we can ignore the details completely and leave them to our cryptographic libraries[^fn-implement-h2g2].
 
 [^fn-implement-h2g2]: Unless you have to implement the thing, as I [ended up doing](https://github.com/ConsenSys/teku/commit/e927d9be89b64fe8297b74405f37aa0e6378024) in Java.
 
@@ -1516,24 +1519,26 @@ A validator applies its secret key to a message to generate a unique digital sig
 
 To verify a signature we need to know the public key of the validator that signed it. Every validator's public key is stored in the beacon state and can be simply looked up via the validator's index which, by design, is always available by some means whenever it's required.
 
-Signature verification can be treated as a black-box: we send the message, the public key, and the signature to the verifier; if after some cryptographic magic the signature matches the public key and the message then we declare it valid. Otherwise, either the signature is corrupt, the incorrect secret key was used, or the message is no longer what was signed.
+Signature verification can be treated as a black-box: we send the message, the public key, and the signature to the verifier; if after some cryptographic magic the signature matches the public key and the message then we declare it valid. Otherwise, either the signature is corrupt, the incorrect secret key was used, or the message is not what was signed.
 
 More formally, signatures are verified using elliptic curve pairings.
 
-With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a paring $e$, $e:G_1\times G_2\rightarrow G_T$.
+With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a pairing $e$, $e:G_1\times G_2\rightarrow G_T$.
 
 Pairings are usually denoted $e(P,Q)$ and have very special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
 
  - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
  - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
 
-(Conventially $G_1$ and $G_2$ are written as additive groups, and $G_T$ as multiplicative, so the $\cdot$ operator is point multiplication in $G_T$.)
+(Conventionally $G_1$ and $G_2$ are written as additive groups, and $G_T$ as multiplicative, so the $\cdot$ operator is point multiplication in $G_T$.)
 
 From this, we can deduce that all of the following identities hold:
 
- - $e([a]P,[b]Q)=e(P,[b]Q)^a=e(P,Q)^{ab}=e(P,[a]Q)^b=e([b]P,[a]Q)$.
+$$
+e([a]P,[b]Q)=e(P,[b]Q)^a=e(P,Q)^{ab}=e(P,[a]Q)^b=e([b]P,[a]Q)
+$$
 
-Armed with our pairing, verifying a signature is straightforward. The signature is valid only if
+Armed with our pairing, verifying a signature is straightforward. The signature is valid if and only if
 
 $$
 e(g_1,\sigma)=e(pk,H(m))
@@ -1575,7 +1580,7 @@ In all of the following we will only consider aggregation of signatures over the
 
 [^fn-aggregation-terminology]: A note on terminology. The [original paper](https://eprint.iacr.org/2018/483.pdf) describing this scheme uses the term "multi-signature" when combining signatures over the same message, and "aggregate signature" when combining signatures over distinct messages. In Eth2 we only do the former, and just call it aggregation.
 
-The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like normal the addition of numbers that we are familiar with, but the operation is completely analagous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, thus the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
+The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like normal the addition of numbers that we are familiar with, but the operation is completely analogous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, thus the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
 
 <a id="img_bls_signature_aggregation"></a>
 <div class="image" style="width:60%">
@@ -1605,11 +1610,11 @@ Since aggregate signatures are indistinguishable from normal signatures, and agg
 <div class="image" style="width:70%">
 
 ![Diagram of verification of an aggregate signature](md/images/diagrams/bls_aggregate_verify.svg)
-Verification of an aggregate signature is identical to verification of a normal signature as lokng as we use the corresponding aggregate public key.
+Verification of an aggregate signature is identical to verification of a normal signature as long as we use the corresponding aggregate public key.
 
 </div>
 
-This miracle is due to the bilinearity of the pairing operation. With an aggregate signature $\sigma_{agg}$ and a corresponding aggregate public key $pk_{agg}$ (and common message $m$) we have the following identity, which is exactly the same as the verification identity for a single signature and public key.
+This miracle is due to the bilinearity of the pairing operation. With an aggregate signature $\sigma_{agg}$ and a corresponding aggregate public key $pk_{agg}$, and common message $m$, we have the following identity, which is exactly the same as the verification identity for a single signature and public key.
 
 $$
 \begin{aligned}
@@ -1624,9 +1629,9 @@ $$
 
 ##### Benefits of aggregation
 
-Verification of a BLS signature is expensive (resource intensive) compared with verification of an ECDSA signature, perhaps an order of magnitude slower due to the pairing operation, so what benefits do we gain?
+Verification of a BLS signature is expensive (resource intensive) compared with verification of an ECDSA signature, more than an order of magnitude slower due to the pairing operation, so what benefits do we gain?
 
-The benefits accrue when we are able to aggregate significant numbers of signatures. This is exactly what we have with attestation committees: ideally, all the validators in the committee sign-off on the same attestation data, so all their signatures can be aggregated. In practice, there might be differences of opinion about the chain state between committee members resulting in two or three different attestations, but even so there will be many fewer aggregates compared with the total number of committee members.
+The benefits accrue when we are able to aggregate significant numbers of signatures. This is exactly what we have with beacon chain attestation committees. Ideally, all the validators in the committee sign-off on the same attestation data, so all their signatures can be aggregated. In practice, there might be differences of opinion about the chain state between committee members resulting in two or three different attestations, but even so there will be many fewer aggregates compared with the total number of committee members.
 
 ###### Speed benefits
 
@@ -1636,22 +1641,23 @@ This is a first approximation because we also need to account for aggregating th
 
 In summary:
 
-  - we can verify a single signature with two pairings, and
-  - we can verify an aggregate of $N$ signatures with two pairings, $N-1$ additions in $G_1$ and $N-1$ additions in $G_2$. The cost of this is dominated by the cost of the pairings, the additions are almost free.
+  - We can verify a single signature with two pairings.
+  - We can naively verify $N$ signatures with $2N$ pairings.
+  - Or we can verify $N$ signatures via aggregation with just two pairings, $N-1$ additions in $G_1$ and $N-1$ additions in $G_2$. Each elliptic curve point additions is much, much cheaper than a pairing.
 
 ###### Space benefits
 
 There is also a huge space saving when we aggregate signatures.
 
-An aggregate signature is 96 bytes as all BLS signatures are. So, to a first approximation, an aggregate of $N$ signatures occupies $\frac{1}{N}$ the space of the unaggregated signatures.
+An aggregate signature has 96 bytes as all BLS signatures do. So, to a first approximation, an aggregate of $N$ signatures occupies $\frac{1}{N}$ the space of the unaggregated signatures.
 
-Again, this is only a first approximation. The subtlety here is that, in order to construct the corresponding public key, we somehow need to keep track of which validators signed the message. We cannot assume that the whole committee participated, and we need to be careful not to include validators multiple times.
+Again, this is only a first approximation. The subtlety here is that, in order to construct the corresponding aggregate public key, we somehow need to keep track of which validators signed the message. We cannot assume that the whole committee participated, and we need to be careful not to include any validator more than once.
 
 If we know in advance who the members of the committee are and how they are ordered then this tracking can be done at the marginal cost of one bit per validator: true if the validator contributed to the aggregate, false if it did not.
 
 ##### The full picture
 
-This diagram illustrates the full flow from signing, through aggregating, to verifying. There are three validators in this case, although there could be many more, and each is signing the same message contents. Each validator has its own unique secret key and public key pair. The workflow is entirely non-interactive, and any of the actions up to the verification can happen independently. Even the aggregation can be done incrementally.
+This diagram illustrates the full flow from signing, through aggregating, to verifying. There are three validators in this case, although there could be many more, and each is signing the same message contents. Each validator has its own unique secret key and public key pair. The workflow is entirely non-interactive, and any of the actions before the verification can happen independently. Even the aggregation can be done incrementally.
 
 <a id="img_bls_aggregation"></a>
 <div class="image" style="width:80%">
@@ -1667,7 +1673,7 @@ Two useful examples of how aggregate signatures are used in practice are in aggr
 
 ###### Aggregate attestations
 
-Aggregate attestations are a very compact way both to store and to prove which validators made a particular attestation.
+Aggregate attestations are a very compact way store and prove which validators made a particular attestation.
 
 Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attesting).
 
@@ -1686,7 +1692,7 @@ The `signature` field is the validator's [signature](https://github.com/ethereum
 
 This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
 
-This aggregate attestation will be gossipped around the network and eventually included in a block. At each step the aggregate signature will be checked.
+This aggregate attestation will be gossiped around the network and eventually included in a block. At each step the aggregate signature will be verified.
 
 To verify the signature, a node needs to reconstruct the list of validators in the committee, which it can do from the information in the [`AttestationData`](/part3/containers/dependencies#attestationdata):
 
@@ -1700,7 +1706,7 @@ class AttestationData(Container):
 
 Given the reconstructed list of committee members, the validating node filters the list according to which `aggregation_bits` are set in the attestation. Now it has the indices of all the validators that contributed to this attestation. The node retrieves the public keys of those validators from the beacon state and aggregates those keys together (by elliptic curve addition).
 
-Finally, the aggregate signature, the aggregate public key, and the `data` are fed into the standard BLS signature verification function. If all is well this will return `True`, else the aggregate attestation is invalid.
+Finally, the aggregate signature, the aggregate public key, and the signing root of the `data` are fed into the standard BLS signature verification function. If all is well this will return `True`, else the aggregate attestation is invalid.
 
 ###### Sync aggregates
 
@@ -1722,15 +1728,33 @@ class SyncCommittee(Container):
 
 Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
 
-The main points of interest are that the `SyncCommittee` object contains the actual public keys of all the members (possibly with duplicates), rather than validator indices. It also contains a pre-computed `aggregate_pubkey` field that is the aggregate of all the public keys.
+The main points of interest are that the `SyncCommittee` object contains the actual public keys of all the members (possibly with duplicates), rather than validator indices. It also contains a pre-computed `aggregate_pubkey` field that is the aggregate of all the public keys in the committee.
 
-The idea of this is to reduce computation for light clients, who will be the ones needing to verify the `SyncAggregate` signatures. Sync committees are expected to have high participation, with, say, 90% of the validators contributing. To verify the aggregate signature we need to aggregate the public keys of all the contributors. Starting from an empty set, that would mean 461 elliptic curve point additions (90% of 512). However, if we start from the _full_ set, `aggregate_pubkey`, then we can achieve the same thing by _subtracting_ the 10% that did not participate. That's 51 elliptic curve subtractions (which have the same cost as additions) and nine times less work.
+The idea of this is to reduce the computation load for light clients, who will be the ones needing to verify the `SyncAggregate` signatures. Sync committees are expected to have high participation, with, say, 90% of the validators contributing. To verify the aggregate signature we need to aggregate the public keys of all the contributors. Starting from an empty set, that would mean 461 elliptic curve point additions (90% of 512). However, if we start from the _full_ set, `aggregate_pubkey`, then we can achieve the same thing by _subtracting_ the 10% that did not participate. That's 51 elliptic curve subtractions (which have the same cost as additions) and nine times less work.
 
-#### Miscellaneous topics
+#### Various topics
 
 ##### Domain separation and forks
 
-TODO
+Every signature that's used in the Eth2 protocol has a `domain` value mixed into the message before signing. This is taken care of by the [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root) function which both calculates the SSZ [hash tree root](/part2/building_blocks/merkleization) of the object to be signed and mixes in the given domain.
+
+```python
+def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
+    return hash_tree_root(SigningData(
+        object_root=hash_tree_root(ssz_object),
+        domain=domain,
+    ))
+```
+
+The domain, in turn, is calculated by the [`compute_domain()`](/part3/helper/misc#def_compute_domain) function which combines one of ten [domain types](/part3/config/constants#domain-types) with a mash-up of the [fork version](/part3/config/types#version) and the [genesis validators root](/part3/containers/state#genesis_validators_root).
+
+Each of the extra quantities that's rolled into the message has a specific purpose.
+
+  - The domain type ensures that signatures made for one purpose cannot be re-used for a different purpose. Objects of different SSZ types are not guaranteed to have unique hash tree roots, and we would rather like to be able to tell the difference between them. The ten [domain types](/part3/config/constants#domain-types) are all the different ways signatures are used in the protocol.
+  - The genesis validators root uniquely identifies this particular beacon chain, distinguishing it from any other testnet or alternative chain. This ensures that signatures from different chains are always incompatible.
+  - The fork version identifies deliberate consensus upgrades to the beacon chain. Mixing the fork version into the message ensures that messages from validators that have not upgraded are invalid. They are out of consensus and have no information that is useful to us, so this provides a convenient way to ignore their messages. Alternatively, a validator may wish to operate on both sides of a contentious fork, and the fork version provides a way for them to do so safely.
+
+The sole exception to the mixing-in of the fork version is signatures on deposits. Deposits are always valid, however the beacon chain gets upgraded.
 
 ##### Choice of groups
 
@@ -1738,9 +1762,9 @@ BLS signatures are based on two elliptic curve groups, $G_1$ and $G_2$. Elements
 
 We can choose to use either group for public keys, as long as we use the other group for signatures: the pairing function doesn't care; everything still works if we swap the groups over. The [original paper](https://eprint.iacr.org/2018/483.pdf) describing BLS aggregate signatures has public keys in $G_2$ and signatures in $G_1$, while for Ethereum&nbsp;2 we made the opposite choice.
 
-The main reason for this is that we want public key aggregation to be as fast as possible. Signatures are verified much more often than they are aggregated &ndash; by far the main load on beacon chain clients currently is signature verification &ndash; and verification requires public key aggregation. So we choose to have our public keys to be in the faster $G_1$ group. This also has the benefit of reducing the size of the beacon state, since public keys are stored in validator records. If we were to use the $G_2$ group for public keys, the beacon state would be about 35% larger.
+The main reason for this is that we want public key aggregation to be as fast as possible. Signatures are verified much more often than they are aggregated &ndash; by far the main load on beacon chain clients currently is signature verification &ndash; and verification requires public key aggregation. So we choose to have our public keys in the faster $G_1$ group. This also has the benefit of reducing the size of the beacon state, since public keys are stored in validator records. If we were to use the $G_2$ group for public keys, the beacon state would be about 35% larger.
 
-The trade-off is that protocol messages (gossip) and beacon chain blocks are larger due to the larger signature size.
+The trade-off is that protocol messages and beacon chain blocks are larger due to the larger signature size.
 
 Fundamentally, verification of aggregate signatures is an "on-chain" activity that we wish to be as light as possible, and signature aggregation is "off-chain" so can be more heavyweight.
 
@@ -1752,7 +1776,7 @@ Say your public key is $pk_1$, and I have a secret key, $sk_2$. But instead of p
 
 Now, when verifying with my rogue public key and your actual public key, the claim checks out: it looks like you signed the message when you didn't: $e(g1,\sigma)=e(g_1,[sk_2]H(m))=e([sk_2]g_1,H(m))=e(pk_1+pk'_2,H(m))$.
 
-One relatively simple defence against this &ndash; the one we are using in Ethereum&nbsp;2 &ndash; is to force validators to register a "proof of possession" of the private key corresponding to their claimed public key. You see, the attacker doesn't have and cannot calculate the $sk'_2$ corresponding to $pk'_2$. This can be done simply by getting all validators to sign their public keys on registration. If the signature validates with that public key then all is well.
+One relatively simple defence against this &ndash; the one we are using in Ethereum&nbsp;2 &ndash; is to force validators to register a "proof of possession" of the private key corresponding to their claimed public key. You see, the attacker doesn't have and cannot calculate the $sk'_2$ corresponding to $pk'_2$. The proof of possession can be done simply by getting all validators to sign their public keys on registration, that is, when they deposit their stakes in the deposit contract. If the actual signature validates with the claimed public key then all is well.
 
 ##### Threshold signatures
 
@@ -1760,31 +1784,31 @@ In addition to aggregation, the BLS scheme also supports [threshold signatures](
 
 Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $M-N$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
 
-Threshold signatures also find a place in Distributed Validator Technology, which I plan to write about elsewhere.
+Threshold signatures also find a place in Distributed Validator Technology, which I will write about in a different chapter.
 
 [TODO - link to DVT when done]::
 
 ##### Batch verification
 
-The bilinearity of the pairing function allows for some pretty funky optimisations. For example, Vitalik has formulated a method for [verifying a batch](https://ethresear.ch/t/fast-verification-of-multiple-bls-signatures/5407?u=benjaminion) of signatures simultaneously &ndash; such as all the signatures contained in a block &ndash; that reduces the number of pairing operations required. Since this technique constitutes a client-side optimisation rather than being a fundamental part of the protocol, I shall describe it properly in the Implementation chapter.
+The bilinearity of the pairing function allows for some pretty funky optimisations. For example, Vitalik has formulated a method for [verifying a batch](https://ethresear.ch/t/fast-verification-of-multiple-bls-signatures/5407?u=benjaminion) of signatures simultaneously &ndash; such as all the signatures contained in a block &ndash; that significantly reduces the number of pairing operations required. Since this technique constitutes a client-side optimisation rather than being a fundamental part of the protocol, I shall describe it properly in the Implementation chapter.
 
 [TODO - link to batch verification when done]::
 
 #####  Quantum security
 
-The security (unforgeability) of BLS signatures relies, among other things, on the hardness of something called the elliptic curve discrete logarithm problem (ECDLP) [^fn-discrete-division-problem]. Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
+The security (unforgeability) of BLS signatures relies, among other things, on the hardness of something called the elliptic curve discrete logarithm problem (ECDLP)[^fn-discrete-division-problem]. Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
 
 [^fn-discrete-division-problem]: It's puzzling to me that this is called the discrete logarithm problem when we write groups additively, rather than the discrete division problem. But it's far from being the most confusing thing about elliptic curves.
 
-The ECDLP is believed to be vulnerable to attack by [quantum computers](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks), thus our signature scheme presumably has a limited shelf-life.
+The ECDLP is believed to be vulnerable to attack by [quantum computers](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks), thus our signature scheme may have a limited shelf-life.
 
 Quantum-resistant alternatives such as [zkSTARKs](https://eprint.iacr.org/2018/046.pdf) are known, but currently not as practical as the BLS scheme. The expectation is that, at some point, we will migrate to such a scheme as a drop-in replacement for BLS signatures.
 
-In case someone overnight unveils a sufficiently capable quantum computer, [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) (which sets a standard for BLS key generation in Ethereum) describes a way to generate a hierarchy of [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature). Lamport signatures are believed to be quantum secure, but come with their own limitations. In principle we could make an emergency switch over to these to tide us over while implementing STARKs. But, in practice, this would be extrememly challenging.
+In case someone overnight unveils a sufficiently capable quantum computer, [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) (which is a standard for BLS key generation in Ethereum) describes a way to generate a hierarchy of [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature). Lamport signatures are believed to be quantum secure, but come with their own limitations. In principle we could make an emergency switch over to these to tide us over while implementing STARKs. But this would be extremely challenging in practice.
 
 #### BLS library functions
 
-As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of posession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerfiy` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
 
  - `def `[`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
     - Sign a message with the validator's private key.
@@ -1803,24 +1827,27 @@ The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pub
 
 #### See also
 
-[Compact Multi-Signatures for Smaller Blockchains](https://eprint.iacr.org/2018/483.pdf), Boneh, Drijvers, Neven. The original paper that described efficient BLS multi-signatures.
+The main standards that we strive to follow are the following IETF drafts:
+  - [BLS Signatures](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)
+  - [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09)
+  - [Pairing-Friendly Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-pairing-friendly-curves-10)
 
-https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion
+[Compact Multi-Signatures for Smaller Blockchains](https://eprint.iacr.org/2018/483.pdf) (Boneh, Drijvers, Neven) is the original paper that described efficient BLS multi-signatures. And [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion) is Justin Drake's proposal to use these signatures in an Ethereum&nbsp;2 context.
 
-https://hackmd.io/@benjaminion/bls12-381
+For a gentle(ish) introduction to pairings, Vitalik's [Exploring Elliptic Curve Pairings](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627) is very good. If you are looking for a very deep rabbit hole to explore, [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) by Craig Costello is amazing.
 
-Vitalik on pairings: https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627
+I've written a lengthy homage to the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve that also covers some BLS signature topics.
 
-https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04
-https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09
-
-Several EIPs are intended to govern the generation and storage of keys in practice:
+Three EIPs are intended to govern the generation and storage of keys in practice:
 
   - [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) provides a method for deriving a tree-hierarchy of BLS12-381 keys based on an entropy seed.
   - [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md) defines a deterministic account hierarchy for specifying the purpose of keys.
   - [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) specifies a standard keystore format for storage and interchange of BLS12-381 keys.
 
-Implementation: https://github.com/supranational/blst (and the JS one?)
+There are several implementations of pairings on the BLS12-381 curve around, which can be used to implement the BLS signature scheme we use:
+
+  - The [Blst](https://github.com/supranational/blst) library is the most commonly used by Eth2 client implementers.
+  - The [noble-bls12-381](https://github.com/paulmillr/noble-bls12-381) library is better documented and may be more enjoyable if you want to try playing around with these things.
 
 ### Randomness <!-- /part2/building_blocks/randomness* -->
 
@@ -1831,6 +1858,10 @@ TODO
 TODO
 
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
+
+|||||
+|-|-|-|-|
+| First cut | $\checkmark$ | Revision | TODO |
 
 <div class="summary">
 
