@@ -1402,22 +1402,21 @@ The building blocks in this chapter are those that are part of the protocol spec
 
 </div>
 
-<!--
-Notes:
-  - Signing domains
-  - Batch verification (elsewhere)
-  - Rogue public key (and mitigation via deposits)
--->
-
 #### Digital signatures
 
 [Digital signatures](https://en.wikipedia.org/wiki/Digital_signature) are heavily used in blockchain technology. A digital signature is applied to a message to ensure two things: that the message has not been tampered with in any way; and that the sender of the message is who it claims to be. Digital signatures are not new, and really developed during the 1980s as a result of the invention of [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). However, more recent developments involving elliptic curve, pairing-based cryptography have heavily influenced the design of Ethereum&nbsp;2.
 
-Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1. Under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined: nobody cares who actually mined the block, so no signature is needed.
+Every time you send an Ethereum transaction you are using a digital signature; all Ethereum users are familiar with the signing work flow. But that's at the transaction level. At the consensus protocol level digital signatures are not used at all in Ethereum&nbsp;1: under proof of work, a block just needs to have a correct `mixHash` proving that it was correctly mined; nobody cares who actually mined the block, so no signature is needed.
 
 In Ethereum&nbsp;2, however, validators have identities and are accountable for their actions. In order to enforce the Casper FFG rules, and in order to be able to count votes for the LMD GHOST fork choice, we need to be able to uniquely identify the validators making individual attestations and blocks.
 
-Digital signatures find a couple of other uses within the Ethereum&nbsp;2 protocol in addition to signing blocks and attestations: they are used when contributing randomness to the [RANDAO](/part2/building_blocks/randomness), and they are used to select [subsets of committees](/part2/building_blocks/aggregator) for aggregation duty. We will discuss those usages in their respective sections and focus on the signing of protocol messages in this section.
+#### Digital signature usage
+
+The primary function of digital signatures is to irrevocably link the sender of a message with the contents of the message. This can be used, for example, to prove with certainty that a validator has published conflicting votes and thus is subject to being slashed.
+
+The ability to tie messages to validators is also useful outside the protocol. For example, in the gossip layer, signatures are validated by nodes before they are forwarded as an anti-spam mechanism.
+
+Alongside their normal function of identifying message senders, digital signatures have a couple of novel uses within the Ethereum&nbsp;2 protocol. They are used when contributing randomness to the [RANDAO](/part2/building_blocks/randomness), and they are used to select [subsets of committees](/part2/building_blocks/aggregator) for aggregation duty. We will discuss those usages in their respective sections and focus on the signing of protocol messages in this section.
 
 #### Background
 
@@ -1727,28 +1726,11 @@ The main points of interest are that the `SyncCommittee` object contains the act
 
 The idea of this is to reduce computation for light clients, who will be the ones needing to verify the `SyncAggregate` signatures. Sync committees are expected to have high participation, with, say, 90% of the validators contributing. To verify the aggregate signature we need to aggregate the public keys of all the contributors. Starting from an empty set, that would mean 461 elliptic curve point additions (90% of 512). However, if we start from the _full_ set, `aggregate_pubkey`, then we can achieve the same thing by _subtracting_ the 10% that did not participate. That's 51 elliptic curve subtractions (which have the same cost as additions) and nine times less work.
 
-#### BLS library functions
+#### Miscellaneous topics
+
+##### Domain separation and forks
 
 TODO
-
-> - `def Sign(privkey: int, message: Bytes) -> BLSSignature`
-> - `def Verify(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
-> - `def Aggregate(signatures: Sequence[BLSSignature]) -> BLSSignature`
-> - `def FastAggregateVerify(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool`
-> - `def AggregateVerify(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
-> - `def KeyValidate(pubkey: BLSPubkey) -> bool`
-
-#### How signatures are used
-
- - Attestations and blocks and sync committee messages
- - Protocol messages
- - Deposits
- - Withdrawals ?
- - Randomness accumulation
- - Selection of subsets of committees
- - Domain separation and forks.
-
-#### Miscellaneous topics
 
 ##### Choice of groups
 
@@ -1784,13 +1766,40 @@ Threshold signatures also find a place in Distributed Validator Technology, whic
 
 ##### Batch verification
 
-TODO
+The bilinearity of the pairing function allows for some pretty funky optimisations. For example, Vitalik has formulated a method for [verifying a batch](https://ethresear.ch/t/fast-verification-of-multiple-bls-signatures/5407?u=benjaminion) of signatures simultaneously &ndash; such as all the signatures contained in a block &ndash; that reduces the number of pairing operations required. Since this technique constitutes a client-side optimisation rather than being a fundamental part of the protocol, I shall describe it properly in the Implementation chapter.
 
-TODO maybe:
+[TODO - link to batch verification when done]::
 
-  - Quantum security? (lack of)
-  - Batch verification as an implementation optimisation
-  - Subgroup checks
+#####  Quantum security
+
+The security (unforgeability) of BLS signatures relies, among other things, on the hardness of something called the elliptic curve discrete logarithm problem (ECDLP) [^fn-discrete-division-problem]. Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
+
+[^fn-discrete-division-problem]: It's puzzling to me that this is called the discrete logarithm problem when we write groups additively, rather than the discrete division problem. But it's far from being the most confusing thing about elliptic curves.
+
+The ECDLP is believed to be vulnerable to attack by [quantum computers](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks), thus our signature scheme presumably has a limited shelf-life.
+
+Quantum-resistant alternatives such as [zkSTARKs](https://eprint.iacr.org/2018/046.pdf) are known, but currently not as practical as the BLS scheme. The expectation is that, at some point, we will migrate to such a scheme as a drop-in replacement for BLS signatures.
+
+In case someone overnight unveils a sufficiently capable quantum computer, [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) (which sets a standard for BLS key generation in Ethereum) describes a way to generate a hierarchy of [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature). Lamport signatures are believed to be quantum secure, but come with their own limitations. In principle we could make an emergency switch over to these to tide us over while implementing STARKs. But, in practice, this would be extrememly challenging.
+
+#### BLS library functions
+
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of posession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerfiy` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+
+ - `def `[`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
+    - Sign a message with the validator's private key.
+ - `def `[`Verify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.7)`(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
+    - Verify a signature given the public key and the message.
+ - `def `[`Aggregate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.8)`(signatures: Sequence[BLSSignature]) -> BLSSignature`
+    - Aggregate a list of signatures.
+ - `def `[`FastAggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4)`(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) - bool`
+    - Verify an aggregate signature given the message and the list of public keys corresponding to the validators that contributed to the aggregate signature.
+ - `def `[`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
+    - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
+ - `def `[`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
+    - Checks that a public key is valid. That is, it lies on the elliptic curve, it is not the group's identity point (corresponding to the zero secret key), and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
+
+The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pubkeys()` and `eth_fast_aggregate_verify()` that I describe in the [annotated spec](/part3/helper/crypto#bls-signatures).
 
 #### See also
 
@@ -1807,7 +1816,7 @@ https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09
 
 Several EIPs are intended to govern the generation and storage of keys in practice:
 
-  - [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) provides a method for deriving a tree-hierarchy of BLS12-381 keys based on an entropy seed. As a bonus, it also generates a set of [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature) that could be used as an emergency backup in case of a break in the BLS signature scheme.
+  - [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) provides a method for deriving a tree-hierarchy of BLS12-381 keys based on an entropy seed.
   - [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md) defines a deterministic account hierarchy for specifying the purpose of keys.
   - [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) specifies a standard keystore format for storage and interchange of BLS12-381 keys.
 
@@ -6061,12 +6070,12 @@ The `assert` statement is interesting. If an attestation does not have the corre
 
 After checking the validity of the votes, the timeliness of each vote is checked. Let's take them in reverse order.
 
-    - Correct head votes must be included immediately, that is, in the very next slot.
-       - Head votes, used for LMD GHOST consensus, are not useful after one slot.
-    - Correct target votes must be included within 32 slots, one epoch.
-       - Target votes are useful at any time, but it is simpler if they don't span more than a couple of epochs, so 32 slots is a reasonable limit. This check is actually redundant since attestations in blocks cannot be older than 32 slots.
-    - Correct source votes must be included within 5 slots (`integer_squareroot(32)`).
-       - This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold). This is an arbitrary choice. Vitalik's view [^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
+ - Correct head votes must be included immediately, that is, in the very next slot.
+    - Head votes, used for LMD GHOST consensus, are not useful after one slot.
+ - Correct target votes must be included within 32 slots, one epoch.
+    - Target votes are useful at any time, but it is simpler if they don't span more than a couple of epochs, so 32 slots is a reasonable limit. This check is actually redundant since attestations in blocks cannot be older than 32 slots.
+ - Correct source votes must be included within 5 slots (`integer_squareroot(32)`).
+    - This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold). This is an arbitrary choice. Vitalik's view[^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
 
 [^fn_vitalik_geometric_mean]: From a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum Research Discord server.
 
