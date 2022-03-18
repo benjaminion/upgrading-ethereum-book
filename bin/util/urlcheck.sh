@@ -10,11 +10,11 @@ do
     echo $x;
 
     # Include credentials for github.com
-    [[ "$x" =~ .*github.com* ]] && creds="-u $github_secret" || creds=""
+    [[ "$x" =~ github.com ]] && creds="-u $github_secret" || creds=""
 
     # beaconcha.in doesn't like HEAD requests
-    [[ "$x" =~ .*beaconcha.in* ]] && head="" || head="--head"
-    
+    [[ "$x" =~ beaconcha.in ]] && head="" || head="--head"
+
     res=$(curl $creds -Lo /dev/null --silent $head --write-out '%{http_code}\n' $x)
 
     if [ "200" -ne "$res" ]
