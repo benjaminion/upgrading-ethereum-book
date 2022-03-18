@@ -1643,7 +1643,7 @@ In summary:
 
   - We can verify a single signature with two pairings.
   - We can naively verify $N$ signatures with $2N$ pairings.
-  - Or we can verify $N$ signatures via aggregation with just two pairings, $N-1$ additions in $G_1$ and $N-1$ additions in $G_2$. Each elliptic curve point additions is much, much cheaper than a pairing.
+  - Or we can verify $N$ signatures via aggregation with just two pairings, $N-1$ additions in $G_1$, and $N-1$ additions in $G_2$. Each elliptic curve point additions is much, much cheaper than a pairing.
 
 ###### Space benefits
 
@@ -3332,7 +3332,7 @@ All Ether amounts are specified in units of Gwei ($10^9$ Wei, $10^{-9}$ Ether). 
 
 #### Root
 
-Merkle roots are ubiquitous in the Eth2 protocol. They are a very succinct and tamper-proof way of representing a lot of data, an example of a [cryptographic accumulator](https://en.wikipedia.org/wiki/Accumulator_(cryptography)). Blocks are summarised by their Merkle roots; state is summarised by its Merkle root; the list of Eth1 deposits is summarised by its Merkle root; the digital signature of a message is calculated from the Merkle root of the data structure contained within the message.
+Merkle roots are ubiquitous in the Eth2 protocol. They are a very succinct and tamper-proof way of representing a lot of data, an example of a [cryptographic accumulator](https://en.wikipedia.org/wiki/Accumulator_%28cryptography%29). Blocks are summarised by their Merkle roots; state is summarised by its Merkle root; the list of Eth1 deposits is summarised by its Merkle root; the digital signature of a message is calculated from the Merkle root of the data structure contained within the message.
 
 #### Hash32
 
