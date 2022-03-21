@@ -1663,7 +1663,7 @@ This diagram illustrates the full flow from signing, through aggregating, to ver
 <div class="image" style="width:80%">
 
 ![Diagram showing the end-to-end aggregate signature workflow](md/images/diagrams/bls_aggregation.svg)
-The end-to-end aggregate signature workflow.
+The end-to-end aggregate signature workflow. Verifying the single aggregate signature is much faster than verifying the original signatures separately.
 
 </div>
 
