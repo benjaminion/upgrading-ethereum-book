@@ -1853,6 +1853,50 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 TODO
 
+Let's say an attacker controls a proportion $r$ of the total stake (whether directly, or by bribing validators). How much can the attacker boost its influence by manipulating the RANDAO?
+
+The proposers for the next epoch are determined based on the value of the RANDAO at the end of an epoch. So, to sucessfully manipulate the RANDAO to gain influence over the chain, the attacker must be the block proposer in the last slot of an epoch, otherwise a validator they don't control will make the last proposal and completely re-randomise the RANDAO.
+
+We'll call $p_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We can account for this by modifying $r$. If a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot is $r' = r(1 + \alpha + \alpha^2 \dots \alpha^{31})$, since $\alpha^n$ is the probability that the last $n$ slots of an epoch are empty.
+
+Choosing an epoch and labelling it $0$, we have $p_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
+
+Given that the attacker gains uts last slot, it now has a choice: it can can publish its block or withold its block. In both cases, the attacker knows the outcome of the RANDAO and can predict from that the proposers for the next epoch. Given this capability, how much more likely is it that the attacker can make itself proposer of the last block in epoch $1$?
+
+$$
+p_1 = (1-p_0)r + p_0(1-(1-r)^2)
+$$
+
+The first term, $(1-p_0)r$ is the probability that the attacker would have been the last proposer of epoch $1$ without being the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that either of its choices makes it last proposer of epoch $1$. (That is, that neither of its choices make it not the last proposer of epoch $1$.)
+
+We can simplify this to
+
+$$
+p_1 = r(1 + p_0(1-r)) = r(1 + r - r^2)
+$$
+
+So we see that, by being able to influence the RANDAO, an attacker with some proportion $r$ of the stake can boost its probability of being in a position to influence the RANDAO next time by a factor $1 + r - r^2$, which is greater than one.
+
+TODO: insert graph
+
+What's the best an attacker can do? With increased odds of being last proposer next epoch, it can repeat the process and further increase its odds of being last proposer in the next-but-one epoch and so on. Could an attacker use this to bootstrap itself to full control of the RANDAO?
+
+Let $p_n$ be the best probability that an attacker can achieve of being last proposer in $n$ epochs' time.
+
+$$
+\begin{aligned}
+p_n &= r(1 + p_{n-1}(1-r)) \\
+    &= r(1 + r(1 + p_{n-2}(1-r))(1-r)) \\
+    &= r(1 + r(1-r) + rp_{n-2)(1-r)^2) \\
+    &= r(1 + r(1-r) + r^2(1-r)^2 + \dots + r^n(1-r)^n) \\
+    &= r \left( 1 + \frac{r(1-r)(1-(r(1-r))^n)}{1 - r(1-r)} \right) \\
+\end{aligned}
+$$
+
+where we have made use of $p_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
+
+TODO: insert graph
+
 ### Committees <!-- /part2/building_blocks/committees* -->
 
 TODO
