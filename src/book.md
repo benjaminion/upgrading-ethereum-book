@@ -1849,25 +1849,29 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
   - The [Blst](https://github.com/supranational/blst) library is the most commonly used by Eth2 client implementers.
   - The [noble-bls12-381](https://github.com/paulmillr/noble-bls12-381) library is better documented and may be more enjoyable if you want to try playing around with these things.
 
-### Randomness <!-- /part2/building_blocks/randomness* -->
+### Randomness <!-- /part2/building_blocks/randomness -->
 
-TODO
+TODO: Introductory stuff
 
-Let's say an attacker controls a proportion $r$ of the total stake (whether directly, or by bribing validators). How much can the attacker boost its influence by manipulating the RANDAO?
+#### RANDAO takeover
 
-The proposers for the next epoch are determined based on the value of the RANDAO at the end of an epoch. So, to sucessfully manipulate the RANDAO to gain influence over the chain, the attacker must be the block proposer in the last slot of an epoch, otherwise a validator they don't control will make the last proposal and completely re-randomise the RANDAO.
+Let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence by manipulating the RANDAO?
 
-We'll call $p_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We can account for this by modifying $r$. If a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot is $r' = r(1 + \alpha + \alpha^2 \dots \alpha^{31})$, since $\alpha^n$ is the probability that the last $n$ slots of an epoch are empty.
+##### Last proposer
 
-Choosing an epoch and labelling it $0$, we have $p_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
+The proposers for an epoch are determined based on the value of the RANDAO at the end of the previous epoch. To sucessfully manipulate the RANDAO the attacker must be the block proposer in the last slot of an epoch, otherwise a validator not controlled by the attacker will make the last proposal and completely re-randomise the RANDAO.
 
-Given that the attacker gains uts last slot, it now has a choice: it can can publish its block or withold its block. In both cases, the attacker knows the outcome of the RANDAO and can predict from that the proposers for the next epoch. Given this capability, how much more likely is it that the attacker can make itself proposer of the last block in epoch $1$?
+We'll call $p_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We could account for this by modifying $r$: if a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot of an epoch is $r' = r(1 + \alpha + \alpha^2 + \dots + \alpha^{31})$, since $\alpha^k$ is the probability that the last $k$ slots of an epoch are empty. But we shall ignore that nicety in what follows.
+
+Choosing an arbitrary epoch and labelling it $0$, we have $p_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
+
+Once an attacker occupies the epoch's last slot it has a choice: it can publish its block or withold its block. In each case, the attacker can predict the effect on the RANDAO and can calculate from that the proposers for the next epoch. Given this capability, how likely is it that the attacker can make itself proposer of the last block in epoch $1$?
 
 $$
 p_1 = (1-p_0)r + p_0(1-(1-r)^2)
 $$
 
-The first term, $(1-p_0)r$ is the probability that the attacker would have been the last proposer of epoch $1$ without being the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that either of its choices makes it last proposer of epoch $1$. (That is, that neither of its choices make it not the last proposer of epoch $1$.)
+The first term, $(1-p_0)r$ is the usual probability that the attacker would have been the last proposer of epoch $1$ without having been the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that one or other or both of its choices make it last proposer of epoch $1$. (That is, it is not the case that both of its choices lead to it not having the last slot of epoch $1$.)
 
 We can simplify this to
 
@@ -1875,27 +1879,101 @@ $$
 p_1 = r(1 + p_0(1-r)) = r(1 + r - r^2)
 $$
 
-So we see that, by being able to influence the RANDAO, an attacker with some proportion $r$ of the stake can boost its probability of being in a position to influence the RANDAO next time by a factor $1 + r - r^2$, which is greater than one.
-
-TODO: insert graph
+So we see that, by being able to influence the RANDAO, an attacker with some proportion $r$ of the stake can boost its probability of again being in a position to influence the RANDAO (being in the last slot) next time by a factor $1 + r - r^2$, which is greater than one.
 
 What's the best an attacker can do? With increased odds of being last proposer next epoch, it can repeat the process and further increase its odds of being last proposer in the next-but-one epoch and so on. Could an attacker use this to bootstrap itself to full control of the RANDAO?
 
-Let $p_n$ be the best probability that an attacker can achieve of being last proposer in $n$ epochs' time.
+Let $p_n$ be the probability that an attacker can achieve being last proposer in $n$ epochs' time.
 
 $$
 \begin{aligned}
 p_n &= r(1 + p_{n-1}(1-r)) \\
     &= r(1 + r(1 + p_{n-2}(1-r))(1-r)) \\
-    &= r(1 + r(1-r) + rp_{n-2)(1-r)^2) \\
+    &= r(1 + r(1-r) + rp_{n-2}(1-r)^2) \\
     &= r(1 + r(1-r) + r^2(1-r)^2 + \dots + r^n(1-r)^n) \\
     &= r \left( 1 + \frac{r(1-r)(1-(r(1-r))^n)}{1 - r(1-r)} \right) \\
 \end{aligned}
 $$
 
-where we have made use of $p_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
+where we have made use of $p_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less significantly than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
 
-TODO: insert graph
+<a id="img_randao_manipulation_1"></a>
+<div class="image" style="width:100%">
+
+![TODO](md/images/charts/randao_manipulation_1.svg)
+The solid line, "Epoch&nbsp;0", is the usual probability that an entity will be last proposer in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will be last proposer in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will be last proposer in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
+
+</div>
+
+The greatest effect of this is when the attacker controls half the stake. It can increase its odds of being the last proposer of future epochs from $1/2$ to $2/3$.
+
+##### Last two proposers
+
+We have found that being the last proposer of an epoch allows an attacker to manipulate the RANDAO to improve its odds of being the last proposer of the next epoch, but it cannot be leveraged to gain permanent control of the RANDAO.
+
+How about if the attacker gains the last two proposers of an epoch? This happens normally with probability $r^2$, but affords four opportunities to influence the RANDAO: propose both blocks; propose the first but not the second; propose the second but not the first; propose neither.
+
+Calling $q_n$ the probability that the attacker has control over the last two proposers after $n$ epochs we can follow a similar approach to the above.
+
+$$
+\begin{aligned}
+q_0 &= r^2 \\
+q_1 &= (1 - q_0)r^2 + q_0(1 - (1 - r^2)^4) \\
+& \vdots \\
+q_n &= (1 - q_{n-1})r^2 + q_{n-1}(1 - (1 - r^2)^4) \\
+\end{aligned}
+$$
+
+The first term in $q_n$ is just the normal probability of the attacker being proposer in the last two slots of epoch $n$ if it wasn't in epoch $n - 1$. The second term applies when the attacker was proposer in the last two slots in epoch $n - 1$ and thus has four attempts to become proposer in the last two slots of epoch $n$.[^fn-k-proposers-calc]
+
+[^fn-k-proposers-calc]: The way I think of it is like this.
+
+    - The probability of getting the last $k$ proposers is $r^k$ in one attempt.
+    - So the probability of _not_ getting the last $k$ proposers is $1 - r^k$.
+    - This has to happen $2^k$ times in a row as we have that many attempts if we control the last $n$ slots of the previous epoch, hence $(1 - r^k)^{2^k}$.
+    - The final probability that, given that we have $2^k$ attempts at least one attempt gains us the $k$ final slots in the next epoch is $(1 - (1 - r^k)^{2^k}$.
+
+<a id="img_randao_manipulation_2"></a>
+<div class="image" style="width:100%">
+
+![TODO](md/images/charts/randao_manipulation_2.svg)
+The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last two proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last two proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last two proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp; 0".
+
+</div>
+
+##### Last k proposers
+
+We can extend this further an consider an attacker gaining the last $k$ slots of an epoch. Extending the previous model, we have,
+
+$$
+\begin{aligned}
+q_0 &= r^k \\
+&\vdots \\
+q_n &= (1 - q_{n-1})r^k + q_{n-1}(1 - (1 - r^k)^{2^k}) \\
+\end{aligned}
+$$
+
+Graphing this for $k = 8$, we see that an attacker with more than around 65% of the stake is practically certain to be able to take control of the RANDAO for an indefinite number of epochs, whereas an attacker with less than 55% of the stake has no chance.
+
+<a id="img_randao_manipulation_8"></a>
+<div class="image" style="width:100%">
+
+![TODO](md/images/charts/randao_manipulation_8.svg)
+The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last eight proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last eight proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last eight proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
+
+</div>
+
+I've simplified a lot of detail in the above. For example, I've assumed that the attacker is targeting a fixed number of final validators. There's probably an advantage to the attacker in being more flexible than that. There's likely a decent research paper to be written by someone (other than me) on all the nuances of the RANDAO.
+
+##### Observations on biasability
+
+In the light of these results, clearly it's better if no single entity controls too great a proportion of validators, and essential that no single entity controls more than around 55% of the validators. Any advantage an attacker can gain below that threshold is relatively minor.
+
+There are other scenarios in which a validator might want to use its privileged position of proposing at the end of an epoch to its advantage.
+
+For example, a validator may forgo proposing a block in order to acquire more block proposals for its owner in the next epoch. If I withold the last block of an epoch, but in return earn either two extra block proposals in the next &ndash; or one more proposal including one in the last slot so I can try again &ndash; then it might be worth doing so.
+
+Or I might be the last proposer before the membership of the next sync committee is decided. Being in a sync committee is currently about four times more valuable than proposing a block, so I may wish to skip the block proposal if that will set up the RANDAO so as to get one of my validators into the committee. This is pre-Merge, of course. Post-merge, blocks will be more valuable due to priority fees.
 
 ### Committees <!-- /part2/building_blocks/committees* -->
 

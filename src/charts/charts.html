@@ -30,6 +30,8 @@
     roughness: 1,
     bowing: 0,
     simplification: 0.2,
+    colors: ["black"],
+    strokeWidth: 1.5,
     axisRoughness: 1,
     axisStrokeWidth: 1.0,
     axisFontSize: 20,
@@ -135,7 +137,7 @@
       yVals[i] = yFunc(1000 * xVals[i]) / 1000;
     }
 
-    const chart = new roughViz.Line({
+    new roughViz.Line({
       element: '#issuance_curve',
       width: opts.width,
       height: opts.height,
@@ -154,8 +156,8 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
-      strokeWidth: 1.5,
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
       interpolation: ["curve"],
 
       circle: true,
@@ -194,7 +196,7 @@
       yVals[i] = yFunc(1000 * xVals[i]) * 100;
     }
 
-    const chart = new roughViz.Line({
+    new roughViz.Line({
       element: '#rewards_curve',
       width: opts.width,
       height: opts.height,
@@ -213,8 +215,8 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
-      strokeWidth: 1.5,
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
       interpolation: ["curve"],
 
       circle: true,
@@ -240,7 +242,7 @@
 <div class="svg" id="reward_variance"></div>
 <script>
   async function do_reward_variance() {
-    const chart = new roughViz.Bar({
+    new roughViz.Bar({
       element: '#reward_variance',
       width: opts.width,
       height: opts.height,
@@ -261,7 +263,7 @@
 
       color: 'white',
       fillStyle: 'solid',
-      strokeWidth: 1.5,
+      strokeWidth: opts.strokeWidth,
       padding: 0.01,
 
       axisStrokeWidth: opts.axisStrokeWidth,
@@ -304,7 +306,7 @@
     }
     xVals[0] = "";
 
-    const chart = new roughViz.Line({
+    new roughViz.Line({
       element: '#reward_timeliness',
       width: opts.width,
       height: opts.height,
@@ -324,10 +326,10 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
+      colors: opts.colors,
       interpolation: ["straight", "curve"],
       dash: [[0], [8, 6]],
-      strokeWidth: 1.5,
+      strokeWidth: opts.strokeWidth,
 
       circle: false,
 
@@ -366,7 +368,7 @@
       y2Vals[i] = y2Func(y2Vals[i - 1], y1Vals[i]);
     }
 
-    const chart = new roughViz.Line({
+    new roughViz.Line({
       element: '#hysteresis',
       width: opts.width,
       height: opts.height,
@@ -386,10 +388,10 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
+      colors: opts.colors,
       interpolation: ["straight"],
       dash: [[0], [10, 10]],
-      strokeWidth: 1.5,
+      strokeWidth: opts.strokeWidth,
 
       circle: false,
 
@@ -490,7 +492,7 @@
       {x: offlineEnd, dash: [2, 10]},
     ];
 
-    const chart_1 = new roughViz.Line({
+    new roughViz.Line({
       element: '#inactivity_scores',
       width: opts.width,
       height: opts.height,
@@ -515,8 +517,8 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
-      strokeWidth: 1.5,
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
       interpolation: ["straight"],
       dash: dashPattern,
 
@@ -542,7 +544,7 @@
       interactive: opts.interactive,
     });
 
-    const chart_2 = new roughViz.Line({
+    new roughViz.Line({
       element: '#inactivity_balances',
       width: opts.width,
       height: opts.height,
@@ -567,9 +569,9 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
-      strokeWidth: 1.5,
-      interpolation: ["straight"],
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
+      interpolation: ["curve"],
       dash: dashPattern,
 
       axisStrokeWidth: opts.axisStrokeWidth,
@@ -599,29 +601,30 @@
 <!-- RANDAO manipulation probabilities - - - - - - - - - - - - - - - - - - -  -->
 
 <div class="svg" id="randao_manipulation_1"></div>
-<div class="svg" id="randao_manipulation_n"></div>
+<div class="svg" id="randao_manipulation_2"></div>
+<div class="svg" id="randao_manipulation_8"></div>
 <script>
-  async function do_randao_manipulation() {
+
+  const dashPattern = [[0], [2, 6], [6, 6]];
+  const margin = {top: 30, right: 20, bottom: 80, left: 120};
+  const xValueFormat = ".2f";
+
+  async function do_randao_manipulation_1() {
     const xInterval = 0.05;
     const xVals = [];
     const y0vals= [];
     const y1vals= [];
     const ynvals = [];
-    r = 0;
+    var r = 0;
     for (let idx = 0; r < 1 + xInterval/2; idx++) {
-      xVals[idx] = parseFloat(r).toFixed(2);;
+      xVals[idx] = r;
       y0vals[idx] = r;
       y1vals[idx] = r * (1 + r * (1 - r));
       ynvals[idx] = r / (1 - r * (1 - r));
       r += xInterval;
     }
 
-    console.log(ynvals);
-    
-    const dashPattern = [[0], [2, 6], [6, 6], [10, 6], [10, 6, 4, 6]];
-    const margin = {top: 30, right: 20, bottom: 80, left: 120};
-
-    const chart_1 = new roughViz.Line({
+    new roughViz.Line({
       element: '#randao_manipulation_1',
       width: opts.width,
       height: opts.height,
@@ -633,9 +636,10 @@
         y3: ynvals,
       },
       x: xVals,
-      xLabel: "Epochs since leak start",
-      yLabel: "Inactivity score",
-      xLabelDelta: 0,
+      xValueFormat: xValueFormat,
+      xLabel: "Fraction of stake",
+      yLabel: "Probability of being last proposer",
+      xLabelDelta: 10,
       yLabelDelta: -10,
       yDomain: [0, 1],
 
@@ -644,9 +648,9 @@
       bowing: opts.bowing,
       simplification: opts.simplification,
 
-      colors: ["black"],
-      strokeWidth: 1.5,
-      interpolation: ["straight"],
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
+      interpolation: ["curve"],
       dash: dashPattern,
 
       axisStrokeWidth: opts.axisStrokeWidth,
@@ -655,61 +659,9 @@
       labelFontSize: opts.labelFontSize,
 
       notes: [
-        {x: 200, y: 270, text: "Always offline"},
-        {x: 454, y: 350, text: "Temporarily"},
-        {x: 430, y: 375, text: "offline"},
-        {x: 620, y: 390, text: "70% online"},
-        {x: 620, y: 436, text: "90% online"},
-        {x: 630, y: 473, text: "Always online"},
-      ],
-      notesFontSize: 0.8 * opts.labelFontSize,
-
-      margin: margin,
-      legend: opts.legend,
-      interactive: opts.interactive,
-    });
-
-    const chart_2 = new roughViz.Line({
-      element: '#randao_manipulation_n',
-      width: opts.width,
-      height: opts.height,
-      font: opts.font,
-
-      data: {
-        y1: y1Balance,
-        y2: y2Balance,
-        y3: y3Balance,
-        y4: y4Balance,
-        y5: y5Balance,
-      },
-      x: xVals,
-      yValueFormat: ".4f",
-      xLabel: "Epochs since leak start",
-      yLabel: "Balance (ETH)",
-      xLabelDelta: 0,
-      yLabelDelta: -20,
-
-      circle: false,
-      roughness: 0.3,
-      bowing: opts.bowing,
-      simplification: opts.simplification,
-
-      colors: ["black"],
-      strokeWidth: 1.5,
-      interpolation: ["straight"],
-      dash: dashPattern,
-
-      axisStrokeWidth: opts.axisStrokeWidth,
-      axisRoughness: opts.axisRoughness,
-      axisFontSize: opts.axisFontSize,
-      labelFontSize: opts.labelFontSize,
-
-      notes: [
-        {x: 170, y: 80, text: "Always offline"},
-        {x: 876, y: 105, text: "Temporarily offline"},
-        {x: 840, y: 62, text: "70% online"},
-        {x: 1000, y: 47, text: "90% online"},
-        {x: 990, y: 13, text: "Always online"},
+        {x: 650, y: 230, text: "Epoch 0"},
+        {x: 650, y: 160, text: "Epoch 1"},
+        {x: 460, y: 160, text: "Epoch n"},
       ],
       notesFontSize: 0.8 * opts.labelFontSize,
 
@@ -718,7 +670,160 @@
       interactive: opts.interactive,
     });
   }
-  do_randao_manipulation().then(makeLink('randao_manipulation_1')).then(makeLink('randao_manipulation_n'));
+  do_randao_manipulation_1().then(makeLink('randao_manipulation_1'));
+
+  async function do_randao_manipulation_2() {
+
+    const qnp1 = (qn, r2) => {
+      return (1 - qn) * r2 + qn * (1 - Math.pow(1 - r2, 4));
+    }
+
+    const xInterval = 0.05;
+    const xVals = [];
+    const y0vals= [];
+    const y1vals= [];
+    const ynvals = [];
+    var r = 0;
+    for (let idx = 0; r < 1 + xInterval/2; idx++) {
+      xVals[idx] = r;
+      var r2 = r * r;
+      y0vals[idx] = r2;
+      y1vals[idx] = qnp1(y0vals[idx], r2);
+      ynvals[idx] = qnp1(y1vals[idx], r2);
+      // Iterate to convergence
+      var delta;
+      do {
+        delta = ynvals[idx];
+        ynvals[idx] = qnp1(ynvals[idx], r2);
+        delta -=  ynvals[idx];
+      } while (Math.abs(delta) > 0.0001)
+      r += xInterval;
+    }
+
+    new roughViz.Line({
+      element: '#randao_manipulation_2',
+      width: opts.width,
+      height: opts.height,
+      font: opts.font,
+
+      data: {
+        y1: y0vals,
+        y2: y1vals,
+        y3: ynvals,
+      },
+      x: xVals,
+      xValueFormat: xValueFormat,
+      xLabel: "Fraction of stake",
+      yLabel: "Probability of two last proposers",
+      xLabelDelta: 10,
+      yLabelDelta: -10,
+      yDomain: [0, 1],
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
+      interpolation: ["curve"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 780, y: 280, text: "Epoch 0"},
+        {x: 780, y: 170, text: "Epoch 1"},
+        {x: 570, y: 170, text: "Epoch n"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+  do_randao_manipulation_2().then(makeLink('randao_manipulation_2'));
+
+  async function do_randao_manipulation_8() {
+
+    const qnp1 = (qn, r, pow) => {
+      var rpow = Math.pow(r, pow);
+      return (1 - qn) * rpow + qn * (1 - Math.pow(1 - rpow, Math.pow(2, pow)));
+    }
+
+    const xInterval = 0.025;
+    const xVals = [];
+    const y0vals= [];
+    const y1vals= [];
+    const ynvals = [];
+    var r = 0;
+    var nlast = 8;
+    for (let idx = 0; r < 1 + xInterval/2; idx++) {
+      xVals[idx] = r;
+      y0vals[idx] = qnp1(0, r, nlast);
+      y1vals[idx] = qnp1(y0vals[idx], r, nlast);
+      ynvals[idx] = qnp1(y1vals[idx], r, nlast);
+      // Iterate to convergence
+      var delta;
+      do {
+        delta = ynvals[idx];
+        ynvals[idx] = qnp1(ynvals[idx], r, nlast);
+        delta -=  ynvals[idx];
+      } while (Math.abs(delta) > 0.00001)
+      r += xInterval;
+    }
+
+    new roughViz.Line({
+      element: '#randao_manipulation_8',
+      width: opts.width,
+      height: opts.height,
+      font: opts.font,
+
+      data: {
+        y1: y0vals,
+        y2: y1vals,
+        y3: ynvals,
+      },
+      x: xVals,
+      xValueFormat: xValueFormat,
+      xLabel: "Fraction of stake",
+      yLabel: "Probability of eight last proposers",
+      xLabelDelta: 10,
+      yLabelDelta: -10,
+      yDomain: [0, 1],
+
+      circle: false,
+      roughness: 0.3,
+      bowing: opts.bowing,
+      simplification: opts.simplification,
+
+      colors: opts.colors,
+      strokeWidth: opts.strokeWidth,
+      interpolation: ["curve"],
+      dash: dashPattern,
+
+      axisStrokeWidth: opts.axisStrokeWidth,
+      axisRoughness: opts.axisRoughness,
+      axisFontSize: opts.axisFontSize,
+      labelFontSize: opts.labelFontSize,
+
+      notes: [
+        {x: 900, y: 425, text: "Epoch 0"},
+        {x: 900, y: 160, text: "Epoch 1"},
+        {x: 590, y: 160, text: "Epoch n"},
+      ],
+      notesFontSize: 0.8 * opts.labelFontSize,
+
+      margin: margin,
+      legend: opts.legend,
+      interactive: opts.interactive,
+    });
+  }
+  do_randao_manipulation_8().then(makeLink('randao_manipulation_8'));
 </script>
 
 </div>
