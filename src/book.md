@@ -1382,7 +1382,8 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 #### See also
 
-  - [What Happens If Beacon Chain Consensus Fails?](https://www.symphonious.net/2021/09/23/what-happens-if-beacon-chain-consensus-fails/), a blog post by Adrian Sutton.
+  - [Run the majority client at your own peril!](https://dankradfeist.de/ethereum/2022/03/24/run-the-majority-client-at-your-own-peril.html) by Dankrad Feist.
+  - [What Happens If Beacon Chain Consensus Fails?](https://www.symphonious.net/2021/09/23/what-happens-if-beacon-chain-consensus-fails/) by Adrian Sutton.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
