@@ -1976,6 +1976,12 @@ For example, a validator may forgo proposing a block in order to acquire more bl
 
 Or I might be the last proposer before the membership of the next sync committee is decided. Being in a sync committee is currently about four times more valuable than proposing a block, so I may wish to skip the block proposal if that will set up the RANDAO so as to get one of my validators into the committee. This is pre-Merge, of course. Post-merge, blocks will be more valuable due to priority fees.
 
+#### See also
+
+https://github.com/runtimeverification/rdao-smc
+
+https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf
+
 ### Committees <!-- /part2/building_blocks/committees* -->
 
 TODO
