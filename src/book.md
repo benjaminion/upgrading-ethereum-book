@@ -5267,7 +5267,7 @@ No check is done here that the `attesting_indices` (which are the global validat
 |||
 |-|-|
 | Used&nbsp;by | [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing), [`process_attestation()`](/part3/transition/block#def_process_attestation) |
-| Uses | [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), `[bls.FastAggregateVerify()`](/part2/building_blocks/signatures#bls-signatures) |
+| Uses | [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.FastAggregateVerify()`](/part2/building_blocks/signatures#bls-library-functions) |
 | See&nbsp;also | [IndexedAttestation](/part3/containers/dependencies#indexedattestation), [Attestation](/part3/containers/operations#attestation) |
 
 #### `is_valid_merkle_branch`
