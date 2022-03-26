@@ -14,19 +14,19 @@ export default function Template({
   data,
 }) {
   const { markdownRemark } = data
-  const { html } = markdownRemark
+  const { html, frontmatter } = markdownRemark
 
   //console.log(JSON.stringify(markdownRemark, undefined, 2))
 
-  const index_array = markdownRemark.frontmatter.path !== "/contents"
-        ? markdownRemark.frontmatter.index
+  const index_array = frontmatter.path !== "/contents"
+        ? frontmatter.index
         : []
 
   return (
     <Layout>
-      <Sidebar index={markdownRemark.frontmatter.index} />
+      <Sidebar index={frontmatter.index} />
       <div className="main-content">
-        <PrevNext seq={markdownRemark.frontmatter.sequence} />
+        <PrevNext seq={frontmatter.sequence} />
         <div className="container">
           <div className="section">
             <div
@@ -37,10 +37,10 @@ export default function Template({
           </div>
         </div>
         <Footer />
-        <PrevNext seq={markdownRemark.frontmatter.sequence} />
+        <PrevNext seq={frontmatter.sequence} />
       </div>
       <div className="page-navi">
-        <PageNavi path={markdownRemark.frontmatter.path} />
+        <PageNavi path={frontmatter.path} />
       </div>
     </Layout>
   )
