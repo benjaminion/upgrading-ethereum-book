@@ -23,7 +23,7 @@ module.exports = {
   },
   pathPrefix: `/altair`,
   plugins: [
-      {
+    {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `markdown-pages`,
@@ -38,6 +38,12 @@ module.exports = {
           `gatsby-remark-autolink-headers`,
           `gatsby-remark-numbered-footnotes`,
           `gatsby-remark-katex`,
+          {
+            resolve: `my-tooltips`,
+            options: {
+              file: `${__dirname}/src/constants.json`
+            }
+          },
           {
             resolve: `gatsby-remark-external-links`,
             options: {

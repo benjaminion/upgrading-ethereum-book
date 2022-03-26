@@ -1,0 +1,11 @@
+{
+  "name": "my-tooltips",
+  "version": "1.0.0",
+  "description": "Add tooltips for constant values",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Edgington",
+  "license": "ISC"
+}
