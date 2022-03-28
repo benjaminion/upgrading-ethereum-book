@@ -1854,13 +1854,21 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 TODO: Introductory stuff
 
-#### RANDAO takeover
+#### RANDAO biasability
+
+If a validator happens to be assigned to propose a block in the last slot of an epoch then it gains a little control over the RANDAO. This is because it can choose to reveal
+
+The proposers for an epoch are determined based on the value of the RANDAO at the end of the previous epoch. To sucessfully manipulate the RANDAO the attacker must be the block proposer in the last slot of an epoch, otherwise a validator not controlled by the attacker will make the last proposal and completely re-randomise the RANDAO.
+
+
+
+##### Block proposals boost
+
+##### RANDAO takeover
 
 Let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence by manipulating the RANDAO?
 
 ##### Last proposer
-
-The proposers for an epoch are determined based on the value of the RANDAO at the end of the previous epoch. To sucessfully manipulate the RANDAO the attacker must be the block proposer in the last slot of an epoch, otherwise a validator not controlled by the attacker will make the last proposal and completely re-randomise the RANDAO.
 
 We'll call $p_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We could account for this by modifying $r$: if a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot of an epoch is $r' = r(1 + \alpha + \alpha^2 + \dots + \alpha^{31})$, since $\alpha^k$ is the probability that the last $k$ slots of an epoch are empty. But we shall ignore that nicety in what follows.
 
