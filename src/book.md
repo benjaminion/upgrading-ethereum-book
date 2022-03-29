@@ -1864,6 +1864,29 @@ The proposers for an epoch are determined based on the value of the RANDAO at th
 
 ##### Block proposals boost
 
+My expected number of proposals per epoch without trying to bias the RANDAO is simple to compute, where $r$ is the proportion of the total stake that I control.
+
+$$
+E = \sum_{k=0}^{32} k p_k = 32 r
+$$
+
+If I try to bias the RABDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals looks like this.
+
+$$
+E' = \sum_{k=0}^{32} k ((1 - r) p_k + r q_k)
+$$
+
+Unpacking this, the first term in the addition is the probability, $r - 1$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) with the usual probability $p_k$ of having $k$ proposals in an epoch. The second term is the probability, $r$, that I did have the last slot in the previous epoch along with the probability $q_k$ that I gained either $k$ validators by proposing my block or $k + 1$ validators by withholding that block &ndash; the plus one is to make up for the block I dropped at the end of the previous epoch in order to gain this outcome.
+
+$$
+\begin{aligned}
+q_k &= \sum_{i=0}^{k} (p_i p_k + p_i p_{k+1}) \\
+q_{32} &= \sum_{i=0}^{32} (p_i p_k) \\
+\end{aligned}
+$$
+
+Here is some Python code can be used to calculate $E'$.
+
 ```python
 def fac(n):
     return n * fac(n - 1) if n else 1
@@ -1888,21 +1911,25 @@ for idx in range(1, nintervals + 1):
     print(r, r * 32, sum(s), 100 * (sum(s) / (r * 32) - 1))
 ```
 
+The output of this can be plotted as follows.
+
 <a id="img_randao_proposals"></a>
 <div class="image" style="width:100%">
 
-![TODO](md/images/charts/randao_proposals.svg)
-TODO
+![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
+The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
 
 </div>
 
 <a id="img_randao_proposals_percent"></a>
 <div class="image" style="width:100%">
 
-![TODO](md/images/charts/randao_proposals_percent.svg)
-TODO
+![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
+The percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.9% of proposals by using its influence on the last slot of any epoch, assuming that the remaining stakers are uncoordinated.
 
 </div>
+
+Note that in the above we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher. This is left as an exercise for the interested researcher.
 
 ##### RANDAO takeover
 
