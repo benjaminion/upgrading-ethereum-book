@@ -1864,6 +1864,46 @@ The proposers for an epoch are determined based on the value of the RANDAO at th
 
 ##### Block proposals boost
 
+```python
+def fac(n):
+    return n * fac(n - 1) if n else 1
+
+def choose(n, k):
+    return fac(n) / fac(k) / fac(n - k)
+
+def prob(n, k, p):
+    return p**k * (1 - p)**(n - k) * choose(n, k)
+
+nintervals = 20
+for idx in range(1, nintervals + 1):
+    r = idx / nintervals
+    p = [prob(32, k, r) for k in range(33)]
+
+    # Calculate q[k] = prob(max(j, i - 1) == k)
+    q = []
+    for k in range(33):
+        qq = [p[i] * p[k] + (p[k + 1] * p[i] if (k < 32) else 0) for i in range(k + 1)]
+        q.append(sum(qq))
+    s = [k * (p[k] * (1 - r) + q[k] * r) for k in range(33)]
+    print(r, r * 32, sum(s), 100 * (sum(s) / (r * 32) - 1))
+```
+
+<a id="img_randao_proposals"></a>
+<div class="image" style="width:100%">
+
+![TODO](md/images/charts/randao_proposals.svg)
+TODO
+
+</div>
+
+<a id="img_randao_proposals_percent"></a>
+<div class="image" style="width:100%">
+
+![TODO](md/images/charts/randao_proposals_percent.svg)
+TODO
+
+</div>
+
 ##### RANDAO takeover
 
 Let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence by manipulating the RANDAO?
