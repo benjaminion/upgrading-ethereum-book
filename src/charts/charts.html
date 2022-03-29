@@ -631,9 +631,9 @@
       font: opts.font,
 
       data: {
-        y1: y0vals,
-        y2: y1vals,
-        y3: ynvals,
+        epoch_0: y0vals,
+        epoch_1: y1vals,
+        epoch_2: ynvals,
       },
       x: xVals,
       xValueFormat: xValueFormat,
@@ -707,9 +707,9 @@
       font: opts.font,
 
       data: {
-        y1: y0vals,
-        y2: y1vals,
-        y3: ynvals,
+        epoch_0: y0vals,
+        epoch_1: y1vals,
+        epoch_2: ynvals,
       },
       x: xVals,
       xValueFormat: xValueFormat,
@@ -784,9 +784,9 @@
       font: opts.font,
 
       data: {
-        y1: y0vals,
-        y2: y1vals,
-        y3: ynvals,
+        epoch_0: y0vals,
+        epoch_1: y1vals,
+        epoch_2: ynvals,
       },
       x: xVals,
       xValueFormat: xValueFormat,
@@ -832,7 +832,6 @@
 <div class="svg" id="randao_proposals"></div>
 <div class="svg" id="randao_proposals_percent"></div>
 <script>
-
   async function do_randao_proposals() {
 
     const fac = [];
@@ -840,47 +839,46 @@
     for (var i = 1; i <= 32; i++) {
       fac[i] = i * fac[i - 1];
     }
-    console.log(fac);
 
     function choose(n, k) {
       return fac[n] / fac[k] / fac[n-k];
     }
 
     function prob(n, k, p) {
-      return Math.pow(p, k) * Math.pow((1-p), (n-k)) * choose(n,k);
+      return Math.pow(p, k) * Math.pow((1 - p), (n - k)) * choose(n, k);
     }
 
-/*
-nintervals = 20
-for idx in range(1, nintervals + 1):
-    r = idx / nintervals
-    p = [prob(32, k, r) for k in range(33)]
-    q = []
-    for k in range(33):
-        qq = 0
-        for i in range(k + 1):
-            qq += p[i] * p[k] + (p[k + 1] * p[i] if (k < 32) else 0)
-        q.append(qq) # q[k] = prob(max(j, i - 1) == k)
-    s = [k * p[k] * (1 - r) + k * r * q[k] for k in range(0, 33)]
-    #print(r, r * 32, sum(s), 100 * (sum(s) / (r * 32) - 1))
-    print(sum(s))
-*/
-    
     const xInterval = 0.05;
-    const xVals = [];
-    const y0vals = [];
-    const y1vals = [0, 1.6143301847044762, 3.2523998033082804, 4.904476338937724, 6.565659232176894, 8.232610903895985, 9.902675381685807, 11.573538693679033, 13.243052739200774, 14.909121526642545, 16.569610718420726, 18.222259643674175, 19.86457910880116, 21.493714716832503, 23.106242557266935, 24.69783271168795, 26.26263692870752, 27.792032587313802, 29.271598229774497, 30.672273509385093, 32.0];
-    const y2vals = [];
+    const xVals = [], y0vals = [], y1vals = [], y2vals = [];
     var r = 0;
     for (let idx = 0; r < 1 + xInterval/2; idx++) {
       xVals[idx] = r;
+
+      // Expected number of proposals without cheating
       y0vals[idx] = r * 32;
+
+      // Expected number of proposals with cheating
+      y1vals[idx] = 0;
+      let p = [], q = [];
+      for (let i = 0; i < 33; i++) {
+        p[i] = prob(32, i, r);
+      }
+      for (let k = 0; k < 33; k++) {
+        q[k] = 0;
+        for (let i = 0; i <= k; i++) {
+          q[k] += p[i] * p[k] + ((k < 32) ? p[k + 1] * p[i] : 0);
+        }
+        y1vals[idx] += k * (p[k] * (1 - r) + q[k] * r);
+      }
+
+      // Percentage difference
       y2vals[idx] = 100 * (y1vals[idx] / y0vals[idx] - 1);
+
       r += xInterval;
     }
     y2vals[0] = 0;
     y2vals[y2vals.length - 1] = 0;
-    
+
     const dashPattern = [[0], [6, 6]];
     const xValueFormat = ".2f";
     const margin = {top: 30, right: 20, bottom: 80, left: 120};
@@ -892,8 +890,8 @@ for idx in range(1, nintervals + 1):
       font: opts.font,
 
       data: {
-        y1: y0vals,
-        y2: y1vals,
+        expected_good: y0vals,
+        expected_cheat: y1vals,
       },
       x: xVals,
       xValueFormat: xValueFormat,
@@ -936,7 +934,7 @@ for idx in range(1, nintervals + 1):
       font: opts.font,
 
       data: {
-        y1: y2vals,
+        percentage: y2vals,
       },
       x: xVals,
       xValueFormat: xValueFormat,
