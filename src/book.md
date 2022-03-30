@@ -1856,24 +1856,28 @@ TODO: Introductory stuff
 
 #### RANDAO biasability
 
-If a validator happens to be assigned to propose a block in the last slot of an epoch then it gains a little control over the RANDAO. This is because it can choose to reveal
+The RANDAO value for an epoch is set at the end of the previous epoch, and duty assignments for the entire epoch (proposals and committee memberships) depend on that value. (Actually, due to [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead), on the RANDAO value at the end of the last-but-one epoch, but we'll overlook that in what follows.)
 
-The proposers for an epoch are determined based on the value of the RANDAO at the end of the previous epoch. To sucessfully manipulate the RANDAO the attacker must be the block proposer in the last slot of an epoch, otherwise a validator not controlled by the attacker will make the last proposal and completely re-randomise the RANDAO.
+Thus, when a validator happens to be assigned to propose a block in the last slot of an epoch, it gains a small amount of control over the assignments for the next epoch. This is because it can choose to reveal its block, which mixes in its RANDAO reveal, or it can choose (at a cost) to withhold its block and keep the existing RANDAO value. In this way, a validator is able to exert a little influence over the proposer and committee assignments in the next epoch.
 
+To make this more concrete I shall try to quantify what this means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently. We will also assume that the RANDAO output is uniformly random, of course.
 
+In the first example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. In the second, an attacker will try to gain control of the RANDAO by indefinitely giving itself proposals in the last slots of an epoch.
+
+These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
 
 ##### Block proposals boost
 
 My expected number of proposals per epoch without trying to bias the RANDAO is simple to compute, where $r$ is the proportion of the total stake that I control.
 
 $$
-E = \sum_{k=0}^{32} k p_k = 32 r
+E = \sum_{k=1}^{32} k p_k = 32 r
 $$
 
-If I try to bias the RABDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals looks like this.
+If I try to bias the RANDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals looks like this.
 
 $$
-E' = \sum_{k=0}^{32} k ((1 - r) p_k + r q_k)
+E' = \sum_{k=1}^{32} k ((1 - r) p_k + r q_k)
 $$
 
 Unpacking this, the first term in the addition is the probability, $r - 1$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) with the usual probability $p_k$ of having $k$ proposals in an epoch. The second term is the probability, $r$, that I did have the last slot in the previous epoch along with the probability $q_k$ that I gained either $k$ validators by proposing my block or $k + 1$ validators by withholding that block &ndash; the plus one is to make up for the block I dropped at the end of the previous epoch in order to gain this outcome.
@@ -1885,7 +1889,13 @@ q_{32} &= \sum_{i=0}^{32} (p_i p_k) \\
 \end{aligned}
 $$
 
-Here is some Python code can be used to calculate $E'$.
+HERE: Iterate
+
+$$
+E'_{n+1} = \sum_{k=1}^{32} k ((1 - \frac{E'_n}{32}) p_k + \frac{E'_n}{32} q_k)
+$$
+
+The following Python code calculates $E'_n$ to convergence.
 
 ```python
 def fac(n):
@@ -1899,17 +1909,27 @@ def prob(n, k, p):
 
 nintervals = 20
 for idx in range(1, nintervals + 1):
-    r = idx / nintervals
-    p = [prob(32, k, r) for k in range(33)]
+    r = r0 = idx / nintervals
+    p = [prob(32, k, r0) for k in range(33)]
 
-    # Calculate q[k] = prob(max(j, i - 1) == k)
+    # q[k] = prob(max(j, i - 1) == k)
     q = []
     for k in range(33):
         qq = [p[i] * p[k] + (p[k + 1] * p[i] if (k < 32) else 0) for i in range(k + 1)]
         q.append(sum(qq))
-    s = [k * (p[k] * (1 - r) + q[k] * r) for k in range(33)]
-    print(r, r * 32, sum(s), 100 * (sum(s) / (r * 32) - 1))
+
+    # Iterate to convergence
+    e = 0
+    while (e == 0 or abs(e - e_old) > 0.000001):
+        e_old = e
+        e = sum([k * (p[k] * (1 - r) + q[k] * r) for k in range(33)])
+        r = e / 32
+
+    print(r0, r0 * 32, e, 100 * (e / (r0 * 32) - 1))
 ```
+
+
+
 
 The output of this can be plotted as follows.
 
@@ -1929,7 +1949,15 @@ The percentage increase in the expected number of proposals per epoch that can b
 
 </div>
 
-Note that in the above we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher. This is left as an exercise for the interested researcher.
+###### Loose ends
+
+In the above we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher.
+
+HERE: iteration, and combination with the below technique to gain last slots.
+
+Both of these will increase the expected number.
+
+This is left as an exercise for the interested researcher.
 
 ##### RANDAO takeover
 
@@ -6008,9 +6036,9 @@ Each slot, exactly one of the active validators is randomly chosen to be the pro
 
 The chosen block proposer does not need to be a member of one of the beacon committees for that slot: it is chosen from the entire set of active validators for that epoch.
 
-The randao [is updated](/part3/transition/block#randao) with every block that is processed. To ensure that we are able to choose a different proposer at every slot, even if a block has not been received, the slot number is mixed into the seed using a hash.
+The RANDAO seed returned by [`get_seed()`](#def_get_seed) is updated once per epoch. The slot number is mixed into the seed using a hash to allow us to choose a different proposer at each slot. This also protects us in the case that there is an entire epoch of empty blocks. If that were to happen the RANDAO would not be updated, but we would still be able to select a different set of proposers for the next epoch via this slot number mix-in process.
 
-There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch: if every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
+There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch. If every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
 
 |||
 |-|-|
