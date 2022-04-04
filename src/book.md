@@ -583,7 +583,10 @@ Under the ideal conditions we are assuming, the beacon chain is designed to issu
 With $365.25 \times 225 = 82181.25$ epochs per year, and [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) $= 64$,
 
 $$
-\text{Max issuance per year} = 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \text{ETH}
+\begin{aligned}
+\text{Max issuance per year} &= 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \text{ETH} \\
+                             &= 940.87 \sqrt{N} \\
+\end{aligned}
 $$
 
 With 300,000 validators this equates to 515,333 ETH per year, plus change. For comparison, the Eth1 block and uncle rewards currently amount to almost five million ETH per year.
