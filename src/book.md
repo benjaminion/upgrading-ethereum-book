@@ -610,7 +610,10 @@ Thus, a well-performing validator with a 32&nbsp;ETH effective balance can expec
 Similarly to the issuance calculation, we can calculate the expected annual percentage reward for a validator due to participating in the beacon chain protocol:
 
 $$
-\text{APR} = 100 \times 82181.25 \times \frac{64}{\sqrt{32 \times 10^9 \times N}}
+\begin{aligned}
+\text{APR} &= 100 \times 82181.25 \times \frac{64}{\sqrt{32 \times 10^9 \times N}} \% \\
+           &= \frac{2940.21}{\sqrt{N}} \% \\
+\end{aligned}
 $$
 
 For example, with 300,000 validators participating, this amounts to an expected return of 5.37% on a validator's effective balance.
