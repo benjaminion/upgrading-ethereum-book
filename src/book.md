@@ -295,6 +295,8 @@ By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of d
 
 Vlad Zamfir's memoirs on the development of the Casper Protocol are not only a great read, but a good introduction to the challenges of designing a proof of stake protocol. They discuss the background to many of the design decisions that led, eventually, to the protocol we see today. [Part 1](https://medium.com/@Vlad_Zamfir/the-history-of-casper-part-1-59233819c9a9), [Part 2](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-2-8e09b9d3b780), [Part 3](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-3-70fefb1182fc), [Part 4](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-4-3855638b5f0e), [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58).
 
+Much of the material in the following sections is also covered in the more recent report by Umberto Natale of Chorus One, [Analysing Ethereum Cryptoeconomics: the validator's perspective](https://docs.google.com/document/d/1r640UQOm2z-Q9nsJzqBq3BVgCtTL1_Yc7WnPp4jEBgk/edit).
+
 ### Staking <!-- /part2/incentives/staking -->
 
 <div class="summary">
@@ -1385,7 +1387,8 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 #### See also
 
-  - [What Happens If Beacon Chain Consensus Fails?](https://www.symphonious.net/2021/09/23/what-happens-if-beacon-chain-consensus-fails/), a blog post by Adrian Sutton.
+  - [Run the majority client at your own peril!](https://dankradfeist.de/ethereum/2022/03/24/run-the-majority-client-at-your-own-peril.html) by Dankrad Feist.
+  - [What Happens If Beacon Chain Consensus Fails?](https://www.symphonious.net/2021/09/23/what-happens-if-beacon-chain-consensus-fails/) by Adrian Sutton.
 
 ## The Building Blocks <!-- /part2/building_blocks -->
 
