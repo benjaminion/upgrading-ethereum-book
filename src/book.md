@@ -1669,7 +1669,7 @@ This diagram illustrates the full flow from signing, through aggregating, to ver
 <div class="image" style="width:80%">
 
 ![Diagram showing the end-to-end aggregate signature workflow](md/images/diagrams/bls_aggregation.svg)
-The end-to-end aggregate signature workflow.
+The end-to-end aggregate signature workflow. Verifying the single aggregate signature is much faster than verifying the original signatures separately.
 
 </div>
 
@@ -5810,9 +5810,9 @@ Each slot, exactly one of the active validators is randomly chosen to be the pro
 
 The chosen block proposer does not need to be a member of one of the beacon committees for that slot: it is chosen from the entire set of active validators for that epoch.
 
-The randao [is updated](/part3/transition/block#randao) with every block that is processed. To ensure that we are able to choose a different proposer at every slot, even if a block has not been received, the slot number is mixed into the seed using a hash.
+The RANDAO seed returned by [`get_seed()`](#def_get_seed) is updated once per epoch. The slot number is mixed into the seed using a hash to allow us to choose a different proposer at each slot. This also protects us in the case that there is an entire epoch of empty blocks. If that were to happen the RANDAO would not be updated, but we would still be able to select a different set of proposers for the next epoch via this slot number mix-in process.
 
-There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch: if every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
+There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch. If every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
 
 |||
 |-|-|
