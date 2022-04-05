@@ -1862,13 +1862,15 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 <div class="summary">
 
- - 
+ -
 
 </div>
 
 #### Introduction
 
-An element of randomness is an important part of permissionless blockchain protocols, both for security and for fairness. If the protocol were fully predictable attackers would know ahead of time which validators would be active in different roles, which gives them a significant foothold in attacking the protocol. For example, by selectively mounting denial of service attacks against future proposers, or by bribing members of a particular committee, or by registering especially advantagous validator numbers for themselves to allow them to take over a future committee, or to censor transactions.
+An element of randomness is an important part of permissionless blockchain protocols, both for security and for fairness. If the protocol were fully predictable attackers could know ahead of time which validators will be active in different roles, which gives them a significant foothold in attacking the protocol. For example, by selectively mounting denial of service attacks against future proposers, or by bribing members of a particular committee, or by registering especially advantagous validator numbers for themselves to allow them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
+
+[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://twitter.com/paulhauner/status/1509677010448121856).
 
 To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al,[^fn-unpredictability-paper]
 
@@ -1876,9 +1878,9 @@ To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al,[
 
 [^fn-unpredictability-paper]: [Formal Barriers to Longest-Chain Proof-of-Stake Protocols](https://arxiv.org/abs/1809.06528), Jonah Brown-Cohen, Arvind Narayanan, Christos-Alexandros Psomas, and S. Matthew Weinberg (2018). Quotation from section 3.1.
 
-Unpredictability is an excellent first line of defence against many attacks.
+Unpredictability, arising from randomness, is an excellent first line of defence against many attacks.
 
-Unpredictability in Proof of Work comes from the process used to mine a blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethreum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average, each guess being a unit of work. This is similar odds to rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform (nobody is better at guessing, or rolling dice, than anyone else) this provides fairness &endash; every Giga hash per second is equivalent to every other &ndash; although there are other sources of unfairness in Proof of Work. And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above, as well as helping with censorship resistance.
+Unpredictability in Proof of Work comes from the process used to mine a blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethreum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar odds to rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
 
 Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is required in order to bring unpredictability to the selection block proposers, and the membership of the committees that attest to blocks.
 
@@ -1888,7 +1890,7 @@ In this section we will look at the way that randomness is introduced into the b
 
 #### The RANDAO
 
-The beacon chain design has always used a RANDAO[^fn-randao-naming]  mechanism. This is simply an accumulator that incrementally gathers randomness from contributors. So, with each block, the proposer mixes in their random contribution to the existing RANDAO value.
+The beacon chain design has always used a RANDAO[^fn-randao-naming] mechanism to provide its in-protocol randomness. A RANDAO is simply an accumulator that incrementally gathers randomness from contributors. So, with each block, the proposer mixes in a random contribution to the existing RANDAO value.
 
 [^fn-randao-naming]: I'm not certain where the name RANDAO comes from, but it's modelled as a DAO (decentralised autonomous organisation) that deals in randomness. The Ethereum [randao project](https://github.com/randao/randao) from 2016 may have been the origin of the name.
 
@@ -1902,34 +1904,45 @@ We can imagine the RANDAO as a deck of cards that accumulates randomness over ti
 
 </div>
 
-Current and past RANDAO values are stored in the [beacon state](/part3/containers/state#beaconstate) in the `randao_mixes` field. The current value is updated by [`process_randao`](/part3/transition/block#def_process_randao) with every block that the beacon chain processes. If there is no block in a slot then the RANDAO is not updated. In addition the RANDAO's current value, [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) (minus one) past values of the RANDAO accumulator at the ends of epochs are also stored in the state. These can be used to recalculate past committee assignments, which allows historical attestations to be slashed even months later.
-
-There is a nice subtlety in the way that [`process_randao`](/part3/transition/block#def_process_randao) makes the update. It uses the (commutative) `xor` function to mix in the proposer's contribution [rather than](https://github.com/ethereum/consensus-specs/pull/498/files#diff-db220562b1f251d9a8521a5e6622e01c9c655326712da23d207d7b17ba3c4d26R1446) the perhaps more obvious approach of using a hash function to do the mix-in:
-
-```none
-    mix = xor(get_randao_mix(state, epoch), hash(body.randao_reveal))
-```
-
-<a id="note-on-xor"></a>
-
-Justin Drake explains this in his [notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr):
-> Using `xor` in `process_randao` is (slightly) more secure than using `hash`. To illustrate why, imagine an attacker can grind randomness in the current epoch such that two of his validators are the last proposers, in a different order, in two resulting samplings of the next epochs. The commutativity of `xor` makes those two samplings equivalent, hence reducing the attacker’s grinding opportunity for the next epoch versus `hash` (which is not commutative). The strict security improvement may simplify the derivation of RANDAO security formal lower bounds.
-
-We will see [later](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. If somehow an attacker can choose to manoeuvre two validators $V_0$ and $V_1$ into the last two slots of an epoch in either order, then using `hash` means that the ordering $V_0, V_1$ gives a different outcome from the ordering $V_1, V_0$, whereas they both have the same outcome when using `xor`. This fractionally reduces an attackers choices when it comes to influencing the RANDAO.
+Current and past RANDAO values are stored in the [beacon state](/part3/containers/state#beaconstate) in the `randao_mixes` field. The current value is updated by [`process_randao`](/part3/transition/block#def_process_randao) with every block that the beacon chain processes. If there is no block in a slot then the RANDAO is not updated. In addition, the RANDAO's current value, [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) (minus one) past values of the RANDAO at the ends of epochs are also stored in the state. These can be used to recalculate past committee assignments, which allows historical attestations to be slashed even months later.
 
 #### Source of randomness
 
 With every [block](/part3/containers/blocks#beaconblockbody) that's proposed the proposer includes a "RANDAO reveal". This is its contribution to be mixed in to the RANDAO.
 
-Although random, this value must not be arbitrary. The proposer must not be able to pick and choose its contribution, otherwise it will just choose a value that advantages itself in some way. There must be a single valid contribution that the proposer can make in any given block, and it must be verifiable by all nodes.
+This contribution should satisfy two properties: it should be unpredictable by any other node, yet it should be cerifiable by all nodes.
+
+"Verifiable" means that, although random, the RANDAO contribution value must not be arbitrary. The proposer must not be able to pick and choose its contribution, otherwise it will just choose a value that advantages itself in some way. There must be a single valid contribution that the proposer can make in any given block, and all the other nodes must be able to check that contribution.
+
+##### The old: hash onions
 
 [Early ideas](https://github.com/ethereum/consensus-specs/pull/33/files#diff-d74f72ec8cd401e342e5e5f6939647b860dd98518a6618d3a7f5256edbaf4b69R480) for verifiable randomness had each validator pre-committing to a "hash onion". Before joining the beacon chain a validator would generate a random number. When registering its initial deposit the validator would include the result of repeatedly cryptographically hashing that number a large number (thousands) of times as a commitment. Then when proposing a block the `randao_reveal` would be the pre-image of that commitment: one layer would be "peeled off the onion". Since a cryptographic hash is not invertible, only the proposer could calculate this value, but it's easily verifiable by everyone. Then the reveal gets stored as the new commitment and so on. This scheme is viable, but has complexities and edge cases: for example if a proposer's block gets orphaned everybody (except the beacon chain) can now see the reveal &ndash; reconciling that is clunky.
 
-When we moved to using [BLS signatures](/part2/building_blocks/signatures) in the protocol a natural alternative to the hash onion became available. With the BLS scheme, every validator already has a closely guarded random value: the private key that it signs blocks and attestations with. As far as anyone knows, the signatures produced are unformly random (otherwise that might indicate a vulnerability in the signing scheme). Therefore, BLS signatures generated by block proposers are an excellent source of the randomness needed to update the RANDAO.
+##### The new: BLS signatures
 
-Thus, [we now use](https://github.com/ethereum/consensus-specs/pull/483) a BLS signature as the entropy contribution. When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is its signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498).
+When we moved to using [BLS signatures](/part2/building_blocks/signatures) in the protocol a natural alternative to the hash onion became available. With the BLS scheme every validator already has a closely guarded random value: the private key that it signs blocks and attestations with. As far as anyone knows the signatures produced are unformly random. Therefore, BLS signatures generated by block proposers are an excellent source of the randomness we need to update the RANDAO.
 
-The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#randao-reveal) by the proposer as follows:
+Using signatures rather than the hash onion both simplifies the protocol and provides for multi-party (distributed) validators. The aggregation properties of BLS signatures allow signatures from multiple validators to be combined as a threshhold signature so that they can effectively act as a single validator. This valuable property would be very difficult with the hash onion approach.
+
+[TODO: add link to DVT when done]::
+
+For these reasons [we now use](https://github.com/ethereum/consensus-specs/pull/483) a BLS signature as the entropy contribution to the RANDAO.
+
+##### Where does the entropy come from?
+
+So we can see that the predominant source of randomness in the Ethereum 2 protocol is the private keys of the validators. This amounts to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
+
+Some other sources of randomness that influence the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399), such as,
+
+  - Missed or orphaned block proposals. Network conditions, node faults, or maintenance downtime can all lead to missed block proposals with a degree of randomness. Missed blocks directly influence the the RANDAO value.
+  - The total number of active validators in an epoch affects the selection of proposers which in turn affects participation in the RANDAO. Thus, deposits, exits, and slashings also contribute entropy.
+  - A validator's [effective balance](/part2/incentives/balances) affects its likelihood of being selected to propose a block. Thus, changes in effective balances (perhaps due to one or more validators being offline for a period of time) feed into the entropy as well.
+
+#### Updating the RANDAO
+
+When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using it's normal signing private key.
+
+This `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#randao-reveal) by the proposer as follows.
 
 ```python
 def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) -> BLSSignature:
@@ -1938,7 +1951,7 @@ def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) ->
     return bls.Sign(privkey, signing_root)
 ```
 
-And mixed into the RANDAO [like this](/part3/transition/block#def_process_randao),
+When a block is processed, the `randao_reveal` is mixed into the RANDAO [like this](/part3/transition/block#def_process_randao):
 
 ```python
 def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
@@ -1952,21 +1965,31 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     state.randao_mixes[epoch % EPOCHS_PER_HISTORICAL_VECTOR] = mix
 ```
 
-Basically two things are going on here.
+Two things are going on here.
 
-First the signature is verified using the proposer's public key before being mixed in. This means that the proposer has almost no choice about what it contributes to the RANDAO: it either contributes a single verifiable value &ndash; the correct signature &ndash; or it withholds its block and contributes nothing.
+First the signature is verified using the proposer's public key before being mixed in. This means that the proposer has almost no choice about what it contributes to the RANDAO: it either contributes a single verifiable value &ndash; the correct signature over the epoch number &ndash; or it withholds its block and contributes nothing.
 
-Second, the hash of the signature is mixed in to the beacon state's RANDAO using `xor`. As a corollary to the note [above](#note-on-xor) on `xor`, using a signature over the epoch number rather than the slot number ever so slightly [reduces](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457449830) an attacker's advantage when seeking to influence the RANDAO: whichever slot of an epoch the attacker manoeuvres its validator into, its contribution to the RANDAO will be the same.
+Second, the hash of the signature is mixed in to the beacon state's RANDAO using `xor`. The combination of using the epoch number as the signed quantity and using `xor` to mix it in leads to a subtle, albeit tiny, [improvement](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457449830) in attack-resistance of the RANDAO.
 
-Using signatures rather than the hash onion both simplifies the protocol and provides for multi-party (distributed) validators. That is, the aggregation properties of BLS signatures allow signatures from multiple validators to be combined linearly so they can effectively act as a single validator. This would be very difficult with the hash onion approach.
+Justin Drake explains in his [notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr):
 
-[TODO: add link to DVT when done]::
+> Using `xor` in `process_randao` is (slightly) more secure than using `hash`. To illustrate why, imagine an attacker can grind randomness in the current epoch such that two of his validators are the last proposers, in a different order, in two resulting samplings of the next epochs. The commutativity of `xor` makes those two samplings equivalent, hence reducing the attacker’s grinding opportunity for the next epoch versus `hash` (which is not commutative). The strict security improvement may simplify the derivation of RANDAO security formal lower bounds.
 
-So, the ultimate source of randomness in the Ethereum 2 protocol is the private keys of the validators. This amount to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
+We will see [shortly](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. Justin's [point](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457546253) is that, under the current scheme, the attacker having $V_0, V_1$ in the two last slots of an epoch is equivalent to it having $V_1, V_0$ with respect to the `randao_reveal`s. This fractionally reduces an attackers choices when it comes to influencing the RANDAO. If we used `hash` rather than `xor`, or if we signed over the slot number rather than the epoch number, these orderings would result in different outcomes from each other, giving the attacker more choice.
 
 #### Lookahead
 
-TODO: balance between validators being ready (subnets etc.), and not giving too much notice. Also deposits. See https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation
+We started this section with a discussion of unpredictability. Theoretically it's ideal if every block proposer and committee is unpredictable until the moment that they become active. However, in practice, proposers and committee members need a little advanced notice of their duties to allow them to join the right p2p network subnets and whatever other preparation they need to do.
+
+The RANDAO seed at the end of epoch $N$ is used to compute validator duties for the whole of epoch $N+2$. This is controlled by [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) via the [`get_seed()`](/part3/helper/accessors#def_get_seed) function. Thus validators have at least one full epoch to prepare themselves for any duties, but no more than two.
+
+TODO: diagram?
+
+HERE: Using validator activations and exits to influence the randao.
+
+Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow.
+
+To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount, which allows new randomness to come in via block proposals from honest validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
 #### RANDAO biasability
 
@@ -2209,17 +2232,29 @@ For example, a validator may forgo proposing a block in order to acquire more bl
 
 Or I might be the last proposer before the membership of the next sync committee is decided. Being in a sync committee is currently about four times more valuable than proposing a block, so I may wish to skip the block proposal if that will set up the RANDAO so as to get one of my validators into the committee. This is pre-Merge, of course. Post-merge, blocks will be more valuable due to priority fees.
 
-TODO: VDF
+#### Verifiable delay functions
+
+Although the RANDAO is biasable it is not so biasable as to break the protocol: our randomness is "good enough" for in-protocol purposes.
+
+Nonetheless, it is interesting to explore how we might improve the randomness, especially as with The Merge the RANDAO contents will be available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus layer.
+
+The suggested fix to biasability is a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best any other device could do is to obtain the result in, say, 5 seconds.
+
+The idea is that RANDAO updates would come from the output of the VDF. A proposer would have to decide whether to commit its `randao_reveal` before it is possible for it to compute the actual contribution, the future output of the VDF. This eliminates any purposeful biasing of the RANDAO.
+
+Only one VDF needs to be active at any time on the network since it can publish its result for quick verification by all the other nodes.
+
+Although a [lot of work](https://www.vdfalliance.org/) has been done on designing and specifying VDFs there is no active plan to implement one in Ethereum at this time.
 
 #### See also
 
-https://github.com/runtimeverification/rdao-smc
+Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation).
 
-https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf
+On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketch I did in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
 
-https://www.vdfalliance.org/
+A good place to start exploring verifiable delay functions is the [VDF Alliance site](https://www.vdfalliance.org/).
 
-https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation
+[TODO: Link to VDF section when written]::
 
 ### Committees <!-- /part2/building_blocks/committees* -->
 
