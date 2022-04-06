@@ -1862,7 +1862,11 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 <div class="summary">
 
- -
+ - Assigning beacon chain duties unpredictably (randomly) is an important defence against some attacks.
+ - The beacon chain maintains a RANDAO to accumulate randomness.
+ - Duties such as proposing blocks, committee assignments, and sync committee participation are assigned based on the RANDAO, with a limited lookahead period.
+ - Block proposers verifiably contribute randomness to the RANDAO via BLS signatures over the epoch number.
+ - Validators are able to bias the RANDAO to a small extent but this is not significant problem in practice.
 
 </div>
 
@@ -1932,11 +1936,11 @@ For these reasons [we now use](https://github.com/ethereum/consensus-specs/pull/
 
 So we can see that the predominant source of randomness in the Ethereum 2 protocol is the private keys of the validators. This amounts to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
 
-Some other sources of randomness that influence the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399), such as,
+Some other sources of randomness affecting the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399).
 
-  - Missed or orphaned block proposals. Network conditions, node faults, or maintenance downtime can all lead to missed block proposals with a degree of randomness. Missed blocks directly influence the the RANDAO value.
-  - The total number of active validators in an epoch affects the selection of proposers which in turn affects participation in the RANDAO. Thus, deposits, exits, and slashings also contribute entropy.
-  - A validator's [effective balance](/part2/incentives/balances) affects its likelihood of being selected to propose a block. Thus, changes in effective balances (perhaps due to one or more validators being offline for a period of time) feed into the entropy as well.
+  - Missed or orphaned block proposals directly affect the RANDAO's output. Network conditions, node faults, or maintenance downtime can all lead to missed block proposals that have a degree of randomness.
+  - The total number of active validators in an epoch affects the selection of proposers which in turn affects participation in the RANDAO. Thus, deposits and exits (both voluntary and forced) contribute entropy.
+  - A validator's [effective balance](/part2/incentives/balances) affects its likelihood of being selected to propose a block. Thus, changes in effective balances (perhaps due to one or more validators being offline for a period of time) add entropy.
 
 #### Updating the RANDAO
 
@@ -1951,7 +1955,7 @@ def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) ->
     return bls.Sign(privkey, signing_root)
 ```
 
-When a block is processed, the `randao_reveal` is mixed into the RANDAO [like this](/part3/transition/block#def_process_randao):
+And when a block is processed, the `randao_reveal` is mixed into the RANDAO [like this](/part3/transition/block#def_process_randao):
 
 ```python
 def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
@@ -1965,11 +1969,19 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     state.randao_mixes[epoch % EPOCHS_PER_HISTORICAL_VECTOR] = mix
 ```
 
-Two things are going on here.
+Two things are going on when the `randao_reveal` is processed.
 
 First the signature is verified using the proposer's public key before being mixed in. This means that the proposer has almost no choice about what it contributes to the RANDAO: it either contributes a single verifiable value &ndash; the correct signature over the epoch number &ndash; or it withholds its block and contributes nothing.
 
 Second, the hash of the signature is mixed in to the beacon state's RANDAO using `xor`. The combination of using the epoch number as the signed quantity and using `xor` to mix it in leads to a subtle, albeit tiny, [improvement](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457449830) in attack-resistance of the RANDAO.
+
+<a id="img_randomness_reveal"></a>
+<div class="image" style="width:80%">
+
+![Diagram illustrating updating the RANDAO](md/images/diagrams/randomness_reveal.svg)
+What's really happening when the RANDAO is shuffled. The signature over the epoch number is the RANDAO reveal that the proposer includes in its block. This is hashed then mixed in to the existing RANDAO with an `xor` operation.
+
+</div>
 
 Justin Drake explains in his [notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr):
 
@@ -1979,17 +1991,29 @@ We will see [shortly](#randao-biasability) that it can be advantageous to an att
 
 #### Lookahead
 
-We started this section with a discussion of unpredictability. Theoretically it's ideal if every block proposer and committee is unpredictable until the moment that they become active. However, in practice, proposers and committee members need a little advanced notice of their duties to allow them to join the right p2p network subnets and whatever other preparation they need to do.
+We started this section with a discussion of unpredictability. Ideally, it should not be possible to predict the duties for any block proposer or committee member until the moment they become active. However, in practice, proposers and committee members need a little advanced notice of their duties to allow them to join the right p2p network subnets and whatever other preparation they need to do.
 
 The RANDAO seed at the end of epoch $N$ is used to compute validator duties for the whole of epoch $N+2$. This is controlled by [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) via the [`get_seed()`](/part3/helper/accessors#def_get_seed) function. Thus validators have at least one full epoch to prepare themselves for any duties, but no more than two.
 
-TODO: diagram?
+Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to selectively exit validators or make deposits[^fn-instant-activations] in order to ensure that they gain control of a committee, or a large number of block proposal slots.
 
-HERE: Using validator activations and exits to influence the randao.
+[^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](https://eth2book.info/altair/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
 
-Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow.
+It's certainly not an easy attack. Nonetheless it's easy to defend against, so we might as well.
 
-To prevent this, we assume a maximum feasible lookahead that an attacker might achieve (`MAX_SEED_LOOKAHEAD`) and delay all activations and exits by this amount, which allows new randomness to come in via block proposals from honest validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
+To prevent this, we assume a maximum feasible lookahead that an attacker might achieve, [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) and delay all activations and exits by this amount, which allows time for new randomness to come in via block proposals from honest validators, making irrelevant any manipulation by the entering or exiting validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
+
+<a id="img_randomness_lookahead"></a>
+<div class="image" style="width:90%">
+
+![Diagram showing min and max lookahead](md/images/diagrams/randomness_lookahead.svg)
+The RANDAO value at the end of epoch $N$ is used to set duties for epoch $N+2$, which is controlled by `MIN_SEED_LOOKAHEAD`. A validator exited in epoch $N+1$ remains active until at least the end of epoch $N+5$ (depending on the exit queue). This is controlled by `MAX_SEED_LOOKAHEAD`.
+
+</div>
+
+Both the minimum and maximum lookaheads as currently implemented smell a little of engineering hackery. In a perfect design only the block proposer would know ahead of time that it has been chosen to propose. Once its block is revealed then the rest of the network would be able to verify that, yes, this was indeed the chosen proposer. This feature is called [Single Secret Leader Election](https://eprint.iacr.org/2020/025). We do not yet have it in the Ethereum protocol, and I shall write about it elsewhere. Meanwhile, some [good progress](https://ethresear.ch/t/simplified-ssle/12315?u=benjaminion) is being made towards making it practical.
+
+[TODO - link to SSLE when done]::
 
 #### RANDAO biasability
 
@@ -2013,7 +2037,11 @@ The last proposer in an epoch has a choice. It can propose its block as usual, u
 
 </div>
 
-To make this more concrete I shall try to quantify what this means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently. We will also assume that the RANDAO output is uniformly random, of course.
+#### Biasability analyses
+
+This section is fully optional.
+
+To make things more concrete I shall try to quantify what biasability means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
 
 In the first example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. In the second, an attacker will try to gain control of the RANDAO by indefinitely giving itself proposals in the last slots of an epoch.
 
@@ -2021,28 +2049,37 @@ These examples are intended only as illustrations. They are not academic studies
 
 ##### Block proposals boost
 
-My expected number of proposals per epoch without trying to bias the RANDAO is simple to compute, where $r$ is the proportion of the total stake that I control.
+My expected number of proposals per epoch when acting honestly is simple to compute.
 
 $$
 E = \sum_{k=1}^{32} k p_k = 32 r
 $$
 
-If I try to bias the RANDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals looks like this.
+Here, $r$ is the proportion of the total stake that I control, and $p_k$ is my probability of getting exactly $k$ proposals in an epoch:
 
 $$
-E' = \sum_{k=1}^{32} k ((1 - r) p_k + r q_k)
+p_k = r^k(1-r)^{32-k}{32 \choose k}
 $$
 
-Unpacking this, the first term in the addition is the probability, $r - 1$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) with the usual probability $p_k$ of having $k$ proposals in an epoch. The second term is the probability, $r$, that I did have the last slot in the previous epoch along with the probability $q_k$ that I gained either $k$ validators by proposing my block or $k + 1$ validators by withholding that block &ndash; the plus one is to make up for the block I dropped at the end of the previous epoch in order to gain this outcome.
+If I try to bias the RANDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals in the next epoch looks like this (the prime denoting the cases in which I am trying to maximise my advantage).
 
 $$
-\begin{aligned}
-q_k &= \sum_{i=0}^{k} (p_i p_k + p_i p_{k+1}) \\
-q_{32} &= \sum_{i=0}^{32} (p_i p_k) \\
-\end{aligned}
+E'_1 = \sum_{k=1}^{32} k ((1 - r) p_k + r q_k)
 $$
 
-HERE: Iterate
+Unpacking this, the first term in the addition is the probability, $1 - r$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) combined with the usual probability $p_k$ of having $k$ proposals in an epoch.
+
+The second term is the probability, $r$, that I _did_ have the last slot in the previous epoch combined with the probability $q_k$ that I can gain either $k$ proposals by proposing my block, or $k + 1$ proposals by withholding my block - the plus one is needed to make up for the block I withheld at the end of the previous epoch in order to gain this outcome.
+
+$$
+q_k =
+\begin{dcases}
+\sum_{i=0}^{k} p_i (p_k + p_{k+1}) & 0 \leq k < 32 \\
+\sum_{i=0}^{32} p_i p_k            & k = 32
+\end{dcases}
+$$
+
+To find out the maximum long-term advantage I can gain, we can iterate the above on an epoch by epoch basis. The probability in the cheating case that I had the last slot of epoch $n$ is $E'_n / 32$.
 
 $$
 E'_{n+1} = \sum_{k=1}^{32} k ((1 - \frac{E'_n}{32}) p_k + \frac{E'_n}{32} q_k)
@@ -2081,78 +2118,82 @@ for idx in range(1, nintervals + 1):
     print(r0, r0 * 32, e, 100 * (e / (r0 * 32) - 1))
 ```
 
-
-
-
 The output of this can be plotted as follows.
 
 <a id="img_randao_proposals"></a>
 <div class="image" style="width:100%">
 
 ![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
-The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
+The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the long-term expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
 
 </div>
+
+The maximum percentage gain in block proposals that I can acquire is shown in the following graph.
 
 <a id="img_randao_proposals_percent"></a>
 <div class="image" style="width:100%">
 
 ![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
-The percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.9% of proposals by using its influence on the last slot of any epoch, assuming that the remaining stakers are uncoordinated.
+The long-term percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.99% of proposals (8.24 per epoch rather than exactly 8), assuming that the remaining stakers are uncoordinated.
 
 </div>
 
-###### Loose ends
-
-In the above we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher.
-
-HERE: iteration, and combination with the below technique to gain last slots.
-
-Both of these will increase the expected number.
-
-This is left as an exercise for the interested researcher.
+In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher, especially if combined with the next attack.
 
 ##### RANDAO takeover
 
-Let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence by manipulating the RANDAO?
+As above, let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence over the protocol by manipulating the RANDAO?
 
 ##### Last proposer
 
-We'll call $p_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We could account for this by modifying $r$: if a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot of an epoch is $r' = r(1 + \alpha + \alpha^2 + \dots + \alpha^{31})$, since $\alpha^k$ is the probability that the last $k$ slots of an epoch are empty. But we shall ignore that nicety in what follows.
+```python
+def prob_tail_eq(r, k, n):
+    return (1 - r) * r**k if k < n else r**k
+    
+def expect(r, n):
+    return sum([i * prob_tail_eq(r, i, n) for i in range(n + 1)])
 
-Choosing an arbitrary epoch and labelling it $0$, we have $p_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
+nintervals = 20
+for i in range(1, nintervals + 1):
+    r = i / nintervals
+    print(r, expect(r, 32), [1 - (1 - r**k)**(2**k) for k in range(1, 33)])
+```
+
+We'll call $p^{(1)}_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We could account for this by modifying $r$: if a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot of an epoch is $r' = r(1 + \alpha + \alpha^2 + \dots + \alpha^{31})$, since $\alpha^k$ is the probability that the last $k$ slots of an epoch are empty. But we shall ignore that nicety in what follows.
+
+Choosing an arbitrary epoch and labelling it $0$, we have $p^{(1)}_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
 
 Once an attacker occupies the epoch's last slot it has a choice: it can publish its block or withold its block. In each case, the attacker can predict the effect on the RANDAO and can calculate from that the proposers for the next epoch. Given this capability, how likely is it that the attacker can make itself proposer of the last block in epoch $1$?
 
 $$
-p_1 = (1-p_0)r + p_0(1-(1-r)^2)
+p^{(1)}_1 = (1-p^{(1)}_0)r + p^{(1)}_0(1-(1-r)^2)
 $$
 
-The first term, $(1-p_0)r$ is the usual probability that the attacker would have been the last proposer of epoch $1$ without having been the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that one or other or both of its choices make it last proposer of epoch $1$. (That is, it is not the case that both of its choices lead to it not having the last slot of epoch $1$.)
+The first term, $(1-p^{(1)}_0)r$ is the usual probability that the attacker would have been the last proposer of epoch $1$ without having been the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that one or other or both of its choices make it last proposer of epoch $1$. (That is, it is not the case that both of its choices lead to it not having the last slot of epoch $1$.)
 
 We can simplify this to
 
 $$
-p_1 = r(1 + p_0(1-r)) = r(1 + r - r^2)
+p^{(1)}_1 = r(1 + p^{(1)}_0(1-r)) = r(1 + r - r^2)
 $$
 
 So we see that, by being able to influence the RANDAO, an attacker with some proportion $r$ of the stake can boost its probability of again being in a position to influence the RANDAO (being in the last slot) next time by a factor $1 + r - r^2$, which is greater than one.
 
 What's the best an attacker can do? With increased odds of being last proposer next epoch, it can repeat the process and further increase its odds of being last proposer in the next-but-one epoch and so on. Could an attacker use this to bootstrap itself to full control of the RANDAO?
 
-Let $p_n$ be the probability that an attacker can achieve being last proposer in $n$ epochs' time.
+Let $p^{(1)}_n$ be the probability that an attacker can achieve being last proposer in $n$ epochs' time.
 
 $$
 \begin{aligned}
-p_n &= r(1 + p_{n-1}(1-r)) \\
-    &= r(1 + r(1 + p_{n-2}(1-r))(1-r)) \\
-    &= r(1 + r(1-r) + rp_{n-2}(1-r)^2) \\
-    &= r(1 + r(1-r) + r^2(1-r)^2 + \dots + r^n(1-r)^n) \\
-    &= r \left( 1 + \frac{r(1-r)(1-(r(1-r))^n)}{1 - r(1-r)} \right) \\
+p^{(1)}_n &= r(1 + p^{(1)}_{n-1}(1-r)) \\
+      &= r(1 + r(1 + p^{(1)}_{n-2}(1-r))(1-r)) \\
+      &= r(1 + r(1-r) + rp^{(1)}_{n-2}(1-r)^2) \\
+      &= r(1 + r(1-r) + r^2(1-r)^2 + \dots + r^n(1-r)^n) \\
+      &= r \left( 1 + \frac{r(1-r)(1-(r(1-r))^n)}{1 - r(1-r)} \right) \\
 \end{aligned}
 $$
 
-where we have made use of $p_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less significantly than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
+where we have made use of $p^{(1)}_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less significantly than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
 
 <a id="img_randao_manipulation_1"></a>
 <div class="image" style="width:100%">
@@ -2170,20 +2211,20 @@ We have found that being the last proposer of an epoch allows an attacker to man
 
 How about if the attacker gains the last two proposers of an epoch? This happens normally with probability $r^2$, but affords four opportunities to influence the RANDAO: propose both blocks; propose the first but not the second; propose the second but not the first; propose neither.
 
-Calling $q_n$ the probability that the attacker has control over the last two proposers after $n$ epochs we can follow a similar approach to the above.
+Calling $p^{(2)}_n$ the probability that the attacker has control over the last two proposers after $n$ epochs we can follow a similar approach to the above.
 
 $$
 \begin{aligned}
-q_0 &= r^2 \\
-q_1 &= (1 - q_0)r^2 + q_0(1 - (1 - r^2)^4) \\
+p^{(2)}_0 &= r^2 \\
+p^{(2)}_1 &= (1 - p^{(2)}_0)r^2 + p^{(2)}_0(1 - (1 - r^2)^4) \\
 & \vdots \\
-q_n &= (1 - q_{n-1})r^2 + q_{n-1}(1 - (1 - r^2)^4) \\
+p^{(2)}_n &= (1 - p^{(2)}_{n-1})r^2 + p^{(2)}_{n-1}(1 - (1 - r^2)^4) \\
 \end{aligned}
 $$
 
-The first term in $q_n$ is just the normal probability of the attacker being proposer in the last two slots of epoch $n$ if it wasn't in epoch $n - 1$. The second term applies when the attacker was proposer in the last two slots in epoch $n - 1$ and thus has four attempts to become proposer in the last two slots of epoch $n$.[^fn-k-proposers-calc]
+The first term in $p^{(2)}_n$ is just the normal probability of the attacker being proposer in the last two slots of epoch $n$ if it wasn't in epoch $n - 1$. The second term applies when the attacker was proposer in the last two slots in epoch $n - 1$ and thus has four attempts to become proposer in the last two slots of epoch $n$.[^fn-k-proposers-calc]
 
-[^fn-k-proposers-calc]: The way I think of it is like this.
+[^fn-k-proposers-calc]: I think of it is like this:
 
     - The probability of getting the last $k$ proposers is $r^k$ in one attempt.
     - So the probability of _not_ getting the last $k$ proposers is $1 - r^k$.
@@ -2204,9 +2245,8 @@ We can extend this further an consider an attacker gaining the last $k$ slots of
 
 $$
 \begin{aligned}
-q_0 &= r^k \\
-&\vdots \\
-q_n &= (1 - q_{n-1})r^k + q_{n-1}(1 - (1 - r^k)^{2^k}) \\
+p^{(k)}_0 &= r^k \\
+p^{(k)}_n &= (1 - p^{(k)}_{n-1})r^k + p^{(k)}_{n-1}(1 - (1 - r^k)^{2^k}) \\
 \end{aligned}
 $$
 
@@ -2220,25 +2260,19 @@ The solid line, "Epoch&nbsp;0", is the usual probability that an entity will hav
 
 </div>
 
+In the light of these results, clearly it's better if no single entity controls too great a proportion of validators, and essential that no single entity controls more than around 55% of the validators. Below that threshhold any advantage an attacker can gain by biasing the RANDAO is relatively minor. In any case, an attacker with greater than 50% of the validators has other avenues of attack such as hijacking the fork-choice rule to orphan non-attack blocks, so the RANDAO biasability is not of great concern.
+
 I've simplified a lot of detail in the above. For example, I've assumed that the attacker is targeting a fixed number of final validators. There's probably an advantage to the attacker in being more flexible than that. There's likely a decent research paper to be written by someone (other than me) on all the nuances of the RANDAO.
-
-##### Observations on biasability
-
-In the light of these results, clearly it's better if no single entity controls too great a proportion of validators, and essential that no single entity controls more than around 55% of the validators. Any advantage an attacker can gain below that threshold is relatively minor.
-
-There are other scenarios in which a validator might want to use its privileged position of proposing at the end of an epoch to its advantage.
-
-For example, a validator may forgo proposing a block in order to acquire more block proposals for its owner in the next epoch. If I withold the last block of an epoch, but in return earn either two extra block proposals in the next &ndash; or one more proposal including one in the last slot so I can try again &ndash; then it might be worth doing so.
-
-Or I might be the last proposer before the membership of the next sync committee is decided. Being in a sync committee is currently about four times more valuable than proposing a block, so I may wish to skip the block proposal if that will set up the RANDAO so as to get one of my validators into the committee. This is pre-Merge, of course. Post-merge, blocks will be more valuable due to priority fees.
 
 #### Verifiable delay functions
 
-Although the RANDAO is biasable it is not so biasable as to break the protocol: our randomness is "good enough" for in-protocol purposes.
+Although the RANDAO is biasable it is not so biasable as to break the protocol: for our purposes the randomness is "good enough".
 
 Nonetheless, it is interesting to explore how we might improve the randomness, especially as with The Merge the RANDAO contents will be available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus layer.
 
-The suggested fix to biasability is a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best any other device could do is to obtain the result in, say, 5 seconds.
+The long-term fix for biasability is to use a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best any other device could do is to obtain the result in, say, 5 seconds.
+
+[TODO - link VDF section when done]::
 
 The idea is that RANDAO updates would come from the output of the VDF. A proposer would have to decide whether to commit its `randao_reveal` before it is possible for it to compute the actual contribution, the future output of the VDF. This eliminates any purposeful biasing of the RANDAO.
 
@@ -2250,11 +2284,9 @@ Although a [lot of work](https://www.vdfalliance.org/) has been done on designin
 
 Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation).
 
-On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketch I did in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
+On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketches I did in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
 
 A good place to start exploring verifiable delay functions is the [VDF Alliance site](https://www.vdfalliance.org/).
-
-[TODO: Link to VDF section when written]::
 
 ### Committees <!-- /part2/building_blocks/committees* -->
 

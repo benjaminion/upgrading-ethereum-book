@@ -600,45 +600,51 @@
 
 <!-- RANDAO manipulation probabilities - - - - - - - - - - - - - - - - - - -  -->
 
-<div class="svg" id="randao_manipulation_1"></div>
-<div class="svg" id="randao_manipulation_2"></div>
-<div class="svg" id="randao_manipulation_8"></div>
+<div class="svg" id="randao_extend"></div>
 <script>
 {
   const dashPattern = [[0], [2, 6], [6, 6]];
   const margin = {top: 30, right: 20, bottom: 80, left: 120};
-  const xValueFormat = ".2f";
+  const xValueFormat = ".0f";
 
-  async function do_randao_manipulation_1() {
-    const xInterval = 0.05;
+  async function do_randao_extend() {
+    const xInterval = 0.1;
     const xVals = [];
-    const y0vals= [];
-    const y1vals= [];
-    const ynvals = [];
-    var r = 0;
-    for (let idx = 0; r < 1 + xInterval/2; idx++) {
-      xVals[idx] = r;
-      y0vals[idx] = r;
-      y1vals[idx] = r * (1 + r * (1 - r));
-      ynvals[idx] = r / (1 - r * (1 - r));
-      r += xInterval;
+    const yvals = [];
+    for (k = 0; k < 33; k++) {
+      xVals[k] = k;
+    }
+    //var r = [0.40, 0.45, 0.48, 0.49, 0.5, 0.51, 0.52, 0.55, 0.60];
+    var r = [0.10, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+    for (let idx = 0; idx < r.length; idx++) {
+      var ys = [];
+      for (k = 1; k < 33; k++) {
+        ys[k] = 1 - Math.pow(1 - Math.pow(r[idx], k), Math.pow(2, k));
+      }
+      yvals.push(ys);
     }
 
     new roughViz.Line({
-      element: '#randao_manipulation_1',
+      element: '#randao_extend',
       width: opts.width,
       height: opts.height,
       font: opts.font,
 
       data: {
-        epoch_0: y0vals,
-        epoch_1: y1vals,
-        epoch_2: ynvals,
-      },
+        y0: yvals[0],
+        y1: yvals[1],
+        y2: yvals[2],
+        y3: yvals[3],
+        y4: yvals[4],
+        y5: yvals[5],
+        y6: yvals[6],
+        y7: yvals[7],
+        y8: yvals[8],
+       },
       x: xVals,
       xValueFormat: xValueFormat,
-      xLabel: "Fraction of stake",
-      yLabel: "Probability of being last proposer",
+      xLabel: "Length of tail",
+      yLabel: "Probability of extending tail",
       xLabelDelta: 10,
       yLabelDelta: -10,
       yDomain: [0, 1],
@@ -670,160 +676,7 @@
       interactive: opts.interactive,
     });
   }
-  do_randao_manipulation_1().then(makeLink('randao_manipulation_1'));
-
-  async function do_randao_manipulation_2() {
-
-    const qnp1 = (qn, r2) => {
-      return (1 - qn) * r2 + qn * (1 - Math.pow(1 - r2, 4));
-    }
-
-    const xInterval = 0.05;
-    const xVals = [];
-    const y0vals= [];
-    const y1vals= [];
-    const ynvals = [];
-    var r = 0;
-    for (let idx = 0; r < 1 + xInterval/2; idx++) {
-      xVals[idx] = r;
-      var r2 = r * r;
-      y0vals[idx] = r2;
-      y1vals[idx] = qnp1(y0vals[idx], r2);
-      ynvals[idx] = qnp1(y1vals[idx], r2);
-      // Iterate to convergence
-      var delta;
-      do {
-        delta = ynvals[idx];
-        ynvals[idx] = qnp1(ynvals[idx], r2);
-        delta -=  ynvals[idx];
-      } while (Math.abs(delta) > 0.0001)
-      r += xInterval;
-    }
-
-    new roughViz.Line({
-      element: '#randao_manipulation_2',
-      width: opts.width,
-      height: opts.height,
-      font: opts.font,
-
-      data: {
-        epoch_0: y0vals,
-        epoch_1: y1vals,
-        epoch_2: ynvals,
-      },
-      x: xVals,
-      xValueFormat: xValueFormat,
-      xLabel: "Fraction of stake",
-      yLabel: "Probability of two last proposers",
-      xLabelDelta: 10,
-      yLabelDelta: -10,
-      yDomain: [0, 1],
-
-      circle: false,
-      roughness: 0.3,
-      bowing: opts.bowing,
-      simplification: opts.simplification,
-
-      colors: opts.colors,
-      strokeWidth: opts.strokeWidth,
-      interpolation: ["curve"],
-      dash: dashPattern,
-
-      axisStrokeWidth: opts.axisStrokeWidth,
-      axisRoughness: opts.axisRoughness,
-      axisFontSize: opts.axisFontSize,
-      labelFontSize: opts.labelFontSize,
-
-      notes: [
-        {x: 780, y: 280, text: "Epoch 0"},
-        {x: 780, y: 170, text: "Epoch 1"},
-        {x: 570, y: 170, text: "Epoch n"},
-      ],
-      notesFontSize: 0.8 * opts.labelFontSize,
-
-      margin: margin,
-      legend: opts.legend,
-      interactive: opts.interactive,
-    });
-  }
-  do_randao_manipulation_2().then(makeLink('randao_manipulation_2'));
-
-  async function do_randao_manipulation_8() {
-
-    const qnp1 = (qn, r, pow) => {
-      var rpow = Math.pow(r, pow);
-      return (1 - qn) * rpow + qn * (1 - Math.pow(1 - rpow, Math.pow(2, pow)));
-    }
-
-    const xInterval = 0.025;
-    const xVals = [];
-    const y0vals= [];
-    const y1vals= [];
-    const ynvals = [];
-    var r = 0;
-    var nlast = 8;
-    for (let idx = 0; r < 1 + xInterval/2; idx++) {
-      xVals[idx] = r;
-      y0vals[idx] = qnp1(0, r, nlast);
-      y1vals[idx] = qnp1(y0vals[idx], r, nlast);
-      ynvals[idx] = qnp1(y1vals[idx], r, nlast);
-      // Iterate to convergence
-      var delta;
-      do {
-        delta = ynvals[idx];
-        ynvals[idx] = qnp1(ynvals[idx], r, nlast);
-        delta -=  ynvals[idx];
-      } while (Math.abs(delta) > 0.00001)
-      r += xInterval;
-    }
-
-    new roughViz.Line({
-      element: '#randao_manipulation_8',
-      width: opts.width,
-      height: opts.height,
-      font: opts.font,
-
-      data: {
-        epoch_0: y0vals,
-        epoch_1: y1vals,
-        epoch_2: ynvals,
-      },
-      x: xVals,
-      xValueFormat: xValueFormat,
-      xLabel: "Fraction of stake",
-      yLabel: "Probability of eight last proposers",
-      xLabelDelta: 10,
-      yLabelDelta: -10,
-      yDomain: [0, 1],
-
-      circle: false,
-      roughness: 0.3,
-      bowing: opts.bowing,
-      simplification: opts.simplification,
-
-      colors: opts.colors,
-      strokeWidth: opts.strokeWidth,
-      interpolation: ["curve"],
-      dash: dashPattern,
-
-      axisStrokeWidth: opts.axisStrokeWidth,
-      axisRoughness: opts.axisRoughness,
-      axisFontSize: opts.axisFontSize,
-      labelFontSize: opts.labelFontSize,
-
-      notes: [
-        {x: 900, y: 425, text: "Epoch 0"},
-        {x: 900, y: 160, text: "Epoch 1"},
-        {x: 590, y: 160, text: "Epoch n"},
-      ],
-      notesFontSize: 0.8 * opts.labelFontSize,
-
-      margin: margin,
-      legend: opts.legend,
-      interactive: opts.interactive,
-    });
-  }
-  do_randao_manipulation_8().then(makeLink('randao_manipulation_8'));
+  do_randao_extend().then(makeLink('randao_extend'));
 }
 </script>
 
