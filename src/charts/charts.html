@@ -849,7 +849,7 @@
     }
 
     const xInterval = 0.05;
-    const xVals = [], exp = [], exp_1 = [], exp_n = [], per_1 = [], per_n = [];
+    const xVals = [], exp = [], exp_1 = [], exp_n = [], per_n = [];
     const exp_n_old = [];
     var r = 0;
     for (let idx = 0; r < 1 + xInterval/2; idx++) {
@@ -886,13 +886,10 @@
       } while (diff > 0.001);
       
       // Percentage difference
-      per_1[idx] = 100 * (exp_1[idx] / exp[idx] - 1);
       per_n[idx] = 100 * (exp_n[idx] / exp[idx] - 1);
 
       r += xInterval;
     }
-    per_1[0] = 0;
-    per_1[per_1.length - 1] = 0;
     per_n[0] = 0;
     per_n[per_n.length - 1] = 0;
 
