@@ -23,8 +23,7 @@ def hyper(q, j, k):
 
 # The difference between sides j + 1 and j for a hypercube of dimension k
 def hyperdiff(q, j, k):
-    #if memo[j][k] is None:
-    if True:
+    if memo[j][k] is None:
         sum = q[j]**(k - 1)
         for i in range(1, k):
             sum += choose(i, k) * hyper(q, j, i) * q[j]**(k - 1 - i)
@@ -35,8 +34,8 @@ n = 32
 result = []
 nintervals = 10
 rs = [i / nintervals for i in range(1, nintervals)]
-for k in range(6):
-    foo = []
+for k in range(32):
+    tmp = []
     for r in rs:
         reset_memo()
         # The probability of having a tail of exactly j in 1 attempt
@@ -45,8 +44,7 @@ for k in range(6):
         p = [hyperdiff(q, j, k + 1) for j in range(n + 1)]
         # The expected length of tail in the next round
         e = sum([j * p[j] for j in range(n + 1)])
-        #print(r, k, e)
-        foo.append(e)
-    result.append(foo)
+        tmp.append(e)
+    result.append(tmp)
 print(rs)
 print(result)
