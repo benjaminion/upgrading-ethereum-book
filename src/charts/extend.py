@@ -1,6 +1,6 @@
 # Memoisation makes an astonishing difference to runtime
 JMAX = 33
-KMAX = 33
+KMAX = 129
 memo = [[None] * KMAX for i in range(JMAX)]
 
 def reset_memo():
@@ -31,21 +31,22 @@ def hyperdiff(q, j, k):
         memo[j][k] = q[j] * sum
     return memo[j][k]
 
-# Simple sanity check - instantly sums 8e24 (=6**32) products of 32 numbers :)
+# Smoke test - instantly sums 8e24 (=6**32) products of 32 numbers :)
 assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
 
 n = 32
-kmax = n - 1
+kmax = 7
 result = [[] for i in range(kmax + 1)]
 nintervals = 10
 rs = [i / nintervals for i in range(1, nintervals)]
 for r in rs:
+    print(r) # Progress check
     reset_memo()
     # q[j] = the probability of having a tail of exactly j in one attempt
     q = [prob_tail_eq(r, j, n) for j in range(n + 1)]
     for k in range(kmax + 1):
         # p[j] = the probability that with a tail of k I can achieve a tail of j in the next round
-        p = [hyperdiff(q, j, k + 1) for j in range(n + 1)]
+        p = [hyperdiff(q, j, 2**k) for j in range(n + 1)]
         # e = the expected length of tail in the next round
         e = sum([j * p[j] for j in range(n + 1)])
         result[k].append(e)
