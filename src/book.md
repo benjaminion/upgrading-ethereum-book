@@ -2195,6 +2195,7 @@ $$
 
 where we have made use of $p^{(1)}_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less significantly than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
 
+<!--
 <a id="img_randao_manipulation_1"></a>
 <div class="image" style="width:100%">
 
@@ -2202,6 +2203,7 @@ where we have made use of $p^{(1)}_0 = r$. As $n$ increases, this converges to $
 The solid line, "Epoch&nbsp;0", is the usual probability that an entity will be last proposer in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will be last proposer in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will be last proposer in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
 
 </div>
+-->
 
 The greatest effect of this is when the attacker controls half the stake. It can increase its odds of being the last proposer of future epochs from $1/2$ to $2/3$.
 
@@ -2231,6 +2233,7 @@ The first term in $p^{(2)}_n$ is just the normal probability of the attacker bei
     - This has to happen $2^k$ times in a row as we have that many attempts if we control the last $n$ slots of the previous epoch, hence $(1 - r^k)^{2^k}$.
     - The final probability that, given that we have $2^k$ attempts at least one attempt gains us the $k$ final slots in the next epoch is $(1 - (1 - r^k)^{2^k}$.
 
+<!--
 <a id="img_randao_manipulation_2"></a>
 <div class="image" style="width:100%">
 
@@ -2238,6 +2241,7 @@ The first term in $p^{(2)}_n$ is just the normal probability of the attacker bei
 The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last two proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last two proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last two proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp; 0".
 
 </div>
+-->
 
 ##### Last k proposers
 
@@ -2252,6 +2256,7 @@ $$
 
 Graphing this for $k = 8$, we see that an attacker with more than around 65% of the stake is practically certain to be able to take control of the RANDAO for an indefinite number of epochs, whereas an attacker with less than 55% of the stake has no chance.
 
+<!--
 <a id="img_randao_manipulation_8"></a>
 <div class="image" style="width:100%">
 
@@ -2259,6 +2264,7 @@ Graphing this for $k = 8$, we see that an attacker with more than around 65% of 
 The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last eight proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last eight proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last eight proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
 
 </div>
+-->
 
 In the light of these results, clearly it's better if no single entity controls too great a proportion of validators, and essential that no single entity controls more than around 55% of the validators. Below that threshhold any advantage an attacker can gain by biasing the RANDAO is relatively minor. In any case, an attacker with greater than 50% of the validators has other avenues of attack such as hijacking the fork-choice rule to orphan non-attack blocks, so the RANDAO biasability is not of great concern.
 
