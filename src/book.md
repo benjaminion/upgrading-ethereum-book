@@ -2039,50 +2039,173 @@ The last proposer in an epoch has a choice. It can propose its block as usual, u
 
 #### Biasability analyses
 
-This section is fully optional.
+This section is fully optional. I got a bit carried away with the analyses and it's fine to skip to the end.
 
 To make things more concrete I shall try to quantify what biasability means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
 
-In the first example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. In the second, an attacker will try to gain control of the RANDAO by indefinitely giving itself proposals in the last slots of an epoch.
+In the first example, I will try to gain control of the RANDAO by indefinitely giving myself proposals in the last slots of an epoch. In the second example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so.
 
-These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
+These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. It's very likely I've messed something up: probability is _hard_. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
 
-##### Block proposals boost
+##### RANDAO takeover
 
-My expected number of proposals per epoch when acting honestly is simple to compute.
+If I control a proportion $r$ of the total stake, how much can I boost my influence over the protocol by manipulating the RANDAO?
 
-$$
-E = \sum_{k=1}^{32} k p_k = 32 r
-$$
+The ability to influence the RANDAO depends on controlling a contiguous string of block proposals at the end of an epoch. We shall call this property "having a tail", and the tail will have a length $k$, from 0 to a maximum of 32, an entire epoch.
 
-Here, $r$ is the proportion of the total stake that I control, and $p_k$ is my probability of getting exactly $k$ proposals in an epoch:
+Our question can be characterised like this: if I have a tail of length $k$ in one epoch, what is my expected length of tail in the next epoch? With a tail of length $k$ I have $2^k$ opportunities to reshuffle the RANDAO by selectively making or withholding block proposals. Can I grind through the possibilities to increase its tail length next time, and eventually take over the whole epoch?
 
-$$
-p_k = r^k(1-r)^{32-k}{32 \choose k}
-$$
-
-If I try to bias the RANDAO to give myself more proposals, based only on choosing whether to propose or not in the last slot of an epoch, then my expected number of proposals in the next epoch looks like this (the prime denoting the cases in which I am trying to maximise my advantage).
-
-$$
-E'_1 = \sum_{k=1}^{32} k ((1 - r) p_k + r q_k)
-$$
-
-Unpacking this, the first term in the addition is the probability, $1 - r$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) combined with the usual probability $p_k$ of having $k$ proposals in an epoch.
-
-The second term is the probability, $r$, that I _did_ have the last slot in the previous epoch combined with the probability $q_k$ that I can gain either $k$ proposals by proposing my block, or $k + 1$ proposals by withholding my block - the plus one is needed to make up for the block I withheld at the end of the previous epoch in order to gain this outcome.
+In the absence of any manipulation, my probability of having a tail of length exactly $k$ in any given epoch is $(1-r)r^k$ for $k < 32$, and $r^{32}$ when $k = 32$. That is, the chance that I make $k$ proposals in the tail positions, preceded by a proposal that I did not make.
 
 $$
 q_k =
 \begin{dcases}
-\sum_{i=0}^{k} p_i (p_k + p_{k+1}) & 0 \leq k < 32 \\
-\sum_{i=0}^{32} p_i p_k            & k = 32
+(1-r)r^k & 0 \leq k < 32 \\
+r^k      & k = 32
 \end{dcases}
 $$
 
-To find out the maximum long-term advantage I can gain, we can iterate the above on an epoch by epoch basis. The probability in the cheating case that I had the last slot of epoch $n$ is $E'_n / 32$.
+So the expected tail length for someone controlling a proportion $r$ of the stake is,
 
 $$
-E'_{n+1} = \sum_{k=1}^{32} k ((1 - \frac{E'_n}{32}) p_k + \frac{E'_n}{32} q_k)
+E(r) = \sum_{i=1}^{32} i q_i = \sum_{i=1}^{31} i (1-r) r^i + 32 r^{32}
+$$
+
+<a id="img_randao_tail"></a>
+<div class="image" style="width:100%">
+
+![Graph of the expected RANDAO tail](md/images/charts/randao_tail.svg)
+The bottom axis is $r$, and the side axis is my expected proposals tail length, $E(r)$ (with no manipulation).
+
+</div>
+
+Now we must calculate $E_k(r)$, the expected length of tail I can achieve in the next epoch by using my previous tail of length $k$ to grind the options.
+
+Consider the case where I have a tail of length $k = 1$ in some epoch. This gives me two options: I can publish my RANDAO contribution or I can withhold by RANDAO contribution (by withholding my block). My strategy is to choose the longest tail for the next epoch that I can gain over either of these options.
+
+The probability, $p^{(1)}_j$, of gaining a tail of exactly length $j$ as a result of having a tail of length 1 is,
+
+$$
+p^{(1)}_j =  2\sum_{i=0}^{j-1}q_jq_i + q_jq_j = q_j \left( 2\sum_{i=0}^{j-1}q_i + q_j \right)
+$$
+
+We can think about this as follows. To calculate $p^{(1)}_j$ we need the sum over the probability of getting a tail of length exactly $j$ (that is, $q_j$) multiplied by all the probabilities of getting a tail of $j$ or less (that is, not getting a tail longer than $j$, otherwise we would have chosen that length instead of $j$). With $k = 1$ we get two goes at this, therefore $q$ appears twice in each product.
+
+Visually, calculating $p_2$ when $k=1$ looks like summing the values in the shaded area of this diagram:
+
+<a id="img_randomness_tail_probabilities"></a>
+<div class="image" style="width:33%">
+
+![TODO](md/images/diagrams/randomness_tail_probabilities.svg)
+TODO
+
+</div>
+
+The tail length $k = 1$ example results in a two-dimensional square since we have two possibilities to try. To find $p^{(1)}_j$ we take the difference between the sum of all the products in the square side $j$ and the sum of all the products in the square side $j - 1$.
+
+Thinking of it like this helps us to generalise to the cases when $k > 1$. In that case we have a hyper-cube of dimension $2^k$. To calculate $p^{(k)}_j$ we need to find the difference between the sum of all the products in the $k$-dimensional cube side $j$ and the sum of all the products in the $k$-dimensional cube side $j - 1$. This is tedious to write down, but see the code below for a way to calculate it.
+
+Now, finally, we can calculate the expected tail length in the next epoch given that we have a tail length of $k$ in this epoch as simply,
+
+$$
+E^{(k)}(r) = \sum_{i=1}^{32} i p^{(k)}_i
+$$
+
+Graphing this for various values of $k$ we get the following. Note that the solid, $k=0$, line is the same as $E(r)$ above - the expected tail with no manipulation. That is, $E^{(0)}(r) = E(r)$
+
+<a id="img_randao_extend_0"></a>
+<div class="image" style="width:100%">
+
+![Graph of the expected RANDAO tail TODO](md/images/charts/randao_extend_0.svg)
+The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length, $E^{(k)}(r)$ given various values of tail length $k$ that I can play with. Note that $E^{(0)}(r) = E(r)$ from the graph above.
+
+</div>
+
+We can clearly see that, if I end up with any length of tail in an epoch, I can always grind my RANDAO contributions to improve my expected length of tail in the next epoch when compared with not grinding the RANDAO. This is not very surprising.
+
+The important question is, under what circumstances can I use this ability to indefinitely increase my expected length of tail, so that I can eventually gain full control of the RANDAO?
+
+To investigate this, consider the following graph. Here, for each line $k$ we have plotted $E^{(k)}(r) - k$. This allows us to see whether our expected tail in the next epoch is greater or less than our current tail. If $E^{(k)}(r) - k$ is negative then I can expect to have fewer proposals in the next epoch than I have in this one.
+
+<a id="img_randao_extend_1"></a>
+<div class="image" style="width:100%">
+
+![Graph of the expected RANDAO tail TODO](md/images/charts/randao_extend_1.svg)
+The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length minus my current tail length, $E^{(k)}(r) - k$ for various values of $k$.
+
+</div>
+
+For completeness, we shouldn't only look at expectations, but also at probabilities. The following graph shows the probability that if I have a tail of length $k$ then I will have a tail of length less than $k$ in the next epoch. As $k$ increases you can see that a step function is forming: for a proportion of stake less than about 50% it becomes practically certain that my tail will decrease in length from one epoch to the next despite my best efforts to grow it; conversely, for a proportion of stake a little greater than a little over 50% it becomes practically certain that I can maintain or grow my tail of block proposals.
+
+<a id="img_randao_extend_2"></a>
+<div class="image" style="width:100%">
+
+![Graph of the expected RANDAO tail TODO](md/images/charts/randao_extend_2.svg)
+TODO
+
+</div>
+
+###### Discussion
+
+What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing my tail length: on average the length of tail I have will decrease rather than increase. Whereas if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO.
+
+The good news is that, if attackers control more than half the stake, they have more interesting attacks available, like taking over the LMD fork choice rule, for example. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack is not feasible.
+
+TODO: link to the code. Note that limit to k = 7 since higher values very intensive to calculate.
+
+##### Block proposals boost
+
+For our second worked example, I will try to improve the overall number of proposals that I get among my validators. Once again, I control a proportion $r$ of the stake. In this example I will only consider a tail of length zero or of length one to work with - going beyond that gets quite messy.
+
+Let $q_j$ be my probability of getting exactly $j$ proposals in an epoch without any manipulation of the RANDAO (different from the $q$ above, but related):
+
+$$
+q_j = r^j(1-r)^{32-j}{32 \choose j}
+$$
+
+My expected number of proposals per epoch when acting honestly is simple to compute,
+
+$$
+E = \sum_{i=1}^{32} i q_i = 32 r
+$$
+
+Now I will try to bias the RANDAO to give myself more proposals whenever I have the last slot of an epoch, which will happen with probability $r$. Doing this, my expected number of proposals in the next epoch is as follows. The prime is to show that I am trying to maximise my advantage (cheat), and the subscript to show that we are looking one epoch ahead.
+
+$$
+E'_1 = \sum_{i=1}^{32} i ((1 - r) q_i + r p_i)
+$$
+
+Unpacking this, the first term in the addition is the probability, $1 - r$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) combined with the usual probability $q_j$ of having $j$ proposals in an epoch.
+
+The second term is the probability, $r$, that I _did_ have the last slot in the previous epoch combined with the probability $p_j$ that I can gain either $j$ proposals by proposing my block, or $j + 1$ proposals by withholding my block. We need the plus one to make up for the block I would be withholding at the end of the previous epoch in order to gain this outcome.
+
+$$
+p_j =
+\begin{dcases}
+\sum_{i=0}^{j} q_i (q_j + q_{j+1}) & 0 \leq j < 32 \\
+\sum_{i=0}^{32} q_i q_j            & j = 32
+\end{dcases}
+$$
+
+As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: propose or withhold. In order to achieve a net number of exactly $j$ proposals we are looking for the combinations (avoiding double counting) where either:
+
+ 1. proposing gives me exactly $j$ proposals and withholding gives no more than $j$ (that is, $\sum_{i=0}^{j}q_iq_j$); or
+ 2. proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is , $\sum_{i=0}^{j}q_{j+1}q_i$.[^fn-hyper-hurts-head]
+
+[^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
+
+<a id="img_randomness_propose_probabilities"></a>
+<div class="image" style="width:33%">
+
+![TODO](md/images/diagrams/randomness_propose_probabilities.svg)
+TODO
+
+</div>
+
+We can iterate this on an epoch by epoch basis to calculate the maximum long-term advantage I can gain. The probability that I gain the last slot of epoch $n$ is $E'_n / 32$ when I am trying to maximise my overall number of proposals like this.
+
+$$
+E'_{n+1} = \sum_{k=1}^{32} k ((1 - \frac{E'_n}{32}) q_k + \frac{E'_n}{32} p_k)
 $$
 
 The following Python code calculates $E'_n$ to convergence.
@@ -2094,31 +2217,27 @@ def fac(n):
 def choose(n, k):
     return fac(n) / fac(k) / fac(n - k)
 
-def prob(n, k, p):
-    return p**k * (1 - p)**(n - k) * choose(n, k)
+def prob(n, k, r):
+    return r**k * (1 - r)**(n - k) * choose(n, k)
 
 nintervals = 20
 for idx in range(1, nintervals + 1):
     r = r0 = idx / nintervals
-    p = [prob(32, k, r0) for k in range(33)]
+    q = [prob(32, j, r0) for j in range(33)]
 
-    # q[k] = prob(max(j, i - 1) == k)
-    q = []
-    for k in range(33):
-        qq = [p[i] * p[k] + (p[k + 1] * p[i] if (k < 32) else 0) for i in range(k + 1)]
-        q.append(sum(qq))
+    p = []
+    for j in range(33):
+        p.append(sum([q[i] * q[j] + (q[j + 1] * q[i] if (j < 32) else 0) for i in range(j + 1)]))
 
     # Iterate to convergence
     e = 0
     while (e == 0 or abs(e - e_old) > 0.000001):
         e_old = e
-        e = sum([k * (p[k] * (1 - r) + q[k] * r) for k in range(33)])
+        e = sum([i * (q[i] * (1 - r) + p[i] * r) for i in range(33)])
         r = e / 32
 
     print(r0, r0 * 32, e, 100 * (e / (r0 * 32) - 1))
 ```
-
-The output of this can be plotted as follows.
 
 <a id="img_randao_proposals"></a>
 <div class="image" style="width:100%">
@@ -2138,137 +2257,9 @@ The long-term percentage increase in the expected number of proposals per epoch 
 
 </div>
 
-In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher, especially if combined with the next attack.
+###### Discussion
 
-##### RANDAO takeover
-
-As above, let's say an attacker controls a proportion $r$ of the total stake, whether directly or perhaps by bribing validators. How much can the attacker boost its influence over the protocol by manipulating the RANDAO?
-
-##### Last proposer
-
-```python
-def prob_tail_eq(r, k, n):
-    return (1 - r) * r**k if k < n else r**k
-    
-def expect(r, n):
-    return sum([i * prob_tail_eq(r, i, n) for i in range(n + 1)])
-
-nintervals = 20
-for i in range(1, nintervals + 1):
-    r = i / nintervals
-    print(r, expect(r, 32), [1 - (1 - r**k)**(2**k) for k in range(1, 33)])
-```
-
-We'll call $p^{(1)}_n$ the probability that the attacker is the last proposer in epoch $n$. We are assuming here that all slots are full. If there are empty slots then the attacker needs only to have the last full slot of the epoch. We could account for this by modifying $r$: if a proportion $\alpha < 1 - r$ of slots are empty, then the probability that the attacker has the last full slot of an epoch is $r' = r(1 + \alpha + \alpha^2 + \dots + \alpha^{31})$, since $\alpha^k$ is the probability that the last $k$ slots of an epoch are empty. But we shall ignore that nicety in what follows.
-
-Choosing an arbitrary epoch and labelling it $0$, we have $p^{(1)}_0 = r$: the probability of the attacker being the last proposer of the epoch is the same as its probability of being selected in any given slot, namely its proportion of stake, $r$.
-
-Once an attacker occupies the epoch's last slot it has a choice: it can publish its block or withold its block. In each case, the attacker can predict the effect on the RANDAO and can calculate from that the proposers for the next epoch. Given this capability, how likely is it that the attacker can make itself proposer of the last block in epoch $1$?
-
-$$
-p^{(1)}_1 = (1-p^{(1)}_0)r + p^{(1)}_0(1-(1-r)^2)
-$$
-
-The first term, $(1-p^{(1)}_0)r$ is the usual probability that the attacker would have been the last proposer of epoch $1$ without having been the last proposer of epoch $0$. The second term is more interesting. It is the probability that the attacker is both the last proposer of epoch $0$, and that one or other or both of its choices make it last proposer of epoch $1$. (That is, it is not the case that both of its choices lead to it not having the last slot of epoch $1$.)
-
-We can simplify this to
-
-$$
-p^{(1)}_1 = r(1 + p^{(1)}_0(1-r)) = r(1 + r - r^2)
-$$
-
-So we see that, by being able to influence the RANDAO, an attacker with some proportion $r$ of the stake can boost its probability of again being in a position to influence the RANDAO (being in the last slot) next time by a factor $1 + r - r^2$, which is greater than one.
-
-What's the best an attacker can do? With increased odds of being last proposer next epoch, it can repeat the process and further increase its odds of being last proposer in the next-but-one epoch and so on. Could an attacker use this to bootstrap itself to full control of the RANDAO?
-
-Let $p^{(1)}_n$ be the probability that an attacker can achieve being last proposer in $n$ epochs' time.
-
-$$
-\begin{aligned}
-p^{(1)}_n &= r(1 + p^{(1)}_{n-1}(1-r)) \\
-      &= r(1 + r(1 + p^{(1)}_{n-2}(1-r))(1-r)) \\
-      &= r(1 + r(1-r) + rp^{(1)}_{n-2}(1-r)^2) \\
-      &= r(1 + r(1-r) + r^2(1-r)^2 + \dots + r^n(1-r)^n) \\
-      &= r \left( 1 + \frac{r(1-r)(1-(r(1-r))^n)}{1 - r(1-r)} \right) \\
-\end{aligned}
-$$
-
-where we have made use of $p^{(1)}_0 = r$. As $n$ increases, this converges to $r / (1-r(1-r))$ which is greater than $r$, the attacker's proportion of stake. However, for $r < 1$, this is always less significantly than $1$, so the probability of the attacker gaining and maintaining control over the RANDAO indefinitely tends to zero.
-
-<!--
-<a id="img_randao_manipulation_1"></a>
-<div class="image" style="width:100%">
-
-![TODO](md/images/charts/randao_manipulation_1.svg)
-The solid line, "Epoch&nbsp;0", is the usual probability that an entity will be last proposer in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will be last proposer in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will be last proposer in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
-
-</div>
--->
-
-The greatest effect of this is when the attacker controls half the stake. It can increase its odds of being the last proposer of future epochs from $1/2$ to $2/3$.
-
-##### Last two proposers
-
-We have found that being the last proposer of an epoch allows an attacker to manipulate the RANDAO to improve its odds of being the last proposer of the next epoch, but it cannot be leveraged to gain permanent control of the RANDAO.
-
-How about if the attacker gains the last two proposers of an epoch? This happens normally with probability $r^2$, but affords four opportunities to influence the RANDAO: propose both blocks; propose the first but not the second; propose the second but not the first; propose neither.
-
-Calling $p^{(2)}_n$ the probability that the attacker has control over the last two proposers after $n$ epochs we can follow a similar approach to the above.
-
-$$
-\begin{aligned}
-p^{(2)}_0 &= r^2 \\
-p^{(2)}_1 &= (1 - p^{(2)}_0)r^2 + p^{(2)}_0(1 - (1 - r^2)^4) \\
-& \vdots \\
-p^{(2)}_n &= (1 - p^{(2)}_{n-1})r^2 + p^{(2)}_{n-1}(1 - (1 - r^2)^4) \\
-\end{aligned}
-$$
-
-The first term in $p^{(2)}_n$ is just the normal probability of the attacker being proposer in the last two slots of epoch $n$ if it wasn't in epoch $n - 1$. The second term applies when the attacker was proposer in the last two slots in epoch $n - 1$ and thus has four attempts to become proposer in the last two slots of epoch $n$.[^fn-k-proposers-calc]
-
-[^fn-k-proposers-calc]: I think of it is like this:
-
-    - The probability of getting the last $k$ proposers is $r^k$ in one attempt.
-    - So the probability of _not_ getting the last $k$ proposers is $1 - r^k$.
-    - This has to happen $2^k$ times in a row as we have that many attempts if we control the last $n$ slots of the previous epoch, hence $(1 - r^k)^{2^k}$.
-    - The final probability that, given that we have $2^k$ attempts at least one attempt gains us the $k$ final slots in the next epoch is $(1 - (1 - r^k)^{2^k}$.
-
-<!--
-<a id="img_randao_manipulation_2"></a>
-<div class="image" style="width:100%">
-
-![TODO](md/images/charts/randao_manipulation_2.svg)
-The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last two proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last two proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last two proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp; 0".
-
-</div>
--->
-
-##### Last k proposers
-
-We can extend this further an consider an attacker gaining the last $k$ slots of an epoch. Extending the previous model, we have,
-
-$$
-\begin{aligned}
-p^{(k)}_0 &= r^k \\
-p^{(k)}_n &= (1 - p^{(k)}_{n-1})r^k + p^{(k)}_{n-1}(1 - (1 - r^k)^{2^k}) \\
-\end{aligned}
-$$
-
-Graphing this for $k = 8$, we see that an attacker with more than around 65% of the stake is practically certain to be able to take control of the RANDAO for an indefinite number of epochs, whereas an attacker with less than 55% of the stake has no chance.
-
-<!--
-<a id="img_randao_manipulation_8"></a>
-<div class="image" style="width:100%">
-
-![TODO](md/images/charts/randao_manipulation_8.svg)
-The solid line, "Epoch&nbsp;0", is the usual probability that an entity will have the last eight proposers in an epoch, without manipulation. The dotted line, "Epoch&nbsp;1", is the probability that an attacker will have the last eight proposers in the next epoch. The dashed line, "Epoch&nbsp;n" is the probability that an attacker will have the last eight proposers in some large number of epochs time: the probabilities converge to this line. If the RANDAO were not biasable, all these lines would follow "Epoch&nbsp;0".
-
-</div>
--->
-
-In the light of these results, clearly it's better if no single entity controls too great a proportion of validators, and essential that no single entity controls more than around 55% of the validators. Below that threshhold any advantage an attacker can gain by biasing the RANDAO is relatively minor. In any case, an attacker with greater than 50% of the validators has other avenues of attack such as hijacking the fork-choice rule to orphan non-attack blocks, so the RANDAO biasability is not of great concern.
-
-I've simplified a lot of detail in the above. For example, I've assumed that the attacker is targeting a fixed number of final validators. There's probably an advantage to the attacker in being more flexible than that. There's likely a decent research paper to be written by someone (other than me) on all the nuances of the RANDAO.
+In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher, especially if combined with the previous tail-extension attack.
 
 #### Verifiable delay functions
 

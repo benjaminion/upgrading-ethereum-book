@@ -1,4 +1,4 @@
-N = 32    # The number of slots per epoch
+N    = 32 # The number of slots per epoch
 KMAX = 7  # The maximum length of prior tail we will consider
 NINT = 10 # The number of intervals of r between 0 and 1 to generate
 
@@ -31,10 +31,12 @@ def hyperdiff(q, j, k):
         memo[j][k] = q[j] * sum
     return memo[j][k]
 
-# Smoke test
-assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
+# Smoke test.
+# Done naively this would involve 31*6^32 (2.5e26) multiplications and 6^32 (8.0e24) additions :)
+#assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
 
-result = [[] for i in range(KMAX + 1)]
+expected = [[] for i in range(KMAX + 1)]
+prob_dec = [[] for i in range(KMAX + 1)]
 rs = [i / NINT for i in range(1, NINT)]
 for r in rs:
     print(r) # Just a progress check
@@ -44,8 +46,10 @@ for r in rs:
     for k in range(KMAX + 1):
         # p[j] = the probability that with a tail of k I can achieve a tail of j in the next epoch
         p = [hyperdiff(q, j, 2**k) for j in range(N + 1)]
-        # e = the expected length of tail in the next epoch given r and k
-        e = sum([j * p[j] for j in range(N + 1)])
-        result[k].append(e)
+        # The expected length of tail in the next epoch given r and k
+        expected[k].append(sum([j * p[j] for j in range(N + 1)]))
+        # The probability of a decrease in tail length to < k
+        prob_dec[k].append(hyper(q, k, 2**k))
 print(rs)
-print(result)
+print(expected)
+print(prob_dec)
