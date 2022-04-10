@@ -2068,7 +2068,7 @@ $$
 So the expected tail length for someone controlling a proportion $r$ of the stake is,
 
 $$
-E(r) = \sum_{i=1}^{32} i q_i = \sum_{i=1}^{31} i (1-r) r^i + 32 r^{32}
+E(r) = \sum_{n=1}^{32} n q_n = \sum_{i=n}^{31} n (1-r) r^n + 32 r^{32}
 $$
 
 <a id="img_randao_tail"></a>
@@ -2108,7 +2108,7 @@ Thinking of it like this helps us to generalise to the cases when $k > 1$. In th
 Now, finally, we can calculate the expected tail length in the next epoch given that we have a tail length of $k$ in this epoch as simply,
 
 $$
-E^{(k)}(r) = \sum_{i=1}^{32} i p^{(k)}_i
+E^{(k)}(r) = \sum_{n=1}^{32} n p^{(k)}_n
 $$
 
 Graphing this for various values of $k$ we get the following. Note that the solid, $k=0$, line is the same as $E(r)$ above - the expected tail with no manipulation. That is, $E^{(0)}(r) = E(r)$
@@ -2147,17 +2147,21 @@ TODO
 
 ###### Discussion
 
-What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing my tail length: on average the length of tail I have will decrease rather than increase. Whereas if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO.
+What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing my tail length: on average the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely.
 
-The good news is that, if attackers control more than half the stake, they have more interesting attacks available, like taking over the LMD fork choice rule, for example. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack is not feasible.
+The good news is that, if attackers control more than half the stake, they have more interesting attacks available, such as taking over the LMD fork choice rule. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack is not feasible.
+
+
 
 TODO: link to the code. Note that limit to k = 7 since higher values very intensive to calculate.
 
 ##### Block proposals boost
 
-For our second worked example, I will try to improve the overall number of proposals that I get among my validators. Once again, I control a proportion $r$ of the stake. In this example I will only consider a tail of length zero or of length one to work with - going beyond that gets quite messy.
+For the second worked example I will try to improve the overall number of proposals that I get among my validators. Unlike the first example, I will not be trying to maximise my advantage at any cost. I will only manipulate the RANDAO when I can do so without any net cost to myself.
 
-Let $q_j$ be my probability of getting exactly $j$ proposals in an epoch without any manipulation of the RANDAO (different from the $q$ above, but related):
+Once again, I control a proportion $r$ of the stake. I will only be considering tails of length zero or of length one - going beyond that gets quite messy, and my intuition is that for values of $r$ less than a half or so it will make little difference.
+
+Let $q_j$ be my probability of getting exactly $j$ proposals in an epoch without any manipulation of the RANDAO (different from the $q$ in the first example, but related):
 
 $$
 q_j = r^j(1-r)^{32-j}{32 \choose j}
@@ -2166,18 +2170,18 @@ $$
 My expected number of proposals per epoch when acting honestly is simple to compute,
 
 $$
-E = \sum_{i=1}^{32} i q_i = 32 r
+E = \sum_{n=1}^{32} n q_n = 32 r
 $$
 
-Now I will try to bias the RANDAO to give myself more proposals whenever I have the last slot of an epoch, which will happen with probability $r$. Doing this, my expected number of proposals in the next epoch is as follows. The prime is to show that I am trying to maximise my advantage (cheat), and the subscript to show that we are looking one epoch ahead.
+Now I will try to bias the RANDAO to give myself more proposals whenever I have the last slot of an epoch, which will happen with probability $r$. Doing this, my expected number of proposals in the next epoch is as follows. The prime is to show that I am trying to maximise my advantage (cheat), and the subscript is to show that we are looking one epoch ahead.
 
 $$
-E'_1 = \sum_{i=1}^{32} i ((1 - r) q_i + r p_i)
+E'_1 = \sum_{n=1}^{32} n ((1 - r) q_n + r p_n)
 $$
 
-Unpacking this, the first term in the addition is the probability, $1 - r$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) combined with the usual probability $q_j$ of having $j$ proposals in an epoch.
+Unpacking this, the first term in the addition is the probability, $1 - r$, that I did not have the last slot in the previous epoch (so I cannot do any biasing) combined with the usual probability $q_n$ of having $n$ proposals in an epoch.
 
-The second term is the probability, $r$, that I _did_ have the last slot in the previous epoch combined with the probability $p_j$ that I can gain either $j$ proposals by proposing my block, or $j + 1$ proposals by withholding my block. We need the plus one to make up for the block I would be withholding at the end of the previous epoch in order to gain this outcome.
+The second term is the probability, $r$, that I _did_ have the last slot in the previous epoch combined with the probability $p_n$ that I get either $n$ proposals by proposing my block, or $n + 1$ proposals by withholding my block. We need the plus one to make up for the block I would be withholding at the end of the previous epoch in order to get this outcome.
 
 $$
 p_j =
@@ -2202,13 +2206,13 @@ TODO
 
 </div>
 
-We can iterate this on an epoch by epoch basis to calculate the maximum long-term advantage I can gain. The probability that I gain the last slot of epoch $n$ is $E'_n / 32$ when I am trying to maximise my overall number of proposals like this.
+We can iterate this epoch by epoch to calculate the maximum long-term improvement in my expected number of proposals. The probability that I gain the last slot of epoch $N$ is $E'_N / 32$ when I am trying to maximise my overall number of proposals like this.
 
 $$
-E'_{n+1} = \sum_{k=1}^{32} k ((1 - \frac{E'_n}{32}) q_k + \frac{E'_n}{32} p_k)
+E'_{N+1} = \sum_{n=1}^{32} n ((1 - \frac{E'_N}{32}) q_n + \frac{E'_N}{32} p_n)
 $$
 
-The following Python code calculates $E'_n$ to convergence.
+The following Python code calculates $E'_N$ to convergence.
 
 ```python
 def fac(n):
@@ -2259,7 +2263,9 @@ The long-term percentage increase in the expected number of proposals per epoch 
 
 ###### Discussion
 
-In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO. If we consider using the two last slots, or the $n$ last slots, the expected gain may be higher, especially if combined with the previous tail-extension attack.
+In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO and saw that an entity with any amount of stake can fractionally improve their overall expected number of block proposals, assuming that everyone else is acting honestly.
+
+If we consider using the two last slots, or the $k$ last slots, the expected gain may be higher, especially if combined with the previous tail-extension attack. But I expect that for $r$ less than a half or so the improvement will be small.
 
 #### Verifiable delay functions
 
