@@ -1862,7 +1862,7 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 <div class="summary">
 
- - Assigning beacon chain duties unpredictably (randomly) is an important defence against some attacks.
+ - Assigning beacon chain duties unpredictably is an important defence against some attacks.
  - The beacon chain maintains a RANDAO to accumulate randomness.
  - Duties such as proposing blocks, committee assignments, and sync committee participation are assigned based on the RANDAO, with a limited lookahead period.
  - Block proposers verifiably contribute randomness to the RANDAO via BLS signatures over the epoch number.
