@@ -1872,7 +1872,7 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 #### Introduction
 
-An element of randomness is an important part of permissionless blockchain protocols, both for security and for fairness. If the protocol were fully predictable attackers could know ahead of time which validators will be active in different roles, which gives them a significant foothold in attacking the protocol. For example, by selectively mounting denial of service attacks against future proposers, or by bribing members of a particular committee, or by registering especially advantageous validator numbers for themselves to allow them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
+An element of randomness is an important part of a permissionless blockchain protocol, both for security and for fairness. If the protocol were fully predictable attackers could know ahead of time which validators will be active in different roles, which gives them a significant foothold in attacking the protocol. For example, to selectively mount denial of service attacks against future proposers, or to bribe members of a particular committee, or to register especially advantageous validator numbers for themselves allowing them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
 
 [^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://twitter.com/paulhauner/status/1509677010448121856).
 
@@ -1880,15 +1880,15 @@ To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al,[
 
 > Intuitively, it is good for protocols to be unpredictable in the sense that miners do not learn that they are eligible to mine a block until shortly before it is due to be mined. Many attacks, such as double-spending, or selfish-mining, can become much more profitable if miners know in advance when they become eligible to mine.
 
-[^fn-unpredictability-paper]: [Formal Barriers to Longest-Chain Proof-of-Stake Protocols](https://arxiv.org/abs/1809.06528), Jonah Brown-Cohen, Arvind Narayanan, Christos-Alexandros Psomas, and S. Matthew Weinberg (2018). Quotation from section 3.1.
+[^fn-unpredictability-paper]: [Formal Barriers to Longest-Chain Proof-of-Stake Protocols](https://arxiv.org/abs/1809.06528), Jonah Brown-Cohen, Arvind Narayanan, Christos-Alexandros Psomas, and S. Matthew Weinberg (2018). Quotation is from section 3.1.
 
 Unpredictability, arising from randomness, is an excellent first line of defence against many attacks.
 
-Unpredictability in Proof of Work comes from the process used to mine a blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar odds to rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
+Unpredictability in Proof of Work comes from the process used to mine a blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar to the odds of rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other Giga hash per second (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
 
-Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is required in order to bring unpredictability to the selection block proposers, and the membership of the committees that attest to blocks.
+Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is used to bring unpredictability to the selection block proposers, and to the membership of the committees that attest to blocks and sign sync data.
 
-[^fn-pseudo-random]: I'm not going to distinguish the niceties of randomness and pseudo-randomness in what follows. We are actually using pseudo-randomness seeded with (presumed) genuine randomness. It has to be this way as it is impossible to come to consensus on genuine randomness. However, I will just call it "randomness" throughout.
+[^fn-pseudo-random]: I'm not going to distinguish the niceties of randomness and pseudo-randomness in this section. We are actually using pseudo-randomness seeded with (presumed) genuine randomness. It must be the case as it is impossible to come to consensus on genuine randomness. However, I will just call it "randomness" throughout.
 
 In this section we will look at the way that randomness is introduced into the beacon chain, some of the ways in which is is used, and finally some of the issues with the current scheme.
 
@@ -1896,7 +1896,7 @@ In this section we will look at the way that randomness is introduced into the b
 
 The beacon chain design has always used a RANDAO[^fn-randao-naming] mechanism to provide its in-protocol randomness. A RANDAO is simply an accumulator that incrementally gathers randomness from contributors. So, with each block, the proposer mixes in a random contribution to the existing RANDAO value.
 
-[^fn-randao-naming]: I'm not certain where the name RANDAO comes from, but it's modelled as a DAO (decentralised autonomous organisation) that deals in randomness. The Ethereum [randao project](https://github.com/randao/randao) from 2016 may have been the origin of the name.
+[^fn-randao-naming]: I'm not certain where the name RANDAO comes from, but it's modelled as a DAO (decentralised autonomous organisation) that deals in randomness. The Ethereum [randao project](https://github.com/randao/randao) from 2016 may be the origin of the name.
 
 We can think of a RANDAO as being like a deck of cards that's passed round the table, each person shuffling it in turn: the deck gets repeatedly re-randomised. Even if one contributor's randomness is weak, the cumulative result has a high level of entropy.
 
@@ -1908,35 +1908,35 @@ We can imagine the RANDAO as a deck of cards that accumulates randomness over ti
 
 </div>
 
-Current and past RANDAO values are stored in the [beacon state](/part3/containers/state#beaconstate) in the `randao_mixes` field. The current value is updated by [`process_randao`](/part3/transition/block#def_process_randao) with every block that the beacon chain processes. If there is no block in a slot then the RANDAO is not updated. In addition, the RANDAO's current value, [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) (minus one) past values of the RANDAO at the ends of epochs are also stored in the state. These can be used to recalculate past committee assignments, which allows historical attestations to be slashed even months later.
+Current and past RANDAO values are stored in the [beacon state](/part3/containers/state#beaconstate) in the `randao_mixes` field. The current value is updated by [`process_randao`](/part3/transition/block#def_process_randao) with every block that the beacon chain processes. If there is no block in a slot then the RANDAO is not updated. In addition to the RANDAO's current value, [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) (minus one) past values of the RANDAO at the ends of epochs are also stored in the state. These can be used to recalculate past committee assignments, which allows historical attestations to be slashed even months later.
 
 #### Source of randomness
 
-With every [block](/part3/containers/blocks#beaconblockbody) that's proposed the proposer includes a "RANDAO reveal". This is its contribution to be mixed in to the RANDAO.
+With every [block](/part3/containers/blocks#beaconblockbody) that's proposed the proposer includes a field `randao_reveal` which is its contribution to be mixed in to the RANDAO.
 
-This contribution should satisfy two properties: it should be unpredictable by any other node, yet it should be verifiable by all nodes.
+This contribution needs to satisfy two properties: it should be unpredictable by any other node, yet it should be verifiable by all nodes.
 
-"Verifiable" means that, although random, the RANDAO contribution value must not be arbitrary. The proposer must not be able to pick and choose its contribution, otherwise it will just choose a value that advantages itself in some way. There must be a single valid contribution that the proposer can make in any given block, and all the other nodes must be able to check that contribution.
+"Verifiable" means that, although random (read pseudo-random), the RANDAO contribution value must not be arbitrary. The proposer must not be able to pick and choose its contribution, otherwise it will just choose a value that advantages itself in some way. There must be a single valid contribution that the proposer can make in any given block, and all the other nodes must be able to verify that contribution.
 
 ##### The old: hash onions
 
-[Early ideas](https://github.com/ethereum/consensus-specs/pull/33/files#diff-d74f72ec8cd401e342e5e5f6939647b860dd98518a6618d3a7f5256edbaf4b69R480) for verifiable randomness had each validator pre-committing to a "hash onion". Before joining the beacon chain a validator would generate a random number. When registering its initial deposit the validator would include the result of repeatedly cryptographically hashing that number a large number (thousands) of times as a commitment. Then when proposing a block the `randao_reveal` would be the pre-image of that commitment: one layer would be "peeled off the onion". Since a cryptographic hash is not invertible, only the proposer could calculate this value, but it's easily verifiable by everyone. Then the reveal gets stored as the new commitment and so on. This scheme is viable, but has complexities and edge cases: for example if a proposer's block gets orphaned everybody (except the beacon chain) can now see the reveal &ndash; reconciling that is clunky.
+[Early ideas](https://github.com/ethereum/consensus-specs/pull/33/files#diff-d74f72ec8cd401e342e5e5f6939647b860dd98518a6618d3a7f5256edbaf4b69R480) for verifiable randomness had each validator pre-committing to a "hash onion". Before joining the beacon chain a validator would generate a random number. When registering its initial deposit the validator would include the result of repeatedly cryptographically hashing that number a large number (thousands) of times as a commitment. Then when proposing a block the `randao_reveal` would be the pre-image of that commitment: one layer would be "peeled off the onion". Since a cryptographic hash is not invertible, only the proposer could calculate this value, but it's easily verifiable by everyone. Then the reveal gets stored as the new commitment and so on. This scheme is viable, but has complexities and edge cases &ndash; for example if a proposer's block gets orphaned everybody (except the beacon chain) can now see the reveal &ndash; that make it clunky.
 
 ##### The new: BLS signatures
 
-When we moved to using [BLS signatures](/part2/building_blocks/signatures) in the protocol a natural alternative to the hash onion became available. With the BLS scheme every validator already has a closely guarded random value: the private key that it signs blocks and attestations with. As far as anyone knows the signatures produced are uniformly random. Therefore, BLS signatures generated by block proposers are an excellent source of the randomness we need to update the RANDAO.
+A natural alternative to the hash onion became available when we moved to using [BLS signatures](/part2/building_blocks/signatures) in the protocol. With the BLS scheme every validator already has a closely guarded random value: the private key that it signs blocks and attestations with. As far as anyone knows the signatures produced are uniformly random. Therefore, BLS signatures generated by block proposers are an excellent source of the randomness that we need for updating the RANDAO.
 
 Using signatures rather than the hash onion both simplifies the protocol and provides for multi-party (distributed) validators. The aggregation properties of BLS signatures allow signatures from multiple validators to be combined as a threshold signature so that they can effectively act as a single validator. This valuable property would be very difficult with the hash onion approach.
 
 [TODO: add link to DVT when done]::
 
-For these reasons [we now use](https://github.com/ethereum/consensus-specs/pull/483) a BLS signature as the entropy contribution to the RANDAO.
+For these reasons [we now use](https://github.com/ethereum/consensus-specs/pull/483) a BLS signature as the entropy contribution to the RANDAO, that is, the `randao_reveal`.
 
 ##### Where does the entropy come from?
 
-So we can see that the predominant source of randomness in the Ethereum 2 protocol is the private keys of the validators. This amounts to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
+Evidently the predominant source of randomness in the Ethereum 2 protocol is the private keys of the validators. This amounts to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
 
-Some other sources of randomness affecting the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399).
+Some other sources of entropy for the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399).
 
   - Missed or orphaned block proposals directly affect the RANDAO's output. Network conditions, node faults, or maintenance downtime can all lead to missed block proposals that have a degree of randomness.
   - The total number of active validators in an epoch affects the selection of proposers which in turn affects participation in the RANDAO. Thus, deposits and exits (both voluntary and forced) contribute entropy.
@@ -1946,7 +1946,7 @@ Some other sources of randomness affecting the RANDAO are noted in [EIP-4399](ht
 
 When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using it's normal signing private key.
 
-This `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#randao-reveal) by the proposer as follows.
+The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
 
 ```python
 def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) -> BLSSignature:
@@ -1955,7 +1955,7 @@ def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) ->
     return bls.Sign(privkey, signing_root)
 ```
 
-And when a block is processed, the `randao_reveal` is mixed into the RANDAO [like this](/part3/transition/block#def_process_randao):
+When a block is processed, the `randao_reveal` is mixed into the RANDAO [like this](/part3/transition/block#def_process_randao):
 
 ```python
 def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
@@ -1969,10 +1969,11 @@ def process_randao(state: BeaconState, body: BeaconBlockBody) -> None:
     state.randao_mixes[epoch % EPOCHS_PER_HISTORICAL_VECTOR] = mix
 ```
 
-Two things are going on when the `randao_reveal` is processed.
+Two things are going on in the processing of the `randao_reveal` signature.
 
-First the signature is verified using the proposer's public key before being mixed in. This means that the proposer has almost no choice about what it contributes to the RANDAO: it either contributes a single verifiable value &ndash; the correct signature over the epoch number &ndash; or it withholds its block and contributes nothing.
+First, the signature is verified using the proposer's public key before being mixed in. This means that the proposer has almost no choice about what it contributes to the RANDAO: it either contributes a single verifiable value &ndash; the correct signature over the epoch number &ndash; or it withholds its block and contributes nothing. (Equivalently, a block with an incorrect reveal is invalid.)
 
+<a id="randao_xor"></a>
 Second, the hash of the signature is mixed in to the beacon state's RANDAO using `xor`. The combination of using the epoch number as the signed quantity and using `xor` to mix it in leads to a subtle, albeit tiny, [improvement](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457449830) in attack-resistance of the RANDAO.
 
 <a id="img_randomness_reveal"></a>
@@ -1987,19 +1988,19 @@ Justin Drake explains in his [notes](https://notes.ethereum.org/@JustinDrake/rkP
 
 > Using `xor` in `process_randao` is (slightly) more secure than using `hash`. To illustrate why, imagine an attacker can grind randomness in the current epoch such that two of his validators are the last proposers, in a different order, in two resulting samplings of the next epochs. The commutativity of `xor` makes those two samplings equivalent, hence reducing the attacker’s grinding opportunity for the next epoch versus `hash` (which is not commutative). The strict security improvement may simplify the derivation of RANDAO security formal lower bounds.
 
-We will see [shortly](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. Justin's [point](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457546253) is that, under the current scheme, the attacker having $V_0, V_1$ in the two last slots of an epoch is equivalent to it having $V_1, V_0$ with respect to the `randao_reveal`s. This fractionally reduces an attackers choices when it comes to influencing the RANDAO. If we used `hash` rather than `xor`, or if we signed over the slot number rather than the epoch number, these orderings would result in different outcomes from each other, giving the attacker more choice.
+We will see [shortly](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. Justin's [point](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457546253) is that, under the current scheme, the attacker having validators $V_0, V_1$ in the two last slots of an epoch is equivalent to it having $V_1, V_0$ with respect to the `randao_reveal`s. This fractionally reduces an attackers choices when it comes to influencing the RANDAO. If we used `hash` rather than `xor`, or if we signed over the slot number rather than the epoch number, these orderings would result in different outcomes from each other, giving an attacker more choice and therefore more power.
 
 #### Lookahead
 
-We started this section with a discussion of unpredictability. Ideally, it should not be possible to predict the duties for any block proposer or committee member until the moment they become active. However, in practice, proposers and committee members need a little advanced notice of their duties to allow them to join the right p2p network subnets and whatever other preparation they need to do.
+We started this section with a discussion of unpredictability. Ideally, it should not be possible to predict the duties for any block proposer or committee member until the moment they become active. However, in practice, proposers and committee members need a little advance notice of their duties to allow them to join the right p2p network subnets and do whatever other preparation they need to do.
 
-The RANDAO seed at the end of epoch $N$ is used to compute validator duties for the whole of epoch $N+2$. This is controlled by [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) via the [`get_seed()`](/part3/helper/accessors#def_get_seed) function. Thus validators have at least one full epoch to prepare themselves for any duties, but no more than two.
+The RANDAO seed at the end of epoch $N$ is used to compute validator duties for the whole of epoch $N+2$. This interval is controlled by [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) via the [`get_seed()`](/part3/helper/accessors#def_get_seed) function. Thus validators have at least one full epoch to prepare themselves for any duties, but no more than two.
 
-Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to selectively exit validators or make deposits[^fn-instant-activations] in order to ensure that they gain control of a committee, or a large number of block proposal slots.
+Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to strategically exit validators or make deposits[^fn-instant-activations] in order to gain control of a committee, or a large number of block proposal slots.
 
-[^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](https://eth2book.info/altair/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
+[^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](https://eth2book.info/altair/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
 
-It's certainly not an easy attack. Nonetheless it's easy to defend against, so we might as well.
+It's certainly not an easy attack. Nonetheless it's easy to defend against, so we might as well do so.
 
 To prevent this, we assume a maximum feasible lookahead that an attacker might achieve, [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) and delay all activations and exits by this amount, which allows time for new randomness to come in via block proposals from honest validators, making irrelevant any manipulation by the entering or exiting validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOK_AHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
@@ -2007,17 +2008,19 @@ To prevent this, we assume a maximum feasible lookahead that an attacker might a
 <div class="image" style="width:90%">
 
 ![Diagram showing min and max lookahead](md/images/diagrams/randomness_lookahead.svg)
-The RANDAO value at the end of epoch $N$ is used to set duties for epoch $N+2$, which is controlled by `MIN_SEED_LOOKAHEAD`. A validator exited in epoch $N+1$ remains active until at least the end of epoch $N+5$ (depending on the exit queue). This is controlled by `MAX_SEED_LOOKAHEAD`.
+The RANDAO value at the end of epoch $N$ is used to set duties for epoch $N+2$, which is controlled by `MIN_SEED_LOOKAHEAD`. A validator exiting in epoch $N+1$ remains active until at least the end of epoch $N+5$ (depending on the exit queue). This is controlled by `MAX_SEED_LOOKAHEAD`.
 
 </div>
 
-Both the minimum and maximum lookaheads as currently implemented smell a little of engineering hackery. In a perfect design only the block proposer would know ahead of time that it has been chosen to propose. Once its block is revealed then the rest of the network would be able to verify that, yes, this was indeed the chosen proposer. This feature is called [Single Secret Leader Election](https://eprint.iacr.org/2020/025). We do not yet have it in the Ethereum protocol, and I shall write about it elsewhere. Meanwhile, some [good progress](https://ethresear.ch/t/simplified-ssle/12315?u=benjaminion) is being made towards making it practical.
+##### Single Secret Leader Election
+
+As currently implemented, both the minimum and maximum lookaheads smell a little of engineering hackery. In a perfect design only the block proposer would know ahead of time that it has been chosen to propose in that slot. Once its block is revealed then the rest of the network would be able to verify that, yes, this was indeed the chosen proposer. This feature is called [Single Secret Leader Election](https://eprint.iacr.org/2020/025). We do not yet have it in the Ethereum protocol, and I shall write about it elsewhere. Meanwhile, some [good progress](https://ethresear.ch/t/simplified-ssle/12315?u=benjaminion) is being made towards making it practical.
 
 [TODO: link to SSLE when done]::
 
 #### RANDAO biasability
 
-The RANDAO value for an epoch is set at the end of the previous epoch, and duty assignments for the entire epoch (proposals and committee memberships) depend on that value. (Actually, due to [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead), on the RANDAO value at the end of the last-but-one epoch, but we'll overlook that in what follows.)
+The RANDAO value for an epoch is set at the end of the previous epoch, and duty assignments for the entire epoch (proposals and committee memberships) depend on that value. (Actually &ndash; due to [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) &ndash; on the RANDAO value at the end of the last-but-one epoch, but we'll overlook that in what follows.)
 
 <a id="img_randomness_assignments"></a>
 <div class="image" style="width:80%">
@@ -2027,7 +2030,7 @@ Future duty assignments for validators &ndash; block proposers, committee member
 
 </div>
 
-Thus, when a validator happens to be assigned to propose a block in the last slot of an epoch, it gains a small amount of control over the assignments for the next epoch. This is because it can choose to reveal its block, which mixes in its RANDAO reveal, or it can choose (at a cost) to withhold its block and keep the existing RANDAO value. In this way, a validator is able to exert a little influence over the proposer and committee assignments in the next epoch.
+Thus, when a validator happens to be assigned to propose a block in the last slot of an epoch, it gains a small amount of control over the assignments for the next epoch. This is because it can choose to reveal its block, which mixes in its RANDAO reveal, or it can choose (at a cost) to withhold its block and keep the existing RANDAO value, knowing that there will be no subsequent RANDAO change before duties are calculated. In this way, a validator is able to exert a little influence over the proposer and committee assignments in the next epoch. This is called "one bit of influence" over the RANDAO as the validator has a choice of two outcomes.
 
 <a id="img_randomness_biasing"></a>
 <div class="image" style="width:80%">
@@ -2037,25 +2040,27 @@ The last proposer in an epoch has a choice. It can propose its block as usual, u
 
 </div>
 
+If an attacker gets a string of proposals at the end of an epoch then it has more power. Having $k$ consecutive proposals at the end of an epoch gives the attacker $2^k$ choices for the ultimate value of the RANDAO that will be used to compute future validator duties. In this scenario the attacker has "$k$ bits of influence" over the RANDAO.
+
 #### Biasability analyses
 
-This section is fully optional. I got a bit carried away with the analyses and it's fine to skip to the end.
+This section is fully optional. I got a bit carried away with the maths and it's fine to skip to the [next section](#verifiable-delay-functions).
 
-To make things more concrete I shall try to quantify what biasability means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
+To make discussion of RANDAO biasability more concrete I shall try to quantify what it means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently and correctly. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
 
-In the first example, I will try to gain control of the RANDAO by indefinitely giving myself proposals in the last slots of an epoch. In the second example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. I will do this by selectively making and withholding proposals having computed the best outcome: a process of "grinding" the RANDAO.
+In the first example, I will try to gain control of the RANDAO by permanently acquiring proposals in the last slots of an epoch. In the second example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. In both cases I will be selectively making and withholding proposals having computed the best outcome: a process of "grinding" the RANDAO.
 
-These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. It's very likely I've messed something up: probability is _hard_. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
+These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. It's very likely I've messed something up: probability is _hard_. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work, more simulation based, was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
 
 ##### RANDAO takeover
 
 If I control a proportion $r$ of the total stake, how much can I boost my influence over the protocol by manipulating the RANDAO?
 
-The ability to influence the RANDAO depends on controlling a contiguous string of block proposals at the end of an epoch. We shall call this property "having a tail", and the tail will have a length $k$, from 0 to a maximum of 32, an entire epoch.
+The ability to influence the RANDAO depends on controlling a consecutive string of block proposals at the end of an epoch. We shall call this property "having a tail", and the tail will have a length $k$ from 0 to a maximum of 32, an entire epoch.
 
-Our question can be characterised like this: if I have a tail of length $k$ in one epoch, what is my expected length of tail in the next epoch? With a tail of length $k$ I have $2^k$ opportunities to reshuffle the RANDAO by selectively making or withholding block proposals. Can I grind through the possibilities to increase its tail length next time, and eventually take over the whole epoch?
+Our question can be framed like this: if I have a tail of length $k$ in one epoch, what is my expected length of tail in the next epoch? With a tail of length $k$ I have $2^k$ opportunities to reshuffle the RANDAO by selectively making or withholding block proposals. Can I grind through the possibilities to increase my tail length next time, and eventually take over the whole epoch?
 
-In the absence of any manipulation, my probability of having a tail of length exactly $k$ in any given epoch is $(1-r)r^k$ for $k < 32$, and $r^{32}$ when $k = 32$. That is, the chance that I make $k$ proposals in the tail positions, preceded by a proposal that I did not make.
+In the absence of any manipulation, my probability of having a tail of length exactly $k$ in any given epoch is $(1-r)r^k$ for $k < 32$, and $r^{32}$ when $k = 32$. This is the chance that I make $k$ proposals in the tail positions preceded by a proposal that I did not make.
 
 $$
 q_k =
@@ -2068,20 +2073,20 @@ $$
 So the expected tail length for someone controlling a proportion $r$ of the stake is,
 
 $$
-E(r) = \sum_{n=1}^{32} n q_n = \sum_{i=n}^{31} n (1-r) r^n + 32 r^{32}
+E(r) = \sum_{n=1}^{32} n q_n = \sum_{n=1}^{31} n (1-r) r^n + 32 r^{32}
 $$
 
 <a id="img_randao_tail"></a>
 <div class="image" style="width:100%">
 
 ![Graph of the expected RANDAO tail](md/images/charts/randao_tail.svg)
-The bottom axis is $r$, and the side axis is my expected proposals tail length, $E(r)$ (with no manipulation).
+The bottom axis is $r$, and the side axis is my expected proposals tail length $E(r)$ assuming no RANDAO manipulation.
 
 </div>
 
-Now we must calculate $E_k(r)$, the expected length of tail I can achieve in the next epoch by using my previous tail of length $k$ to grind the options.
+Now we will calculate $E^{(k)}(r)$, the expected length of tail I can achieve in the next epoch by using my previous tail of length $k$ to grind the options.
 
-Consider the case where I have a tail of length $k = 1$ in some epoch. This gives me two options: I can publish my RANDAO contribution or I can withhold by RANDAO contribution (by withholding my block). My strategy is to choose the longest tail for the next epoch that I can gain over either of these options.
+Consider the case where I have a tail of length $k = 1$ in some epoch. This gives me two options: I can publish my RANDAO contribution or I can withhold my RANDAO contribution (by withholding my block). My strategy is to choose the longest tail for the next epoch that I can gain via either of these options.
 
 The probability, $p^{(1)}_j$, of gaining a tail of exactly length $j$ as a result of having a tail of length 1 is,
 
@@ -2089,29 +2094,29 @@ $$
 p^{(1)}_j =  2\sum_{i=0}^{j-1}q_jq_i + q_jq_j = q_j \left( 2\sum_{i=0}^{j-1}q_i + q_j \right)
 $$
 
-We can think about this as follows. To calculate $p^{(1)}_j$ we need the sum over the probability of getting a tail of length exactly $j$ (that is, $q_j$) multiplied by all the probabilities of getting a tail of $j$ or less (that is, not getting a tail longer than $j$, otherwise we would have chosen that length instead of $j$). With $k = 1$ we get two goes at this, therefore $q$ appears twice in each product.
+We can think about this as follows. With $k = 1$ we get two attempts, therefore $q$ appears twice in each product. To calculate $p^{(1)}_j$ we need the sum over the all the combinations of the probability of getting a tail of length exactly $j$ (that is, $q_j$) multiplied by the probability of getting a tail of $j$ or less (that is, not getting a tail longer than $j$, otherwise we would have chosen that length instead of $j$).
 
-Visually, calculating $p_2$ when $k=1$ looks like summing the values in the shaded area of the next diagram.
+Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded area of this diagram,
 
 <a id="img_randomness_tail_probabilities"></a>
-<div class="image" style="width:33%">
+<div class="image" style="width:40%">
 
 ![Matrix of tail length probabilities](md/images/diagrams/randomness_tail_probabilities.svg)
 The probability that we get a maximum tail length of exactly two with two attempts is the sum of the terms in the shaded area.
 
 </div>
 
-The tail length $k = 1$ example results in a two-dimensional square since we have two possibilities to try. To find $p^{(1)}_j$ we take the difference between the sum of all the products in the square side $j$ and the sum of all the products in the square side $j - 1$.
+This example with tail length $k = 1$ results in a two-dimensional square since we have two possibilities to try. One way to calculate $p^{(1)}_j$ is to take the difference between the sum of all the products in the square side $j + 1$ and the sum of all the products in the square side $j$.
 
-Thinking of it like this helps us to generalise to the cases when $k > 1$. In that case we have a hyper-cube of dimension $2^k$. To calculate $p^{(k)}_j$ we need to find the difference between the sum of all the products in the $k$-dimensional cube side $j$ and the sum of all the products in the $k$-dimensional cube side $j - 1$. This is tedious to write down, but see the code below for a way to calculate it.
+Thinking of it like this helps us to generalise to the cases when $k > 1$. In those cases we are dealing with a hyper-cube of dimension $2^k$; each element is the product of $2^k$ values of $q$. To calculate $p^{(k)}_j$ we can find the difference between the sum of all the products in the $2^k$-dimensional cube side $j + 1$ and the sum of all the products in the $2^k$-dimensional cube side $j$. This is tedious to write down and involves a mind-boggling number of calculations even for quite small $k$, but see my [example code](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py) for an efficient a way to calculate it.
 
-Now, finally, we can calculate the expected tail length in the next epoch given that we have a tail length of $k$ in this epoch as simply,
+Now, finally, we can calculate the expected tail length in the next epoch given that we have a tail of length $k$ in this epoch.
 
 $$
 E^{(k)}(r) = \sum_{n=1}^{32} n p^{(k)}_n
 $$
 
-Graphing this for various values of $k$ we get the following. Note that the solid, $k=0$, line is the same as $E(r)$ above - the expected tail with no manipulation. That is, $E^{(0)}(r) = E(r)$
+Graphing this for various values of $k$ we get the following. Note that the solid, $k = 0$, line is the same as $E(r)$ above - the expected tail with no manipulation. That is, $E^{(0)}(r) = E(r)$ as you'd expect.
 
 <a id="img_randao_extend_0"></a>
 <div class="image" style="width:100%">
@@ -2121,11 +2126,11 @@ The bottom axis is $r$, and the side axis is my subsequent expected proposals ta
 
 </div>
 
-We see that, if I end up with any length of tail in an epoch, I can always grind my RANDAO contributions to improve my expected length of tail in the next epoch when compared with not grinding the RANDAO. This is not very surprising.
+We see that, if I end up with any length of tail in an epoch, I can always grind my RANDAO contributions to improve my expected length of tail in the next epoch when compared with not grinding the RANDAO. This is not surprising.
 
-The important question is, under what circumstances can I use this ability to indefinitely increase my expected length of tail, so that I can eventually gain full control of the RANDAO?
+The important question is, under what circumstances can I use this ability in order to indefinitely increase my expected tail length, so that I can eventually gain full control of the RANDAO?
 
-To investigate this, consider the following graph. Here, for each line $k$ we have plotted $E^{(k)}(r) - k$. This allows us to see whether our expected tail in the next epoch is greater or less than our current tail. If $E^{(k)}(r) - k$ is negative then I can expect to have fewer proposals in the next epoch than I have in this one.
+To investigate this, consider the following graph. Here, for each $k$ line we have plotted $E^{(k)}(r) - k$. This allows us to see whether our expected tail in the next epoch is greater or less than our current tail. If $E^{(k)}(r) - k$ is negative then I can expect to have fewer proposals in the next epoch than I have in this one.
 
 <a id="img_randao_extend_1"></a>
 <div class="image" style="width:100%">
@@ -2135,7 +2140,9 @@ The bottom axis is $r$, and the side axis is my subsequent expected proposals ta
 
 </div>
 
-For completeness, we shouldn't only look at expectations, but also at probabilities. The following graph shows the probability that if I have a tail of length $k$ then I will have a tail of length less than $k$ in the next epoch. As $k$ increases you can see that a step function is forming: for a proportion of stake less than about 50% it becomes practically certain that my tail will decrease in length from one epoch to the next despite my best efforts to grow it; conversely, for a proportion of stake a little greater than a little over 50% it becomes practically certain that I can maintain or grow my tail of block proposals.
+We can see that for $r$ less than around 0.5, especially as $k$ grows, we expect our tail length to shrink rather than grow, despite our best RANDAO grinding efforts. However, for $r$ greater than 0.5, we expect our tail length to grow as a result of our grinding, whatever tail length we start with.
+
+For completeness, we shouldn't only look at expectations, but also at probabilities. The following graph shows the probability that if I have a tail of length $k$ then I will have a tail of length less than $k$ in the next epoch. As $k$ increases you can see that a step function is forming: for a proportion of stake less than about 50% it becomes practically certain that my tail will decrease in length from one epoch to the next despite my best efforts to grow it; conversely, for a proportion of stake greater than a little over 50% it becomes practically certain that I can maintain or grow my tail of block proposals.
 
 <a id="img_randao_extend_2"></a>
 <div class="image" style="width:100%">
@@ -2147,15 +2154,17 @@ The bottom axis is $r$, and the side axis is the probability that my best tail l
 
 ###### Discussion
 
-What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing my tail length: on average the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely. With high enough $r$, the $2^k$ options I have for grinding the RANDAO overwhelm the probability of of losing tail proposals. For large values of $k$ it will not be practical to grind through all of these options, but we need to arrive at only one good combination in order to succeed so may not need to do the full calculation.
+What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing tail length: with high probability the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely. With high enough $r$, the $2^k$ options I have for grinding the RANDAO overwhelm the probability of losing tail proposals. For large values of $k$ it will not be practical to grind through all of these options, but we need to arrive at only one good combination in order to succeed so we might not need to do the full calculation.
 
-The good news is that, if attackers control more than half the stake, they have more interesting attacks available, such as taking over the LMD fork choice rule. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack is not feasible.
+The good news is that, if attackers control more than half the stake, they have more interesting attacks available, such as taking over the LMD fork choice rule. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack appears to be infeasible.
 
 Source code for calculating the expected tail lengths and the probabilities is [on GitHub](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py). I've limited the length of tail we are considering to $k = 7$ only because calculating beyond that is quite compute intensive. But it's enough to see the general picture.
 
+As a final observation, we have ignored cases where two or more of the tail proposals are from the same validator. As discussed [above](#randao_xor), these proposals would each result in the same RANDAO contribution and reduce my grinding options. However, with a large number of validators in the system this is a reasonable approximation to make.
+
 ##### Block proposals boost
 
-For the second worked example I will try to improve the overall number of proposals that I get among my validators. Unlike the first example, I will not be trying to maximise my advantage at any cost. I will only manipulate the RANDAO when I can do so without any net cost to myself.
+For the second worked example I will try to improve the overall number of proposals that I get among my validators. Unlike in the first example, I will not be trying to maximise my advantage at any cost. I will only manipulate the RANDAO when I can do so without any net cost to myself.
 
 Once again, I control a proportion $r$ of the stake. I will only be considering tails of length zero or of length one - going beyond that gets quite messy, and my intuition is that for values of $r$ less than a half or so it will make little difference.
 
@@ -2185,29 +2194,29 @@ $$
 p_j =
 \begin{dcases}
 \sum_{i=0}^{j} q_i (q_j + q_{j+1}) & 0 \leq j < 32 \\
-\sum_{i=0}^{32} q_i q_j            & j = 32
+\sum_{i=0}^{j} q_i q_j            & j = 32
 \end{dcases}
 $$
 
-As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: propose or withhold. In order to achieve a net number of exactly $j$ proposals we are looking for the combinations (avoiding double counting) where either:
+As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. In order to achieve a net number of exactly $j$ proposals we are looking for the combinations (avoiding double counting) where either:
 
  1. proposing gives me exactly $j$ proposals and withholding gives no more than $j$ (that is, $\sum_{i=0}^{j}q_iq_j$); or
- 2. proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is , $\sum_{i=0}^{j}q_{j+1}q_i$.[^fn-hyper-hurts-head]
+ 2. proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head]
 
 [^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
 
 <a id="img_randomness_propose_probabilities"></a>
-<div class="image" style="width:33%">
+<div class="image" style="width:40%">
 
 ![Matrix of proposal number probabilities](md/images/diagrams/randomness_propose_probabilities.svg)
 The probability that we get a net number of exactly two proposals with two attempts is the sum of the terms in the shaded area.
 
 </div>
 
-We can iterate this epoch by epoch to calculate the maximum long-term improvement in my expected number of proposals. The probability that I gain the last slot of epoch $N$ is $E'_N / 32$ when I am trying to maximise my overall number of proposals like this.
+We can iterate this epoch by epoch to calculate the maximum long-term improvement in my expected number of proposals. The probability that I gain the last slot of epoch $N$ is $E'_N / 32$.
 
 $$
-E'_{N+1} = \sum_{n=1}^{32} n ((1 - \frac{E'_N}{32}) q_n + \frac{E'_N}{32} p_n)
+E'_{N+1} = \sum_{n=1}^{32} n \left((1 - \frac{E'_N}{32}) q_n + \frac{E'_N}{32} p_n\right)
 $$
 
 The following Python code calculates $E'_N$ to convergence.
@@ -2263,19 +2272,19 @@ The long-term percentage increase in the expected number of proposals per epoch 
 
 In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO and saw that an entity with any amount of stake can fractionally improve its overall expected number of block proposals, assuming that everyone else is acting honestly.
 
-If we consider using the two last slots, or the $k$ last slots, the expected gain may be higher, especially if combined with the previous tail-extension attack. But I expect that for $r$ less than a half or so the improvement will be very small.
+The expected gain may be higher if we consider using the two last slots, or the $k$ last slots, especially if combined with the previous tail-extension attack. But I expect that for $r$ less than a half or so any further improvement will be very small.
 
 #### Verifiable delay functions
 
-Although the RANDAO is biasable it is not so biasable as to break the protocol: for our purposes the randomness is "good enough".
+We've seen that, although the RANDAO is biasable, it is not so biasable as to break the protocol: for our purposes the randomness is "good enough".
 
-Nonetheless, it is interesting to explore how we might improve the randomness, especially as with The Merge the RANDAO contents will be available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus layer.
+Nonetheless, it is interesting to explore how it might be improved, especially as, with The Merge, the RANDAO contents will be available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus layer.
 
-The long-term fix for biasability is to use a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best any other device could do is to obtain the result in, say, 5 seconds.
+The long-term fix for biasability is to use a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best that any other device could do is to obtain the result in, say, 5 seconds.
 
 [TODO: link VDF section when done]::
 
-The idea is that RANDAO updates would come from the output of the VDF. A proposer would have to decide whether to commit its `randao_reveal` before it is possible for it to compute the actual contribution, the future output of the VDF. This eliminates any purposeful biasing of the RANDAO.
+The idea is that RANDAO updates would come from the output of the VDF. A proposer would have to decide whether to commit its `randao_reveal` before it is possible for it to compute the actual contribution: the future output of the VDF. This eliminates any opportunistic biasing of the RANDAO.
 
 Only one VDF needs to be active at any time on the network since it can publish its result for quick verification by all the other nodes.
 
@@ -2285,7 +2294,7 @@ Although a [lot of work](https://www.vdfalliance.org/) has been done on designin
 
 Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation).
 
-On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketches I did in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
+On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketches I presented in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
 
 A good place to start exploring verifiable delay functions is the [VDF Alliance site](https://www.vdfalliance.org/).
 
