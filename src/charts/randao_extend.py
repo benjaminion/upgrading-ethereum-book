@@ -12,7 +12,7 @@ def reset_memo():
 def fac(n):
     return n * fac(n - 1) if n else 1
 
-def choose(k, n):
+def choose(n, k):
     return fac(n) / fac(k) / fac(n - k)
 
 def prob_tail_eq(r, k):
@@ -27,13 +27,13 @@ def hyperdiff(q, j, k):
     if memo[j][k] is None:
         sum = q[j]**(k - 1)
         for i in range(1, k):
-            sum += choose(i, k) * hyper(q, j, i) * q[j]**(k - 1 - i)
+            sum += choose(k, i) * hyper(q, j, i) * q[j]**(k - 1 - i)
         memo[j][k] = q[j] * sum
     return memo[j][k]
 
 # Smoke test.
 # Done naively this would involve 31*6^32 (2.5e26) multiplications and 6^32 (8.0e24) additions :)
-#assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
+assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
 
 expected = [[] for i in range(KMAX + 1)]
 prob_dec = [[] for i in range(KMAX + 1)]
