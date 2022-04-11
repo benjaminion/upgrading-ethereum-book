@@ -1884,9 +1884,9 @@ To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al,[
 
 Unpredictability, arising from randomness, is an excellent first line of defence against many attacks.
 
-Unpredictability in Proof of Work comes from the process used to mine a blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar to the odds of rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other Giga hash per second (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
+Unpredictability in Proof of Work comes from the process used to mine blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar to the odds of rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other Giga hash per second (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
 
-Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is used to bring unpredictability to the selection block proposers, and to the membership of the committees that attest to blocks and sign sync data.
+Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is used to bring unpredictability to the selection of block proposers, and to the membership of the committees that attest to blocks and sign sync data.
 
 [^fn-pseudo-random]: I'm not going to distinguish the niceties of randomness and pseudo-randomness in this section. We are actually using pseudo-randomness seeded with (presumed) genuine randomness. It must be the case as it is impossible to come to consensus on genuine randomness. However, I will just call it "randomness" throughout.
 
@@ -1912,7 +1912,7 @@ Current and past RANDAO values are stored in the [beacon state](/part3/container
 
 #### Source of randomness
 
-With every [block](/part3/containers/blocks#beaconblockbody) that's proposed the proposer includes a field `randao_reveal` which is its contribution to be mixed in to the RANDAO.
+With every [block](/part3/containers/blocks#beaconblockbody) the proposer includes a field `randao_reveal` that is its contribution to be mixed in to the RANDAO.
 
 This contribution needs to satisfy two properties: it should be unpredictable by any other node, yet it should be verifiable by all nodes.
 
