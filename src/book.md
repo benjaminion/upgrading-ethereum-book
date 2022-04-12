@@ -2165,12 +2165,6 @@ As a final observation, we have ignored cases where two or more of the tail prop
 Here is the code for generating the data for the graphs above. The length of tail goes up to $k = 12$. Feel free to increase that, although it gets quite compute intensive. Twelve is enough to see the general picture.
 
 ```python
-def fac(n):
-    return n * fac(n - 1) if n else 1
-
-def choose(n, k):
-    return fac(n) / fac(k) / fac(n - k)
-
 def prob_tail_eq(r, k):
     return (1 - r) * r**k if k < N else r**k
 

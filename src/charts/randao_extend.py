@@ -1,9 +1,3 @@
-def fac(n):
-    return n * fac(n - 1) if n else 1
-
-def choose(n, k):
-    return fac(n) / fac(k) / fac(n - k)
-
 def prob_tail_eq(r, k):
     return (1 - r) * r**k if k < N else r**k
 
