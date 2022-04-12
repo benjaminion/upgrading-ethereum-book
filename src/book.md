@@ -2108,7 +2108,7 @@ The probability that we get a maximum tail length of exactly two with two attemp
 
 This example with tail length $k = 1$ results in a two-dimensional square since we have two possibilities to try. One way to calculate $p^{(1)}_j$ is to take the difference between the sum of all the products in the square side $j + 1$ and the sum of all the products in the square side $j$.
 
-Thinking of it like this helps us to generalise to the cases when $k > 1$. In those cases we are dealing with a hyper-cube of dimension $2^k$; each element is the product of $2^k$ values of $q$. To calculate $p^{(k)}_j$ we can find the difference between the sum of all the products in the $2^k$-dimensional cube side $j + 1$ and the sum of all the products in the $2^k$-dimensional cube side $j$. This is tedious to write down and involves a mind-boggling number of calculations even for quite small $k$, but see my [example code](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py) for an efficient a way to calculate it.
+Thinking of it like this helps us to generalise to the cases when $k > 1$. In those cases we are dealing with a hyper-cube of dimension $2^k$; each element is the product of $2^k$ values of $q$. To calculate $p^{(k)}_j$ we can find the difference between the sum of all the products in the $2^k$-dimensional cube side $j + 1$ and the sum of all the products in the $2^k$-dimensional cube side $j$. This is tedious to write down and involves a mind-boggling number of calculations even for quite small $k$, but see my [example code](#tail-extension-code) for an efficient a way to calculate it.
 
 Now, finally, we can calculate the expected tail length in the next epoch given that we have a tail of length $k$ in this epoch.
 
@@ -2122,7 +2122,7 @@ Graphing this for various values of $k$ we get the following. Note that the soli
 <div class="image" style="width:100%">
 
 ![Graph of the expected RANDAO tail](md/images/charts/randao_extend_0.svg)
-The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length, $E^{(k)}(r)$ given various values of tail length $k$ that I can play with. Note that $E^{(0)}(r) = E(r)$ from the graph above ([computation](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py)).
+The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length, $E^{(k)}(r)$ given various values of tail length $k$ that I can play with. Note that $E^{(0)}(r) = E(r)$ from the graph above.
 
 </div>
 
@@ -2136,7 +2136,7 @@ To investigate this, consider the following graph. Here, for each $k$ line we ha
 <div class="image" style="width:100%">
 
 ![Graph of the expected change in RANDAO tail](md/images/charts/randao_extend_1.svg)
-The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length minus my current tail length, $E^{(k)}(r) - k$ for various values of $k$ ([computation](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py)).
+The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length minus my current tail length, $E^{(k)}(r) - k$ for various values of $k$.
 
 </div>
 
@@ -2148,7 +2148,7 @@ For completeness, we shouldn't only look at expectations, but also at probabilit
 <div class="image" style="width:100%">
 
 ![Graph of the probability that my tail will shrink](md/images/charts/randao_extend_2.svg)
-The bottom axis is $r$, and the side axis is the probability that my best tail length in the next epoch is less than my current tail length for various values of tail length $k$ ([computation](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py)).
+The bottom axis is $r$, and the side axis is the probability that my best tail length in the next epoch is less than my current tail length for various values of tail length $k$.
 
 </div>
 
@@ -2158,9 +2158,55 @@ What can we conclude from this? If I control less than about half the stake, the
 
 The good news is that, if attackers control more than half the stake, they have more interesting attacks available, such as taking over the LMD fork choice rule. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack appears to be infeasible.
 
-Source code for calculating the expected tail lengths and the probabilities is [on GitHub](https://github.com/benjaminion/upgrading-ethereum-book/blob/publish/src/charts/randao_extend.py). I've limited the length of tail we are considering to $k = 7$ only because calculating beyond that is quite compute intensive. But it's enough to see the general picture.
-
 As a final observation, we have ignored cases where two or more of the tail proposals are from the same validator. As discussed [above](#randao_xor), these proposals would each result in the same RANDAO contribution and reduce my grinding options. However, with a large number of validators in the system this is a reasonable approximation to make.
+
+###### Tail extension code
+
+Here is the code for generating the data for the graphs above. The length of tail goes up to $k = 12$. Feel free to increase that, although it gets quite compute intensive. Twelve is enough to see the general picture.
+
+```python
+def fac(n):
+    return n * fac(n - 1) if n else 1
+
+def choose(n, k):
+    return fac(n) / fac(k) / fac(n - k)
+
+def prob_tail_eq(r, k):
+    return (1 - r) * r**k if k < N else r**k
+
+# The sum of the products of all the q_i in the hypercube of side j and dim k
+# Recursive is cooler, but written iteratively so that python doesn't run out of stack
+def hyper(q, j, k):
+    h = 1
+    for n in range(1, k + 1):
+        h = sum([q[i] * h for i in range(j)])
+    return h
+
+# Smoke test.
+assert abs(hyper([0.9, 0.09, 0.009, 0.0009, 0.00009, 0.00001], 6, 32) - 1.0) < 1e-12
+
+N    = 32 # The number of slots per epoch
+KMAX = 12 # The maximum length of prior tail we will consider
+NINT = 20 # The number of intervals of r between 0 and 1 to generate
+
+expected = [[] for i in range(KMAX + 1)]
+prob_dec = [[] for i in range(KMAX + 1)]
+rs = [i / NINT for i in range(1, NINT)]
+for r in rs:
+    # q[j] = the probability of having a tail of exactly j in one attempt
+    q = [prob_tail_eq(r, j) for j in range(N + 1)]
+    for k in range(KMAX + 1):
+        h = [hyper(q, j, 2**k) for j in range(N + 2)]
+        # p[j] = the probability that with a tail of k I can achieve a tail of j in the next epoch
+        p = [h[j + 1] - h[j] for j in range(N + 1)]
+        # The expected length of tail in the next epoch given r and k
+        expected[k].append(sum([j * p[j] for j in range(N + 1)]))
+        # The probability of a decrease in tail length to < k
+        prob_dec[k].append(h[k])
+print(rs)
+print(expected)
+print(prob_dec)
+```
 
 ##### Block proposals boost
 
