@@ -2244,9 +2244,9 @@ $$
 
 As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. In order to achieve a net number of exactly $j$ proposals we are looking for the combinations (avoiding double counting) where either:
 
- 1. proposing gives me exactly $j$ proposals and withholding gives no more than $j$ (that is, $\sum_{i=0}^{j}q_iq_j$); or
+ 1. proposing gives me exactly $j$ proposals and withholding gives no more than $j+1$ (that is, $\sum_{i=0}^{j+1}q_iq_j$, or rather $\sum_{i=0}^{j}q_iq_j$ anticipating that we will need to deduplicate the $q_{j+1}q_j$ element as it also turns up in the next sum); or
  2. proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head]
-
+ 
 [^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
 
 <a id="img_randomness_propose_probabilities"></a>
