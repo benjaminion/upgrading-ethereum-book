@@ -2100,13 +2100,13 @@ $$
 
 We can think about this as follows. With $k = 1$ we get two attempts, therefore $q$ appears twice in each product. To calculate $p^{(1)}_j$ we need the sum over the all the combinations of the probability of getting a tail of length exactly $j$ (that is, $q_j$) multiplied by the probability of getting a tail of $j$ or less (that is, not getting a tail longer than $j$, otherwise we would have chosen that length instead of $j$).
 
-Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded area of this diagram,
+Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded area of the next diagram.
 
 <a id="img_randomness_tail_probabilities"></a>
 <div class="image" style="width:40%">
 
 ![Matrix of tail length probabilities](md/images/diagrams/randomness_tail_probabilities.svg)
-The probability that we get a maximum tail length of exactly two with two attempts is the sum of the terms in the shaded area.
+The probability that we get a maximum tail length of exactly two with two attempts is the sum of the terms in the shaded areas. Despite the overlap, each term is included only once.
 
 </div>
 
@@ -2242,10 +2242,12 @@ p_j =
 \end{dcases}
 $$
 
-As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. In order to achieve a net number of exactly $j$ proposals we are looking for the combinations (avoiding double counting) where either:
+As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. To achieve a net number of exactly $j$ proposals we are looking for the combinations where either of the following holds.
 
- 1. proposing gives me exactly $j$ proposals and withholding gives no more than $j+1$ (that is, $\sum_{i=0}^{j+1}q_iq_j$, or rather $\sum_{i=0}^{j}q_iq_j$ anticipating that we will need to deduplicate the $q_{j+1}q_j$ element as it also turns up in the next sum); or
- 2. proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head]
+ 1. Proposing gives me exactly $j$ proposals and withholding gives no more than $j+1$ (that is, $\sum_{i=0}^{j+1}q_iq_j$). These are the elements in the horizontal bar in the diagram below.
+ 2. Proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head] These are the elements in the vertical bar in the diagram below.
+
+Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be included only once.
  
 [^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
 
@@ -2253,7 +2255,7 @@ As before, we can illustrate this by considering the matrix of probabilities. Wi
 <div class="image" style="width:40%">
 
 ![Matrix of proposal number probabilities](md/images/diagrams/randomness_propose_probabilities.svg)
-The probability that we get a net number of exactly two proposals with two attempts is the sum of the terms in the shaded area.
+The probability that we get a net number of exactly two proposals with two attempts is the sum of the terms in the shaded areas. Despite the overlap, each term is included only once.
 
 </div>
 
