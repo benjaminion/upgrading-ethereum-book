@@ -1397,11 +1397,27 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 ### Introduction
 
-In this chapter we will explore some of the fundamental innovations that make the Ethereum&nbsp;2 protocol practical. None of them is absolutely brand new &ndash; they all build to a degree on existing technologies &ndash; but in each case some dimension of its application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
+In this chapter we will explore some of the fundamental innovations that make the Ethereum&nbsp;2 protocol practical, the building blocks from which the higher level protocol is constructed.
 
-As you read, be alert to the trade-offs that underpin these design choices. It is always the trade-offs that are the gateway to deep understanding. Some of them are quite interesting. For example, neither the [shuffling](/part2/building_blocks/shuffling) algorithm nor the [state root](/part2/building_blocks/merkleization) calculation algorithm are the most efficient that we could have chosen, at least in terms of pure speed. In both these cases we preferred algorithms that enable a light client ecosystem over algorithms that might be more performant for full nodes.
+None of the buiding blocks is absolutely brand new &ndash; they all depend to a degree on existing technologies &ndash; but in each case some aspect of the application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
 
-The building blocks in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
+Be alert, as you read, to the trade-offs that underpin these design choices. The gateway to deep understanding is always in the trade-offs.
+
+Some of the trade-offs are quite interesting. For example, neither the [shuffling](/part2/building_blocks/shuffling) algorithm nor the [state root](/part2/building_blocks/merkleization) calculation algorithm are the most efficient that we could have chosen, at least in terms of pure speed. In both cases we preferred algorithms that enable a light client ecosystem over algorithms that might be more performant for full nodes.
+
+The building blocks I've grouped together in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
+
+Here's what we shall be covering:
+
+  - [BLS Signatures](/part2/building_blocks/signatures);
+  - [Randomness](/part2/building_blocks/randomness);
+  - Committees (to-do);
+  - [Shuffling](/part2/building_blocks/shuffling);
+  - Aggregator Selection (to-do);
+  - [SSZ: Simple Serialize](/part2/building_blocks/ssz);
+  - [Hash Tree Roots and Merkleization](/part2/building_blocks/merkleization);
+  - Generalised indices and Merkle proofs (to-do);
+  - Sync Committees (to-do).
 
 ### BLS Signatures <!-- /part2/building_blocks/signatures -->
 
