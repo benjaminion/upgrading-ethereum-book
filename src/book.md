@@ -570,7 +570,7 @@ Issuance is the amount of new Ether created by the protocol in order to incentiv
 
 The Eth1 chain issues new Ether in the form of block and uncle rewards. Since the London upgrade this issuance has been offset in part, or even at times exceeded by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
 
-During the current Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards on the Eth1 chain. But the base fee burn will remain, and is is very likely that the net issuance will become permanently negative: more Ether will be destroyed than created.[^fn-ultrasound-money]
+During the current Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards on the Eth1 chain. But the base fee burn will remain, and it is very likely that the net issuance will become negative &ndash; more Ether will be destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that [an equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) will be reached between Ether issuance from proof of stake and Ether destruction due to EIP-1559, leading to a steady overall supply of Ether.
 
 [^fn-ultrasound-money]: You can see Ethereum's current issuance and play with various scenarios at [ultrasound.money](https://ultrasound.money/).
 
@@ -2362,10 +2362,6 @@ A [search for RANDAO](https://ethresear.ch/search?q=RANDAO) on ethresear.ch yiel
 
 A good place to start exploring verifiable delay functions is the [VDF Alliance site](https://www.vdfalliance.org/).
 
-### Committees <!-- /part2/building_blocks/committees* -->
-
-TODO
-
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
 
 |||||
@@ -2570,6 +2566,14 @@ This property is important for light clients. Light clients are observers of the
  - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/consensus-specs/issues/323) on the specs repo.
  - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/consensus-specs/issues/563).
  - The original paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, ["An Enciphering Scheme Based on a Card Shuffle"](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). See the "generalized domain" algorithm on page 3.
+
+### Committees <!-- /part2/building_blocks/committees -->
+
+Two types of committees feature in the Altair spec, beacon committees and sync committees, which have quite different functions. We will focus on beacon commitees here, and describe sync committees is a [later section](/part2/building_blocks/sync_committees).
+
+Beacon committees (which I shall just call committees from now on) feature prominently in the Eth2 pecification, but actually have very little purpose in the current design.
+
+HERE
 
 ### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
 
