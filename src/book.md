@@ -2569,11 +2569,58 @@ This property is important for light clients. Light clients are observers of the
 
 ### Committees <!-- /part2/building_blocks/committees -->
 
-Two types of committees feature in the Altair spec, beacon committees and sync committees, which have quite different functions. We will focus on beacon commitees here, and describe sync committees is a [later section](/part2/building_blocks/sync_committees).
+#### Introduction
+
+Committees are subsets of the total set of active validators and are used to manage and distribute the overall workload across validators.
+
+The Altair spec has two types of committees, beacon committees and sync committees, which have quite different functions. We will focus on beacon commitees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
+
+Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
+
+For the duration of the epoch this active validator set is divided into (at most) `SLOTS_PER_EPOCH` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one of these committees.
+
+
+
+#### Committee assignments
+
+  - When are committees assigned. RANDAO and lookahead thing.
+  - Number of committees
+  - Committee target size; what happens when num vals is insufficient
+    Priority:
+    - 1 committee per slot
+    - 128 per committee
+    - max 2048 committees
+    - Max 2048 validators per committee (4 million total validators)
+  - Shuffling
+
+[`MAX_VALIDATORS_PER_COMMITTEE`](/part3/config/preset#max_validators_per_committee)
+
+[`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot)
+[`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee)
+[`compute_committee()`](/part3/helper/misc#compute_committee)
+
+| Validators | Threshold | Committee structure |
+| - | - | - |
+| <&nbsp;32         | `SLOTS_PER_EPOCH` | ???  |
+| <&nbsp;4096       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` | TODO |
+| <&nbsp;262,144    | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `TARGET_COMMITTEE_SIZE` | TODO |
+| <=&nbsp;4,194,304 | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | TODO |
+| >&nbsp;4,194,304  | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | [Everything breaks](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
+
+The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
+
+
+HERE
+
+
+
+
+
+
+#### Background
 
 Beacon committees (which I shall just call committees from now on) feature prominently in the Eth2 pecification, but actually have very little purpose in the current design.
 
-HERE
 
 ### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
 
