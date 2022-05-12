@@ -11,6 +11,7 @@ BEGIN {
     print "path: /annotated-spec"
     print "titles: [\"One Page Annotated Spec\",\"\",\"\"]"
     print "index: [999]"
+    print "sequence: 990"
     print "---"
 }
 
