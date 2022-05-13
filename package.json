@@ -17,7 +17,7 @@
     "gatsby-plugin-catch-links": "^4.14.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
-    "gatsby-plugin-sharp": "^4.14.0",
+    "gatsby-plugin-sharp": "^4.14.1",
     "gatsby-remark-autolink-headers": "^5.14.0",
     "gatsby-remark-copy-linked-files": "^5.14.0",
     "gatsby-remark-external-links": "^0.0.4",
