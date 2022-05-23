@@ -13,7 +13,7 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
-    "gatsby": "^4.14.0",
+    "gatsby": "^4.14.1",
     "gatsby-plugin-catch-links": "^4.14.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
