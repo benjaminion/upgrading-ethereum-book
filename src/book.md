@@ -26,7 +26,7 @@ This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethere
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
-Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but you will find better help in places like the excellent [Ethstaker](https://ethstaker.cc/) community.
+Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
 
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
 
@@ -1004,7 +1004,7 @@ Penalties are subtracted from validators' balances on the beacon chain and effec
 
 Attestations are penalised for being missing, late, or incorrect. We'll lump these together as "missed" for conciseness.
 
-Attesters are penalised for missed CASPER FFG votes, that is, missed source or target votes. But there is no penalty for a missed head vote. If a source vote is incorrect, then the target vote is missed; if the source or target vote is incorrect then the head vote is missed.
+Attesters are penalised for missed Casper FFG votes, that is, missed source or target votes. But there is no penalty for a missed head vote. If a source vote is incorrect, then the target vote is missed; if the source or target vote is incorrect then the head vote is missed.
 
 Let's update our [rewards matrix](/part2/incentives/rewards#rewards-table) to give the full picture of penalties and rewards for attestations. Recall that this shows the weights; we need to multiply by $\frac{nb}{W_{\Sigma}}$ to get the actual reward.
 
@@ -1151,7 +1151,7 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 <a id="img_inactivity_scores"></a>
 <div class="image">
 
-![A graph illustrating inctivity score scenarios](md/images/charts/inactivity_scores.svg)
+![A graph illustrating inactivity score scenarios](md/images/charts/inactivity_scores.svg)
 The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.
 
 </div>
@@ -1379,7 +1379,7 @@ Danny Ryan has presented a slightly [different angle](https://blog.ethereum.org/
 > If a single client:
 >
 >  - Does not exceed 66.6%, a fault/bug in a single client cannot be finalized.
->  - Does not exceed 50%, a fault/bug in a single client’s forkchoice cannot dominate the head of the chain.
+>  - Does not exceed 50%, a fault/bug in a single client’s fork choice cannot dominate the head of the chain.
 >  - Does not exceed 33.3%, a fault/bug in a single client cannot disrupt finality.
 
 #### Epilogue
@@ -1399,7 +1399,7 @@ It is instructive to revisit the [major incident](https://hackmd.io/@benjaminion
 
 In this chapter we will explore some of the fundamental innovations that make the Ethereum&nbsp;2 protocol practical, the building blocks from which the higher level protocol is constructed.
 
-None of the buiding blocks is absolutely brand new &ndash; they all depend to a degree on existing technologies &ndash; but in each case some aspect of the application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
+None of the building blocks is absolutely brand new &ndash; they all depend to a degree on existing technologies &ndash; but in each case some aspect of the application to Eth2 is novel. The Ethereum Foundation R&D team deserves huge credit for the research and insights behind these advances.
 
 Be alert, as you read, to the trade-offs that underpin these design choices. The gateway to deep understanding is always in the trade-offs.
 
@@ -3049,7 +3049,7 @@ Start of Part 2 (variable size elements)
 e4 748300000000000066e9000000000000c868010000000000
 ```
 
-The first thing to notice is that the `attesting_indices` list is variable size, so it is represented in Part&nbsp;1 by an offset pointing to where the actual data is. In this case, at 0xe4 bytes (228 bytes) from the start of the serialised data. The actual length of the list can be calculated as the length of the whole string (252 bytes) minus 228 bytes (the start of the list) divided by 8 bytes, one per element. Thus we recover our list of three validator indices.
+The first thing to notice is that the `attesting_indices` list is variable size, so it is represented in Part&nbsp;1 by an offset pointing to where the actual data is. In this case, at `0xe4` bytes (228 bytes) from the start of the serialised data. The actual length of the list can be calculated as the length of the whole string (252 bytes) minus 228 bytes (the start of the list) divided by 8 bytes, one per element. Thus we recover our list of three validator indices.
 
 All the remaining items are fixed size, and are encoded in-place, including recursively encoding the fixed size `AttestationData` object, and its fixed size `Checkpoint` children.
 
@@ -4998,7 +4998,7 @@ class VoluntaryExit(Container):
     validator_index: ValidatorIndex
 ```
 
-Voluntary exit messages are how a validator signals that it wants to cease being a validator. Blocks containg `VoluntaryExit` data for an epoch later than the current epoch are invalid, so nodes should buffer or ignore any future-dated exits they see.
+Voluntary exit messages are how a validator signals that it wants to cease being a validator. Blocks containing `VoluntaryExit` data for an epoch later than the current epoch are invalid, so nodes should buffer or ignore any future-dated exits they see.
 
 `VoluntaryExit` objects are never used naked; they are always wrapped up into a [`SignedVoluntaryExit`](/part3/containers/envelopes#signedvoluntaryexit) object.
 
@@ -5406,7 +5406,7 @@ Merkleization, the process of calculating the `hash_tree_root()` of an object, i
 
 #### BLS signatures
 
-See the main wirte-up on [BLS Signatures](/part2/building_blocks/signatures) for a more in-depth exploration of this topic.
+See the main write-up on [BLS Signatures](/part2/building_blocks/signatures) for a more in-depth exploration of this topic.
 
 > The [IETF BLS signature draft standard v4](https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-04) with ciphersuite `BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_` defines the following functions:
 >
