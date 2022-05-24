@@ -2264,7 +2264,7 @@ As before, we can illustrate this by considering the matrix of probabilities. Wi
  2. Proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head] These are the elements in the vertical bar in the diagram below.
 
 Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be included only once.
- 
+
 [^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
 
 <a id="img_randomness_propose_probabilities"></a>
