@@ -91,7 +91,6 @@ MEV
 Math
 Medalla
 Merkle
-Merkleised
 Merkleization
 Merkleize
 Merkleized
