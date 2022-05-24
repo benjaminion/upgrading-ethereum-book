@@ -15,6 +15,18 @@ exports.onPreInit = ({reporter}) => {
     err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
   }
 
+  reporter.info("Performing spellcheck...")
+  try {
+    const out = execSync('bin/build/spellcheck.sh src/book.md bin/build/spellcheck_my_words.txt', {encoding: 'utf8'})
+    if (out !== "") {
+      reporter.warn("Found some misspellings:")
+      out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+    }
+  } catch (err) {
+    reporter.warn("Unable to perform spellcheck:")
+    err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  }
+
   reporter.info("Unpacking book source...")
   try {
     execSync('bin/build/update.sh')
