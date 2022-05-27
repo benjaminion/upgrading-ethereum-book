@@ -2180,7 +2180,9 @@ The good news is that, if attackers control more than half the stake, they have 
 
 As a final observation, we have ignored cases where two or more of the tail proposals are from the same validator. As discussed [above](#randao_xor), these proposals would each result in the same RANDAO contribution and reduce my grinding options. However, with a large number of validators in the system this is a reasonable approximation to make.
 
-###### Tail extension code
+<a id="tail-extension-code"></a>
+<details>
+<summary>Code for calculating the length of tail with cheating</summary>
 
 Here is the code for generating the data for the graphs above. The length of tail goes up to $k = 12$. Feel free to increase that, although it gets quite compute intensive. Twelve is enough to see the general picture.
 
@@ -2221,6 +2223,8 @@ print(rs)
 print(expected)
 print(prob_dec)
 ```
+
+</details>
 
 ##### Block proposals boost
 
@@ -2281,6 +2285,27 @@ $$
 E'_{N+1} = \sum_{n=1}^{32} n \left((1 - \frac{E'_N}{32}) q_n + \frac{E'_N}{32} p_n\right)
 $$
 
+<a id="img_randao_proposals"></a>
+<div class="image" style="width:100%">
+
+![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
+The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the long-term expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
+
+</div>
+
+The maximum percentage gain in block proposals that I can acquire is shown in the following graph.
+
+<a id="img_randao_proposals_percent"></a>
+<div class="image" style="width:100%">
+
+![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
+The long-term percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.99% of proposals (8.24 per epoch rather than exactly 8), assuming that the remaining stakers are uncoordinated.
+
+</div>
+
+<details>
+<summary>Code for calculating the expected number of proposals with cheating</summary>
+
 The following Python code calculates $E'_N$ to convergence.
 
 ```python
@@ -2312,23 +2337,7 @@ for idx in range(1, nintervals + 1):
     print(r0, r0 * 32, e, 100 * (e / (r0 * 32) - 1))
 ```
 
-<a id="img_randao_proposals"></a>
-<div class="image" style="width:100%">
-
-![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
-The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the long-term expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
-
-</div>
-
-The maximum percentage gain in block proposals that I can acquire is shown in the following graph.
-
-<a id="img_randao_proposals_percent"></a>
-<div class="image" style="width:100%">
-
-![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
-The long-term percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.99% of proposals (8.24 per epoch rather than exactly 8), assuming that the remaining stakers are uncoordinated.
-
-</div>
+</details>
 
 ###### Discussion
 

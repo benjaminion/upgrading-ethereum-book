@@ -214,6 +214,14 @@ div.section-header, div.chapter-header {
   border-bottom: solid 1px #999;
 }
 
+details summary {
+  font-weight: bold;
+}
+
+details p:first-of-type {
+  padding-top: 2ex;
+}
+
 /*** Code prettifier ***/
 
 pre.language-text {
@@ -322,6 +330,9 @@ div.summary {
   }
   pre[class*="language-"] code span {
     color: black !important;
+  }
+  summary {
+    list-style: none;
   }
 }
 
