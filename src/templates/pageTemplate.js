@@ -1,5 +1,6 @@
 import React from "react"
 import { graphql } from "gatsby"
+import { Helmet } from 'react-helmet'
 
 import Layout from "../components/page"
 import Sidebar from "../components/sidebar"
@@ -13,14 +14,21 @@ import "katex/dist/katex.min.css"
 export default function Template({
   data,
 }) {
-  const { markdownRemark } = data
+  const { markdownRemark, site } = data
   const { html, frontmatter } = markdownRemark
 
   //console.log(JSON.stringify(markdownRemark, undefined, 2))
 
-  const index_array = frontmatter.path !== "/contents"
+  const indexArray = frontmatter.path !== "/contents"
         ? frontmatter.index
         : []
+
+  var pageTitle = site.siteMetadata.title
+  if (frontmatter.titles !== null) {
+    const titles = frontmatter.titles.filter(x => x !== "")
+    const number = (indexArray.length >= 2) ? indexArray.join('.') : ''
+    pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
+  }
 
   return (
     <Layout>
@@ -33,7 +41,7 @@ export default function Template({
               className="section-content"
               dangerouslySetInnerHTML={{ __html: html }}
             />
-            <Subsections indexArray={index_array} />
+            <Subsections indexArray={indexArray} />
           </div>
         </div>
         <Footer />
@@ -42,6 +50,9 @@ export default function Template({
       <div className="page-navi">
         <PageNavi path={frontmatter.path} />
       </div>
+      <Helmet>
+        <title>{pageTitle}</title>
+      </Helmet>
     </Layout>
   )
 }
@@ -53,8 +64,14 @@ export const pageQuery = graphql`
         index
         path
         sequence
+        titles
       }
       html
+    }
+    site {
+      siteMetadata {
+        title
+      }
     }
   }
 `
