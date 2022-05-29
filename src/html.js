@@ -1,5 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
+import Helmet from "react-helmet"
+import { withPrefix } from "gatsby"
 
 export default function HTML(props) {
   return (
@@ -39,34 +41,9 @@ export default function HTML(props) {
         <meta name="theme-color" content="#ffffff" />
         <link rel="stylesheet" type="text/css" href="https://eth2book.info/fonts/fonts.css" />
         {props.headComponents}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-// Open closed details elements for printing
-window.addEventListener('beforeprint', () => {
-  const allDetails = document.body.querySelectorAll('details');
-  for(let i = 0; i < allDetails.length; i++) {
-    if(allDetails[i].open) {
-      allDetails[i].dataset.open = '1';
-    } else {
-      allDetails[i].setAttribute('open', '');
-    }
-  }
-});
-
-// After printing close details elements not opened before
-window.addEventListener('afterprint', () => {
-  const allDetails = document.body.querySelectorAll('details');
-  for(let i = 0; i < allDetails.length; i++) {
-    if(allDetails[i].dataset.open) {
-      allDetails[i].dataset.open = '';
-    } else {
-      allDetails[i].removeAttribute('open');
-    }
-  }
-});
-                  `,
-        }}
-        />
+        <Helmet>
+          <script src={withPrefix('local.js')} />
+        </Helmet>
     </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}
