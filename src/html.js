@@ -12,7 +12,6 @@ export default function HTML(props) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>Upgrading Ethereum</title>
         <meta property="og:image" content="https://eth2book.info/f/android-icon-192x192.png" />
         <meta property="og:title" content="Upgrading Ethereum" />
         <meta property="og:description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
