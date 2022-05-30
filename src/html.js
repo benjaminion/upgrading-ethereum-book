@@ -1,6 +1,5 @@
 import React from "react"
 import PropTypes from "prop-types"
-import Helmet from "react-helmet"
 import { withPrefix } from "gatsby"
 
 export default function HTML(props) {
@@ -41,10 +40,8 @@ export default function HTML(props) {
         <meta name="theme-color" content="#ffffff" />
         <link rel="stylesheet" type="text/css" href="https://eth2book.info/fonts/fonts.css" />
         {props.headComponents}
-        <Helmet>
-          <script src={withPrefix('local.js')} />
-        </Helmet>
-    </head>
+        <script src={withPrefix('local.js')} />
+      </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}
         <div
