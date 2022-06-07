@@ -93,7 +93,7 @@ BEGIN{
 
     if (h_section != "") {
         print "\n<div class=\"section-header\">\n" > filename
-        print "# " h_part > filename
+        print "# " h_part "\n" > filename
         print "## " h_chapter > filename
         print "\n</div>\n" > filename
         print "### " h_section > filename

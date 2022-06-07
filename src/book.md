@@ -301,9 +301,9 @@ Much of the material in the following sections is also covered in the more recen
 
 <div class="summary">
 
- - The stake in proof of stake provides three things: an anti-Sybil mechanism, an accountability mechanism, and an incentive alignment mechanism.
- - The 32&nbsp;ETH stake size is a trade-off between network overhead, number of validators, and time to finality.
- - Combined with the Casper FFG rules, stakes provide economic finality: a quantifiable measure of the security of the chain.
+  - The stake in proof of stake provides three things: an anti-Sybil mechanism, an accountability mechanism, and an incentive alignment mechanism.
+  - The 32&nbsp;ETH stake size is a trade-off between network overhead, number of validators, and time to finality.
+  - Combined with the Casper FFG rules, stakes provide economic finality: a quantifiable measure of the security of the chain.
 
 </div>
 
@@ -398,8 +398,8 @@ For more on the mechanics of economic finality, see below under [Slashing](/part
 
 #### See also
 
- - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs for different stake sizes. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
- - [Why 32 ETH validator sizes?](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) from Vitalik's Serenity Design Rationale.
+  - [Parametrizing Casper: the decentralization/finality time/overhead tradeoff](https://medium.com/@VitalikButerin/parametrizing-casper-the-decentralization-finality-time-overhead-tradeoff-3f2011672735) presents some early reasoning about the trade-offs for different stake sizes. Things have moved on somewhat since then, most notably with the advent of BLS aggregate signatures.
+  - [Why 32 ETH validator sizes?](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) from Vitalik's Serenity Design Rationale.
 
 Vitalik's discussion document around achieving [single slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality) looks at the participation/overhead/finality trade-off space from a different perspective.
 
@@ -407,10 +407,10 @@ Vitalik's discussion document around achieving [single slot finality](https://no
 
 <div class="summary">
 
- - Each validator maintains an _effective balance_ in addition to its actual balance.
- - The validator's influence in the protocol is proportional to its effective balance, as are its rewards and penalties.
- - The effective balance tracks the validator's actual balance, but is designed to change much more rarely. This is an optimisation.
- - A validator's effective balance is capped at 32 ETH.
+  - Each validator maintains an _effective balance_ in addition to its actual balance.
+  - The validator's influence in the protocol is proportional to its effective balance, as are its rewards and penalties.
+  - The effective balance tracks the validator's actual balance, but is designed to change much more rarely. This is an optimisation.
+  - A validator's effective balance is capped at 32 ETH.
 
 </div>
 
@@ -536,9 +536,9 @@ From the spec:
 
 <div class="summary">
 
- - Issuance is the amount of new Ether created by the protocol in order to incentivise its participants.
- - An ideally running beacon chain issues a set amount of Ether per epoch, which is a multiple of the base reward per increment.
- - Total issuance is proportional to the square root of the number of validators. This is not a completely arbitrary choice.
+  - Issuance is the amount of new Ether created by the protocol in order to incentivise its participants.
+  - An ideally running beacon chain issues a set amount of Ether per epoch, which is a multiple of the base reward per increment.
+  - Total issuance is proportional to the square root of the number of validators. This is not a completely arbitrary choice.
 
 </div>
 
@@ -564,7 +564,7 @@ We will call the base reward per increment $b$ for brevity. An increment is one 
 
 The [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) is the big knob that we could turn if we wished to change the issuance rate of Ether on the beacon chain. So far it's always been set at 64 which results in the issuance graph we see below. This seems to be working very well and there are no plans to change it.
 
-#### Issuance
+#### Rewards come from issuance
 
 Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, burned transaction fees and so forth is sometimes referred to as inflation, or supply growth.
 
@@ -633,6 +633,7 @@ The expected annual percentage rewards for stakers as a function of the number o
 The choice to scale the per-validator expected reward with $\frac{1}{\sqrt{N}}$ is not obvious, and we can imagine different scenarios.
 
 If we model the per-validator reward as $r \propto N^{-p}$, then some options are as follows.
+
 1. $p = 0$: each validator earns a constant return regardless of the total number of validators. Issuance is proportional to $N$.
 2. $p = \frac{1}{2}$: issuance scales like $\sqrt{N}$, the formula we are using.
 3. $p = 1$: each validator's expected reward is inversely proportional to the total number of validators. Issuance is independent of the total number of validators.
@@ -657,12 +658,12 @@ For more background to the $\frac{1}{\sqrt{N}}$ reward curve, see
 
 <div class="summary">
 
- - Validators receive rewards for making attestations according to their view of the chain, proposing blocks, and participating in sync committees in varying proportions.
- - Votes that make up attestations must be both correct and timely in order to be rewarded.
- - The proposer's reward is a fixed proportion (1/7) of the total reward for all the duties it is including in its block.
- - A validator's expected long-term reward is $nb$ per epoch (number of increments times the base reward per increment), but there is significant variance around that due to the randomness of proposer and sync committee assignments.
- - Rewards are scaled both with a validator's effective balance and with the total participation rate of the validator set.
- - The need to defend against discouragement attacks has shaped various aspects of the protocol.
+  - Validators receive rewards for making attestations according to their view of the chain, proposing blocks, and participating in sync committees in varying proportions.
+  - Votes that make up attestations must be both correct and timely in order to be rewarded.
+  - The proposer's reward is a fixed proportion (1/7) of the total reward for all the duties it is including in its block.
+  - A validator's expected long-term reward is $nb$ per epoch (number of increments times the base reward per increment), but there is significant variance around that due to the randomness of proposer and sync committee assignments.
+  - Rewards are scaled both with a validator's effective balance and with the total participation rate of the validator set.
+  - The need to defend against discouragement attacks has shaped various aspects of the protocol.
 
 </div>
 
@@ -986,9 +987,9 @@ Discouragement Attacks attacks are analysed in a [paper](https://github.com/ethe
 
 <div class="summary">
 
- - Validators that do not fulfil their assigned duties are penalised by losing small amounts of stake.
- - Receiving a penalty is not the same as being slashed!
- - Break-even uptime for a validator is around 43%.
+  - Validators that do not fulfil their assigned duties are penalised by losing small amounts of stake.
+  - Receiving a penalty is not the same as being slashed!
+  - Break-even uptime for a validator is around 43%.
 
 </div>
 
@@ -1069,9 +1070,9 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 <div class="summary">
 
- - When the beacon chain is not finalising it enters a special "inactivity leak" mode.
- - Attesters receive no rewards. Non-participating validators receive increasingly large penalties based on their track records.
- - This is designed to eventually restore finality in the event of a permanent failure of large numbers of validators.
+  - When the beacon chain is not finalising it enters a special "inactivity leak" mode.
+  - Attesters receive no rewards. Non-participating validators receive increasingly large penalties based on their track records.
+  - This is designed to eventually restore finality in the event of a permanent failure of large numbers of validators.
 
 </div>
 
@@ -1116,6 +1117,7 @@ The value was decreased by one quarter in the Altair upgrade from $2^{26}$ to $3
 During Phase&nbsp;0, the inactivity penalty was an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time could still be quite severely penalised due to the growth of the inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair." We found during the [Medalla testnet incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that keeping a validator online when all around you is chaos is not easy. We don't want to punish stakers who are honestly doing their best.
 
 To improve this, the Altair upgrade introduced individual validator inactivity scores that are stored in the state. The scores are updated each epoch as follows.
+
   - Every epoch, irrespective of the inactivity leak,
     - decrease the score by one when the validator makes a correct timely target vote, and
     - increase the score by `INACTIVITY_SCORE_BIAS` (four) otherwise.
@@ -1193,8 +1195,8 @@ We can see that the new scoring system means that some validators will continue 
 
 From the spec:
 
- - Inactivity scores are updated during epoch processing in [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates).
- - Inactivity penalties are calculated in [`def_get_inactivity_penalty_deltas()`](/part3/transition/epoch#def_get_inactivity_penalty_deltas).
+  - Inactivity scores are updated during epoch processing in [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates).
+  - Inactivity penalties are calculated in [`def_get_inactivity_penalty_deltas()`](/part3/transition/epoch#def_get_inactivity_penalty_deltas).
 
 For the original description of the mechanics of the inactivity leak, see the [Casper paper](https://arxiv.org/abs/1710.09437), section 4.2.
 
@@ -1202,10 +1204,10 @@ For the original description of the mechanics of the inactivity leak, see the [C
 
 <div class="summary">
 
- - Validators are slashed for breaking very specific protocol rules that could be part of an attack on the chain.
- - Slashed validators are exited from the beacon chain and receive three types of penalty.
- - Correlated penalties mean that punishment is light for isolated incidents, but severe when many validators are slashed in a short time period.
- - Block proposers receive rewards for reporting evidence of slashable offences.
+  - Validators are slashed for breaking very specific protocol rules that could be part of an attack on the chain.
+  - Slashed validators are exited from the beacon chain and receive three types of penalty.
+  - Correlated penalties mean that punishment is light for isolated incidents, but severe when many validators are slashed in a short time period.
+  - Block proposers receive rewards for reporting evidence of slashable offences.
 
 </div>
 
@@ -1214,6 +1216,7 @@ For the original description of the mechanics of the inactivity leak, see the [C
 Slashing occurs when validators break very specific protocol rules when submitting attestations or block proposals which could constitute attacks on the chain. Getting slashed means losing a potentially significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty". The good news is that stakers can take simple precautions to protect against ever being slashed.
 
 Validators' stakes can be slashed for two distinct behaviours:
+
 1. as attesters, for breaking the Casper commandments, the two rules on voting for source and target checkpoints; and
 2. as proposers, for proposing two different blocks at the same height (equivocation).
 
@@ -1252,6 +1255,7 @@ This second penalty is based on the total amount of stake slashed during the 18 
 To be able to calculate this, the beacon chain maintains a record of the effective balances of all validators that were slashed during the most recent 8192 epochs (about 36 days).
 
 The correlated penalty is calculated as follows.
+
  1. Compute the sum of the effective balances (as they were when the validators were slashed) of all validators that were slashed in the previous 36 days. That is, for the 18 days preceding and the 18 days following our validator's slashing.
  2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
  3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
@@ -1306,8 +1310,8 @@ This functionality may become useful in future upgrades.
 
 From the spec:
 
- - The initial slashing penalty and proposer reward are applied in [`slash_validator()`](/part3/helper/mutators#def_slash_validator) during block processing.
- - The correlation slashing penalty is applied in [`process_slashings()`](/part3/transition/epoch#def_process_slashings) during epoch processing.
+  - The initial slashing penalty and proposer reward are applied in [`slash_validator()`](/part3/helper/mutators#def_slash_validator) during block processing.
+  - The correlation slashing penalty is applied in [`process_slashings()`](/part3/transition/epoch#def_process_slashings) during epoch processing.
 
 In the Serenity Design Rationale Vitalik gives some further background on why Ethereum&nbsp;2.0 [includes proposer slashing](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Slashing). It is specifically intended to discourage stakers from simultaneously running primary and backup nodes.
 
@@ -1315,10 +1319,10 @@ In the Serenity Design Rationale Vitalik gives some further background on why Et
 
 <div class="summary">
 
- - Beacon chain incentives strongly encourage diversity among client deployments, hosting infrastructure, and staking pools.
- - Lack of diversity puts at risk both the chain in general and all those running the majority client.
- - The greater the share of validators hosted by a single client implementation the greater the risk.
- - The beacon chain is at its most robust and fault-tolerant when no single client type manages more than one-third (33%) of validators.
+  - Beacon chain incentives strongly encourage diversity among client deployments, hosting infrastructure, and staking pools.
+  - Lack of diversity puts at risk both the chain in general and all those running the majority client.
+  - The greater the share of validators hosted by a single client implementation the greater the risk.
+  - The beacon chain is at its most robust and fault-tolerant when no single client type manages more than one-third (33%) of validators.
 
 </div>
 
@@ -1378,9 +1382,9 @@ Danny Ryan has presented a slightly [different angle](https://blog.ethereum.org/
 
 > If a single client:
 >
->  - Does not exceed 66.6%, a fault/bug in a single client cannot be finalized.
->  - Does not exceed 50%, a fault/bug in a single client’s fork choice cannot dominate the head of the chain.
->  - Does not exceed 33.3%, a fault/bug in a single client cannot disrupt finality.
+>   - Does not exceed 66.6%, a fault/bug in a single client cannot be finalized.
+>   - Does not exceed 50%, a fault/bug in a single client’s fork choice cannot dominate the head of the chain.
+>   - Does not exceed 33.3%, a fault/bug in a single client cannot disrupt finality.
 
 #### Epilogue
 
@@ -1427,10 +1431,10 @@ Here's what we shall be covering:
 
 <div class="summary">
 
- - Proof of stake protocols use digital signatures to identify their participants and hold them accountable.
- - BLS signatures can be aggregated together, making them efficient to verify at large scale.
- - Signature aggregation allows the beacon chain to scale to hundreds of thousands of validators.
- - Ethereum transaction signatures on the execution (Eth1) layer remain as-is.
+  - Proof of stake protocols use digital signatures to identify their participants and hold them accountable.
+  - BLS signatures can be aggregated together, making them efficient to verify at large scale.
+  - Signature aggregation allows the beacon chain to scale to hundreds of thousands of validators.
+  - Ethereum transaction signatures on the execution (Eth1) layer remain as-is.
 
 </div>
 
@@ -1464,7 +1468,7 @@ This signature aggregation capability was the main breakthrough that prompted us
 
 [^fn-killing-of-hybrid-casper]: The last significant update to EIP-1011 was made on the [16th of May, 2018](https://github.com/ethereum/EIPs/commit/46927c516f6dda913cbabb0beb44a3f19f02c0bb). Justin Drake's post on signature aggregation was made just [two weeks later](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion).
 
-#### BLS Signatures
+#### BLS Digital Signatures
 
 Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
 
@@ -1552,8 +1556,8 @@ With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, 
 
 Pairings are usually denoted $e(P,Q)$ and have very special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
 
- - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
- - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
+  - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
+  - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
 
 (Conventionally $G_1$ and $G_2$ are written as additive groups, and $G_T$ as multiplicative, so the $\cdot$ operator is point multiplication in $G_T$.)
 
@@ -1819,7 +1823,7 @@ The bilinearity of the pairing function allows for some pretty funky optimisatio
 
 [TODO - link to batch verification when done]::
 
-#####  Quantum security
+##### Quantum security
 
 The security (unforgeability) of BLS signatures relies, among other things, on the hardness of something called the elliptic curve discrete logarithm problem (ECDLP)[^fn-discrete-division-problem]. Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
 
@@ -1835,17 +1839,17 @@ In case someone overnight unveils a sufficiently capable quantum computer, [EIP-
 
 As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
 
- - `def `[`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
+  - `def `[`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
     - Sign a message with the validator's private key.
- - `def `[`Verify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.7)`(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
+  - `def `[`Verify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.7)`(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
     - Verify a signature given the public key and the message.
- - `def `[`Aggregate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.8)`(signatures: Sequence[BLSSignature]) -> BLSSignature`
+  - `def `[`Aggregate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.8)`(signatures: Sequence[BLSSignature]) -> BLSSignature`
     - Aggregate a list of signatures.
- - `def `[`FastAggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4)`(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) - bool`
+  - `def `[`FastAggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4)`(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) - bool`
     - Verify an aggregate signature given the message and the list of public keys corresponding to the validators that contributed to the aggregate signature.
- - `def `[`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
+  - `def `[`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
     - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
- - `def `[`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
+  - `def `[`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
     - Checks that a public key is valid. That is, it lies on the elliptic curve, it is not the group's identity point (corresponding to the zero secret key), and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
 
 The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pubkeys()` and `eth_fast_aggregate_verify()` that I describe in the [annotated spec](/part3/helper/crypto#bls-signatures).
@@ -1853,6 +1857,7 @@ The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pub
 #### See also
 
 The main standards that we strive to follow are the following IETF drafts:
+
   - [BLS Signatures](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)
   - [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09)
   - [Pairing-Friendly Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-pairing-friendly-curves-10)
@@ -1878,11 +1883,11 @@ There are several implementations of pairings on the BLS12-381 curve around, whi
 
 <div class="summary">
 
- - Assigning beacon chain duties unpredictably is an important defence against some attacks.
- - The beacon chain maintains a RANDAO to accumulate randomness.
- - Duties such as proposing blocks, committee assignments, and sync committee participation are assigned based on the RANDAO, with a limited lookahead period.
- - Block proposers verifiably contribute randomness to the RANDAO via BLS signatures over the epoch number.
- - Validators are able to bias the RANDAO to a small extent but this is not significant problem in practice.
+  - Assigning beacon chain duties unpredictably is an important defence against some attacks.
+  - The beacon chain maintains a RANDAO to accumulate randomness.
+  - Duties such as proposing blocks, committee assignments, and sync committee participation are assigned based on the RANDAO, with a limited lookahead period.
+  - Block proposers verifiably contribute randomness to the RANDAO via BLS signatures over the epoch number.
+  - Validators are able to bias the RANDAO to a small extent but this is not significant problem in practice.
 
 </div>
 
@@ -2172,7 +2177,7 @@ The bottom axis is $r$, and the side axis is the probability that my best tail l
 
 </div>
 
-###### Discussion
+###### Discussion of RANDAO takeover
 
 What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing tail length: with high probability the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely. With high enough $r$, the $2^k$ options I have for grinding the RANDAO overwhelm the probability of losing tail proposals. For large values of $k$ it will not be practical to grind through all of these options, but we need to arrive at only one good combination in order to succeed so we might not need to do the full calculation.
 
@@ -2339,7 +2344,7 @@ for idx in range(1, nintervals + 1):
 
 </details>
 
-###### Discussion
+###### Discussion of proposals boost
 
 In the above analysis we considered only the effect of using the last slot of an epoch to bias the RANDAO and saw that an entity with any amount of stake can fractionally improve its overall expected number of block proposals, assuming that everyone else is acting honestly.
 
@@ -2379,10 +2384,10 @@ A good place to start exploring verifiable delay functions is the [VDF Alliance 
 
 <div class="summary">
 
- - Shuffling is used to randomly assign validators to committees and choose block proposers.
- - Ethereum&nbsp;2 uses a "swap-or-not" shuffle.
- - Swap-or-not is an oblivious shuffle: it can be applied to single list elements and subsets.
- - This makes it ideal for supporting light clients.
+  - Shuffling is used to randomly assign validators to committees and choose block proposers.
+  - Ethereum&nbsp;2 uses a "swap-or-not" shuffle.
+  - Swap-or-not is an oblivious shuffle: it can be applied to single list elements and subsets.
+  - This makes it ideal for supporting light clients.
 
 </div>
 
@@ -2433,8 +2438,8 @@ The shuffling proceeds in rounds. In each round, a `pivot` index is pseudo-rando
 
 Next, an index `flip` is found, which is `pivot - index`, after accounting for wrap-around due to the modulo function. The important points are that, given `pivot`, every `index` maps to a unique `flip`, and that the calculation is symmetrical, so that `flip` maps to `index`.
 
- - With `index_count = 100`, `pivot = 70`, `index = 45`, we get `flip = 25`.
- - With `index_count = 100`, `pivot = 70`, `index = 82`, we get `flip = 88`.
+  - With `index_count = 100`, `pivot = 70`, `index = 45`, we get `flip = 25`.
+  - With `index_count = 100`, `pivot = 70`, `index = 82`, we get `flip = 88`.
 
 Finally in the round, a decision is made as to whether to keep the index as-is, or to update it to `flip`. This decision is pseudo-randomly made based on the values of `seed`, the round number, and the higher of `index` and `flip`.
 
@@ -2572,9 +2577,9 @@ This property is important for light clients. Light clients are observers of the
 
 #### See also
 
- - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/consensus-specs/issues/323) on the specs repo.
- - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/consensus-specs/issues/563).
- - The original paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, ["An Enciphering Scheme Based on a Card Shuffle"](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). See the "generalized domain" algorithm on page 3.
+  - The initial discussion about the search for a good shuffling algorithm is [Issue 323](https://github.com/ethereum/consensus-specs/issues/323) on the specs repo.
+  - The winning algorithm was announced in [Issue 563](https://github.com/ethereum/consensus-specs/issues/563).
+  - The original paper describing the swap-or-not shuffle is Hoang, Morris, and Rogaway, 2012, ["An Enciphering Scheme Based on a Card Shuffle"](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). See the "generalized domain" algorithm on page 3.
 
 ### Committees <!-- /part2/building_blocks/committees -->
 
@@ -2587,8 +2592,6 @@ The Altair spec has two types of committees, beacon committees and sync committe
 Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
 
 For the duration of the epoch this active validator set is divided into (at most) `SLOTS_PER_EPOCH` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one of these committees.
-
-
 
 #### Committee assignments
 
@@ -2618,18 +2621,11 @@ For the duration of the epoch this active validator set is divided into (at most
 
 The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
 
-
 HERE
-
-
-
-
-
 
 #### Background
 
 Beacon committees (which I shall just call committees from now on) feature prominently in the Eth2 specification, but actually have very little purpose in the current design.
-
 
 ### Aggregator Selection <!-- /part2/building_blocks/aggregator* -->
 
@@ -2643,11 +2639,11 @@ TODO
 
 <div class="summary">
 
- - The beacon chain uses a novel serialisation method called Simple Serialize (SSZ).
- - After much debate we chose to use SSZ for both consensus and communication.
- - SSZ is not self-describing; you need to know in advance what you are deserialising.
- - An offset scheme allows fast access to subsets of the data.
- - SSZ plays nicely with Merkleization and generalised indices in Merkle proofs.
+  - The beacon chain uses a novel serialisation method called Simple Serialize (SSZ).
+  - After much debate we chose to use SSZ for both consensus and communication.
+  - SSZ is not self-describing; you need to know in advance what you are deserialising.
+  - An offset scheme allows fast access to subsets of the data.
+  - SSZ plays nicely with Merkleization and generalised indices in Merkle proofs.
 
 </div>
 
@@ -2658,6 +2654,7 @@ TODO
 A cooking recipe is a kind of serialisation. I can write down a method for cooking something in such a way that you and others can recreate the method to cook the same thing. The recipe can be written in a book, appear online, even be spoken and memorised &ndash; this is serialisation. Using the recipe to cook something is deserialisation.
 
 Serialisation is used for three main purposes on the beacon chain.
+
 1. Consensus: if you and I each have information in a data structure, such as the beacon state, how can we know if our data structures are the same or not? Serialisation allows us to answer this question, as long as all clients use the same method. Note that this is also bound up with [Merkleization](/part2/building_blocks/merkleization).
 2. Peer-to-peer communication: we need to exchange data structures over the Internet, such as attestations and blocks. We can't transmit structured data as-is, it must be serialised for transmission and deserialised at the other end. All clients must use the same p2p serialisation, but it doesn't need to be the same as the consensus serialisation.
 3. Similarly, data structures need to be serialised for users accessing a beacon node's API. Clients are free to choose their own API serialisation. For example, the Prysm client has [an API](https://docs.prylabs.network/docs/how-prysm-works/prysm-public-api/) that uses [Protocol Buffers](https://developers.google.com/protocol-buffers) (which is being deprecated now that we have agreed a [common API format](https://github.com/ethereum/beacon-APIs) that uses both SSZ and JSON).
@@ -2727,6 +2724,7 @@ The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1
 The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
 The formal properties that we require for SSZ to be useful for both consensus and communications areas defined in the [SSZ formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
+
   1. involutive: $\texttt{deserialise}\langle T \rangle(\texttt{serialise}\langle T \rangle(O_1)) = O_1$  (required for communications), and
   2. injective: $\texttt{serialise}\langle T \rangle(O_1) = \texttt{serialise}\langle T \rangle(O_2)$ implies that $O_1 = O_2$ (required for consensus).
 
@@ -2752,6 +2750,7 @@ SSZ's basic types are very simple and limited, comprising only the following two
   - Booleans: a `boolean` is either `True` or `False`.
 
 The serialisation of basic types lives up to the "simple" name:
+
   - `uintN` types are encoded as the little-endian representation in `N/8` bytes. For example, the decimal number 12345 (`0x3039` in hexadecimal) as a `uint16` type is serialised as `0x3930` (two bytes). The same number as a `uint32` type is serialised as `0x39300000` (four bytes).
   - `boolean` types are always one byte and serialised as `0x01` for true and `0x00` for false.
 
@@ -2916,6 +2915,7 @@ SSZ distinguishes between fixed size and variable size types, and treats them di
   - Everything else is fixed size.
 
 This distinction is important when we serialise a compound type. The serialised output is created in two parts, as follows.
+
   1. The serialisation of fixed length types, along with 32-bit offsets to any variable length types.
   2. The serialisation of any variable length types.
 
@@ -2935,7 +2935,7 @@ As an example, consider the following container. It has a single fixed length `u
 
 We see that the serialisation contains an unexpected `06` byte and some zero bytes. To see where they come from I'll break down the output as follows, where the first column is the byte number in the serialised string.
 
-```
+```none
 Start of Part 1 (fixed size elements)
 00 01       - The serialisation of x = uint8(1)
 01 06000000 - A 32-bit offset to byte 6 (in little-endian format),
@@ -2968,12 +2968,14 @@ It's not only containers that use this format, it applies to any type that conta
 
 Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#aliases) here for completeness:
 
+<!-- markdownlint-disable ul-style emphasis-style -->
 > For convenience we alias:
 >
-> * `bit` to `boolean`
-> * `byte` to `uint8` (this is a basic type)
-> * `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is *not* a basic type)
-> * `ByteList[N]` to `List[byte, N]`
+>   * `bit` to `boolean`
+>   * `byte` to `uint8` (this is a basic type)
+>   * `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is *not* a basic type)
+>   * `ByteList[N]` to `List[byte, N]`
+<!-- markdownlint-enable ul-style emphasis-style -->
 
 In the main beacon chain spec, a bunch of [custom types](/part3/config/types#table_custom_types) are also defined in terms of the standard SSZ types and aliases. For example, `Slot` is an SSZ `uint64` type, `BLSPubkey` is an SSZ `Bytes48` type, and so on.
 
@@ -3059,7 +3061,7 @@ print(attestation.encode_bytes().hex())
 
 The resulting serialised blob of data that represents this `IndexedAttestation` object is (in hexadecimal):
 
-```
+```none
 e40000007d022f000000000009000000000000004f4250c05956f5c2b87129cf7372f14dd576fc15
 2543bf7042e963196b843fe61278010000000000d24639f2e661bc1adcbe7157280776cf76670fff
 0fee0691f146ab827f4f1ade13780100000000009bcd31881817ddeab686f878c8619d664e8bfa4f
@@ -3075,7 +3077,7 @@ This can be transmitted as a string of bytes over the wire and, knowing at the o
 
 To make sense of this, we'll break down the serialisation into its parts. The first column is the byte-offset from the start of the byte string (in hexadecimal). Before each line I've indicated which part of the data structure it corresponds to, and I've translated the type aliases into their basic underlying SSZ types. Remember that all integer types are little-endian, so `7d022f0000000000` is the hexadecimal number `0x2f027d`, which is 3080829 in decimal (the slot number).
 
-```
+```none
 Start of Part 1 (fixed size elements)
    4-byte offset to the variable length attestation.attesting_indices starting at 0xe4
 00 e4000000
@@ -3146,7 +3148,7 @@ print(slashing.encode_bytes().hex())
 
 From this we get the following serialisation, again shown with the byte-offset within the byte string in the first column.
 
-```
+```none
 Start of Part 1 (fixed size elements)
 0000 08000000
 0004 04010000
@@ -3186,7 +3188,7 @@ Other SSZ resources:
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
-### Hash Tree Roots and Merkleization  <!-- /part2/building_blocks/merkleization -->
+### Hash Tree Roots and Merkleization <!-- /part2/building_blocks/merkleization -->
 
 |||||
 |-|-|-|-|
@@ -3194,11 +3196,11 @@ Other SSZ resources:
 
 <div class="summary">
 
- - A hash tree root provides a succinct cryptographic digest of an SSZ data structure.
- - Calculating the hash tree root involves recursively Merkleizing the data structure.
- - Merkleization is tightly coupled to [SSZ](/part2/building_blocks/ssz) and is defined in the same spec.
- - The use of hash tree roots enables large parts of the beacon state to be cached, making it practical to operate with a monolithic beacon state.
- - Eth2's Merkleization approach facilitates [generalised indices and Merkle proofs](/part2/building_blocks/merkle_proofs) which are important for light clients.
+  - A hash tree root provides a succinct cryptographic digest of an SSZ data structure.
+  - Calculating the hash tree root involves recursively Merkleizing the data structure.
+  - Merkleization is tightly coupled to [SSZ](/part2/building_blocks/ssz) and is defined in the same spec.
+  - The use of hash tree roots enables large parts of the beacon state to be cached, making it practical to operate with a monolithic beacon state.
+  - Eth2's Merkleization approach facilitates [generalised indices and Merkle proofs](/part2/building_blocks/merkle_proofs) which are important for light clients.
 
 </div>
 
@@ -3238,8 +3240,8 @@ We will first recap Merkle trees, then extend them to Merkleization, and finally
 
 The SSZ specification uses the term "Merkleization" to refer to both
 
- - the operation of finding the root of a Merkle tree given its leaves, and
- - the operation of finding the hash tree root of an SSZ object.
+  - the operation of finding the root of a Merkle tree given its leaves, and
+  - the operation of finding the hash tree root of an SSZ object.
 
 For didactic purposes I've chosen to distinguish between these more precisely. In the following sections I'll be calling the first "Merkleization", and the second "calculating a hash tree root".
 
@@ -3352,13 +3354,14 @@ The [spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-se
   - The serialisation is right-padded with zero bytes up to the next full chunk (32 byte boundary).
   - The result is split into a list of 32 byte chunks.
   - If necessary, further (virtual) zero chunks will be appended to reach the following total lengths (only lists and bitlists might actually need extra padding):
-     - All basic types give a single chunk; no basic type has a serialisation longer than 32 bytes.
-     - `Bitlist[N]` and `Bitvector[N]`: `(N + 255) // 256` (dividing by chunk size in bits and rounding up)
-     - `List[B, N]` and `Vector[B, N]`, where `B` is a basic type: `(N * size_of(B) + 31) // 32` (dividing by chunk size in bytes and rounding up)
+    - All basic types give a single chunk; no basic type has a serialisation longer than 32 bytes.
+    - `Bitlist[N]` and `Bitvector[N]`: `(N + 255) // 256` (dividing by chunk size in bits and rounding up)
+    - `List[B, N]` and `Vector[B, N]`, where `B` is a basic type: `(N * size_of(B) + 31) // 32` (dividing by chunk size in bytes and rounding up)
 
 Containers and composite objects that result from rule 2 will have the following numbers of chunks, including zero-chunk padding where required for lists.
-   * `List[C, N]` and `Vector[C, N]`, where `C` is a composite type: `N`, since the Merkleization comprises `N` hash tree roots.
-   * Containers: `len(fields)`, since there is one hash tree root per field in the container.
+
+  - `List[C, N]` and `Vector[C, N]`, where `C` is a composite type: `N`, since the Merkleization comprises `N` hash tree roots.
+  - Containers: `len(fields)`, since there is one hash tree root per field in the container.
 
 It is not immediately obvious why lists and bitlists are padded with zero chunks up to their full maximum lengths, even if these are "virtual" chunks. However, this enables the use of generalised indices which provide a consistent way of creating Merkle proofs against hash tree roots, the topic of our [next section](/part2/building_blocks/merkle_proofs).
 
@@ -3930,6 +3933,7 @@ Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept 
 `ForkDigest` is the unique chain identifier, generated by combining information gathered at genesis with the current chain [`Version`](#version) identifier.
 
 The `ForkDigest` serves two purposes.
+
   1. Within the consensus protocol to prevent, for example, attestations from validators on one fork (that maybe haven't upgraded yet) being counted on a different fork.
   2. Within the networking protocol to help to distinguish between useful peers that on the same chain, and useless peers that are on a different chain. This usage is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice), where `ForkDigest` appears frequently.
 
@@ -3969,9 +3973,9 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 #### References
 
- - A [primer on Merkle roots](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/).
-   - See also [Wikipedia on Merkle Trees](https://en.wikipedia.org/wiki/Merkle_tree).
- - I have written an [intro to the BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381) elsewhere.
+  - A [primer on Merkle roots](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/).
+    - See also [Wikipedia on Merkle Trees](https://en.wikipedia.org/wiki/Merkle_tree).
+  - I have written an [intro to the BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381) elsewhere.
 
 ### Constants <!-- /part3/config/constants -->
 
@@ -4135,12 +4139,12 @@ When random numbers are required in-protocol, one way they are generated is by h
 
 In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate domain before being signed:
 
- - Signed block proposals incorporate `DOMAIN_BEACON_PROPOSER`
- - Signed attestations incorporate `DOMAIN_BEACON_ATTESTER`
- - RANDAO reveals are BLS signatures, and use `DOMAIN_RANDAO`
- - Deposit data messages incorporate `DOMAIN_DEPOSIT`
- - Validator voluntary exit messages incorporate `DOMAIN_VOLUNTARY_EXIT`
- - Sync committee signatures incorporate `DOMAIN_SYNC_COMMITTEE`
+  - Signed block proposals incorporate `DOMAIN_BEACON_PROPOSER`
+  - Signed attestations incorporate `DOMAIN_BEACON_ATTESTER`
+  - RANDAO reveals are BLS signatures, and use `DOMAIN_RANDAO`
+  - Deposit data messages incorporate `DOMAIN_DEPOSIT`
+  - Validator voluntary exit messages incorporate `DOMAIN_VOLUNTARY_EXIT`
+  - Sync committee signatures incorporate `DOMAIN_SYNC_COMMITTEE`
 
 In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
@@ -4259,6 +4263,7 @@ The parameters prefixed `HYSTERESIS_` control the way that effective balance is 
 The original hysteresis design had an [unintended effect](https://github.com/ethereum/consensus-specs/issues/1609) that might have encouraged stakers to over-deposit or make multiple deposits in order to maintain a balance above 32 Ether at all times. If a validator's balance were to drop below 32 Ether soon after depositing, however briefly, the effective balance would have immediately dropped to 31 Ether and taken a long time to recover. This would have resulted in a 3% reduction in rewards for a period.
 
 This problem was addressed by [making the hysteresis configurable](https://github.com/ethereum/consensus-specs/pull/1627) via these parameters. Specifically, these settings mean:
+
  1. if a validators' balance falls 0.25&nbsp;Ether below its effective balance, then its effective balance is reduced by 1&nbsp;Ether
  2. if a validator's balance rises 1.25&nbsp;Ether above its effective balance, then its effective balance is increased by 1&nbsp;Ether
 
@@ -4513,9 +4518,9 @@ These parameters are used to size lists in the beacon block bodies for the purpo
 
 Some comments on the chosen values:
 
- - I have suggested [elsewhere](https://github.com/ethereum/consensus-specs/issues/2152) reducing `MAX_DEPOSITS` from sixteen to one to ensure that more validators must process deposits, which encourages them to run Eth1 clients.
- - At first sight, there looks to be a disparity between the number of proposer slashings and the number of attester slashings that may be included in a block. But note that an attester slashing (a) can be much larger than a proposer slashing, and (b) can result in many more validators getting slashed than a proposer slashing.
- - `MAX_ATTESTATIONS` is double the value of [`MAX_COMMITTEES_PER_SLOT`](#max_committees_per_slot). This allows there to be an empty slot (with no block proposal), yet still include all the attestations for the empty slot in the next slot. Since, ideally, each committee produces a single aggregate attestation, a block can hold two slots' worth of aggregate attestations.
+  - I have suggested [elsewhere](https://github.com/ethereum/consensus-specs/issues/2152) reducing `MAX_DEPOSITS` from sixteen to one to ensure that more validators must process deposits, which encourages them to run Eth1 clients.
+  - At first sight, there looks to be a disparity between the number of proposer slashings and the number of attester slashings that may be included in a block. But note that an attester slashing (a) can be much larger than a proposer slashing, and (b) can result in many more validators getting slashed than a proposer slashing.
+  - `MAX_ATTESTATIONS` is double the value of [`MAX_COMMITTEES_PER_SLOT`](#max_committees_per_slot). This allows there to be an empty slot (with no block proposal), yet still include all the attestations for the empty slot in the next slot. Since, ideally, each committee produces a single aggregate attestation, a block can hold two slots' worth of aggregate attestations.
 
 #### Sync committee
 
@@ -4612,7 +4617,7 @@ Network delays are the main limiting factor in shortening the slot length. Three
 
 This slot length has to account for shard blocks as well in later phases. There was some discussion around having the beacon chain and shards on differing cadences, but the latest sharding design tightly couples the beacon chain with the shards. Shard blocks under this design will be much larger, which led to the extension of the slot to 12 seconds.
 
-There is a general intention to shorten the slot time in future, perhaps to [8 seconds](https://github.com/ethereum/consensus-specs/issues/1890#issue-638024803, if it proves possible to do this in practice. Or perhaps to lengthen it to [16 seconds](https://ethresear.ch/t/two-slot-proposer-builder-separation/10980?u=benjaminion).
+There is a general intention to shorten the slot time in future, perhaps to [8 seconds](https://github.com/ethereum/consensus-specs/issues/1890#issue-638024803), if it proves possible to do this in practice. Or perhaps to lengthen it to [16 seconds](https://ethresear.ch/t/two-slot-proposer-builder-separation/10980?u=benjaminion).
 
 ##### `SECONDS_PER_ETH1_BLOCK`
 
@@ -4719,8 +4724,8 @@ Client implementations in different languages will obviously use their own parad
 
 Two notes directly from the spec:
 
- - The definitions are ordered topologically to facilitate execution of the spec.
- - Fields missing in container instantiations default to their [zero value](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md#default-values).
+  - The definitions are ordered topologically to facilitate execution of the spec.
+  - Fields missing in container instantiations default to their [zero value](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md#default-values).
 
 ### Misc dependencies <!-- /part3/containers/dependencies -->
 
@@ -4794,15 +4799,16 @@ A validator's record is [created](/part3/transition/block#def_get_validator_from
 
 Also stored in `Validator`:
 
- - `pubkey` serves as both the unique identity of the validator and the means of cryptographically verifying messages purporting to have been signed by it. The public key is stored raw, unlike in Eth1, where it is hashed to form the account address. This allows public keys to be aggregated for verifying aggregated attestations.
- - Validators actually have two private/public key pairs, the one above used for signing protocol messages, and a separate "withdrawal key". `withdrawal_credentials` is a commitment generated from the validator's withdrawal key so that, at some time in the future, a validator can prove it owns the funds and will be able to withdraw them. There are two types of [withdrawal credential](/part3/config/constants#withdrawal-prefixes) currently defined, one corresponding to BLS keys, and one corresponding to standard Ethereum ECDSA keys.
- - `effective_balance` is a topic of its own that we've [touched upon already](/part3/config/preset#max_effective_balance), and will discuss more fully when we look at [effective balances updates](/part3/transition/epoch#effective-balances-updates).
- - `slashed` indicates that a validator has been slashed, that is, punished for violating the slashing conditions. A validator can be slashed only once.
- - The remaining values are the epochs in which the validator changed, or is due to change state.
+  - `pubkey` serves as both the unique identity of the validator and the means of cryptographically verifying messages purporting to have been signed by it. The public key is stored raw, unlike in Eth1, where it is hashed to form the account address. This allows public keys to be aggregated for verifying aggregated attestations.
+  - Validators actually have two private/public key pairs, the one above used for signing protocol messages, and a separate "withdrawal key". `withdrawal_credentials` is a commitment generated from the validator's withdrawal key so that, at some time in the future, a validator can prove it owns the funds and will be able to withdraw them. There are two types of [withdrawal credential](/part3/config/constants#withdrawal-prefixes) currently defined, one corresponding to BLS keys, and one corresponding to standard Ethereum ECDSA keys.
+  - `effective_balance` is a topic of its own that we've [touched upon already](/part3/config/preset#max_effective_balance), and will discuss more fully when we look at [effective balances updates](/part3/transition/epoch#effective-balances-updates).
+  - `slashed` indicates that a validator has been slashed, that is, punished for violating the slashing conditions. A validator can be slashed only once.
+  - The remaining values are the epochs in which the validator changed, or is due to change state.
 
 [TODO: link to validator lifecycle chapter]::
 
 A detailed explanation of the stages in a validator's lifecycle is [here](https://notes.ethereum.org/@hww/lifecycle), and we'll be covering it in detail as we work through the beacon chain logic. But, in simplified form, progress is as follows:
+
   1. A 32 ETH deposit has been made on the Ethereum&nbsp;1 chain. No validator record exists yet.
   2. The deposit is processed by the beacon chain at some slot. A validator record is created with all epoch fields set to `FAR_FUTURE_EPOCH`.
   3. At the end of the current epoch, the `activation_eligibility_epoch` is set to the next epoch.
@@ -4874,8 +4880,8 @@ Prior to Altair, `Attestation`s received in blocks were verified then temporaril
 
 A `PendingAttestation` is an [`Attestation`](/part3/containers/operations#attestation) minus the signature, plus a couple of fields related to reward calculation:
 
- - `inclusion_delay` is the number of slots between the attestation having been made and it being included in a beacon block by the block proposer. Validators are rewarded for getting their attestations included in blocks, but the reward used to decline in inverse proportion to the inclusion delay. This incentivised swift attesting and communicating by validators.
- - `proposer_index` is the block proposer that included the attestation. The block proposer gets a micro reward for every validator's attestation it includes, not just for the aggregate attestation as a whole. This incentivises efficient finding and packing of aggregations, since the number of aggregate attestations per block is capped.
+  - `inclusion_delay` is the number of slots between the attestation having been made and it being included in a beacon block by the block proposer. Validators are rewarded for getting their attestations included in blocks, but the reward used to decline in inverse proportion to the inclusion delay. This incentivised swift attesting and communicating by validators.
+  - `proposer_index` is the block proposer that included the attestation. The block proposer gets a micro reward for every validator's attestation it includes, not just for the aggregate attestation as a whole. This incentivises efficient finding and packing of aggregations, since the number of aggregate attestations per block is capped.
 
 Taken together, these rewards are designed to incentivise the whole network to collaborate to do efficient attestation aggregation (proposers want to include only well-aggregated attestations; validators want to get their attestations included, so will ensure that they get well aggregated).
 
@@ -4922,6 +4928,7 @@ The basic information necessary to either add a validator to the registry, or to
 See the [`Validator`](#validator) container for more on `withdrawal_credentials`.
 
 There are two protections that `DepositMessages` get at different points.
+
    1. [`DepositData`](#depositdata) is included in beacon blocks as a [`Deposit`](/part3/containers/operations#deposit), which adds a Merkle proof that the data has been registered with the Eth1 deposit contract.
    2. When the containing beacon block is processed, deposit messages are stored, pending processing at the end of the epoch, in the beacon state as [`DepositData`](#depositdata). This includes the pending validator's BLS signature so that the authenticity of the `DepositMessage` can be verified before a validator is added.
 
@@ -5263,9 +5270,9 @@ Previously, during Phase&nbsp;0, we stored two epochs' worth of actual attestati
 
 Ethereum&nbsp;2.0 uses the [Casper FFG](https://arxiv.org/pdf/1710.09437.pdf) finality mechanism, with a [k-finality](https://docs.google.com/presentation/d/1MZ-E6TVwomt4rqz-P2Bd_X3DFUW9fWDQkxUP_QJhkyw/edit#slide=id.g621d74a5e7_0_159) optimisation, where k&nbsp;=&nbsp;2. The above objects in the state are the data that need to be tracked in order to apply the finality rules.
 
- - `justification_bits` is only four bits long. It tracks the justification status of the last four epochs: 1 if justified, 0 if not. This is used when [calculating](/part3/transition/epoch#justification-and-finalization) whether we can finalise an epoch.
- - Outside of the finality calculations, `previous_justified_checkpoint` and `current_justified_checkpoint` are used to [filter](/part3/helper/accessors#get_attestation_participation_flag_indices) attestations: valid blocks include only attestations with a source checkpoint that matches the justified checkpoint in the state for the attestation's epoch.
- - `finalized_checkpoint`: the network has agreed that the beacon chain state at or before that epoch will never be reverted. So, for one thing, the fork choice rule doesn't need to go back any further than this. The Casper FFG mechanism is specifically constructed so that two conflicting finalized checkpoints cannot be created without at least one third of validators being slashed.
+  - `justification_bits` is only four bits long. It tracks the justification status of the last four epochs: 1 if justified, 0 if not. This is used when [calculating](/part3/transition/epoch#justification-and-finalization) whether we can finalise an epoch.
+  - Outside of the finality calculations, `previous_justified_checkpoint` and `current_justified_checkpoint` are used to [filter](/part3/helper/accessors#get_attestation_participation_flag_indices) attestations: valid blocks include only attestations with a source checkpoint that matches the justified checkpoint in the state for the attestation's epoch.
+  - `finalized_checkpoint`: the network has agreed that the beacon chain state at or before that epoch will never be reverted. So, for one thing, the fork choice rule doesn't need to go back any further than this. The Casper FFG mechanism is specifically constructed so that two conflicting finalized checkpoints cannot be created without at least one third of validators being slashed.
 
 <a id="inactivity"></a>
 
@@ -5287,7 +5294,6 @@ There was a period during which beacon state was split into "crystallized state"
 ### Signed envelopes <!-- /part3/containers/envelopes -->
 
 The following are just wrappers for more basic types, with an added signature.
-
 
 #### `SignedVoluntaryExit`
 
@@ -5329,7 +5335,9 @@ Through the magic of [SSZ hash tree roots](/part2/building_blocks/merkleization)
 
 ### Preamble
 
+<!-- markdownlint-disable emphasis-style -->
 > *Note*: The definitions below are for specification purposes and are not necessarily optimal implementations.
+<!-- markdownlint-enable emphasis-style -->
 
 This note in the spec is super important for implementers! There are many, many optimisations of the below routines that are being used in practice; a naive implementation would be impractically slow for mainnet configurations. As long as the optimised code produces identical results to the code here, then all is fine.
 
@@ -5392,11 +5400,11 @@ Fun fact: if you `xor` two `byte` types in Java, the result is a 32 bit (signed)
 
 For the most part, integers are integers and bytes are bytes, and they don't mix much. But there are a few places where we need to convert from integers to bytes:
 
- - several times in the [`compute_shuffled_index()`](/part3/helper/misc#def_compute_shuffled_index) algorithm;
- - in [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) for selecting a proposer weighted by stake;
- - in [`get_seed()`](/part3/helper/accessors#def_get_seed) to mix the epoch number into the randao mix;
- - in [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index) to mix the slot number into the per-epoch randao seed; and
- - in [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices).
+  - several times in the [`compute_shuffled_index()`](/part3/helper/misc#def_compute_shuffled_index) algorithm;
+  - in [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) for selecting a proposer weighted by stake;
+  - in [`get_seed()`](/part3/helper/accessors#def_get_seed) to mix the epoch number into the randao mix;
+  - in [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index) to mix the slot number into the per-epoch randao seed; and
+  - in [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices).
 
 You'll note that in every case, the purpose of the conversion is for the integer to form part of a byte string that is hashed to create (pseudo-)randomness.
 
@@ -5470,12 +5478,12 @@ See the main write-up on [BLS Signatures](/part2/building_blocks/signatures) for
 
 > The [IETF BLS signature draft standard v4](https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-04) with ciphersuite `BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_` defines the following functions:
 >
-> - `def Sign(privkey: int, message: Bytes) -> BLSSignature`
-> - `def Verify(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
-> - `def Aggregate(signatures: Sequence[BLSSignature]) -> BLSSignature`
-> - `def FastAggregateVerify(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool`
-> - `def AggregateVerify(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
-> - `def KeyValidate(pubkey: BLSPubkey) -> bool`
+>   - `def Sign(privkey: int, message: Bytes) -> BLSSignature`
+>   - `def Verify(pubkey: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool`
+>   - `def Aggregate(signatures: Sequence[BLSSignature]) -> BLSSignature`
+>   - `def FastAggregateVerify(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool`
+>   - `def AggregateVerify(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
+>   - `def KeyValidate(pubkey: BLSPubkey) -> bool`
 >
 > The above functions are accessed through the `bls` module, e.g. `bls.Verify`.
 
@@ -5662,6 +5670,7 @@ def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationDa
 This predicate is used by [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) to check that the two sets of alleged conflicting attestation data in an [`AttesterSlashing`](/part3/containers/operations#attesterslashing) do in fact qualify as slashable.
 
 There are two ways for validators to get slashed under Casper FFG:
+
   1. A double vote: voting more than once for the same target epoch, or
   2. A surround vote: the source&ndash;target interval of one attestation entirely contains the source&ndash;target interval of a second attestation from the same validator or validators. The reporting block proposer needs to take care to order the `IndexedAttestation`s within the `AttesterSlashing` object so that the first set of votes surrounds the second. (The opposite ordering also describes a slashable offence, but is not checked for here.)
 
@@ -5695,6 +5704,7 @@ def is_valid_indexed_attestation(state: BeaconState, indexed_attestation: Indexe
 [IndexedAttestation](/part3/containers/dependencies#indexedattestation)s differ from [Attestation](/part3/containers/operations#attestation)s in that the latter record the contributing validators in a bitlist and the former explicitly list the global indices of the contributing validators.
 
 An [IndexedAttestation](/part3/containers/dependencies#indexedattestation) passes this validity test only if all of the following apply.
+
  1. There is at least one validator index present.
  2. The list of validators contains no duplicates (the Python `set` function performs deduplication).
  3. The indices of the validators are sorted. (It is not clear to me why this is required. It's used in the duplicate check here, but that could just be replaced by checking the set size.)
@@ -5778,6 +5788,7 @@ Why do this rather than a simpler, more efficient, conventional shuffle? It's al
 As stated in the code comments, this is an implementation of the "swap-or-not" shuffle, described in [the cited paper](https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf). Vitalik [kicked off a search](https://github.com/ethereum/consensus-specs/issues/323) for a shuffle with these properties in late 2018. With the help of Professor Dan Boneh of Stanford University, the swap-or-not [was identified](https://github.com/ethereum/consensus-specs/issues/563) as a candidate a couple of months later, and [adopted](https://github.com/ethereum/consensus-specs/pull/576) into the spec.
 
 The algorithm breaks down as follows. For each iteration (each round), we start with a current `index`.
+
 1. Pseudo-randomly select a pivot. This is a 64-bit integer based on the seed and current round number. This domain is large enough that any non-uniformity caused by taking the modulus in the next step is [entirely negligible](https://github.com/ethereum/consensus-specs/pull/576#issuecomment-463293660).
 2. Use `pivot` to find another index in the list of validators, `flip`, which is `pivot - index` accounting for wrap-around in the list.
 3. Calculate a single pseudo-random bit based on the seed, the current round number, and some bytes from either `index` or `flip` depending on which is greater.
@@ -5787,9 +5798,9 @@ We are effectively swapping cards in a deck based on a deterministic algorithm.
 
 The way that `position` is broken down is worth noting:
 
- - Bits 0-2 (3 bits) are used to select a single bit from the eight bits of `byte`.
- - Bits 3-7 (5 bits) are used to select a single byte from the thirty-two bytes of `source`.
- - Bits 8-39 (32 bits) are used in generating `source`. Note that the upper two bytes of this will always be zero in practice, due to limits on the number of active validators.
+  - Bits 0-2 (3 bits) are used to select a single bit from the eight bits of `byte`.
+  - Bits 3-7 (5 bits) are used to select a single byte from the thirty-two bytes of `source`.
+  - Bits 8-39 (32 bits) are used in generating `source`. Note that the upper two bytes of this will always be zero in practice, due to limits on the number of active validators.
 
 [`SHUFFLE_ROUND_COUNT`](/part3/config/preset#shuffle_round_count) is, and always has been, 90 in the mainnet configuration, as explained there.
 
@@ -5833,8 +5844,8 @@ A validator's chance of being the proposer is [weighted](https://github.com/ethe
 
 To account for the need to weight by effective balance, this function implements as a try-and-increment algorithm. A counter `i` starts at zero. This counter does double duty:
 
- - First `i` is used to uniformly select a candidate proposer with probability $1/N$ where, $N$ is the number of active validators. This is done by using the [`compute_shuffled_index`](#compute_shuffled_index) routine to shuffle index `i` to a new location, which is then the `candidate_index`.
- - Then `i` is used to generate a pseudo-random byte using the hash function as a seeded PRNG with at least 256 bits of output. The lower 5 bits of `i` select a byte in the hash function, and the upper bits salt the seed. (An obvious optimisation is that the output of the hash changes only once every 32 iterations.)
+  - First `i` is used to uniformly select a candidate proposer with probability $1/N$ where, $N$ is the number of active validators. This is done by using the [`compute_shuffled_index`](#compute_shuffled_index) routine to shuffle index `i` to a new location, which is then the `candidate_index`.
+  - Then `i` is used to generate a pseudo-random byte using the hash function as a seeded PRNG with at least 256 bits of output. The lower 5 bits of `i` select a byte in the hash function, and the upper bits salt the seed. (An obvious optimisation is that the output of the hash changes only once every 32 iterations.)
 
 The `if` test is where the weighting by effective balance is done. If the candidate has `MAX_EFFECTIVE_BALANCE`, it will always pass this test and be returned as the proposer. If the candidate has a fraction of `MAX_EFFECTIVE_BALANCE` then that fraction is the probability of being returned as proposer.
 
@@ -5871,10 +5882,10 @@ Every epoch, a fresh set of committees is generated; during an epoch, the commit
 
 Looking at the parameters in reverse order:
 
- - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](/part3/helper/accessors#def_get_committee_count_per_slot).
- - `index` is the committee number within the epoch, running from `0` to `count - 1`.
- - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain_beacon_attester)).
- - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
+  - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](/part3/helper/accessors#def_get_committee_count_per_slot).
+  - `index` is the committee number within the epoch, running from `0` to `count - 1`.
+  - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain_beacon_attester)).
+  - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
 Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
 
@@ -6016,6 +6027,7 @@ def compute_domain(domain_type: DomainType, fork_version: Version=None, genesis_
 ```
 
 When dealing with signed messages, the signature "domains" are separated according to three independent factors:
+
  1. All signatures include a [`DomainType`](/part3/config/constants#domain-types) relevant to the message's purpose, which is just some cryptographic hygiene in case the same message is to be signed for different purposes at any point.
  2. All but signatures on deposit messages include the fork version. This ensures that messages across different forks of the chain become invalid, and that validators won't be slashed for signing attestations on two different chains (this is allowed).
  3. And, [now](https://github.com/ethereum/consensus-specs/pull/1614), the root hash of the validator Merkle tree at Genesis is included. Along with the fork version this gives a unique identifier for our chain.
@@ -6046,6 +6058,7 @@ def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
 ```
 
 This is a pre-processor for signing objects with BLS signatures:
+
  1. calculate the [hash tree root](/part3/helper/crypto#hash_tree_root) of the object;
  2. combine the hash tree root with the [`Domain`](/part3/config/types#domain) inside a temporary [`SigningData`](/part3/containers/dependencies#signingdata) object;
  3. return the hash tree root of that, which is the data to be signed.
@@ -6302,6 +6315,7 @@ def get_committee_count_per_slot(state: BeaconState, epoch: Epoch) -> uint64:
 Every slot in a given epoch has the same number of beacon committees, as calculated by this function.
 
 As far as the LMD GHOST consensus protocol is concerned, all the validators attesting in a slot effectively act as a single large committee. However, organising them into multiple committees gives two benefits.
+
  1. Having multiple smaller committees reduces the load on the aggregators that collect and aggregate the attestations from committee members. This is important, as validating the signatures and aggregating them takes time. The downside is that blocks need to be larger, as, in the best case, there are up to 64 aggregate attestations to store per block rather than a single large aggregate signature over all attestations.
  2. It maps well onto the future plans for data shards, when each committee will be responsible for committing to a block on one shard in addition to its current duties.
 
@@ -6311,9 +6325,9 @@ Subject to these constraints, the actual number of committees per slot is $N / 4
 
 The intended behaviour looks like this:
 
- - The ideal case is that there are [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) = 64 committees per slot. This maps to one committee per slot per shard once data sharding has been implemented. These committees will be responsible for voting on shard crosslinks. There must be at least 262,144 active validators to achieve this.
- - If there are fewer active validators, then the number of committees per shard is reduced below 64 in order to maintain a minimum committee size of [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) = 128. In this case, not every shard will get crosslinked at every slot (once sharding is in place).
- - Finally, only if the number of active validators falls below 4096 will the committee size be reduced to less than 128. With so few validators, the chain has no meaningful security in any case.
+  - The ideal case is that there are [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) = 64 committees per slot. This maps to one committee per slot per shard once data sharding has been implemented. These committees will be responsible for voting on shard crosslinks. There must be at least 262,144 active validators to achieve this.
+  - If there are fewer active validators, then the number of committees per shard is reduced below 64 in order to maintain a minimum committee size of [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) = 128. In this case, not every shard will get crosslinked at every slot (once sharding is in place).
+  - Finally, only if the number of active validators falls below 4096 will the committee size be reduced to less than 128. With so few validators, the chain has no meaningful security in any case.
 
 |||
 |-|-|
@@ -6473,8 +6487,8 @@ def get_indexed_attestation(state: BeaconState, attestation: Attestation) -> Ind
 
 Lists of validators within committees occur in two forms in the specification.
 
- - They can be compressed into a bitlist, in which each bit represents the presence or absence of a validator from a particular committee. The committee is referenced by slot, and committee index within that slot. This is how sets of validators are represented in [`Attestation`](/part3/containers/operations#attestation)s.
- - Or they can be listed explicitly by their validator indices, as in [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s. Note that the list of indices is sorted: an attestation is [invalid](/part3/helper/predicates#is_valid_indexed_attestation) if not.
+  - They can be compressed into a bitlist, in which each bit represents the presence or absence of a validator from a particular committee. The committee is referenced by slot, and committee index within that slot. This is how sets of validators are represented in [`Attestation`](/part3/containers/operations#attestation)s.
+  - Or they can be listed explicitly by their validator indices, as in [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation)s. Note that the list of indices is sorted: an attestation is [invalid](/part3/helper/predicates#is_valid_indexed_attestation) if not.
 
 `get_indexed_attestation()` converts from the former representation to the latter. The slot number and the committee index are provided by the [`AttestationData`](/part3/containers/dependencies#attestationdata) and are used to reconstruct the committee members via [`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee). The supplied bitlist will have come from an `Attestation`.
 
@@ -6553,7 +6567,9 @@ It's fairly clear why block proposers are selected with a probability proportion
 
 #### `get_next_sync_committee`
 
+<!-- markdownlint-disable emphasis-style -->
 > *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part3/altair-fork#upgrading-the-state).
+<!-- markdownlint-enable emphasis-style -->
 
 The random seed that generates the sync committee is based on the number of the next epoch. [`get_next_sync_committee_indices()`](#def_get_next_sync_committee_indices) doesn't contain any check that the epoch corresponds to a sync-committee change boundary, which allowed the timing of the Altair upgrade to be more flexible. But a consequence is that you will get an incorrect committee if you call `get_next_sync_committee()` at the wrong time.
 
@@ -6670,11 +6686,11 @@ The `assert` statement is interesting. If an attestation does not have the corre
 
 After checking the validity of the votes, the timeliness of each vote is checked. Let's take them in reverse order.
 
- - Correct head votes must be included immediately, that is, in the very next slot.
+  - Correct head votes must be included immediately, that is, in the very next slot.
     - Head votes, used for LMD GHOST consensus, are not useful after one slot.
- - Correct target votes must be included within 32 slots, one epoch.
+  - Correct target votes must be included within 32 slots, one epoch.
     - Target votes are useful at any time, but it is simpler if they don't span more than a couple of epochs, so 32 slots is a reasonable limit. This check is actually redundant since attestations in blocks cannot be older than 32 slots.
- - Correct source votes must be included within 5 slots (`integer_squareroot(32)`).
+  - Correct source votes must be included within 5 slots (`integer_squareroot(32)`).
     - This is the geometric mean of 1 (the timely head threshold) and 32 (the timely target threshold). This is an arbitrary choice. Vitalik's view[^fn_vitalik_geometric_mean] is that, with this setting, the cumulative timeliness rewards most closely match an exponentially decreasing curve, which "feels more logical".
 
 [^fn_vitalik_geometric_mean]: From a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum Research Discord server.
@@ -6858,12 +6874,12 @@ Both [proposer slashings](/part3/transition/block#proposer-slashings) and [attes
 
 When a validator is slashed, several things happen immediately:
 
- - The validator is processed for exit via [`initiate_validator_exit()`](#initiate_validator_exit), so it joins the exit queue.
- - The validator is marked as slashed. This information is used when calculating rewards and penalties: while being exited, whatever it does, a slashed validator receives penalties as if it had failed to propose or attest, including the inactivity leak if applicable.
- - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. The postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
- - The effective balance of the validator is added to the accumulated effective balances of validators slashed this epoch, and stored in the circular list, `state.slashings`. This will later be used by the slashing penalty calculation mentioned in the previous point.
- - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair) is applied. With current values, this is a maximum of 0.5 Ether, increased from 0.25 Ether in Phase&nbsp;0. The plan is to increase this to 1 Ether at The Merge.
- - The block proposer that included the slashing proof receives a reward.
+  - The validator is processed for exit via [`initiate_validator_exit()`](#initiate_validator_exit), so it joins the exit queue.
+  - The validator is marked as slashed. This information is used when calculating rewards and penalties: while being exited, whatever it does, a slashed validator receives penalties as if it had failed to propose or attest, including the inactivity leak if applicable.
+  - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. The postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
+  - The effective balance of the validator is added to the accumulated effective balances of validators slashed this epoch, and stored in the circular list, `state.slashings`. This will later be used by the slashing penalty calculation mentioned in the previous point.
+  - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair) is applied. With current values, this is a maximum of 0.5 Ether, increased from 0.25 Ether in Phase&nbsp;0. The plan is to increase this to 1 Ether at The Merge.
+  - The block proposer that included the slashing proof receives a reward.
 
 In short, a slashed validator receives an initial minor penalty, can expect to receive a further penalty later, and is marked for exit.
 
@@ -6888,6 +6904,7 @@ This is a very important statement of how the spec deals with invalid conditions
 People who do [formal verification](https://github.com/ConsenSys/eth2.0-dafny) of the specification [don't much like this](https://github.com/ethereum/consensus-specs/issues/1797), as having assert statements in running code is an anti-pattern: it is better to ensure that your code can simply never fail.
 
 Anyway, the beacon chain state transition has three elements:
+
   1. [slot processing](#def_process_slots), which is performed for every slot regardless of what else is happening;
   2. [epoch processing](/part3/transition/epoch#epoch-processing), which happens every [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) (32) slots, again regardless of whatever else is going on; and,
   3. [block processing](/part3/transition/block#block-processing), which happens only in slots for which a beacon block has been received.
@@ -7122,6 +7139,7 @@ In $k$-finality, if we have a consecutive set of $k$ justified checkpoints ${C_j
 The Casper FFG version of this is $1$-finality. So, a supermajority link from a justified checkpoint $C_n$ to the very next checkpoint $C_{n+1}$ both justifies $C_{n+1}$ and finalises $C_n$.
 
 On the beacon chain we are using $2$-finality, since target votes may be included up to an epoch late. In $2$ finality, we keep records of checkpoint justification status for four epochs and have the following conditions for finalisation, where the checkpoint for the current epoch is $C_n$. Note that we have already updated the justification status of $C_n$ and $C_{n-1}$ in this routine, which implies the existence of supermajority links pointing to them if the corresponding bits are set, respectively.
+
  1. Checkpoints $C_{n-3}$ and $C_{n-2}$ are justified, and there is a supermajority link from $C_{n-3}$ to $C_{n-1}$: finalise $C_{n-3}$.
  2. Checkpoint $C_{n-2}$ is justified, and there is a supermajority link from $C_{n-2}$ to $C_{n-1}$: finalise $C_{n-2}$. This is equivalent to $1$-finality applied to the previous epoch.
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
@@ -7468,6 +7486,7 @@ Slashing penalties are applied in two stages: the first stage is in [`slash_vali
 In `slash_validator()` the withdrawable epoch is set [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) in the future, so in this function we are considering all slashed validators that are halfway to being withdrawable, that is, completely exited from the protocol. Equivalently, they were slashed `EPOCHS_PER_SLASHINGS_VECTOR` ` // 2` epochs ago (about 18 days).
 
 To calculate the additional slashing penalty, we do the following:
+
  1. Find the sum of the effective balances (at the time of the slashing) of all validators that were slashed in the previous `EPOCHS_PER_SLASHINGS_VECTOR` epochs (36 days). These are stored as a vector in the state.
  2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
  3. For each slashed validator being considered, multiply its effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
@@ -7899,13 +7918,13 @@ Block proposers are rewarded here for including attestations during block proces
 
 This routine processes each attestation included in the block. First a bunch of validity checks are performed. If any of these fails, then the whole block is invalid (it is most likely from a proposer on a different fork, and so useless to us):
 
- - The target vote of the attestation must be either the previous epoch's checkpoint or the current epoch's checkpoint.
- - The target checkpoint and the attestation's slot must belong to the same epoch.
- - The attestation must be no newer than [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) slots, which is one. So this condition rules out attestations from the current or future slots.
- - The attestation must be no older than [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) slots, which is 32.
- - The attestation must come from a committee that existed when the attestation was created.
- - The size of the committee and the size of the aggregate must match (`aggregation_bits`).
- - The (aggregate) signature on the attestation must be valid and must correspond to the aggregated public keys of the validators that it claims to be signed by. This (and other criteria) is checked by [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation).
+  - The target vote of the attestation must be either the previous epoch's checkpoint or the current epoch's checkpoint.
+  - The target checkpoint and the attestation's slot must belong to the same epoch.
+  - The attestation must be no newer than [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) slots, which is one. So this condition rules out attestations from the current or future slots.
+  - The attestation must be no older than [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) slots, which is 32.
+  - The attestation must come from a committee that existed when the attestation was created.
+  - The size of the committee and the size of the aggregate must match (`aggregation_bits`).
+  - The (aggregate) signature on the attestation must be valid and must correspond to the aggregated public keys of the validators that it claims to be signed by. This (and other criteria) is checked by [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation).
 
 Once the attestation has passed the checks it is processed by converting the votes from validators that it contains into flags in the state.
 
@@ -8043,9 +8062,9 @@ A voluntary exit message is submitted by a validator to indicate that it wishes 
 
 Most of the checks are straightforward, as per the comments in the code. Note the following.
 
- - Voluntary exits are ignored if they are included in blocks before the given `epoch`, so nodes might buffer any future-dated exits they see before putting them in a block.
- - A validator must have been active for at least [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs (27 hours). See [there](/part3/config/configuration#shard_committee_period) for the rationale.
- - Voluntary exits are signed with the validator's usual signing key. There is some discussion about [changing this](https://github.com/ethereum/consensus-specs/issues/1578) to also allow signing of a voluntary exit with the validator's withdrawal key.
+  - Voluntary exits are ignored if they are included in blocks before the given `epoch`, so nodes might buffer any future-dated exits they see before putting them in a block.
+  - A validator must have been active for at least [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs (27 hours). See [there](/part3/config/configuration#shard_committee_period) for the rationale.
+  - Voluntary exits are signed with the validator's usual signing key. There is some discussion about [changing this](https://github.com/ethereum/consensus-specs/issues/1578) to also allow signing of a voluntary exit with the validator's withdrawal key.
 
 If the voluntary exit message is valid then the validator is added to the exit queue by calling [`initiate_validator_exit()`](/part3/helper/mutators#initiate_validator_exit).
 
@@ -8099,11 +8118,11 @@ Like proposer rewards, but unlike attestation rewards, sync committee rewards ar
 
 Running through the calculations:
 
- - `total_active_increments`: the sum of the effective balances of the entire active validator set normalised with the [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) to give the total number of increments.
- - `total_base_rewards`: the maximum rewards that will be awarded to all validators for all duties this epoch. It is at most $NB$ in the [notation](/part3/transition/epoch#reward-and-penalty-calculations) established earlier.
- - `max_participant_rewards`: the amount of the total reward to be given to the entire sync committee in this slot.
- - `participant_reward`: the reward per participating validator, and the penalty per non-participating validator.
- - `proposer_reward`: one seventh of the participant reward.
+  - `total_active_increments`: the sum of the effective balances of the entire active validator set normalised with the [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment) to give the total number of increments.
+  - `total_base_rewards`: the maximum rewards that will be awarded to all validators for all duties this epoch. It is at most $NB$ in the [notation](/part3/transition/epoch#reward-and-penalty-calculations) established earlier.
+  - `max_participant_rewards`: the amount of the total reward to be given to the entire sync committee in this slot.
+  - `participant_reward`: the reward per participating validator, and the penalty per non-participating validator.
+  - `proposer_reward`: one seventh of the participant reward.
 
 Each committee member that voted receives a reward of `participant_reward`, and the proposer receives one seventh of this in addition.
 
@@ -8135,9 +8154,9 @@ TODO: rework and synthesis - this text is from the original Genesis
 
 Before the Ethereum beacon chain genesis has been triggered, and for every Ethereum proof-of-work block, let `candidate_state = initialize_beacon_state_from_eth1(eth1_block_hash, eth1_timestamp, deposits)` where:
 
-- `eth1_block_hash` is the hash of the Ethereum proof-of-work block
-- `eth1_timestamp` is the Unix timestamp corresponding to `eth1_block_hash`
-- `deposits` is the sequence of all deposits, ordered chronologically, up to (and including) the block with hash `eth1_block_hash`
+  - `eth1_block_hash` is the hash of the Ethereum proof-of-work block
+  - `eth1_timestamp` is the Unix timestamp corresponding to `eth1_block_hash`
+  - `deposits` is the sequence of all deposits, ordered chronologically, up to (and including) the block with hash `eth1_block_hash`
 
 Proof-of-work blocks must only be considered once they are at least `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` seconds old (i.e. `eth1_timestamp + ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` ` <= current_unix_time`). Due to this constraint, if `GENESIS_DELAY` ` < ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE`, then the `genesis_time` can happen before the time/state is first known. Values should be configured to avoid this case.
 
