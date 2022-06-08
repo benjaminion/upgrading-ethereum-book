@@ -12,10 +12,9 @@ module.exports = ({ markdownAST }, pluginOptions) => {
         const text = node.value
         const value = map[text]
         if (value) {
-          const html = `<code title="${text} = ${value}">${text}</code>`
           node.type = "html"
+          node.value = `<code title="${text} = ${value}">${text}</code>`
           node.children = undefined
-          node.value = html
         }
       }
     })
