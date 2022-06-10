@@ -119,7 +119,7 @@ Protoarray
 Protolambda
 Prysm
 Psomas
-Pythony
+Pythonic
 Péter
 RANDAO
 RANDAO's

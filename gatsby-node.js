@@ -155,6 +155,11 @@ function lintSourceMarkdown(file) {
         'punctuation': '.,;:',
       },
 
+      // We fence all block code with backticks
+      'MD046': {
+        "style": "fenced",
+      },
+
       // Emphasis style
       'MD049': {
         'style': 'underscore',
@@ -174,13 +179,6 @@ function lintSourceMarkdown(file) {
 
       // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
       'MD037': false,
-
-      // no-space-in-code Spaces inside code span elements
-      // it's sometimes useful to do this, but we may want to look at workarounds
-      'MD038': false,
-
-      // We mix code block notations since we sometimes don't want pretty-printing
-      'MD046': false,
     }
   }
 
@@ -215,6 +213,11 @@ function lintSplitMarkdown(files) {
         'punctuation': '.,;:',
       },
 
+      // We fence all block code with backticks
+      'MD046': {
+        "style": "fenced",
+      },
+
       // Emphasis style
       'MD049': {
         'style': 'underscore',
@@ -232,15 +235,8 @@ function lintSplitMarkdown(files) {
       // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
       'MD037': false,
 
-      // no-space-in-code Spaces inside code span elements
-      // it's sometimes useful to do this, but we may want to look at workarounds
-      'MD038': false,
-
       // We don't expect the very first line to be a top-level heading (due to inserted <div>)
       'MD041': false,
-
-      // We mix code block notations since we sometimes don't want pretty-printing
-      'MD046': false,
     }
   }
 
