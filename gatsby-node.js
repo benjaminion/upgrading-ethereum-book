@@ -15,7 +15,7 @@ exports.onPreInit = ({ reporter }) => {
   const sourceMarkdown = 'src/book.md'
   const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
 
-  var sourceLintSucceeded = false
+  var sourceLintSucceeded = true
 
   if (doInternalLinks) {
     reporter.info('Checking internal links...')
@@ -56,12 +56,12 @@ exports.onPreInit = ({ reporter }) => {
       if (out !== null) {
         reporter.warn('Found some linting issues:')
         out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
-      } else {
-        sourceLintSucceeded = true
+        sourceLintSucceeded = false
       }
     } catch (err) {
       reporter.warn('Unable to lint check source markdown:')
       err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      sourceLintSucceeded = false
     }
   } else {
     reporter.warn('Skipping source markdown linting')
