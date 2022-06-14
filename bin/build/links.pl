@@ -42,13 +42,11 @@ my %anchors = (
     );
 my %fns;
 
-# First pass: build list of anchors
+# First pass: build lists of anchors and footnotes
 $inCode = 0;
 while(<$fh>) {
 
-    if (/^```/) {
-        $inCode = 1 - $inCode;
-    }
+    /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
     
     # Add pages
@@ -77,23 +75,18 @@ while(<$fh>) {
     }
 }
 
-die "Error: unbalanced code block markers!" if $inCode;
+$inCode and die "Error: unbalanced code block markers!";
 
 # Reset position to start of file
-seek $fh, 0, SEEK_SET;
-$. = 0;
+seek $fh, $. = 0, SEEK_SET;
 
-# Second pass: check anchors exist
+# Second pass: check anchors and footnotes exist
 while(<$fh>) {
 
-    if (/^```/) {
-        $inCode = 1 - $inCode;
-    }
+    /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
 
-    if (/$newPagePath/) {
-        $pagePath = $2;
-    }
+    /$newPagePath/ and $pagePath = $2;
 
     # Check footnote definitions at start of line
     if (/^\[\^([^]]*)\]:/) {
