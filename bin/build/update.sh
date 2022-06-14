@@ -11,4 +11,4 @@ rm -rf md/pages/
 
 # Build the one page annotated spec
 rm -f md/annotated.md
-../bin/build/annotated.awk book.md > md/annotated.md
+../bin/build/annotated.pl book.md > md/annotated.md

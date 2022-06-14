@@ -20,7 +20,7 @@ exports.onPreInit = ({ reporter }) => {
   if (doInternalLinks) {
     reporter.info('Checking internal links...')
     try {
-      const out = execSync(`bin/build/links.awk ${sourceMarkdown} ${sourceMarkdown}`, {encoding: 'utf8'})
+      const out = execSync(`bin/build/links.pl ${sourceMarkdown}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some bad internal links:')
         out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))

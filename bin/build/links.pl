@@ -1,0 +1,138 @@
+#!/usr/bin/perl
+
+# Finds internal links that do not point to existing anchors.
+#
+# Anchors may be
+#  1. Full page paths: /part3/introduction
+#  2. Headings or <a id="..."></a> elements: #introduction
+#  3. A combination: /part3/introduction#introduction
+#
+# Relative page paths are not supported.
+#
+# Anchors generated from headings have some rules (imposed by Gatsby):
+#  - Converted to lower case
+#  - Spaces become "-"
+#  - Special characters are omitted: ".,?:'`/[]()" and probably others
+#  - Underscores and dashes are retained.
+#
+# Also checks that footnote references have corresponding definitions
+# and vice versa. There is currently a limitation of one footnote per
+# paragraph.
+#
+# Also checks that linked image files exist.
+
+use strict;
+use warnings;
+use Fcntl qw(SEEK_SET);
+
+$\ = "\n"; # set output record separator
+
+my ($file) = @ARGV;
+die "Usage: $0 FILE\n" if not $file;
+open my $fh, '<', $file or die "Can't open $file: $!";
+
+my $newPagePath = qr/^(# |## |### ).* <!-- ([^*]+)\*? -->$/;
+my $filePath = $file =~ s|[^/]+$||r;
+my $pagePath;
+my $inCode;
+
+my %anchors = (
+    '/contents' => 1,
+    '/annotated-spec' => 1,
+    );
+my %fns;
+
+# First pass: build list of anchors
+$inCode = 0;
+while(<$fh>) {
+
+    if (/^```/) {
+        $inCode = 1 - $inCode;
+    }
+    next if $inCode;
+    
+    # Add pages
+    if (/$newPagePath/) {
+        $pagePath = $2;
+        $anchors{$pagePath} = 1;
+    }
+
+    # Add headings
+    if (/^#+ (.*)$/) {
+        my $name = $1 =~ s/ <!-- .* -->$//r;
+        $name = lc $name;
+        $name =~ tr/ /-/;
+        $name =~ tr/a-z0-9_-//cd;
+        $anchors{$pagePath . '#' . $name} = 1;
+    }
+
+    # Add explicit anchors - only one per line allowed, at the start of the line
+    if (/^<a id="(.*)"><\/a>$/) {
+        $anchors{$pagePath . '#' . $1} = 1;
+    }
+
+    # Footnote references are not at start of line, one per line limit
+    if (/^.+\[\^([^]]*)\]/) {
+        $fns{$1} = $.;
+    }
+}
+
+die "Error: unbalanced code block markers!" if $inCode;
+
+# Reset position to start of file
+seek $fh, 0, SEEK_SET;
+$. = 0;
+
+# Second pass: check anchors exist
+while(<$fh>) {
+
+    if (/^```/) {
+        $inCode = 1 - $inCode;
+    }
+    next if $inCode;
+
+    if (/$newPagePath/) {
+        $pagePath = $2;
+    }
+
+    # Check footnote definitions at start of line
+    if (/^\[\^([^]]*)\]:/) {
+        my $fn = $1;
+        if (exists($fns{$fn})) {
+            delete $fns{$fn};
+        } else {
+            print "Unreferenced footnote: $fn , line $.";
+        }
+    }
+
+    while (/(!{0,1})\[[^]]+\]\(([^)]*)\)/g) {
+
+        my $isImg = $1 eq '!' ? 1 : 0;
+        my $link = $2;
+
+        if ($isImg) {
+            unless(-e $filePath . $link) {
+                print "Nonexistent image file: $link line $.";
+            }
+        } else {
+            if ($link =~ /^([#\/])/) {
+                my $anchor = ($1 eq '#') ? $pagePath . $link : $link;
+                unless (exists($anchors{$anchor})) {
+                    print "Anchor not found, line $.: $link";
+                }
+            } elsif ($link eq '') {
+                print "Empty link, line $.";
+            } elsif ($link =~ /localhost/) {
+                print "Link to localhost, line $."
+            } elsif ($link =~ /^http:/) {
+                print "HTTP link, line $.";
+            } elsif (not $link =~ /^https:\/\//) {
+                print "Suspicious link, line $.: $link";
+            }
+        }
+    }
+}
+
+while (my($fn,$line) = each %fns) {
+    print "Missing footnote: $fn, line $line";
+}

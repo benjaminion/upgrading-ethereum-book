@@ -18,13 +18,10 @@
 
 use strict;
 use warnings;
-use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END);
 use File::Path qw(make_path);
 
-my ($file) = @ARGV;
-die "Usage: $0 FILE\n" if not $file;
-
-open my $fh, '<', $file or die "Can't open $file: $!";
+$, = "\n"; # set output field separator
+$\ = "\n"; # set output record separator
 
 my $outFilePrefix = 'md/pages';
 my $sequence = 0;
@@ -38,9 +35,11 @@ my $thisPath;
 my $idx;
 my $ofh;
 
-while( my $line = <$fh>)  {
+while (<>)  {
 
-    if ($line =~ /^(#{1,3} )(.*) <!-- ([^*]*)(\*?) -->$/) {
+    chomp;
+    
+    if (/^(#{1,3} )(.*) <!-- ([^*]*)(\*?) -->$/) {
 
         my $level = $1;
         my $title = $2;
@@ -57,7 +56,7 @@ while( my $line = <$fh>)  {
         }
 
         close $ofh if defined $ofh;
-        open $ofh, '>', $outFile or die "Can't open $file for writing: $!";
+        open $ofh, '>', $outFile or die "Can't open $outFile for writing: $!";
 
         $thisPath = $path;
         if ($level eq '# ') {
@@ -82,29 +81,29 @@ while( my $line = <$fh>)  {
         }
 
         print $ofh
-            "---\n",
-            "hide: $hide\n",
-            "path: $path\n",
-            "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]\n",
-            "index: [$idx]\n",
-            "sequence: $sequence\n",
-            "---\n";
+            "---",
+            "hide: $hide",
+            "path: $path",
+            "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]",
+            "index: [$idx]",
+            "sequence: $sequence",
+            "---";
 
         if ($thisSection ne '') {
             print $ofh
-                "\n<div class=\"section-header\">\n\n",
-                "# $thisPart\n\n",
-                "## $thisChapter\n",
-                "\n</div>\n\n",
-                "### $thisSection\n";
+                "\n<div class=\"section-header\">\n",
+                "# $thisPart\n",
+                "## $thisChapter",
+                "\n</div>\n",
+                "### $thisSection";
         } elsif ($thisChapter ne '') {
             print $ofh
-                "\n<div class=\"chapter-header\">\n\n",
-                "# $thisPart\n",
-                "\n</div>\n\n",
-                "## $thisChapter\n";
+                "\n<div class=\"chapter-header\">\n",
+                "# $thisPart",
+                "\n</div>\n",
+                "## $thisChapter";
         } else {
-            print $ofh "# $thisPart\n";
+            print $ofh "# $thisPart";
         }
 
     } else {
@@ -113,9 +112,9 @@ while( my $line = <$fh>)  {
 
         # Rewrite any markdown image paths to reflect the directory hierarchy
         (my $prefix = substr $thisPath, 2) =~ s|[^/]+|..|g;
-        $line =~ s/\(md/($prefix/;
+        s/\(md/($prefix/;
 
-        print $ofh $line;
+        print $ofh $_;
 
     }
 }
