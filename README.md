@@ -8,7 +8,7 @@ You can read it at [eth2book.info](https://eth2book.info/altair) (also available
 
 It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/altair/preface).
 
-I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
+I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript. (But PRs for typos break my workflow so please raise issues instead.)
 
 ## Licence
 
@@ -35,7 +35,7 @@ Gatsby CLI version: 4.15.0
 npm install -g gatsby-cli
 ```
 
-You'll also need a working `gawk` (GNU awk) installed at _/usr/bin/gawk_ so that the build can preprocess the book document.
+You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document.
 
 ### Building
 

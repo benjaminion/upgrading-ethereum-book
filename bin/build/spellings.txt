@@ -119,7 +119,7 @@ Protoarray
 Protolambda
 Prysm
 Psomas
-Pythony
+Pythonic
 Péter
 RANDAO
 RANDAO's
@@ -311,6 +311,7 @@ validator
 validator's
 validators
 vals
+vbuterin
 verifiably
 verifier
 whistleblower

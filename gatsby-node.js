@@ -5,48 +5,66 @@ const glob = require('glob')
 
 // Set up a hook to pre-process the source file into split files, and perform various
 // checking and linting operations prior to building.
-exports.onPreInit = ({reporter}) => {
+exports.onPreInit = ({ reporter }) => {
+
+  const doInternalLinks = true
+  const doSpellCheck = true
+  const doSourceLint = true
+  const doSplitLint = true
 
   const sourceMarkdown = 'src/book.md'
   const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
-  var sourceLintSucceeded = false
 
-  reporter.info('Checking internal links...')
-  try {
-    const out = execSync(`bin/build/links.awk ${sourceMarkdown} ${sourceMarkdown}`, {encoding: 'utf8'})
-    if (out !== '') {
-      reporter.warn('Found some bad internal links:')
-      out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  var sourceLintSucceeded = true
+
+  if (doInternalLinks) {
+    reporter.info('Checking internal links...')
+    try {
+      const out = execSync(`bin/build/links.pl ${sourceMarkdown}`, {encoding: 'utf8'})
+      if (out !== '') {
+        reporter.warn('Found some bad internal links:')
+        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+      }
+    } catch (err) {
+      reporter.warn('Unable to check internal links:')
+      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
     }
-  } catch (err) {
-    reporter.warn('Unable to check internal links:')
-    err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  } else {
+    reporter.warn('Skipping internal link check')
   }
 
-  reporter.info('Lint checking source markdown...')
-  try {
-    const out = lintSourceMarkdown(sourceMarkdown)
-    if (out !== null) {
-      reporter.warn('Found some linting issues:')
-      out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
-    } else {
-      sourceLintSucceeded = true
+  if (doSpellCheck) {
+    reporter.info('Performing spellcheck...')
+    try {
+      const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellings.txt`, {encoding: 'utf8'})
+      if (out !== '') {
+        reporter.warn('Found some misspellings:')
+        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+      }
+    } catch (err) {
+      reporter.warn('Unable to perform spellcheck:')
+      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
     }
-  } catch (err) {
-    reporter.warn('Unable to lint check source markdown:')
-    err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  } else {
+    reporter.warn('Skipping spellcheck')
   }
 
-  reporter.info('Performing spellcheck...')
-  try {
-    const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellcheck_my_words.txt`, {encoding: 'utf8'})
-    if (out !== '') {
-      reporter.warn('Found some misspellings:')
-      out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  if (doSourceLint) {
+    reporter.info('Linting source markdown...')
+    try {
+      const out = lintSourceMarkdown(sourceMarkdown)
+      if (out !== null) {
+        reporter.warn('Found some linting issues:')
+        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        sourceLintSucceeded = false
+      }
+    } catch (err) {
+      reporter.warn('Unable to lint check source markdown:')
+      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      sourceLintSucceeded = false
     }
-  } catch (err) {
-    reporter.warn('Unable to perform spellcheck:')
-    err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  } else {
+    reporter.warn('Skipping source markdown linting')
   }
 
   reporter.info('Unpacking book source...')
@@ -56,22 +74,26 @@ exports.onPreInit = ({reporter}) => {
     reporter.panic('Failed to unpack book source.', err)
   }
 
-  // To keep the noise down we do this check only if the source check passed
-  if (sourceLintSucceeded) {
-    reporter.info('Lint checking split markdown...')
-    try {
-      const out = lintSplitMarkdown(splitMarkdown)
-      if (out !== null) {
-        reporter.warn('Found some linting issues:')
-        out.split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+  if (doSplitLint) {
+    if (sourceLintSucceeded) {
+      reporter.info('Linting split markdown...')
+      try {
+        const out = lintSplitMarkdown(splitMarkdown)
+        if (out !== null) {
+          reporter.warn('Found some linting issues:')
+          out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        }
+      } catch (err) {
+        reporter.warn('Unable to lint check split markdown:')
+        err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
       }
-    } catch (err) {
-      reporter.warn('Unable to lint check split markdown:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+    } else {
+      reporter.warn('Skipping split markdown linting due to earlier errors')
     }
   } else {
-    reporter.warn('Skipping lint checking of split markdown do to earlier errors.')
+    reporter.warn('Skipping split markdown linting')
   }
+
 }
 
 exports.createPages = async ({ actions, graphql }) => {
@@ -104,6 +126,10 @@ exports.createPages = async ({ actions, graphql }) => {
   })
 }
 
+//
+// See https://github.com/DavidAnson/markdownlint for the rules and options
+//
+
 // Lint check the source markdown file.
 function lintSourceMarkdown(file) {
 
@@ -111,7 +137,6 @@ function lintSourceMarkdown(file) {
     'files': [ file ],
     'config': {
       'default': true,
-      'line-length': false,
 
       // Start unordered lists with two spaces of indentation
       'MD007': {
@@ -128,6 +153,11 @@ function lintSourceMarkdown(file) {
       // Some headings end in ! or ?
       'MD026': {
         'punctuation': '.,;:',
+      },
+
+      // We fence all block code with backticks
+      'MD046': {
+        "style": "fenced",
       },
 
       // Emphasis style
@@ -149,13 +179,6 @@ function lintSourceMarkdown(file) {
 
       // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
       'MD037': false,
-
-      // no-space-in-code Spaces inside code span elements
-      // it's sometimes useful to do this, but we may want to look at workarounds
-      'MD038': false,
-
-      // We mix code block notations since we sometimes don't want pretty-printing
-      'MD046': false,
     }
   }
 
@@ -172,7 +195,6 @@ function lintSplitMarkdown(files) {
     'files': files,
     'config': {
       'default': true,
-      'line-length': false,
 
       // Start unordered lists with two spaces of indentation
       'MD007': {
@@ -189,6 +211,11 @@ function lintSplitMarkdown(files) {
       // Some headings end in ! or ?
       'MD026': {
         'punctuation': '.,;:',
+      },
+
+      // We fence all block code with backticks
+      'MD046': {
+        "style": "fenced",
       },
 
       // Emphasis style
@@ -208,15 +235,8 @@ function lintSplitMarkdown(files) {
       // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
       'MD037': false,
 
-      // no-space-in-code Spaces inside code span elements
-      // it's sometimes useful to do this, but we may want to look at workarounds
-      'MD038': false,
-
       // We don't expect the very first line to be a top-level heading (due to inserted <div>)
       'MD041': false,
-
-      // We mix code block notations since we sometimes don't want pretty-printing
-      'MD046': false,
     }
   }
 
