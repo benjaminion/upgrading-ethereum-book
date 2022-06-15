@@ -311,6 +311,7 @@ validator
 validator's
 validators
 vals
+vbuterin
 verifiably
 verifier
 whistleblower

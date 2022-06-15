@@ -36,7 +36,7 @@ exports.onPreInit = ({ reporter }) => {
   if (doSpellCheck) {
     reporter.info('Performing spellcheck...')
     try {
-      const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellcheck_my_words.txt`, {encoding: 'utf8'})
+      const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellings.txt`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some misspellings:')
         out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))

@@ -15,11 +15,9 @@
 #  - Special characters are omitted: ".,?:'`/[]()" and probably others
 #  - Underscores and dashes are retained.
 #
-# Also checks that footnote references have corresponding definitions
-# and vice versa. There is currently a limitation of one footnote per
-# paragraph.
-#
-# Also checks that linked image files exist.
+# Other checks:
+#  - Footnote references have corresponding definitions and vice versa.
+#  - Linked image files exist.
 
 use strict;
 use warnings;
@@ -48,7 +46,7 @@ while(<$fh>) {
 
     /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
-    
+
     # Add pages
     if (/$newPagePath/) {
         $pagePath = $2;
@@ -64,13 +62,13 @@ while(<$fh>) {
         $anchors{$pagePath . '#' . $name} = 1;
     }
 
-    # Add explicit anchors - only one per line allowed, at the start of the line
-    if (/^<a id="(.*)"><\/a>$/) {
+    # Add explicit anchors
+    while (/<a id="(.+?)"><\/a>$/g) {
         $anchors{$pagePath . '#' . $1} = 1;
     }
 
-    # Footnote references are not at start of line, one per line limit
-    if (/^.+\[\^([^]]*)\]/) {
+    # Add footnote definitions
+    if (/^\[\^(.+?)\]:/) {
         $fns{$1} = $.;
     }
 }
@@ -88,17 +86,17 @@ while(<$fh>) {
 
     /$newPagePath/ and $pagePath = $2;
 
-    # Check footnote definitions at start of line
-    if (/^\[\^([^]]*)\]:/) {
+    # Footnote references
+    while (/^.+\[\^(.+?)\]/g) {
         my $fn = $1;
         if (exists($fns{$fn})) {
             delete $fns{$fn};
         } else {
-            print "Unreferenced footnote: $fn , line $.";
+            print "Missing footnote: $fn , line $.";
         }
     }
 
-    while (/(!{0,1})\[[^]]+\]\(([^)]*)\)/g) {
+    while (/(!{0,1})\[.+?\]\((.*?)\)/g) {
 
         my $isImg = $1 eq '!' ? 1 : 0;
         my $link = $2;
@@ -127,5 +125,5 @@ while(<$fh>) {
 }
 
 while (my($fn,$line) = each %fns) {
-    print "Missing footnote: $fn, line $line";
+    print "Unreferenced footnote: $fn, line $line";
 }
