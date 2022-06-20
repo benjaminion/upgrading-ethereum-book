@@ -2587,13 +2587,25 @@ This property is important for light clients. Light clients are observers of the
 
 #### Introduction
 
-Committees are subsets of the total set of active validators and are used to manage and distribute the overall workload across validators.
+Committees are subsets of the total set of active validators that are used to manage and distribute the overall workload across validators.
 
 The Altair spec has two types of committees, beacon committees and sync committees, which have quite different functions. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
+
+The current beacon committee structure was strongly influenced by the old roadmap that had in-protocol data sharding in Phase&nbsp;1. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally planned to map directly to 64 shards as "crosslink committees". They still serve a useful function in parallelising the aggregation of attestations, but whether 64 remains the right number is moot. Logically the 64 committees in a slot now act as a single large committee, all voting on exactly the same information.
 
 Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
 
 For the duration of the epoch this active validator set is divided into (at most) `SLOTS_PER_EPOCH` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one of these committees.
+
+#### Committee structure
+
+<a id="img_scalability_trilemma"></a>
+<div class="image" style="width: 90%">
+
+![A diagram showing 64 committees at each slot](md/images/diagrams/committees_all.svg)
+An epoch has `MAX_COMMITTEES_PER_SLOT` committees at each slot. Every active validator appears in exactly one committee, thus the committees are all disjoint.
+
+</div>
 
 #### Committee assignments
 
