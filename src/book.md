@@ -3756,7 +3756,7 @@ The beacon chain specification is the guts of the machine. Like the guts of a co
 
 [^fn-justinification]: A process called "Justinification". Iykyk `;-)`
 
-As and when other parts of the book get written I will add links to the specific chapters on each topic (for example on simple serialize, consensus, networking).
+As and when other parts of the book get written I will add links to the specific chapters on each topic (for example on Simple Serialize, consensus, networking).
 
 Note that the online annotated specification is available in two forms:
 
@@ -4362,7 +4362,7 @@ See also [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](#proportional_slashing_mult
 
 ##### `HISTORICAL_ROOTS_LIMIT`
 
-Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are merkleised and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size `HISTORICAL_ROOTS_LIMIT` will be fine for the next few millennia, after which it will be somebody else's problem. The list grows at less than 10 KB per year.
+Every [`SLOTS_PER_HISTORICAL_ROOT`](#slots_per_historical_root) slots, the list of block roots and the list of state roots in the beacon state are Merkleized and added to `state.historical_roots` list. Although `state.historical_roots` is in principle unbounded, all SSZ lists must have maximum sizes specified. The size `HISTORICAL_ROOTS_LIMIT` will be fine for the next few millennia, after which it will be somebody else's problem. The list grows at less than 10 KB per year.
 
 Storing past roots like this allows Merkle proofs to be constructed about anything in the beacon chain's history if required.
 
@@ -4688,7 +4688,7 @@ See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some 
 
 We are about to see our first Python code in the executable spec. For specification purposes, these Container data structures are just Python data classes that are derived from the base SSZ `Container` class.
 
-[SSZ](/part2/building_blocks/ssz) is the serialisation and merkleisation format used everywhere in Ethereum&nbsp;2.0. It is not self-describing, so you need to know ahead of time what you are unpacking when deserialising. SSZ deals with basic types and composite types. Classes like the below are handled as SSZ containers, a composite type defined as an "ordered heterogeneous collection of values".
+[SSZ](/part2/building_blocks/ssz) is the serialisation and Merkleization format used everywhere in Ethereum&nbsp;2.0. It is not self-describing, so you need to know ahead of time what you are unpacking when deserialising. SSZ deals with basic types and composite types. Classes like the below are handled as SSZ containers, a composite type defined as an "ordered heterogeneous collection of values".
 
 Client implementations in different languages will obviously use their own paradigms to represent these data structures.
 
@@ -4761,7 +4761,7 @@ This is the data structure that stores most of the information about an individu
 
 [TODO: link to effective balance]::
 
-Validators' actual balances are stored separately in the `BeaconState` structure, and only the slowly changing "effective balance" is stored here. This is because actual balances are liable to change quite frequently (every epoch): the merkleisation process used to calculate state roots means that only the parts that change need to be recalculated; the roots of unchanged parts can be cached. Separating out the validator balances potentially means that only 1/15th (8/121) as much data needs to be rehashed every epoch compared to storing them here, which is an important optimisation.
+Validators' actual balances are stored separately in the `BeaconState` structure, and only the slowly changing "effective balance" is stored here. This is because actual balances are liable to change quite frequently (every epoch): the Merkleization process used to calculate state roots means that only the parts that change need to be recalculated; the roots of unchanged parts can be cached. Separating out the validator balances potentially means that only 1/15th (8/121) as much data needs to be rehashed every epoch compared to storing them here, which is an important optimisation.
 
 For similar reasons, validators' inactivity scores are stored outside validator records as well, as they are also updated every epoch.
 
@@ -5454,7 +5454,7 @@ The hash function serves two purposes within the protocol. The main use, computa
 
 The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
 
-The naive way to create a digest of a data structure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
+The naive way to create a digest of a data structure is to [serialise](https://en.wikipedia.org/wiki/Serialization) it and then just run a hash function over the result. In tree hashing, the basic idea is to treat each element of an ordered, compound data structure as the leaf of a Merkle tree, recursively if necessary until a primitive type is reached, and to return the [Merkle root](https://en.wikipedia.org/wiki/Merkle_tree) of the resulting tree.
 
 At first sight, this all looks quite inefficient. Twice as much data needs to be hashed when tree hashing, and actual speeds are [4-6 times slower](https://github.com/ethereum/consensus-specs/pull/120) compared with the linear hash. However, it is good for [supporting light clients](https://github.com/ethereum/consensus-specs/issues/54), because it allows Merkle proofs to be constructed easily for subsets of the full state.
 
