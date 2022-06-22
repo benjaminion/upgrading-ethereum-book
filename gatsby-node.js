@@ -179,6 +179,9 @@ function lintSourceMarkdown(file) {
 
       // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
       'MD037': false,
+
+      // link-image-reference-definitions - we use these as TODO comments
+      'MD053': false,
     }
   }
 
@@ -237,6 +240,9 @@ function lintSplitMarkdown(files) {
 
       // We don't expect the very first line to be a top-level heading (due to inserted <div>)
       'MD041': false,
+
+      // link-image-reference-definitions - we use these as TODO comments
+      'MD053': false,
     }
   }
 
