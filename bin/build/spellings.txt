@@ -250,14 +250,12 @@ mainnet
 masse
 md
 memoised
-merkle
-merkleisation
-merkleised
 misbehaviours
 misconfiguration
 modularity
 monocultures
 num
+parallelising
 parameterises
 performant
 permissionless
@@ -270,10 +268,10 @@ randao
 rds
 repo
 reserialise
+roadmap
 scalability
 secp
 serialiser
-serialize
 serializing
 sharding
 shufflings
