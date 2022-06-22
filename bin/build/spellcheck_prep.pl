@@ -32,6 +32,9 @@ while(<>) {
 
     chomp;
 
+    # Block quotations
+    s/^ *>.*$//;
+
     # Footnote links
     s/\[\^.+?\]:?//g;
 
@@ -57,6 +60,9 @@ while(<>) {
 
     # HTML entities
     s/&.+?;/ /g;
+
+    # Anything in quote marks
+    s/".+?"//g;
 
     print "^ $_";
 }
