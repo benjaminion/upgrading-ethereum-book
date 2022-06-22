@@ -10,7 +10,8 @@
     "start": "gatsby develop",
     "build": "gatsby build --prefix-paths",
     "serve": "gatsby serve --prefix-paths",
-    "clean": "gatsby clean"
+    "clean": "gatsby clean",
+    "check": "node ./bin/build/check.js"
   },
   "dependencies": {
     "gatsby": "^4.17.0",
