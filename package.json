@@ -11,7 +11,7 @@
     "build": "gatsby build --prefix-paths",
     "serve": "gatsby serve --prefix-paths",
     "clean": "gatsby clean",
-    "check": "node ./bin/build/check.js"
+    "check": "node -e 'require(\"./bin/build/prebuild\").runChecks()'"
   },
   "dependencies": {
     "gatsby": "^4.17.0",

@@ -17,7 +17,17 @@ const doSplitLint = true
 const sourceMarkdown = 'src/book.md'
 const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
 
-module.exports = (reporter) => {
+module.exports.runChecks = (reporter) => {
+
+  if (!reporter) {
+    reporter = {
+      // https://tintin.mudhalla.net/info/xterm/
+      // https://tintin.mudhalla.net/info/256color/
+      info: function (m) { console.log('\x1b[38;5;19m%s\x1b[0m %s', 'info', m) },
+      warn: function (m) { console.log('\x1b[38;5;130m%s\x1b[0m %s', 'warn', m) },
+      error: function (m) { console.log('\x1b[38;5;160m%s\x1b[0m %s', 'error', m) },
+    }
+  }
 
   var sourceLintSucceeded = true
 
