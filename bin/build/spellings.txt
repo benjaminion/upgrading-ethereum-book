@@ -242,6 +242,7 @@ mainnet
 masse
 md
 memoised
+middleware
 misbehaviours
 misconfiguration
 modularity
@@ -262,6 +263,7 @@ repo
 reserialise
 roadmap
 scalability
+scalable
 secp
 serialiser
 sharding
@@ -297,6 +299,7 @@ validator
 validator's
 validators
 vals
+verifiability
 verifiably
 verifier
 whistleblower
