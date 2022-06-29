@@ -14,7 +14,7 @@
     "check": "node -e 'require(\"./bin/build/prebuild\").runChecks()'"
   },
   "dependencies": {
-    "gatsby": "^4.17.0",
+    "gatsby": "^4.17.2",
     "gatsby-plugin-catch-links": "^4.17.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
