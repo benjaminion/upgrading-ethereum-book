@@ -2655,47 +2655,53 @@ In his survey article, [Paths toward single-slot finality](https://notes.ethereu
 
 <div class="summary">
 
-  - A subset of validators is selected in each committee to perform aggregation of the committee's messages. This improves scaling.
-  - The selection method targets a fixed number of aggregators per committee.
-  - The selection method preserves both secrecy and easy verifiability of the identity of the aggregators.
+  - In each committee, a subset of validators is selected to perform aggregation of the committee's messages. This improves scaling.
+  - Selection of aggregators is probabilistic based on BLS signatures.
+  - This selection method preserves both secrecy and easy verifiability of the identity of the aggregators.
 
 </div>
 
 #### Introduction
 
-In both [beacon committees](/part2/building_blocks/committees) and [sync committees](/part2/building_blocks/sync_committees) validators sign their own votes (`Attestation`s and `SyncCommitteeMessage`s respectively). Before these votes are included in beacon blocks they need to be [aggregated](/part2/building_blocks/signatures#aggregation) into a much smaller number of aggregate signatures, ideally into a single aggregate signature over a single object.
+In both [beacon committees](/part2/building_blocks/committees) and [sync committees](/part2/building_blocks/sync_committees) validators create and sign their own votes (`Attestation`s and `SyncCommitteeMessage`s respectively). These votes must be [aggregated](/part2/building_blocks/signatures#aggregation) into a much smaller number of aggregate signed votes, ideally into a single aggregate signature over a single vote, before being included in beacon blocks.
 
-The goal of aggregation is two-fold: to reduce the signature verification load on the next block proposer, and to reduce the amount of block space required to store the signatures.
+The goals of aggregation are three-fold: to reduce the signature verification load on the next block proposer, to reduce the network load on the global gossip channel, and to reduce the amount of block space required to store the signatures.
 
-In the current beacon chain design voting is done in committees with the goal of getting a majority of committee members to sign off on the same vote, although in practice there might be a number of different votes depending on the network views of the individual committee members. However, members of different committees are signing different data that cannot be aggregated.
+In the current beacon chain design, voting is done in committees with the goal of getting a majority of committee members to sign off on the same vote, although in practice there might be a number of different votes depending on the network views of the individual committee members. In any case, members of different committees are signing different data that cannot be aggregated across committees.
 
 The process of aggregation is as follows:
 
-1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s and [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that they are all subscribed to.
+1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s or [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that the whole committee is subscribed to.
 2. A subset of the committee is selected to be aggregators for that committee.
-3. The aggregators listen on the subnet for votes and aggregate all the ones they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteecontribution)).
+3. The aggregators listen on the subnet for votes, then aggregate all the votes they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteecontribution)).
 4. Each aggregator wraps its aggregate vote with a proof that it was indeed an aggregator for that committee, and it signs the resulting data ([`SignedAggregateAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#signedaggregateandproof) or [`SignedContributionAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#signedcontributionandproof))
 5. Finally the aggregator broadcasts its aggregated vote and proof to a global channel to be received by the next block proposer.
 
 This section is concerned with steps 2 and 4: how the aggregators are selected for duty, and how they prove that they were indeed selected.
 
-[TODO: insert diagram]::
+<a id="img_aggregators"></a>
+<div class="image" style="width: 80%">
+
+![A diagram of the workflow of aggregating attestations from beacon committees](md/images/diagrams/aggregators.svg)
+Within a beacon committee, all members send their individual attestations to a gossip subnet. Aggregators are a chosen subset of the committee who listen to the subnet and aggregate the attestations they receive. The aggregators broadcast their aggregates to the global channel for the next block proposer to pick up.
+
+</div>
 
 #### Aggregator selection desiderata
 
 Aggregator selection has been designed with three properties in mind.
 
-First, the size of the aggregator set. With very high probability we want a small, non-empty subset of the committee to be selected. It doesn't matter too much if our set of aggregators is slightly on the large side, but we really want to avoid having no aggregators. Bear in mind that there's a chance of any given validator being down or malicious.
+First, the size of the resulting aggregator set. With very high probability we want a small, non-empty subset of the committee to be selected. It doesn't matter too much if our set of aggregators is slightly on the large side, but we really want to avoid having no aggregators. Bearing in mind that there's a chance of validators being down or malicious, selecting only one or two aggregators is also risky.
 
-Second, secrecy. We'd prefer that nobody be able to calculate who the aggregators are until after they have broadcast their aggregations. This helps to avoid denial of service (DoS) attacks. It would be much simpler to halt the chain by mounting a network DoS attack against a small number of aggregators than against a whole committee. The secrecy property prevents this.
+Second, secrecy. We'd prefer that nobody be able to calculate who the aggregators are until after they have broadcast their aggregations. This helps to avoid denial of service (DoS) attacks. Disrupting consensus would be much simpler via a network DoS attack against a small number of aggregators than against a whole committee. The secrecy property prevents this.
 
-Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make aggregate attestations and broadcast them to the global channel to ensure that at least one aggregate includes them. This would subvert the whole aggregator scheme.
+Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make and broadcast aggregate attestations to ensure that at least one aggregate includes their own attestation. This would destroy the benefits of the whole aggregator scheme.
 
 #### Aggregator selection details
 
 The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#aggregation-selection).
 
-It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures). Each validator in the committee generates a signature over the current slot number using its secret signing key. If that signature modulo a given target is zero then it is an aggregator, if not then it is not an aggregator.
+It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures). Each validator in the committee generates a signature over the current slot number using its secret signing key. If that signature modulo a given number is zero then it is an aggregator, otherwise it is not an aggregator.
 
 The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
 
@@ -2717,7 +2723,7 @@ def is_aggregator(state: BeaconState, slot: Slot, index: CommitteeIndex, slot_si
     return bytes_to_uint64(hash(slot_signature)[0:8]) % modulo == 0
 ```
 
-This approach provides secrecy as it relies on the validator's secret key, so no-one else can determine whether or not I am an aggregator until after I have published the proof. And it provides verifiability since, once the proof is published, it is easy to check the validity of the signature using the validator's public key.
+This approach provides secrecy since it relies on the validator's secret key: no-one else can determine whether or not I am an aggregator until after I have published the proof. And it provides verifiability since, once the proof is published, it is easy to check the validity of the signature using the validator's public key.
 
 What about the size criterion?
 
@@ -2725,7 +2731,7 @@ What about the size criterion?
 
 Assuming that BLS signatures are uniformly random, then in a committee of size $N$ each validator will have a probability of being selected of `TARGET_AGGREGATORS_PER_COMMITTEE` `/` $N$ (ignoring the integer arithmetic). So in expectation we will have `TARGET_AGGREGATORS_PER_COMMITTEE` (16) aggregators per committee.
 
-The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the minimum target committee size of $N = 128$ this is 1 in 26 million, and for the maximum committee size $N = 2048$ 1 in 9.5 million. So we would expect to see a beacon committee with no aggregators about once every 13,000 epochs (8 weeks) in the former case and once every 5000 epochs (3 weeks) in the latter. Each committee is only $1/2048$ of the total validator set, so occasionally having no aggregator is no threat at all to the protocol, but it is unfortunate for those in that committee who will most likely not have their attestations included in a block as a result.
+The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the minimum target committee size of $N = 128$ this is 1 in 26 million, and for the maximum committee size of $N = 2048$, 1 in 9.5 million. So we would expect to see a beacon committee with no aggregators about once every 13,000 epochs (8 weeks) in the former case and once every 5000 epochs (3 weeks) in the latter. Each committee comprises only a fraction $1/2048$ of the total validator set, so occasionally having no aggregator is insignificant for the protocol, but it is unfortunate for those in that committee who will most likely not have their attestations included in a block as a result.
 
 <a id="img_committee_aggregators"></a>
 <div class="image">
@@ -2747,7 +2753,7 @@ The `TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE` value was [increased from 4 to 16
 
 Aggregators are not directly incentivised by the protocol: there are no explicit rewards or penalties for performing or not performing aggregation duties.
 
-However, there are implicit incentives. For one, if I produce a high quality aggregate signature it increases my chances of ensuring that my own signature is included in a block. For another, since overall attestation rewards [scale in proportion to participation](/part2/incentives/rewards#rewards-scale-with-participation) (inclusion of attestations in blocks), validators benefit alongside all the other validators from slightly higher rewards when they make high quality aggregates.
+However, there are implicit incentives. For one, if I produce a high quality aggregate signature it helps to ensure that my own signature is included in a block (there's a chance that someone else's aggregate may not include my signature). For another, since overall attestation rewards [scale in proportion to participation](/part2/incentives/rewards#rewards-scale-with-participation) (inclusion of attestations in blocks), aggregators benefit alongside all the other validators from slightly higher rewards when they make high quality aggregates that include many votes.
 
 ##### Interaction with DVT
 
@@ -2757,7 +2763,7 @@ A possible approach to implementing distributed validator technology (DVT) is fo
 
 Aggregator selection complicates this. Since each validator has only part of the full key, it cannot calculate when it will be responsible for aggregator duties without collaborating with the other validators in its group. This creates a potentially significant overhead.
 
-We could work round this, for example, by basing aggregator selection on, say, $\mod(i, \frac{N}{16} = 0$, where $i$ is the position of the validator in the (possibly sorted) list of committee members. This is DVT-friendly and easy to verify. It also guarantees exactly 16 aggregators per committee. But it fails to meet the secrecy criterion: anyone could calculate in advance the aggregators for a committee.
+A naive workaround could be to base aggregator selection on, say, $\mod(i, \frac{N}{16} = 0$, where $i$ is the position of the validator in the (possibly sorted) list of committee members. This is DVT-friendly and easy to verify. It also guarantees exactly 16 aggregators per committee. But it fails to meet the secrecy criterion: anyone could calculate in advance the aggregators for a committee.
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
 
