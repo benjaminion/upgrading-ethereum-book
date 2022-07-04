@@ -38,6 +38,7 @@ DAO
 DAOs
 DVT
 Dankrad
+Danksharding
 DeFi
 Dfinity
 Dfinity's
@@ -111,6 +112,7 @@ PoS
 PoW
 Polynya
 Potuz
+Proto
 Protoarray
 Protolambda
 Prysm

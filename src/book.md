@@ -4163,7 +4163,7 @@ These withdrawal credential prefixes are yet significant in the core beacon chai
 
 The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
 
-See the [Withdrawals](/part4/the_merge/withdrawals) section for discussion on what the mechanism might look like.
+See the [Withdrawals](/part4/withdrawals) section for discussion on what the mechanism might look like.
 
 ##### `BLS_WITHDRAWAL_PREFIX`
 
@@ -8467,7 +8467,7 @@ TODO
 
 TODO
 
-### API <!-- /part4/the_merge/api* -->
+### Engine API <!-- /part4/the_merge/api* -->
 
 TODO
 
@@ -8479,7 +8479,19 @@ TODO
 
 TODO
 
-### Withdrawals <!-- /part4/the_merge/withdrawals* -->
+## Withdrawals <!-- /part4/withdrawals* -->
+
+TODO
+
+## Data Availability Sampling <!-- /part4/das* -->
+
+TODO
+
+### Proto-Danksharding <!-- /part4/das/proto* -->
+
+TODO
+
+### Full Danksharding <!-- /part4/das/danksharding* -->
 
 TODO
 
@@ -8511,28 +8523,6 @@ TODO
 
 TODO
 
-## Sharding <!-- /part4/sharding* -->
-
-### Introduction
-
-TODO
-
-### Design <!-- /part4/sharding/design* -->
-
-TODO
-
-### Specification <!-- /part4/sharding/specification* -->
-
-TODO
-
-### Data Availability <!-- /part4/sharding/data_availability* -->
-
-TODO
-
-### Pricing <!-- /part4/sharding/pricing* -->
-
-TODO
-
 ## Active Research Topics <!-- /part4/research* -->
 
 ### Introduction
@@ -8551,7 +8541,7 @@ TODO
 
 TODO
 
-### Executable shards <!-- /part4/research/executable_shards* -->
+### Single slot finality <!-- /part4/research/single_slot_finality* -->
 
 TODO
 
