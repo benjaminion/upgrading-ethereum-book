@@ -14,8 +14,13 @@ const doSpellCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
+const linkChecker = 'bin/build/links.pl'
+const spellChecker = 'bin/build/spellcheck.sh'
+const mdSplitter = 'bin/build/update.sh'
+
 const sourceMarkdown = 'src/book.md'
 const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
+const ourSpellings = 'src/spellings.txt'
 
 module.exports.runChecks = (reporter) => {
 
@@ -34,7 +39,7 @@ module.exports.runChecks = (reporter) => {
   if (doInternalLinks) {
     reporter.info('Checking internal links...')
     try {
-      const out = execSync(`bin/build/links.pl ${sourceMarkdown}`, {encoding: 'utf8'})
+      const out = execSync(`${linkChecker} ${sourceMarkdown}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some bad internal links:')
         out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
@@ -50,7 +55,7 @@ module.exports.runChecks = (reporter) => {
   if (doSpellCheck) {
     reporter.info('Performing spellcheck...')
     try {
-      const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellings.txt`, {encoding: 'utf8'})
+      const out = execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some misspellings:')
         out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
@@ -83,7 +88,7 @@ module.exports.runChecks = (reporter) => {
 
   reporter.info('Unpacking book source...')
   try {
-    execSync('bin/build/update.sh')
+    execSync(mdSplitter)
   } catch (err) {
     reporter.error('Failed to unpack book source.')
     throw err
