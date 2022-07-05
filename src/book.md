@@ -1074,7 +1074,7 @@ The detailed penalty calculations are defined in the spec in these functions:
 
   - When the beacon chain is not finalising it enters a special "inactivity leak" mode.
   - Attesters receive no rewards. Non-participating validators receive increasingly large penalties based on their track records.
-  - This is designed to eventually restore finality in the event of a permanent failure of large numbers of validators.
+  - This is designed to restore finality in the event of the permanent failure of large numbers of validators.
 
 </div>
 
@@ -1088,9 +1088,9 @@ The inactivity leak is a kind of emergency state in which rewards and penalties 
   - Any validators deemed inactive have their inactivity scores raised, leading to an additional inactivity penalty that potentially grows quadratically with time. This is the inactivity leak, sometimes known as the quadratic leak.
   - Proposer and sync committee rewards are unchanged.
 
-The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that of how to recover finality (liveness, in some sense) in the event that over one-third of validators goes offline. Finality requires a majority vote from validators representing 2/3 of the total stake.
+The idea for the inactivity leak was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that of how to recover finality (liveness, in some sense) in the event that over one-third of validators goes offline. Finality requires a majority vote from validators representing 2/3 of the total stake.
 
-It works as follows. When loss of finality is detected the inactivity leak gradually reduces the stakes of validators who are not making attestations until, eventually, the participating validators control 2/3 of the remaining stake. They can then begin to finalise checkpoints once again.
+The mechanism works as follows. When loss of finality is detected the inactivity leak gradually reduces the stakes of validators who are not making attestations until, eventually, the participating validators control 2/3 of the remaining stake. They can then begin to finalise checkpoints once again.
 
 This inactivity penalty mechanism is designed to protect the chain long-term in the face of catastrophic events (sometimes referred to as the ability to survive World War III). The result might be that the beacon chain could permanently split into two independent chains either side of a network partition, and this is assumed to be a reasonable outcome for any problem that can't be fixed in a few weeks. In this sense, the beacon chain formally prioritises availability over consistency. (You [can't have both](https://en.wikipedia.org/wiki/CAP_theorem).)
 
