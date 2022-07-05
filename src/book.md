@@ -2585,33 +2585,85 @@ This property is important for light clients. Light clients are observers of the
 
 ### Committees <!-- /part2/building_blocks/committees -->
 
+<div class="summary">
+
+  - Committees are subsets of the full set of active validators that are used to manage and distribute the overall workload.
+  - Beacon committees manage attestations for the consensus protocol; sync committees are discussed [elsewhere](/part2/building_blocks/sync_committees).
+
+</div>
+
 #### Introduction
 
 One of the biggest challenges in building a highly scalable consensus protocol is organising the work involved so as not to overwhelm the network.
 
-One goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validators, and we must do this twice. Hence, over the course of an epoch every validator votes for a checkpoint via its "source" and "target" attestations, and over the course of the next epoch every validator confirms that it has seen the others' votes. Thus every validator is involved in the process, which gives a very strong notion of "economic finality". But it takes at least two epochs (13 minutes) to achieve it.
+One goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validators, and we must do this twice. Hence, over the course of an epoch every validator votes for a checkpoint via its "source" and "target" attestations, and over the course of the next epoch every validator confirms that it has seen the others' votes.
 
-If the whole validator set were to attest simultaneously the amount of work for beacon nodes in validating and processing these attestations would be unmanageable. Therefore the work is divided among subsets of the validator set called committees.
-
-Committees are subsets of the total set of active validators that are used to manage and distribute the overall workload across validators.
+If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes to validate and process these attestations would be unmanageable. Therefore the work is divided among subsets of the validator set called committees, and spread across two epochs (12.8 minutes).
 
 The Altair spec has two types of committees, beacon committees and sync committees, which have quite different functions. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
 
-The current beacon committee structure was strongly influenced by the old roadmap that had in-protocol data sharding in Phase&nbsp;1. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally planned to map directly to 64 shards as "crosslink committees". They still serve a useful function in parallelising the aggregation of attestations, but whether 64 remains the right number is moot. Logically the 64 committees in a slot now act as a single large committee, all voting on exactly the same information.
+The current beacon committee structure was strongly influenced by the old roadmap that had in-protocol data sharding in Phase&nbsp;1. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally planned to map directly to 64 shards as "crosslink committees" but no longer have that function. Nonetheless, beacon committees still serve a useful purpose in parallelising the aggregation of attestations. Whether 64 remains the right number of committees per slot has not been analysed to my knowledge. The trade-off is that fewer beacon committees would reduce the amount of block space needed for aggregate attestations, but would increase the time taken by [aggregators](/part2/building_blocks/aggregator).
 
-Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
+In any case, logically, the 64 committees in a slot now act as a single large committee, all voting on exactly the same information.
 
-For the duration of the epoch this active validator set is divided into (at most) `SLOTS_PER_EPOCH` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one of these committees.
+#### Committee sizes
+
+The number of committees formed in an epoch depends on the number of active validators in that epoch.
+
+The spec function [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot) is used to calculate the number of committees per slot from the number of active validators. This can be simplified for illustrative purposes like this,
+
+```python
+MAX_COMMITTEES_PER_SLOT = 64
+SLOTS_PER_EPOCH = 32
+TARGET_COMMITTEE_SIZE = 128
+def committees_per_slot(n):
+    return max(1, min(MAX_COMMITTEES_PER_SLOT, n // SLOTS_PER_EPOCH // TARGET_COMMITTEE_SIZE))
+```
+
+This has the following features,
+
+1. Target having committees as close to equal size as possible. That is, committee sizes will differ by at most one. Similarly, target having as close to the same number of committees per slot as possible. That is, the number of committees in each slot will differ by at most one.
+2. The first priority is to achieve one committee per slot.
+3. The next priority is to achieve [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128) validators per committee.
+4. After that
+
+| Validators | Threshold | Committee structure |
+| - | - | - |
+| <&nbsp;32         | `SLOTS_PER_EPOCH` | Fail - there are empty committees  |
+| <&nbsp;8192       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` | TODO |
+| <&nbsp;262,144    | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `TARGET_COMMITTEE_SIZE` | TODO |
+| <=&nbsp;4,194,304 | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | TODO |
+| >&nbsp;4,194,304  | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | [Everything breaks](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
+
+The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
+
+TODO: committee index. Combines slot and per-slot index.
+
+The number of validators in a committee is determined in [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) - TODO describe properties.
 
 #### Committee structure
 
-<a id="img_scalability_trilemma"></a>
+<!-- committee assignments last only an epoch/slot and then are recomputed. Contrast with sync committees. -->
+
+Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
+
+[TODO: check lookahead]::
+
+At the start of an epoch,
+
+Across the span of an epoch this active validator set is divided into (at most) [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one committee.
+
+Within each slot, up to [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (64) committees are active. Each committee is disbanded... TODO
+
+<a id="img_committees_all"></a>
 <div class="image" style="width: 90%">
 
 ![A diagram showing 64 committees at each slot](md/images/diagrams/committees_all.svg)
 An epoch has `MAX_COMMITTEES_PER_SLOT` committees at each slot. Every active validator appears in exactly one committee, thus the committees are all disjoint.
 
 </div>
+
+TODO - revise the alt text for the diagram above.
 
 #### Committee assignments
 
@@ -2630,16 +2682,6 @@ An epoch has `MAX_COMMITTEES_PER_SLOT` committees at each slot. Every active val
 [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot)
 [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee)
 [`compute_committee()`](/part3/helper/misc#compute_committee)
-
-| Validators | Threshold | Committee structure |
-| - | - | - |
-| <&nbsp;32         | `SLOTS_PER_EPOCH` | ???  |
-| <&nbsp;4096       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` | TODO |
-| <&nbsp;262,144    | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `TARGET_COMMITTEE_SIZE` | TODO |
-| <=&nbsp;4,194,304 | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | TODO |
-| >&nbsp;4,194,304  | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | [Everything breaks](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
-
-The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
 
 HERE
 
