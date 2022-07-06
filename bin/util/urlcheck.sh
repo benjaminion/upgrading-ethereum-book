@@ -3,7 +3,7 @@
 # Check availability of external markdown links in the supplied document.
 
 # Github severely rate limits unless you use your access creds.
-github_secret=$(cat ../priv/github.txt)
+github_secret=$(cat $(dirname "$0")/../priv/github.txt)
 
 for x in $(grep -Pho '\(\Khttp[^)]+' $1 | sed 's/#.*$//g' | sort -u)
 do
