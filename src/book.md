@@ -3880,7 +3880,7 @@ The [Remerkleable](https://github.com/protolambda/remerkleable) library is a Pyt
 
 [TODO: Link to backing trees section when done]::
 
-Given the limited type of hashing that's done during Merkleization (always hashing the concatenation of two 32 byte strings), it's worth looking into whether specific performance optimisations are available. Potuz has [done this](https://hackmd.io/@potuz/rJX9iD30u), and produced an optimised library, [Hashtree](https://github.com/prysmaticlabs/hashtree).
+Given the limited type of hashing that's done during Merkleization (always hashing the concatenation of two 32 byte strings), it's worth looking into whether specific performance optimisations are available. Potuz has produced an optimised library, [Hashtree](https://github.com/prysmaticlabs/hashtree), for Merkle tree computation that takes advantage of this.
 
 ### Generalised indices and Merkle proofs <!-- /part2/building_blocks/merkle_proofs* -->
 
