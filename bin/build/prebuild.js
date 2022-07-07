@@ -14,8 +14,13 @@ const doSpellCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
+const linkChecker = 'bin/build/links.pl'
+const spellChecker = 'bin/build/spellcheck.sh'
+const mdSplitter = 'bin/build/update.sh'
+
 const sourceMarkdown = 'src/book.md'
 const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
+const ourSpellings = 'src/spellings.txt'
 
 module.exports.runChecks = (reporter) => {
 
@@ -34,14 +39,14 @@ module.exports.runChecks = (reporter) => {
   if (doInternalLinks) {
     reporter.info('Checking internal links...')
     try {
-      const out = execSync(`bin/build/links.pl ${sourceMarkdown}`, {encoding: 'utf8'})
+      const out = execSync(`${linkChecker} ${sourceMarkdown}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some bad internal links:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
       }
     } catch (err) {
       reporter.warn('Unable to check internal links:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
     }
   } else {
     reporter.warn('Skipping internal link check')
@@ -50,14 +55,14 @@ module.exports.runChecks = (reporter) => {
   if (doSpellCheck) {
     reporter.info('Performing spellcheck...')
     try {
-      const out = execSync(`bin/build/spellcheck.sh ${sourceMarkdown} bin/build/spellings.txt`, {encoding: 'utf8'})
+      const out = execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some misspellings:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
       }
     } catch (err) {
       reporter.warn('Unable to perform spellcheck:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
     }
   } else {
     reporter.warn('Skipping spellcheck')
@@ -69,12 +74,12 @@ module.exports.runChecks = (reporter) => {
       const out = lintSourceMarkdown(sourceMarkdown)
       if (out !== null) {
         reporter.warn('Found some linting issues:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
         sourceLintSucceeded = false
       }
     } catch (err) {
       reporter.warn('Unable to lint check source markdown:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
       sourceLintSucceeded = false
     }
   } else {
@@ -83,7 +88,7 @@ module.exports.runChecks = (reporter) => {
 
   reporter.info('Unpacking book source...')
   try {
-    execSync('bin/build/update.sh')
+    execSync(mdSplitter)
   } catch (err) {
     reporter.error('Failed to unpack book source.')
     throw err
@@ -96,11 +101,11 @@ module.exports.runChecks = (reporter) => {
         const out = lintSplitMarkdown(splitMarkdown)
         if (out !== null) {
           reporter.warn('Found some linting issues:')
-          out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+          printLines(out, reporter.warn)
         }
       } catch (err) {
         reporter.warn('Unable to lint check split markdown:')
-        err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+        printLines(err.toString(), reporter.warn)
       }
     } else {
       reporter.warn('Skipping split markdown linting due to earlier errors')
@@ -109,6 +114,10 @@ module.exports.runChecks = (reporter) => {
     reporter.warn('Skipping split markdown linting')
   }
 
+}
+
+function printLines(s, reporter) {
+  s.split(/\r?\n/).forEach((line, i) => line && reporter(line))
 }
 
 //
