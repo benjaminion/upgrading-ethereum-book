@@ -2627,13 +2627,21 @@ This has the following features,
 3. The next priority is to achieve [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128) validators per committee.
 4. After that
 
-| Validators | Threshold | Committee structure |
+| Validators | Threshold calculation | Committee structure |
 | - | - | - |
-| <&nbsp;32         | `SLOTS_PER_EPOCH` | Fail - there are empty committees  |
-| <&nbsp;8192       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` | TODO |
-| <&nbsp;262,144    | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `TARGET_COMMITTEE_SIZE` | TODO |
-| <=&nbsp;4,194,304 | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | TODO |
-| >&nbsp;4,194,304  | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | [Everything breaks](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
+| ${k < 32}$         | `SLOTS_PER_EPOCH` | Fail - there are empty committees  |
+| $32 <= k < {4096(N+1)}$       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` `*` $N+1$ | $N$ committees per slot |
+| $262\,144 <= k <= 4\,194\,304$ | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | 64 committees per slot |
+| ${k > 4\,194\,304}$  | As above. Note that this can [never be reached](/part3/config/preset#max_validators_per_committee) in practice. | [Things break](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
+
+| $n$ min | $n$ max | Committees per slot | Members per committee |
+| - | - | - | - |
+| $0$ | $31$ | $1$ | Some committees have zero members |
+| $32$ | $4095$ | $1$ | ${\lceil n / 32 \rceil}$ or ${\lfloor n / 32 \rfloor}$ , which is below `TARGET_COMMITTEE_SIZE` |
+| $4096$ | $8191$ | $1$ | ${\lceil n / 32 \rceil}$ or ${\lfloor n / 32 \rfloor}$ |
+| $8192$ | $262\,143$ | ${N = \lfloor n / 4096 \rfloor}$ | ${\lceil n / (32N) \rceil}$ or ${\lfloor n / (32N) \rfloor}$|
+| $262\,144$ | $4\,194\,304$ | 64 | ${\lceil n / 2048 \rceil}$ or ${\lfloor n / 2048 \rfloor}$ |
+| $4\,194\,305$ | - | 64 | [Things break](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) Note that this can [never happen](/part3/config/preset#max_validators_per_committee) in practice. |
 
 The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
 
@@ -2658,12 +2666,10 @@ Within each slot, up to [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_com
 <a id="img_committees_all"></a>
 <div class="image" style="width: 90%">
 
-![A diagram showing 64 committees at each slot](md/images/diagrams/committees_all.svg)
-An epoch has `MAX_COMMITTEES_PER_SLOT` committees at each slot. Every active validator appears in exactly one committee, thus the committees are all disjoint.
+![A diagram showing N committees at each slot and 31 slots per epoch](md/images/diagrams/committees_all.svg)
+Every slot in an epoch has the same number of committees, $N$, up to a maximum of `MAX_COMMITTEES_PER_SLOT`. Every active validator in the epoch appears in exactly one committee, thus the committees are all disjoint.
 
 </div>
-
-TODO - revise the alt text for the diagram above.
 
 #### Committee assignments
 
