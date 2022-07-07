@@ -42,11 +42,11 @@ module.exports.runChecks = (reporter) => {
       const out = execSync(`${linkChecker} ${sourceMarkdown}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some bad internal links:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
       }
     } catch (err) {
       reporter.warn('Unable to check internal links:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
     }
   } else {
     reporter.warn('Skipping internal link check')
@@ -58,11 +58,11 @@ module.exports.runChecks = (reporter) => {
       const out = execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8'})
       if (out !== '') {
         reporter.warn('Found some misspellings:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
       }
     } catch (err) {
       reporter.warn('Unable to perform spellcheck:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
     }
   } else {
     reporter.warn('Skipping spellcheck')
@@ -74,12 +74,12 @@ module.exports.runChecks = (reporter) => {
       const out = lintSourceMarkdown(sourceMarkdown)
       if (out !== null) {
         reporter.warn('Found some linting issues:')
-        out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+        printLines(out, reporter.warn)
         sourceLintSucceeded = false
       }
     } catch (err) {
       reporter.warn('Unable to lint check source markdown:')
-      err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+      printLines(err.toString(), reporter.warn)
       sourceLintSucceeded = false
     }
   } else {
@@ -101,11 +101,11 @@ module.exports.runChecks = (reporter) => {
         const out = lintSplitMarkdown(splitMarkdown)
         if (out !== null) {
           reporter.warn('Found some linting issues:')
-          out.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line))
+          printLines(out, reporter.warn)
         }
       } catch (err) {
         reporter.warn('Unable to lint check split markdown:')
-        err.toString().split(/\r?\n/).forEach((line, i) => reporter.warn(line))
+        printLines(err.toString(), reporter.warn)
       }
     } else {
       reporter.warn('Skipping split markdown linting due to earlier errors')
@@ -114,6 +114,10 @@ module.exports.runChecks = (reporter) => {
     reporter.warn('Skipping split markdown linting')
   }
 
+}
+
+function printLines(s, reporter) {
+  s.split(/\r?\n/).forEach((line, i) => line && reporter(line))
 }
 
 //
