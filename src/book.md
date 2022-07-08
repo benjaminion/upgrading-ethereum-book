@@ -2616,9 +2616,17 @@ The protocol adjusts the total number of committees in an epoch according to the
 
 Clearly, the first goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` validators &ndash; is a committee a committee if nobody is in it? &ndash; and the second goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators. The protocol could hardly be considered secure with fewer than 4096 validators, so this is not a significant issue in practice.
 
+<a id="img_committees_all"></a>
+<div class="image" style="width: 90%">
+
+![A diagram showing N committees at each slot and 32 slots per epoch](md/images/diagrams/committees_all.svg)
+Every slot in an epoch has the same number of committees, $N$, up to a maximum of `MAX_COMMITTEES_PER_SLOT`. Every active validator in the epoch appears in exactly one committee, thus the committees are all disjoint.
+
+</div>
+
 The number of committees per slot is calculated by the spec function [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot). This can be simplified for illustrative purposes, given the number $n$ of active validators in the epoch, as
 
-```python
+```code
 MAX_COMMITTEES_PER_SLOT = 64
 SLOTS_PER_EPOCH = 32
 TARGET_COMMITTEE_SIZE = 128
@@ -2639,67 +2647,128 @@ The committee structure it generates evolves as per the following table as the n
 The numbers at the various thresholds in this table are calculated from the spec constants:
 
   - 32 is [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch).
-  - 4096 is `SLOTS_PER_EPOCH` `*` [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size). This is the point at which our committees all achieve their target minimum size.
+  - 4096 is `SLOTS_PER_EPOCH` `*` [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size). This is the point at which all the committees achieve their target minimum size.
   - 262,144 is `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot). We have reached the maximum number of committees per slot (64). We no longer add new committees as the validator set grows, we just make the committees larger.
-  - 4,194,304 is `SLOTS_PER_EPOCH` `*` [`MAX_VALIDATORS_PER_COMMITTEE`](/part3/config/preset#max_validators_per_committee) `*` `MAX_COMMITTEES_PER_SLOT`. There is not enough Ether in existence to allow us to reach this number of active validators.
-
-<a id="img_committees_all"></a>
-<div class="image" style="width: 90%">
-
-![A diagram showing N committees at each slot and 31 slots per epoch](md/images/diagrams/committees_all.svg)
-Every slot in an epoch has the same number of committees, $N$, up to a maximum of `MAX_COMMITTEES_PER_SLOT`. Every active validator in the epoch appears in exactly one committee, thus the committees are all disjoint.
-
-</div>
+  - 4,194,304 is `SLOTS_PER_EPOCH` `*` [`MAX_VALIDATORS_PER_COMMITTEE`](/part3/config/preset#max_validators_per_committee) `*` `MAX_COMMITTEES_PER_SLOT`. There is not enough Ether in existence to allow us to reach this number of active validators. The limit exists in protocol to enable us to specify a maximum size for the [`aggregation_bits`](/part3/containers/operations#attestation) SSZ [`Bitlist`](/part2/building_blocks/ssz#bitlists) type in attestations.
 
 ##### Committee index
 
-TODO
+Each of the $N$ committees within a slot has a committee index from $0$ to $N-1$. I will call this $i$ in what follows and refer to it as the slot-based index. This [slot-based index](/part3/config/types#committeeindex) is included in committees' attestations via the [`AttestationData`](/part3/containers/dependencies#attestationdata) object,
+
+```code
+class AttestationData(Container):
+    slot: Slot
+    index: CommitteeIndex
+    # LMD GHOST vote
+    beacon_block_root: Root
+    # FFG vote
+    source: Checkpoint
+    target: Checkpoint
+```
+
+The `slot` and the committee `index` within that slot together uniquely identify this committee and its membership.
+
+Since all committees in a slot are voting on exactly the same information, for the most part the `index` is the only thing that varies between the aggregate attestations produced by the different committees. This prevents the attestations from the different committees in a slot being aggregated further, so we will generally end up with $N$ aggregate attestations per slot tat we must store in a beacon block.
+
+Note that, if it were not for the `index` then all these $N$ aggregate attestations could be further aggregated into a single aggregate attestation, combining the votes from all validators voting at that slot.
+
+As a thought experiment we can calculate the potential space savings if were to do this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would potentially introduce complexities in the [committee aggregation process](/part2/building_blocks/aggregator) described in the next section.
+
+There is another index that appears when assigning validators to committees in [`compute_committee()`](/part3/helper/misc#compute_committee), an epoch-based committee index that I shall call $j$. The indices $i$ and $j$ are related as $i = \mod(j, N)$ and $j = Ns + i$  where $s$ is the slot number in the epoch.
 
 #### The size of committees
 
 Validators are divided among the committees in an epoch by the [`compute_committee()`](/part3/helper/misc#compute_committee) function.
 
-If there are $N$ committees per epoch then we can assign each committee a unique index, $j$  within an epoch by adding its normal slot-based index $i$ to $\mod(s,32)N$, where $s$ is the slot number. So $0 <= j < 32N$.
+If there are $N$ committees per slot then we can assign each committee a unique index, $j$  within an epoch by adding its normal slot-based index $i$ to $\mod(s,32)N$, where $s$ is the slot number. So $0 <= j < 32N$.
 
-Given this epoch-based index $j$, `compute_committee()` returns a slice of the full shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / N \rfloor - 1$. So the size of each committee is either $\lfloor n / N \rfloor$ or $\lceil n / N \rceil$. In any case, committee sizes differ by at most one member.
+Given this epoch-based index $j$, `compute_committee()` returns a slice of the full shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / 32N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / 32N \rfloor - 1$. So the size of each committee is either $\lfloor n / 32N \rfloor$ or $\lceil n / 32N \rceil$. In any case, committee sizes differ by at most one member.
 
-In simplified form the [`compute_committee()`](/part3/helper/misc#compute_committee) calculation looks like this. `N` is the total number of committees in the epoch (committees per slot times 32), `n` is the total number of active validators, and `j` is the epoch-based committee index
+In simplified form the [`compute_committee()`](/part3/helper/misc#compute_committee) calculation looks like this. `N` is the number of committees per slot, `n` is the total number of active validators, and `j` is the epoch-based committee index
 
-```python
+```code
 def compute_committee_size(n, j, N):
-    start = (n *j) // N
-    end = (n * (j + 1)) // N
+    start = n * j // (32 * N)
+    end = n * (j + 1) // (32 * N)
     return end - start
 ```
 
-The length of the vector returned will be either `n // N` or `1 + n // N`. The function [`compute_shuffled_index()`](/part3/helper/misc/#compute_shuffled_index) is described in the [next section](/part2/building_blocks/shuffling).
+The length of the vector returned will be either `n // (32 * N)` or `1 + n // (32 * N)`. The function [`compute_shuffled_index()`](/part3/helper/misc#compute_shuffled_index) was described in the [previous section](/part2/building_blocks/shuffling).
+
+<a id="img_committees_selection"></a>
+<div class="image" style="width: 95%">
+
+![A diagram showing how the validator set is sliced up into committees](md/images/diagrams/committees_selection.svg)
+Conceptually, to calculate the committee assignments for an epoch, the entire active validator set is shuffled into a list of length $n$, then sliced into $32N$ committees of as close to the same size as possible. $N$ is the number of committees per slot. The epoch-based committee number, $j$, is shown. The slot-based committee number $i$ is $\mod(j, N)$.
+
+</div>
+
+In the caption to the diagram above I said that this is "conceptually" how committee membership is determined. In practice, due to our use of an [oblivious shuffle](/part2/building_blocks/shuffling), the membership of an individual committee can be calculated without shuffling the entire validator set. The result will be the same.
 
 ##### Target committee size
 
-The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
+[TODO: update the section in the annotated spec to point here]::
 
-TODO: committee index. Combines slot and per-slot index.
+To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators for all committees to have at least `TARGET_COMMITTEE_SIZE` (128) members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
-The number of validators in a committee is determined in [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) - TODO describe properties.
+Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](https://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minimum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
+
+If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
+
+$$
+\sum_{i=k}^{n} p^i(1-p)^{n-i}{n\choose i}
+$$
+
+Using this we can calculate that, in fact, 109 members is sufficient to give only a $2^{-40}$ chance of an attacker with one third of the validators gaining a two-thirds majority by chance.
+
+Notwithstanding all of this, in the current beacon chain design the minimum committee target size is irrelevant as committees never operate alone. As long as we have at least 8192 active validators, each slot has multiple committees all operating together and it is their aggregate size that confers security. As previously mentioned, the current committee design is influenced by an old data sharding model that is now superseded. Nonetheless, individual committees might find a role in future versions of the protocol, so the minimum target size is worth preserving.
+
+<a id="target-committee-size-code"></a>
+<details>
+<summary>Code for calculating the target committee size</summary>
+
+Vitalik provides some Python code to evaluate the probabilities.
+
+```code
+def fac(n):
+    return n * fac(n-1) if n else 1
+
+def choose(n, k):
+    return fac(n) / fac(k) / fac(n-k)
+
+def prob(n, k, p):
+    return p**k * (1-p)**(n-k) * choose(n,k)
+
+def probge(n, k, p):
+    return sum([prob(n,i,p) for i in range(k,n+1)])
+```
+
+With this, we find that the minimum committee size to avoid a two-thirds majority with a $2^{-40}$ probability is 109 rather than 111.
+
+```code
+>>> probge(108, 72, 1.0 / 3) < 2**-40
+False
+>>> probge(109, 73, 1.0 / 3) < 2**-40
+True
+```
+
+In any case, a committee size of 128 is very safe against an attacker with 1/3 of the stake:
+
+```code
+>>> probge(128, 86, 1.0 / 3)
+5.551560731791749e-15
+```
+
+</details>
 
 #### Committee structure
+
+HERE
 
 <!-- TODO
 
   - When are committees assigned. RANDAO and lookahead thing.
     - committee assignments last only an epoch/slot and then are recomputed. Contrast with sync committees
-  - Number of committees
-  - Committee target size; what happens when num vals is insufficient
-    Priority:
-    - 1 committee per slot
-    - 128 per committee
-    - max 2048 committees
-    - Max 2048 validators per committee (4 million total validators)
-  - Shuffling
-
-[`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot)
-[`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee)
-[`compute_committee()`](/part3/helper/misc#compute_committee)
 
 -->
 
@@ -4395,48 +4464,9 @@ Note that sync committees are a different thing: there is only one sync committe
 
 ##### `TARGET_COMMITTEE_SIZE`
 
-To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators to make all committees have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
+To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators for all committees to have at least 128 members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` * `TARGET_COMMITTEE_SIZE` = 4096 validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
 
-Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](https://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minimum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
-
-If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
-
-$$
-\sum_{i=k}^{n} p^i(1-p)^{n-i}{n\choose i}
-$$
-
-Vitalik provides some handy Python code to evaluate this expression.
-
-```code
-    def fac(n):
-        return n * fac(n-1) if n else 1
-    def choose(n, k):
-        return fac(n) / fac(k) / fac(n-k)
-    def prob(n, k, p):
-        return p**k * (1-p)**(n-k) * choose(n,k)
-    def probge(n, k, p):
-        return sum([prob(n,i,p) for i in range(k,n+1)])
-```
-
-Using this, I find that the minimum committee size to avoid a two-thirds majority with a $2^{-40}$ probability is actually 109 rather than 111.
-
-```code
-    >>> probge(108, 72, 1.0 / 3) < 2**-40
-    False
-    >>> probge(109, 73, 1.0 / 3) < 2**-40
-    True
-```
-
-In any case, a committee size of 128 is very safe against an attacker with 1/3 of the stake:
-
-```code
-    >>> probge(128, 86, 1.0 / 3)
-    5.551560731791749e-15
-```
-
-Another concern is that the randomness that we are using (a RANDAO) is not unbiasable. If an attacker happens to control a number of block proposers at the end of an epoch, they can decide to reveal or not to reveal their blocks, gaining one bit of influence per validator on the next random number. This might allow an attacker to gain more control in the next round and so on. In this way, an attacker can gain some influence over committee selection. Having a good lower-bound on committee size helps to defend against this. Alternatively, we could in future use an unbiasable source of randomness such as a [verifiable delay function](/part4/research/vdf).
-
-Note that, currently, a single committee being compromised by an attacker would have no impact since many committees act at each slot to progress consensus. However, these committees will at some future stage become individual shard committees, at which time protecting them from takeover is vital.
+For further discussion and an explanation of how the value of `TARGET_COMMITTEE_SIZE` was set, see the [section on committees](/part2/building_blocks/committees#target-committee-size).
 
 ##### `MAX_VALIDATORS_PER_COMMITTEE`
 
