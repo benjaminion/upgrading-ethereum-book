@@ -2596,7 +2596,7 @@ This property is important for light clients. Light clients are observers of the
 
 One of the biggest challenges in building a highly scalable consensus protocol is organising the work involved so as not to overwhelm the network.
 
-One goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validators, and we must do this twice. Hence, over the course of an epoch every validator votes for a checkpoint via its "source" and "target" attestations, and over the course of the next epoch every validator confirms that it has seen the others' votes.
+A goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validators, and we must do this twice. Hence, over the course of an epoch every validator votes for a checkpoint via its "source" and "target" attestations, and over the course of the next epoch every validator confirms that it has seen the others' votes.
 
 If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes to validate and process these attestations would be unmanageable. Therefore the work is divided among subsets of the validator set called committees, and spread across two epochs (12.8 minutes).
 
@@ -2606,11 +2606,17 @@ The current beacon committee structure was strongly influenced by the old roadma
 
 In any case, logically, the 64 committees in a slot now act as a single large committee, all voting on exactly the same information.
 
-#### Committee sizes
+#### The number of committees
 
-The number of committees formed in an epoch depends on the number of active validators in that epoch.
+The protocol adjusts the total number of committees in an epoch according to the number of active validators. The goals are,
 
-The spec function [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot) is used to calculate the number of committees per slot from the number of active validators. This can be simplified for illustrative purposes like this,
+1. to have the same number of committees per slot throughout the epoch (so the number of committees in an epoch is always a multiple of `SLOTS_PER_EPOCH`),
+2. to have the largest number of committees that ensures that each one has at least `TARGET_COMMITTEE_SIZE` members, and
+3. to have a maximum of `MAX_COMMITTEES_PER_SLOT` committees per slot.
+
+Clearly, the first goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` validators &ndash; is a committee a committee if nobody is in it? &ndash; and the second goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators. The protocol could hardly be considered secure with fewer than 4096 validators, so this is not a significant issue in practice.
+
+The number of committees per slot is calculated by the spec function [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot). This can be simplified for illustrative purposes, given the number $n$ of active validators in the epoch, as
 
 ```python
 MAX_COMMITTEES_PER_SLOT = 64
@@ -2620,48 +2626,22 @@ def committees_per_slot(n):
     return max(1, min(MAX_COMMITTEES_PER_SLOT, n // SLOTS_PER_EPOCH // TARGET_COMMITTEE_SIZE))
 ```
 
-This has the following features,
+The committee structure it generates evolves as per the following table as the number of validators grows.
 
-1. Target having committees as close to equal size as possible. That is, committee sizes will differ by at most one. Similarly, target having as close to the same number of committees per slot as possible. That is, the number of committees in each slot will differ by at most one.
-2. The first priority is to achieve one committee per slot.
-3. The next priority is to achieve [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128) validators per committee.
-4. After that
+| $n$ min | $n$ max | Committees / slot | Members per committee | Min | Max |
+| - | - | - | - | - | - |
+| $0$ | $31$ | $1$ | Some committees have zero members | 0 | 1 |
+| $32$ | $4095$ | $1$ | ${\lceil n / 32 \rceil}$ or ${\lfloor n / 32 \rfloor}$, which is below `TARGET_COMMITTEE_SIZE` | 1 | 128 |
+| $4096$ | $262\,143$ | ${N = \lfloor n / 4096 \rfloor}$ | ${\lceil n / (32N) \rceil}$ or ${\lfloor n / (32N) \rfloor}$ | 128 | 256 |
+| $262\,144$ | $4\,194\,304$ | 64 | ${\lceil n / 2048 \rceil}$ or ${\lfloor n / 2048 \rfloor}$ | 128 | 2048 |
+| $4\,194\,305$ | - | 64 | [Things break](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) Note that this can [never happen](/part3/config/preset#max_validators_per_committee) in practice. | - | - |
 
-| Validators | Threshold calculation | Committee structure |
-| - | - | - |
-| ${k < 32}$         | `SLOTS_PER_EPOCH` | Fail - there are empty committees  |
-| $32 <= k < {4096(N+1)}$       | `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` `*` $N+1$ | $N$ committees per slot |
-| $262\,144 <= k <= 4\,194\,304$ | `SLOTS_PER_EPOCH` `*` `MAX_COMMITTEES_PER_SLOT` `*` `MAX_VALIDATORS_PER_COMMITTEE` | 64 committees per slot |
-| ${k > 4\,194\,304}$  | As above. Note that this can [never be reached](/part3/config/preset#max_validators_per_committee) in practice. | [Things break](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) |
+The numbers at the various thresholds in this table are calculated from the spec constants:
 
-| $n$ min | $n$ max | Committees per slot | Members per committee |
-| - | - | - | - |
-| $0$ | $31$ | $1$ | Some committees have zero members |
-| $32$ | $4095$ | $1$ | ${\lceil n / 32 \rceil}$ or ${\lfloor n / 32 \rfloor}$ , which is below `TARGET_COMMITTEE_SIZE` |
-| $4096$ | $8191$ | $1$ | ${\lceil n / 32 \rceil}$ or ${\lfloor n / 32 \rfloor}$ |
-| $8192$ | $262\,143$ | ${N = \lfloor n / 4096 \rfloor}$ | ${\lceil n / (32N) \rceil}$ or ${\lfloor n / (32N) \rfloor}$|
-| $262\,144$ | $4\,194\,304$ | 64 | ${\lceil n / 2048 \rceil}$ or ${\lfloor n / 2048 \rfloor}$ |
-| $4\,194\,305$ | - | 64 | [Things break](https://consensys.net/blog/news/formal-verification-of-ethereum-2-0-part-1-fixing-the-array-out-of-bound-runtime-error/) Note that this can [never happen](/part3/config/preset#max_validators_per_committee) in practice. |
-
-The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
-
-TODO: committee index. Combines slot and per-slot index.
-
-The number of validators in a committee is determined in [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) - TODO describe properties.
-
-#### Committee structure
-
-<!-- committee assignments last only an epoch/slot and then are recomputed. Contrast with sync committees. -->
-
-Let's begin by considering the entire active validator within an epoch: every active validator has exactly one opportunity to make an attestation each epoch.
-
-[TODO: check lookahead]::
-
-At the start of an epoch,
-
-Across the span of an epoch this active validator set is divided into (at most) [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (2048) disjoint committees. Every active validator is a member of exactly one committee.
-
-Within each slot, up to [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot) (64) committees are active. Each committee is disbanded... TODO
+  - 32 is [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch).
+  - 4096 is `SLOTS_PER_EPOCH` `*` [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size). This is the point at which our committees all achieve their target minimum size.
+  - 262,144 is `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` `*` [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot). We have reached the maximum number of committees per slot (64). We no longer add new committees as the validator set grows, we just make the committees larger.
+  - 4,194,304 is `SLOTS_PER_EPOCH` `*` [`MAX_VALIDATORS_PER_COMMITTEE`](/part3/config/preset#max_validators_per_committee) `*` `MAX_COMMITTEES_PER_SLOT`. There is not enough Ether in existence to allow us to reach this number of active validators.
 
 <a id="img_committees_all"></a>
 <div class="image" style="width: 90%">
@@ -2671,9 +2651,43 @@ Every slot in an epoch has the same number of committees, $N$, up to a maximum o
 
 </div>
 
-#### Committee assignments
+##### Committee index
+
+TODO
+
+#### The size of committees
+
+Validators are divided among the committees in an epoch by the [`compute_committee()`](/part3/helper/misc#compute_committee) function.
+
+If there are $N$ committees per epoch then we can assign each committee a unique index, $j$  within an epoch by adding its normal slot-based index $i$ to $\mod(s,32)N$, where $s$ is the slot number. So $0 <= j < 32N$.
+
+Given this epoch-based index $j$, `compute_committee()` returns a slice of the full shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / N \rfloor - 1$. So the size of each committee is either $\lfloor n / N \rfloor$ or $\lceil n / N \rceil$. In any case, committee sizes differ by at most one member.
+
+In simplified form the [`compute_committee()`](/part3/helper/misc#compute_committee) calculation looks like this. `N` is the total number of committees in the epoch (committees per slot times 32), `n` is the total number of active validators, and `j` is the epoch-based committee index
+
+```python
+def compute_committee_size(n, j, N):
+    start = (n *j) // N
+    end = (n * (j + 1)) // N
+    return end - start
+```
+
+The length of the vector returned will be either `n // N` or `1 + n // N`. The function [`compute_shuffled_index()`](/part3/helper/misc/#compute_shuffled_index) is described in the [next section](/part2/building_blocks/shuffling).
+
+##### Target committee size
+
+The minimum committee size is specified by [`TARGET_COMMITTEE_SIZE`](/part3/config/preset#target_committee_size) (128): if there are fewer than 262,144 validators then the total number of committees is reduced to maintain a minimum of 128 per committee.
+
+TODO: committee index. Combines slot and per-slot index.
+
+The number of validators in a committee is determined in [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee) - TODO describe properties.
+
+#### Committee structure
+
+<!-- TODO
 
   - When are committees assigned. RANDAO and lookahead thing.
+    - committee assignments last only an epoch/slot and then are recomputed. Contrast with sync committees
   - Number of committees
   - Committee target size; what happens when num vals is insufficient
     Priority:
@@ -2683,17 +2697,11 @@ Every slot in an epoch has the same number of committees, $N$, up to a maximum o
     - Max 2048 validators per committee (4 million total validators)
   - Shuffling
 
-[`MAX_VALIDATORS_PER_COMMITTEE`](/part3/config/preset#max_validators_per_committee)
-
 [`get_committee_count_per_slot()`](/part3/helper/accessors#get_committee_count_per_slot)
 [`get_beacon_committee()`](/part3/helper/accessors#get_beacon_committee)
 [`compute_committee()`](/part3/helper/misc#compute_committee)
 
-HERE
-
-#### Background
-
-Beacon committees (which I shall just call committees from now on) feature prominently in the Eth2 specification, but actually have very little purpose in the current design.
+-->
 
 #### See also
 
@@ -6095,7 +6103,7 @@ Every epoch, a fresh set of committees is generated; during an epoch, the commit
 Looking at the parameters in reverse order:
 
   - `count` is the total number of committees in an epoch. This is `SLOTS_PER_EPOCH` times the output of [`get_committee_count_per_slot()`](/part3/helper/accessors#def_get_committee_count_per_slot).
-  - `index` is the committee number within the epoch, running from `0` to `count - 1`.
+  - `index` is the committee number within the epoch, running from `0` to `count - 1`. It is calculated in ([`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee) from the committee number in the slot `index` and the slot number as `(slot % SLOTS_PER_EPOCH) * committees_per_slot + index`.
   - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter ([`get_beacon_committee()`](/part3/helper/accessors#def_get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants#domain_beacon_attester)).
   - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
