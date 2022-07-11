@@ -2594,21 +2594,49 @@ This property is important for light clients. Light clients are observers of the
 
 #### Introduction
 
-One of the biggest challenges in building a highly scalable consensus protocol is organising the work involved so as not to overwhelm the network.
+One of the biggest challenges in building a highly scalable consensus protocol is organising the work involved so as not to overwhelm the network or individual nodes.
 
-A goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validators, and we must do this twice. Hence, over the course of an epoch every validator votes for a checkpoint via its "source" and "target" attestations, and over the course of the next epoch every validator confirms that it has seen the others' votes.
+A goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validator set, and we must do this twice: once to justify an epoch, and once again to finalise it.
 
-If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes to validate and process these attestations would be unmanageable. Therefore the work is divided among subsets of the validator set called committees, and spread across two epochs (12.8 minutes).
+If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes to validate and process these attestations would be unmanageable. This is where committees help. The work is divided among subsets of the validator set (committees) and spread across two epochs (12.8 minutes).
 
-The Altair spec has two types of committees, beacon committees and sync committees, which have quite different functions. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
+The Altair spec has two types of committees, beacon committees and sync committees, each having quite a different function. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
 
-The current beacon committee structure was strongly influenced by the old roadmap that had in-protocol data sharding in Phase&nbsp;1. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally planned to map directly to 64 shards as "crosslink committees" but no longer have that function. Nonetheless, beacon committees still serve a useful purpose in parallelising the aggregation of attestations. Whether 64 remains the right number of committees per slot has not been analysed to my knowledge. The trade-off is that fewer beacon committees would reduce the amount of block space needed for aggregate attestations, but would increase the time taken by [aggregators](/part2/building_blocks/aggregator).
+The current beacon committee structure was strongly influenced by a previous roadmap that included in-protocol data sharding. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally planned to map directly to 64 shards as "crosslink committees" but no longer have that function. Nonetheless, beacon committees still serve a useful purpose in parallelising the aggregation of attestations. Whether 64 remains the right number of committees per slot has not been analysed to my knowledge. The trade-off is that fewer beacon committees would reduce the amount of block space needed for aggregate attestations, but would increase the time needed by [aggregators](/part2/building_blocks/aggregator).
 
-In any case, logically, the 64 committees in a slot now act as a single large committee, all voting on exactly the same information.
+In any case, logically, the 64 committees in a slot now act as a single large committee, all voting on the same information.
+
+#### Committee assignments
+
+Beacon committees are convened to vote exactly once and then disbanded immediately - they are completely transient. By contrast, a sync committee lasts for 256 epochs (a little over 27 hours), and votes 8192 times during that period.
+
+During an epoch, every active validator is a member of exactly one beacon committee, so the committees are all disjoint. At the start of the next epoch, all the existing committees are disbanded and the active validator set is divided into a completely new set of committees.
+
+The composition of the committees for an epoch is fully determined at the start of an epoch by (1) the active validator set for that epoch, and (2) the [RANDAO seed](/part2/building_blocks/randomness#lookahead) value at the start of the previous epoch.
+
+<a id="img_committees_random"></a>
+<div class="image" style="width: 80%">
+
+![Diagram showing circles and triangles randomly divided into committees](md/images/diagrams/committees_random.svg)
+Thirty circles and fifteen triangles are divided into five committees at random. The attacking triangles do not have a majority in any committee.
+
+</div>
+
+Validators are assigned randomly to committees to defend against a minority attacker capturing any single committee. If committees assignments were not random, or were calculable long in advance, then it might be possible for an attacker with a minority of validators to organise them so that they became a supermajority in some committees. They might do this by manipulating the entries and exits of their validators , for example.
+
+<a id="img_committees_organised"></a>
+<div class="image" style="width: 80%">
+
+![Diagram showing circles and triangles divided into committees under the influence of an attacker](md/images/diagrams/committees_organised.svg)
+It would be improbable for the triangles to gain a 2/3 supermajority in a committee purely by chance. But if the attacker could manipulate the assignments then they might gain a supermajority in some committees, such as the first two here.
+
+</div>
+
+The committee sizes used in the Eth2 protocol were chosen to make the takeover of a committee by a minority attacker extremely unlikely. See [target committee size](#target-committee-size), below.
 
 #### The number of committees
 
-The protocol adjusts the total number of committees in an epoch according to the number of active validators. The goals are,
+The protocol adjusts the total number of committees in each epoch according to the number of active validators. The goals are,
 
 1. to have the same number of committees per slot throughout the epoch (so the number of committees in an epoch is always a multiple of `SLOTS_PER_EPOCH`),
 2. to have the largest number of committees that ensures that each one has at least `TARGET_COMMITTEE_SIZE` members, and
@@ -2634,7 +2662,7 @@ def committees_per_slot(n):
     return max(1, min(MAX_COMMITTEES_PER_SLOT, n // SLOTS_PER_EPOCH // TARGET_COMMITTEE_SIZE))
 ```
 
-The committee structure it generates evolves as per the following table as the number of validators grows.
+This generates a committee structure that evolves as per the following table as the number of validators grows.
 
 | $n$ min | $n$ max | Committees / slot | Members per committee | Min | Max |
 | - | - | - | - | - | - |
@@ -2666,13 +2694,13 @@ class AttestationData(Container):
     target: Checkpoint
 ```
 
-The `slot` and the committee `index` within that slot together uniquely identify this committee and its membership.
+The `slot` and the committee `index` within that slot together uniquely identify a committee and its membership.
 
-Since all committees in a slot are voting on exactly the same information, for the most part the `index` is the only thing that varies between the aggregate attestations produced by the different committees. This prevents the attestations from the different committees in a slot being aggregated further, so we will generally end up with $N$ aggregate attestations per slot tat we must store in a beacon block.
+Since all committees in a slot are voting on exactly the same information (source, target, and head block), for the most part the `index` is the only thing that varies between the aggregate attestations produced by the slot's committees. This prevents the attestations from the slot's committees being aggregated further, so we will generally end up with $N$ aggregate attestations per slot that we must store in a beacon block.
 
-Note that, if it were not for the `index` then all these $N$ aggregate attestations could be further aggregated into a single aggregate attestation, combining the votes from all validators voting at that slot.
+If it were not for the `index` then all these $N$ aggregate attestations could be further aggregated into a single aggregate attestation, combining the votes from all validators voting at that slot.
 
-As a thought experiment we can calculate the potential space savings if were to do this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would potentially introduce complexities in the [committee aggregation process](/part2/building_blocks/aggregator) described in the next section.
+As a thought experiment we can calculate the potential space savings of doing this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would potentially introduce complexities in the [committee aggregation process](/part2/building_blocks/aggregator) described in the next section.
 
 There is another index that appears when assigning validators to committees in [`compute_committee()`](/part3/helper/misc#compute_committee), an epoch-based committee index that I shall call $j$. The indices $i$ and $j$ are related as $i = \mod(j, N)$ and $j = Ns + i$  where $s$ is the slot number in the epoch.
 
@@ -2680,9 +2708,7 @@ There is another index that appears when assigning validators to committees in [
 
 Validators are divided among the committees in an epoch by the [`compute_committee()`](/part3/helper/misc#compute_committee) function.
 
-If there are $N$ committees per slot then we can assign each committee a unique index, $j$  within an epoch by adding its normal slot-based index $i$ to $\mod(s,32)N$, where $s$ is the slot number. So $0 <= j < 32N$.
-
-Given this epoch-based index $j$, `compute_committee()` returns a slice of the full shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / 32N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / 32N \rfloor - 1$. So the size of each committee is either $\lfloor n / 32N \rfloor$ or $\lceil n / 32N \rceil$. In any case, committee sizes differ by at most one member.
+Given the epoch-based index $j$, `compute_committee()` returns a slice of the full shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / 32N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / 32N \rfloor - 1$. So the size of each committee is either $\lfloor n / 32N \rfloor$ or $\lceil n / 32N \rceil$. In any case, committee sizes differ by at most one member.
 
 In simplified form the [`compute_committee()`](/part3/helper/misc#compute_committee) calculation looks like this. `N` is the number of committees per slot, `n` is the total number of active validators, and `j` is the epoch-based committee index
 
@@ -2707,11 +2733,9 @@ In the caption to the diagram above I said that this is "conceptually" how commi
 
 ##### Target committee size
 
-[TODO: update the section in the annotated spec to point here]::
+To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators for all committees to have at least `TARGET_COMMITTEE_SIZE` (128) members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators the system would be insecure in any case.
 
-To achieve a desirable level of security, committees need to be larger than a certain size. This makes it infeasible for an attacker to randomly end up with a super-majority in a committee even if they control a significant number of validators. The target here is a kind of lower-bound on committee size. If there are not enough validators for all committees to have at least `TARGET_COMMITTEE_SIZE` (128) members, then, as a first measure, the number of committees per slot is reduced to maintain this minimum. Only if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators in total will the committee size be reduced below `TARGET_COMMITTEE_SIZE`. With so few validators, the system would be insecure in any case.
-
-Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik discusses this in [a presentation](https://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf), and proposes 111 as the minimum committee size needed to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
+Given a proportion of the validators controlled by an attacker, what is the probability that the attacker ends up controlling a two-thirds majority in a randomly selected committee drawn from the full set of validators? Vitalik [calculated 111](https://web.archive.org/web/20190504131341/https://vitalik.ca/files/Ithaca201807_Sharding.pdf) to be the minimum committee size required to maintain a $2^{-40}$ chance (one-in-a-trillion) of an attacker with one third of the validators gaining by chance a two-thirds majority in any one committee. The value 128 was chosen as being the next higher power of two.
 
 If an attacker has a proportion $p$ of the validator pool, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
 
@@ -2721,13 +2745,11 @@ $$
 
 Using this we can calculate that, in fact, 109 members is sufficient to give only a $2^{-40}$ chance of an attacker with one third of the validators gaining a two-thirds majority by chance.
 
-Notwithstanding all of this, in the current beacon chain design the minimum committee target size is irrelevant as committees never operate alone. As long as we have at least 8192 active validators, each slot has multiple committees all operating together and it is their aggregate size that confers security. As previously mentioned, the current committee design is influenced by an old data sharding model that is now superseded. Nonetheless, individual committees might find a role in future versions of the protocol, so the minimum target size is worth preserving.
-
 <a id="target-committee-size-code"></a>
 <details>
 <summary>Code for calculating the target committee size</summary>
 
-Vitalik provides some Python code to evaluate the probabilities.
+The following is Vitalik's Python code for calculating the probabilities.
 
 ```code
 def fac(n):
@@ -2761,20 +2783,13 @@ In any case, a committee size of 128 is very safe against an attacker with 1/3 o
 
 </details>
 
-#### Committee structure
+Odds of one-in-trillion may sound like over-engineering, but we must also consider that an attacker could gain some [power over](/part2/building_blocks/randomness#randao-biasability) the RANDAO, so some safety margin is desirable.
 
-HERE
-
-<!-- TODO
-
-  - When are committees assigned. RANDAO and lookahead thing.
-    - committee assignments last only an epoch/slot and then are recomputed. Contrast with sync committees
-
--->
+Notwithstanding all of this, in the current beacon chain design the minimum target committee size is irrelevant as committees never operate alone. As long as we have at least 8192 active validators, each slot has multiple committees all operating together and it is their aggregate size that confers security, not the size of any individual committee. As previously mentioned, the current committee design is influenced by an old data sharding model that is now superseded. Nonetheless, individual committees might find a role in future versions of the protocol, so the minimum target size is worth preserving.
 
 #### See also
 
-In his survey article, [Paths toward single-slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality), Vitalik considers what it would take to introduce a single "super-committee" at each slot to replace the existing beacon committees. The super-committee would be a large enough subset of the whole validator set to achieve a satisfactorily secure level of finality within a single (extended, 16 second) slot.
+In his survey article, [Paths toward single-slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality), Vitalik considers what it would take to introduce a single "super-committee" at each slot to replace the existing beacon committees. The super-committee would be a large enough subset of the whole validator set to achieve a satisfactorily secure level of finality within a single (extended, 16 second or longer) slot.
 
 ### Aggregator Selection <!-- /part2/building_blocks/aggregator -->
 
