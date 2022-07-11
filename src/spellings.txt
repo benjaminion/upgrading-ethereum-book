@@ -250,6 +250,7 @@ misconfiguration
 modularity
 monocultures
 num
+parallelise
 parallelising
 parameterises
 performant
