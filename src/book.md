@@ -1417,7 +1417,7 @@ These are the topics that I've picked out for special attention.
 
   - [BLS Signatures](/part2/building_blocks/signatures) precipitated the total redesign of Ethereum's proof of stake protocol, and underpin the scale and ambition of Ethereum 2.
   - [Randomness](/part2/building_blocks/randomness) is a vital aspect of security, but difficult to generate in a deterministic system. The beacon chain accomplishes it with BLS signatures.
-  - [Shuffling](/part2/building_blocks/shuffling) is uses randomness to populate committees. But, for the sake of light clients, we use an "oblivious" shuffle rather than the standard Fisher--Yates.
+  - [Shuffling](/part2/building_blocks/shuffling) is uses randomness to populate committees. But, for the sake of light clients, we use an "oblivious" shuffle rather than the standard Fisher&ndash;Yates.
   - [Committees](/part2/building_blocks/committees) distribute the workload of the beacon chain.
   - [Aggregator Selection](/part2/building_blocks/aggregator) secretly selects small subsets of committees to do the work of aggregating attestations.
   - [SSZ: Simple Serialize](/part2/building_blocks/ssz) is a novel serialisation technique that appears everywhere in the protocol. It embodies elegance and efficiency.
