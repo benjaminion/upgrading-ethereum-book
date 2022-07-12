@@ -1413,17 +1413,17 @@ Some of the trade-offs are quite interesting. For example, neither the [shufflin
 
 The building blocks I've grouped together in this chapter are those that are part of the protocol specification itself. Client implementations often employ other optimisations that are not part of the specification. We'll consider some of those later in the [Implementation](/part2/implementation) chapter.
 
-Here's what we shall be covering:
+These are the topics that I've picked out for special attention.
 
-  - [BLS Signatures](/part2/building_blocks/signatures);
-  - [Randomness](/part2/building_blocks/randomness);
-  - Committees (to-do);
-  - [Shuffling](/part2/building_blocks/shuffling);
-  - Aggregator Selection (to-do);
-  - [SSZ: Simple Serialize](/part2/building_blocks/ssz);
-  - [Hash Tree Roots and Merkleization](/part2/building_blocks/merkleization);
-  - Generalised indices and Merkle proofs (to-do);
-  - Sync Committees (to-do).
+  - [BLS Signatures](/part2/building_blocks/signatures) precipitated the total redesign of Ethereum's proof of stake protocol, and underpin the scale and ambition of Ethereum 2.
+  - [Randomness](/part2/building_blocks/randomness) is a vital aspect of security, but difficult to generate in a deterministic system. The beacon chain accomplishes it with BLS signatures.
+  - [Shuffling](/part2/building_blocks/shuffling) is uses randomness to populate committees. But, for the sake of light clients, we use an "oblivious" shuffle rather than the standard Fisher--Yates.
+  - [Committees](/part2/building_blocks/committees) distribute the workload of the beacon chain.
+  - [Aggregator Selection](/part2/building_blocks/aggregator) secretly selects small subsets of committees to do the work of aggregating attestations.
+  - [SSZ: Simple Serialize](/part2/building_blocks/ssz) is a novel serialisation technique that appears everywhere in the protocol. It embodies elegance and efficiency.
+  - [Hash Tree Roots and Merkleization](/part2/building_blocks/merkleization) are applications of SSZ. Among other things, they make light clients practical.
+  - Generalised indices and Merkle proofs (TODO).
+  - Sync Committees (TODO).
 
 ### BLS Signatures <!-- /part2/building_blocks/signatures -->
 
@@ -2891,23 +2891,15 @@ Sync committees operate similarly. Each committee has 512 members that are divid
 
 The `TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE` value was [increased from 4 to 16](https://github.com/ethereum/consensus-specs/pull/2514) ahead of the implementation of sync committees. This was based on an [analysis](https://docs.google.com/spreadsheets/d/1C7pBqEWJgzk3_jesLkqJoDTnjZOODnGTOJUrxUMdxMA/edit#gid=1790975994) showing that, by targeting only four aggregators, there would be an unacceptably high chance of having no aggregators on a sync committee subnet.
 
-#### Miscellaneous notes
-
-##### Incentivisation
+#### Incentivisation
 
 Aggregators are not directly incentivised by the protocol: there are no explicit rewards or penalties for performing or not performing aggregation duties.
 
 However, there are implicit incentives. For one, if I produce a high quality aggregate signature it helps to ensure that my own signature is included in a block (there's a chance that someone else's aggregate may not include my signature). For another, since overall attestation rewards [scale in proportion to participation](/part2/incentives/rewards#rewards-scale-with-participation) (inclusion of attestations in blocks), aggregators benefit alongside all the other validators from slightly higher rewards when they make high quality aggregates that include many votes.
 
-##### Interaction with DVT
+#### See also
 
-[TODO: link to DVT when written]::
-
-A possible approach to implementing distributed validator technology (DVT) is for the multiple validators that represent a single validator to operate independently, and for a middleware to combine their signed attestations. This works because BLS signatures are additive: each validator has part of the key, and the signed attestations can be combined with a [threshold signature](/part2/building_blocks/signatures#threshold-signatures) scheme into a signature from the full key.
-
-Aggregator selection complicates this. Since each validator has only part of the full key, it cannot calculate when it will be responsible for aggregator duties without collaborating with the other validators in its group. This creates a potentially significant overhead.
-
-A naive workaround could be to base aggregator selection on, say, $\mod(i, \frac{N}{16} = 0$, where $i$ is the position of the validator in the (possibly sorted) list of committee members. This is DVT-friendly and easy to verify. It also guarantees exactly 16 aggregators per committee. But it fails to meet the secrecy criterion: anyone could calculate in advance the aggregators for a committee.
+A possible approach to implementing distributed validator technology (DVT) is for the multiple validators representing a single validator to operate independently, alongside a middleware that combines their signed attestations. This works because BLS signatures are additive: each validator has part of the key, and the signed attestations can be combined with a [threshold signature](/part2/building_blocks/signatures#threshold-signatures) scheme into a signature from the full key. While this works in principle, in practice the current interface between the beacon node and the validator client makes it difficult for these validators to determine whether they have been selected to be aggregators or not. Oisín Kyne's [ethresear.ch article](https://ethresear.ch/t/distributed-validator-middlewares-and-the-aggregation-duty/13044?u=benjaminion) explores this problem and proposes a solution.
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
 
