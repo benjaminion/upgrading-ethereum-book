@@ -80,6 +80,7 @@ Iykyk
 JSON
 Jacek's
 Keccak
+Kyne
 LMD
 Lamport
 Lifecycle
@@ -99,6 +100,7 @@ Namib
 Narayanan
 Natale
 Neven
+Oisín
 PBFT
 PRNG
 Parametrizing
