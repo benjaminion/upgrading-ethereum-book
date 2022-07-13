@@ -1,7 +1,5 @@
 # Upgrading Ethereum
 
-## Intro
-
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
 You can read it at [eth2book.info](https://eth2book.info/altair) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/altair)).
