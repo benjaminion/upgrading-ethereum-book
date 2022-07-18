@@ -2,18 +2,19 @@
 
 ## Work in progress!
 
-This is a teaser, an appetiser. Only one part is reasonably complete, the [Annotated Specification](/part3) - the rest is on its way.
+I am writing this book backwards. Bottom up. Starting with the details and working towards the big picture.
 
-The Annotated Spec is the guts of the machine. Like the innards of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can be built around them and the messy details neatly tucked away. My goal for the remaining parts of the book is to wrap a nice accessible narrative around the tricky technical details. There will be pictures.
+The first pretty much complete part is [Part 3: The Annotated Spec](/part3). These are the guts of the machine. Like the innards of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can be built around them with the messiness all neatly tucked away.
+
+I'm now working on [Part 2: Technical Overview](/part2) which wraps a first, hopefully more accessible, layer around the Annotated Spec. Again, I'm writing this backwards, starting with the protocol's [Building Blocks](/part2/building_blocks) and its [Incentive Mechanisms](/part2/incentives) and working forwards towards a higher level narrative of how it all fits together.
 
 In an ideal world, my plan is as follows:
 
-  - Spend some time fixing typos and polishing the annotated spec.
-  - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I aim to have done the following:
-    - Completed [Part 1: Building](/part1)
+  - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I hope to have done the following:
     - Completed [Part 2: Technical Overview](/part2)
-    - Made a start on [Part 4: Future](/part4)
-  - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_ with all sections complete.
+    - Completed [Part 1: Building](/part1) (probably too ambitious)
+    - Made a start on [Part 4: Future](/part4) (unlikely before The Merge)
+  - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_.
   - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing's going to keep me busy for a while.
 
 Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, PDF versions, maybe NFTs... who knows?
@@ -42,6 +43,8 @@ It's a chunky list of exclusions, but there's still [plenty to talk about](/cont
 ## Altair
 
 This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021.
+
+Specifically, any reference to the consensus specifications is to the version [tagged v1.1.1](https://github.com/ethereum/consensus-specs/tree/v1.1.1).
 
 ## A note on Terminology
 
