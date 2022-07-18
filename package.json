@@ -15,7 +15,7 @@
     "links": "bin/util/urlcheck.sh src/book.md"
   },
   "dependencies": {
-    "gatsby": "^4.18.1",
+    "gatsby": "^4.18.2",
     "gatsby-plugin-catch-links": "^4.18.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
