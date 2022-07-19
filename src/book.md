@@ -161,11 +161,73 @@ TODO
 
 [TODO: That paper is a great starting place for an exposition of PoS]::
 
-### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
+#### What is a consensus protocol?
 
 TODO
 
-### Fork Choice <!-- /part2/consensus/fork_choice* -->
+#### Safety and Liveness
+
+Two important concepts that you will come across frequently when studying consensus mechanisms are "safety" and "liveness". As far as I can tell, they were first discussed in those terms by Leslie Lamport in his 1977 paper, [Proving the Correctness of Multiprocess Programs](https://lamport.azurewebsites.net/pubs/proving.pdf).
+
+<!-- From Lamport
+
+To prove the correctness of a program, one must prove two
+essentially different types of properties about it, which we
+call safety and liveness properties.1 A safety property is one
+which states that something will not happen. For example,
+the partial correctness of a single process program is a safety
+property. It states that if the program is started with the correct
+input, then it cannot stop if it does not produce the correct
+output. A liveness property is one which states that something
+must happen. An example of a liveness property is the
+statement that a program will terminate if its input is correct.
+
+-->
+
+##### Safety
+
+Informally, an algorithm is said to be safe if "nothing bad ever happens"[^fn-perspectives-on-cap].
+
+[^fn-perspectives-on-cap]: I first came across these helpful, intuitive definitions of safety and liveness in Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf).
+
+Examples of bad things that might happen in the blockchain context might be the double-spend of a coin, or finalising two conflicting checkpoints.
+
+An important facet of safety in a distributed system is "consistency". That is, if we were to ask nodes on the blockchain about the state of the chain at some point in its progress (such as the balance of an account at a particular block height), then we would always get the same answer, no matter which node we asked. Every node has an identical view of the history of the chain that does not change.
+
+##### Liveness
+
+Again informally, an algorithm is said to be live if "something good eventually happens".
+
+In a blockchain context we generally understand that to mean that the chain can always add a new block; it will never get into a deadlock situation in which it will not produce a new block with transactions in it.
+
+"Availability" is another way of looking at this. I want the chain to be available, meaning that if I send a valid transaction to an honest node it will eventually be included in a block that extends the chain.
+
+##### You can't have both!
+
+The CAP theorem is a famous result in distributed systems theory that states that no distributed system can provide all three of (1) safety, (2) liveness, and (3) partition tolerance. Partition tolerance means the ability to function when communication between the nodes is not reliable. So, for example, they may get split into two or more groups.
+
+It is easy to demonstrate the CAP theorem in our blockchain context. Imagine that Amazon Web Services goes offline, such that all the hosted nodes can communicate with each other, but none can can talk to the outside world. Or that a country firewalls all connections in and out so that no gossip traffic can pass. This divides the nodes into two disjoint groups, $A$ and $B$.
+
+Let's say that somebody connected to the network of $A$ sends a transaction. If the nodes in $A$ process that transaction then they will end up with a state that is different from the nodes in group $B$, so we have lost consistency, and therefore correctness. The only option for avoiding this is for the nodes in group $A$ to to refuse to process the transaction, in which case we have lost availability, and therefore liveness.
+
+HERE
+
+<!--
+Since we have little option but to operate on an unreliable network, the Internet, the CAP theorem means that however we design our
+
+impossibility of guaranteeing both safety and liveness in an unreliable distributed system (such as a blockchain).
+
+-->
+
+#### Fork Choice
+
+TODO
+
+#### See also
+
+Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf)
+
+### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
 TODO
 
@@ -4362,7 +4424,7 @@ Withdrawal prefixes relate to the withdrawal credentials provided when deposits 
 
 Two ways to specify the withdrawal credentials are currently available, versioned with these prefixes, with others such as [`0x02`](https://github.com/ethereum/consensus-specs/pull/2454) and [`0x03`](https://ethresear.ch/t/0x03-withdrawal-credentials-simple-eth1-triggerable-withdrawals/10021?u=benjaminion) under discussion.
 
-These withdrawal credential prefixes are yet significant in the core beacon chain spec, but will become significant when withdrawals are enabled in a future upgrade. The withdrawal credentials data is not consensus-critical, and future withdrawal credential types can be added without a hard fork. There are [suggestions](https://ethresear.ch/t/withdrawal-credential-rotation-from-bls-to-eth1/8722?u=benjaminion) as to how existing credentials might be changed between methods which would be consensus critical.
+These withdrawal credential prefixes are not yet significant in the core beacon chain spec, but will become significant when withdrawals are enabled in a future upgrade. The withdrawal credentials data is not consensus-critical, and future withdrawal credential types can be added without a hard fork. There are [suggestions](https://ethresear.ch/t/withdrawal-credential-rotation-from-bls-to-eth1/8722?u=benjaminion) as to how existing credentials might be changed between methods which would be consensus critical.
 
 The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
 

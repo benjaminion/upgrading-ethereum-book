@@ -84,6 +84,7 @@ Kyne
 LMD
 Lamport
 Lifecycle
+Liveness
 Lookahead
 MEV
 Math
@@ -94,6 +95,7 @@ Merkleize
 Merkleized
 Merkleizing
 MiMC
+Multiprocess
 Mutators
 NFTs
 Namib
