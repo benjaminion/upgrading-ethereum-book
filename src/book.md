@@ -1295,7 +1295,7 @@ In order for the beacon chain to verify slashings and take action against the of
 
 ##### The proposer reward
 
-At the point of the the initial slashing report being included in a block, the proposer of the block receives a reward of `validator.effective_balance` / [`WHISTLEBLOWER_REWARD_QUOTIENT`](/part3/config/preset#whistleblower_reward_quotient), which is $B / 512$ if $B$ is the effective balance of the validator being slashed.
+At the point of the initial slashing report being included in a block, the proposer of the block receives a reward of `validator.effective_balance` / [`WHISTLEBLOWER_REWARD_QUOTIENT`](/part3/config/preset#whistleblower_reward_quotient), which is $B / 512$ if $B$ is the effective balance of the validator being slashed.
 
 A report of a proposer slashing violation can slash only one validator, but a report of an attestation slashing violation can simultaneously slash up to an entire committee, which might be hundreds of validators. This could be extremely lucrative for the proposer including the reports. A single block can contain up to 16 proposer slashing reports and up to 2 attester slashing reports.
 
@@ -1671,7 +1671,7 @@ The benefits accrue when we are able to aggregate significant numbers of signatu
 
 To a first approximation, then, we can verify all of the attestations of a whole committee &ndash; potentially hundreds &ndash; with a single signature verification operation.
 
-This is a first approximation because we also need to account for aggregating the the public keys and the signatures. But these aggregation operations involve only point additions in their respective elliptic curve groups, which are very cheap compared with the verification.
+This is a first approximation because we also need to account for aggregating the public keys and the signatures. But these aggregation operations involve only point additions in their respective elliptic curve groups, which are very cheap compared with the verification.
 
 In summary:
 
@@ -2026,7 +2026,7 @@ We started this section with a discussion of unpredictability. Ideally, it shoul
 
 The RANDAO seed at the end of epoch $N$ is used to compute validator duties for the whole of epoch $N+2$. This interval is controlled by [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) via the [`get_seed()`](/part3/helper/accessors#def_get_seed) function. Thus validators have at least one full epoch to prepare themselves for any duties, but no more than two.
 
-Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to strategically exit validators or make deposits[^fn-instant-activations] in order to gain control of a committee, or a large number of block proposal slots.
+Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to strategically exit validators or make deposits[^fn-instant-activations] in order to gain control of a committee, or a large number of block proposal slots.
 
 [^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](https://eth2book.info/altair/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
 
@@ -2707,7 +2707,7 @@ Since all committees in a slot are voting on exactly the same information (sourc
 
 If it were not for the `index` then all these $N$ aggregate attestations could be further aggregated into a single aggregate attestation, combining the votes from all the validators voting at that slot.
 
-As a thought experiment we can calculate the potential space savings of doing this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would likely make the [committee aggregation process](/part2/building_blocks/aggregator) more complex.
+As a thought experiment we can calculate the potential space savings of doing this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would likely make the [committee aggregation process](/part2/building_blocks/aggregator) more complex.
 
 There is another index that appears when assigning validators to committees in [`compute_committee()`](/part3/helper/misc#compute_committee): an epoch-based committee index that I shall call $j$. The indices $i$ and $j$ are related as $i = \mod(j, N)$ and $j = Ns + i$  where $s$ is the slot number in the epoch.
 
