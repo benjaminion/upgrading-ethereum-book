@@ -41,6 +41,7 @@ Dankrad
 Danksharding
 DeFi
 Decentralization
+Devconnect
 Dfinity
 Dfinity's
 DoS
@@ -51,6 +52,7 @@ ECDSA
 EIP
 EIPs
 ETH
+ETHconomics
 Elowsson
 Endianness
 Eth
