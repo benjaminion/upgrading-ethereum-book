@@ -163,7 +163,45 @@ My hope is that by the end of this chapter that sentence will make perfect sense
 
 #### What is a consensus protocol?
 
+The Ethereum network consists of large numbers of individual nodes. Each node acts independently and nodes communicate over a potentially unreliable, asynchronous network, the Internet. Any individual node might be honest &ndash; behaving correctly at all times &ndash; or faulty in any arbitrary way: simply down or non-communicative, following a different version of the protocol, actively trying to mislead other nodes, and so on. Grouped together, all non-correct node behaviour is called "Byzantine", and want our protocols to be [tolerant to Byzantine faults](#byzantine-fault-tolerance).
+
+Users submit transactions to this network of nodes, and the goal of the consensus protocol is that all correct nodes eventually agree on a single, consistent view of the history of transactions. That is, the order in which transactions were processed and the outcome of that processing. So, if I have 1 ETH and I simultaneously tell the network that I am sending that 1 ETH to Alice and also to Bob, we expect that eventually the network will agree that either I sent it to Alice or I sent it to Bob. It would be a failure if both Alice and Bob received my Ether, or if neither did. (The former would be a safety failure, the latter a liveness failure - see [below](#safety-and-liveness).)
+
+A consensus protocol is the process by which this agreement on the ordering of transactions comes about.
+
+It should be said here that neither proof of work nor proof of stake is a consensus protocol in itself. Each is often, lazily, referred to as a consensus protocol, but they are both merely enablers for consensus. In particular, proof of work and proof of stake provide [Sybil resistance](/part2/incentives/staking#introduction) mechanisms that place a cost on participating in the protocol. This prevents attackers from overwhelming the protocol at low or zero cost. Each of proof of work and proof of stake enables many kinds of consensus protocol to be built on them. Section 7, Related Work, of the [Avalanche white paper](https://arxiv.org/pdf/1906.08936) provides a very nice survey of the zoo of different blockchain consensus mechanisms in use on both proof of work and proof of stake.
+
+#### Block trees and block chains
+
+The basic primitive underlying blockchain technology is, of course, the block.
+
+A block comprises a set of transactions that a leader (block proposer) has assembled.
+
+  - The payload of a block on Ethereum's proof of work chain is an ordered list of user transactions.
+  - The payload of a block on the proof of stake beacon chain is (mostly) a set of attestations made by other validators.
+  - If [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum then blocks will also contain blobs of data alongside the ordered list of user transactions.
+
+<!--
+
+     - Leaders produce blocks and have full responsibility for ordering transactions in the blocks
+     - They append blocks to the chain according to their local view
+     - This can end up with a tree of blocks
+     - How do we make a chain from this tree?
+
+-->
+
 TODO
+
+#### Fork Choice
+
+<!--
+
+  - This is how...
+  - Examples of fork choice: PoW, FFG, LMD GHOST
+
+-->
+
+HERE
 
 #### Safety and Liveness
 
@@ -195,31 +233,33 @@ It is easy to demonstrate the CAP theorem in our blockchain context. Imagine tha
 
 Let's say that somebody connected to the network of group $A$ sends a transaction. If the nodes in $A$ process that transaction then they will end up with a state that is different from the nodes in group $B$, so we have lost consistency, and therefore safety. The only option for avoiding this is for the nodes in group $A$ to to refuse to process the transaction, in which case we have lost availability, and therefore liveness.
 
-In our context, the CAP theorem means that we cannot hope to design a protocol that is both safe and live under all circumstances, since we have no option but to operate across an unreliable network, the Internet.
+In summary, the CAP theorem means that we cannot hope to design a consensus protocol that is both safe and live under all circumstances, since we have no option but to operate across an unreliable network, the Internet.[^fn-flp-theorem]
 
-##### We prioritise liveness
+[^fn-flp-theorem]: The CAP theorem is related to another famous result described by Fisher, Lynch and Paterson in their 1985 paper, [Impossibility of Distributed Consensus with One Faulty Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf) and usually called the FLP theorem. This proves that, even in a reliable network that is asynchronous (that is, there is no bound on how long messages can take to be transmitted and received), just one faulty node can prevent the system coming to consensus. That is, even this unpartitioned system cannot be both live and safe. Gilbert and Lynch's [paper](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf) discusses this in section 3.2.
 
-The Eth2 protocol prioritises liveness: in the case of a network partition the nodes on each side of the partition will continue to produce blocks. However, finality (a safety property) will no longer occur across both sides of the partition. Depending on the proportions of nodes on each side of the network split, either one side or neither side will continue to finalise.
+##### Ethereum prioritises liveness
 
-Eventually, unless the partition is resolved, both sides will regain finality due to the novel [inactivity leak](/part2/incentives/inactivity) mechanism. But this results in the ultimate safety failure: both chains have now finalised different histories and will be irreconcilable and independent forever.
+The Eth2 protocol prioritises liveness: in the case of a network partition the nodes on each side of the partition will continue to produce blocks. However, finality (a safety property) will no longer occur on both sides of the partition. Depending on the proportions of nodes on each side, either one side or neither side will continue to finalise.
 
-It's worth noting that typical proof of work based algorithms also prioritise liveness over safety. In fact, Bitcoin and Ethereum's proof of work offer no safety guarantee at all: they have no concept of finality. At any time somebody might reveal a heavier chain that rewrites history. Even under non-adversarial conditions, minor forks happen frequently and there is no guarantee that different nodes you will give you the same answers. Exchanges typically use a proxy for safety that requires waiting for a certain number of blocks to be built on top of a transaction before it is considered final, but that's only a statistical guarantee, and is no guarantee at all in the face of a 51% attack.
+Eventually, unless the partition is resolved, both sides will regain finality due to the novel [inactivity leak](/part2/incentives/inactivity) mechanism. But this results in the ultimate safety failure. Each chain will finalise a different history and will be irreconcilable and independent forever.
 
-#### Fork Choice
-
-HERE
-
-TODO
+It's worth noting that typical proof of work based algorithms also prioritise liveness over safety. In fact, Bitcoin and Ethereum's proof of work offer no safety guarantee at all; they have no concept of finality. At any time somebody might reveal a heavier chain that rewrites history. Even under non-adversarial conditions, minor forks happen frequently and there is no guarantee that different nodes you will give you the same answers. Exchanges typically use a proxy for safety that requires waiting for a certain number of blocks to be built on top of a transaction before it is considered final, but that's only a statistical guarantee, and is no guarantee at all in the face of a 51% attack.
 
 #### Finality
 
 TODO
 
+#### Byzantine fault tolerance
+
+TODO
+
 #### See also
 
-Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf).
+We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). This is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
 
 Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality/) provides a deeper and more nuanced exploration of the concept of finality.
+
+Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These design criteria strongly influence how we build our consensus protocols. Vitalik explores these issues in hist article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 

@@ -40,6 +40,7 @@ DVT
 Dankrad
 Danksharding
 DeFi
+Decentralization
 Dfinity
 Dfinity's
 DoS
@@ -58,6 +59,7 @@ Ethereum
 Ethereum's
 Ethresear
 FFG
+FLP
 FastAggregateVerify
 Feist
 Flashbots
@@ -259,6 +261,7 @@ parallelising
 parameterises
 performant
 permissionless
+permissionlessness
 pernickety
 piechart
 pre
@@ -299,6 +302,7 @@ unbiasable
 unboundedly
 underflows
 unforgeability
+unpartitioned
 unslashed
 unsuffixed
 uptime
