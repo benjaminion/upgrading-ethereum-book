@@ -40,6 +40,7 @@ DVT
 Dankrad
 Danksharding
 DeFi
+Devconnect
 Dfinity
 Dfinity's
 DoS
@@ -50,6 +51,7 @@ ECDSA
 EIP
 EIPs
 ETH
+ETHconomics
 Elowsson
 Endianness
 Eth

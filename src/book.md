@@ -575,7 +575,7 @@ Issuance is the amount of new Ether created by the protocol in order to incentiv
 
 The Eth1 chain issues new Ether in the form of block and uncle rewards. Since the London upgrade this issuance has been offset in part, or even at times exceeded by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
 
-During the current Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards on the Eth1 chain. But the base fee burn will remain, and it is very likely that the net issuance will become negative &ndash; more Ether will be destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that [an equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) will be reached between Ether issuance from proof of stake and Ether destruction due to EIP-1559, leading to a steady overall supply of Ether.
+During the current Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards on the Eth1 chain. But the base fee burn will remain, and it is very likely that the net issuance will become negative &ndash; more Ether will be destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that there will be [a circulating supply equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) arising from Ether issuance by proof of stake and Ether destruction due to EIP-1559.
 
 [^fn-ultrasound-money]: You can see Ethereum's current issuance and play with various scenarios at [ultrasound.money](https://ultrasound.money/).
 
@@ -658,6 +658,8 @@ For more background to the $\frac{1}{\sqrt{N}}$ reward curve, see
   - [Casper: The Fixed Income Approach](https://ethresear.ch/t/casper-the-fixed-income-approach/218?u=benjaminion),
   - Vitalik's [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Base-rewards), and
   - the [Discouragement Attacks](https://github.com/ethereum/research/blob/master/papers/discouragement/discouragement.pdf) paper.
+
+Anders Elowsson's work on Ethereum’s circulating supply equilibrium and minimum viable issuance takes a deeper look at the relationship between staking issuance and total Ether supply. See his [post and comments](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) on Ethresear.ch, and [ETHconomics presentation](https://www.youtube.com/watch?v=LtEMabS0Oas) at Devconnect 2022.
 
 ### Rewards <!-- /part2/incentives/rewards -->
 
@@ -5246,7 +5248,7 @@ The proposer receives explicit in-protocol rewards for including the following i
 
 Including `Deposit` objects in blocks is only implicitly rewarded, in that, if there are pending deposits that the block proposer does not include then the block is invalid, so the proposer receives no reward.
 
-There is no direct reward for including `VoluntaryExit` objects. However, for each validator exited, rewards for the remaining validators increase very slightly, so it's as well for proposers not to ignore `VoluntaryExit`s.
+There is no direct reward for including `VoluntaryExit` objects. However, for each validator exited, rewards for the remaining validators increase very slightly, so it's still beneficial for proposers not to ignore `VoluntaryExit`s.
 
 #### `ProposerSlashing`
 
@@ -5905,7 +5907,7 @@ def is_slashable_validator(validator: Validator, epoch: Epoch) -> bool:
     return (not validator.slashed) and (validator.activation_epoch <= epoch < validator.withdrawable_epoch)
 ```
 
-Validators can be slashed only once: the flag [`Validator.slashed`](/part3/containers/dependencies#validator) is [set](/part3/helper/mutators#def_slash_validator) on the occasion of the first slashing.
+Validators can be slashed only once: the flag [`validator.slashed`](/part3/containers/dependencies#validator) is [set](/part3/helper/mutators#def_slash_validator) when the first correct slashing report for the validator is processed.
 
 An unslashed validator remains eligible to be slashed from when it becomes active right up until it becomes withdrawable. This is [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs (around 27 hours) after it has exited from being a validator and ceased validation duties.
 
@@ -6827,7 +6829,7 @@ def get_next_sync_committee_indices(state: BeaconState) -> Sequence[ValidatorInd
 
 Similarly to being chosen to propose a block, the probability of any validator being selected for a sync committee is proportional to its effective balance. Thus, the algorithm is almost the same as that of [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index), except that this one exits only after finding `SYNC_COMMITTEE_SIZE` members, rather than exiting as soon as a candidate is found. Both routines use the try-and-increment method to weight the probability of selection with the validators' effective balances.
 
-It's fairly clear why block proposers are selected with a probability proportional to their effective balances: block production is subject to slashing, and proposers with less at stake have less to slash, so we reduce their influence accordingly. It is not so clear why the probability of being in a sync committee is also proportional to a validator's effective balance; sync committees are not subject to slashing. It has to do with keeping calculations for [light clients simple](https://github.com/ethereum/consensus-specs/pull/2130#discussion_r524848644). We don't want to burden light clients with summing up validators' balances to judge whether a 2/3 supermajority of stake in the committee has voted for a block. Ideally, they can just count the participation flags. To make approach this somewhat reliable, we weight the probability of participation with the validator's effective balance.
+It's fairly clear why block proposers are selected with a probability proportional to their effective balances: block production is subject to slashing, and proposers with less at stake have less to slash, so we reduce their influence accordingly. It is not so clear why the probability of being in a sync committee is also proportional to a validator's effective balance; sync committees are not subject to slashing. It has to do with keeping calculations for [light clients simple](https://github.com/ethereum/consensus-specs/pull/2130#discussion_r524848644). We don't want to burden light clients with summing up validators' balances to judge whether a 2/3 supermajority of stake in the committee has voted for a block. Ideally, they can just count the participation flags. To make this somewhat reliable, we weight the probability that a validator participates in proportion to its effective balance.
 
 |||
 |-|-|
@@ -7408,7 +7410,7 @@ In $k$-finality, if we have a consecutive set of $k$ justified checkpoints ${C_j
 
 The Casper FFG version of this is $1$-finality. So, a supermajority link from a justified checkpoint $C_n$ to the very next checkpoint $C_{n+1}$ both justifies $C_{n+1}$ and finalises $C_n$.
 
-On the beacon chain we are using $2$-finality, since target votes may be included up to an epoch late. In $2$ finality, we keep records of checkpoint justification status for four epochs and have the following conditions for finalisation, where the checkpoint for the current epoch is $C_n$. Note that we have already updated the justification status of $C_n$ and $C_{n-1}$ in this routine, which implies the existence of supermajority links pointing to them if the corresponding bits are set, respectively.
+On the beacon chain we are using $2$-finality, since target votes may be included up to an epoch late. In $2$-finality, we keep records of checkpoint justification status for four epochs and have the following conditions for finalisation, where the checkpoint for the current epoch is $C_n$. Note that we have already updated the justification status of $C_n$ and $C_{n-1}$ in this routine, which implies the existence of supermajority links pointing to them if the corresponding bits are set, respectively.
 
  1. Checkpoints $C_{n-3}$ and $C_{n-2}$ are justified, and there is a supermajority link from $C_{n-3}$ to $C_{n-1}$: finalise $C_{n-3}$.
  2. Checkpoint $C_{n-2}$ is justified, and there is a supermajority link from $C_{n-2}$ to $C_{n-1}$: finalise $C_{n-2}$. This is equivalent to $1$-finality applied to the previous epoch.
@@ -7488,7 +7490,7 @@ The base reward is calculated from a [base reward per increment](#def_get_base_r
 
 Other quantities we will use in rewards calculation are the [incentivization weights](/part3/config/constants#incentivization-weights): $W_s$, $W_t$, $W_h$, and $W_y$ being the weights for correct source, target, head, and sync committee votes respectively; $W_p$ being the proposer weight; and the weight denominator $W_{\Sigma}$ which is the sum of the weights.
 
-Issuance for regular rewards are happens in four ways:
+Issuance for regular rewards happens in four ways:
 
   - $I_A$ is the maximum total reward for all validators attesting in an epoch;
   - $I_{A_P}$ is the maximum reward issued to proposers in an epoch for including attestations;
@@ -7537,11 +7539,7 @@ An increment is a single unit of a validator's effective balance, denominated in
 
 The base reward per increment is inversely proportional to the square root of the total balance of all active validators. This means that, as the number $N$ of validators increases, the reward per validator decreases as $\frac{1}{\sqrt{N}}$, and the overall issuance per epoch increases as $\sqrt{N}$.
 
-The decrease with increasing $N$ in per-validator rewards provides a price discovery mechanism: the idea is that an equilibrium will be found where the total number of validators results in a reward similar to returns available elsewhere for similar risk. The [Eth2 Launch Pad](https://launchpad.ethereum.org/) has a graph that shows how this translates into expected APR for running a validator for different total amounts of ETH staked.
-
-[TODO: insert issuance graph]::
-
-A different curve could have been chosen for the rewards profile. For example, the inverse of total balance rather than its square root would keep total issuance constant. Vitalik justifies the inverse square root approach and discusses the trade-offs in the [Serenity design rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Base-rewards).
+The decrease with increasing $N$ in per-validator rewards provides a price discovery mechanism: the idea is that an equilibrium will be found where the total number of validators results in a reward similar to returns available elsewhere for similar risk. A different curve could have been chosen for the rewards profile. For example, the inverse of total balance rather than its square root would keep total issuance constant. The [section on Issuance](/part2/incentives/issuance) has a deeper exploration of these topics.
 
 |||
 |-|-|
@@ -7574,7 +7572,7 @@ def get_finality_delay(state: BeaconState) -> uint64:
     return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 ```
 
-Returns the number of epochs since the last finalised checkpoint (minus one). In ideal running this ought to be zero: during epoch processing we aim to have justified the checkpoint in the current epoch and finalised the checkpoint in the previous epoch. A delay in finalisation suggests a chain split or large fraction of validators going offline.
+Returns the number of epochs since the last finalised checkpoint (minus one). In ideal running this ought to be zero: during epoch processing we aim to have justified the checkpoint in the current epoch and finalised the checkpoint in the previous epoch. A delay in finalisation suggests a chain split or a large fraction of validators going offline.
 
 |||
 |-|-|
@@ -7608,7 +7606,7 @@ def get_eligible_validator_indices(state: BeaconState) -> Sequence[ValidatorInde
 
 These are the validators that were subject to rewards and penalties in the previous epoch.
 
-The list differs from the active validator set returned by [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices) by including slashed by not fully exited validators in addition to the ones marked active. Slashed validators are subject to penalties right up to when they become withdrawable and are thus fully exited.
+The list differs from the active validator set returned by [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices) by including slashed but not fully exited validators in addition to the ones marked active. Slashed validators are subject to penalties right up to when they become withdrawable and are thus fully exited.
 
 |||
 |-|-|
@@ -7718,7 +7716,7 @@ def process_registry_updates(state: BeaconState) -> None:
 
 The [`Registry`](/part3/containers/state#registry) is the part of the beacon state that stores [`Validator`](/part3/containers/dependencies#validator) records. These particular updates are, for the most part, concerned with moving validators through the activation queue.
 
-[`is_eligible_for_activation_queue()`](/part3/helper/predicates#def_is_eligible_for_activation_queue) finds validators that have sufficient deposit yet their `activation_eligibility_epoch` is set to [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch). These will be all the validators for which deposits were process during the last epoch, potentially up to `MAX_DEPOSITS * SLOTS_PER_EPOCH`, which is 512. These have their `activation_eligibility_epoch` set to the next epoch. They will become eligible to be activated once that epoch is finalised.
+[`is_eligible_for_activation_queue()`](/part3/helper/predicates#def_is_eligible_for_activation_queue) finds validators that have a sufficient deposit amount yet their `activation_eligibility_epoch` is still set to [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch). These will be at most the validators for which deposits were processed during the last epoch, potentially up to `MAX_DEPOSITS * SLOTS_PER_EPOCH`, which is 512 (minus any partial deposits that don't yet add up to a whole deposit). These have their `activation_eligibility_epoch` set to the next epoch. They will become eligible for activation once that epoch is finalised &ndash; "eligible for activation" means only that they can be added to the activation queue; they will not become active until they reach the end of the queue.
 
 Next, any validators whose effective balance has fallen to [`EJECTION_BALANCE`](/part3/config/configuration#ejection_balance) have their exit initiated.
 
@@ -8404,7 +8402,7 @@ $$
 I_S = \frac{W_y}{32 \cdot W_{\Sigma}}NB
 $$
 
-The per-epoch rewards is thirty-two times this. The maximum reward for the proposer in respect of sync aggregates:
+The per-epoch reward is thirty-two times this. The maximum reward for the proposer in respect of sync aggregates:
 
 $$
 I_{S_P} = \frac{W_p}{W_{\Sigma} - W_p}I_S
