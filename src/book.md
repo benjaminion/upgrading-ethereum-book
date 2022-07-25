@@ -7425,7 +7425,7 @@ The four k-finality scenarios. Checkpoint numbers are along the bottom.
 
 </div>
 
-Almost always we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the 2/3rds participation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 3 to immediately finalise $C_{n-1}$, for example.
+Almost always we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the 2/3rds participation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 4 to immediately finalise $C_{n-1}$, for example.
 
 For the uninitiated, in Python's array slice syntax, `bits[1:4]` means bits 1, 2, and 3 (but not 4). This always trips me up.
 
