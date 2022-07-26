@@ -185,7 +185,13 @@ A block comprises a set of transactions that a leader (block proposer) has assem
 
 With the exception of the special Genesis block, every block builds on and points to a parent block. Thus we end up with a chain of blocks: a blockchain. Whatever the contents of blocks, the goal of the protocol is for all nodes on the network to agree on the precise history of the blockchain.
 
-[TODO: diagram of blocks in a chain]::
+<a id="img_consensus_block_chain"></a>
+<div class="image" style="width: 90%">
+
+![A picture of a linear chain of blocks](md/images/diagrams/consensus_block_chain.svg)
+A blockchain. Time moves from left to right and, except for the Genesis block, each block points to the parent block it builds on.
+
+</div>
 
 The chain grows as nodes add their blocks to its tip. This is accomplished by temporarily selecting a "leader", an individual node that wins the right to extend the chain. In proof of work the leader is the miner that first solves the proof of work puzzle for its block. In Ethereum's proof of stake the leader is selected pseudo-randomly from the pool of active stakers.
 
@@ -199,16 +205,31 @@ Unfortunately, our neat diagram of a nice linear chain often does not reflect re
 
 Either way, in general we need to be able to deal not with a block chain, but with a block tree.
 
-[TODO: Insert block tree diagram]::
+<a id="img_consensus_block_tree"></a>
+<div class="image" style="width: 90%">
 
-[TODO: Insert resolved block tree diagram]::
+![A diagram of a block tree](md/images/diagrams/consensus_block_tree.svg)
+In general we might end up with a block tree. Again, time moves from left to right and each block points to the parent block it builds on.
+
+</div>
+
+<a id="img_consensus_block_tree_resolved"></a>
+<div class="image" style="width: 90%">
+
+![A diagram of a block chain as a subset of the block tree](md/images/diagrams/consensus_block_tree_resolved.svg)
+The fork choice rule selects a head block from among the candidates. This identifies a unique linear block chain running back to the Genesis block.
+
+</div>
 
 <!--
 
   - Can end up with a tree: naturally or maliciously
+  - Technically a DAG
+  - The branches of the block tree are called "forks"
   - All fork choice rules have validity as a criterion. No correct node will build on a chain that contains invalid blocks (blocks that violate a protocol rule), and no correct node should consider such a chain valid.
-  - This is how...
+  - Input is a block tree, output is a head block, equivalently a block chain flowing the parent links since from any block gives a unique path back to genesis.
   - Examples of fork choice: PoW, FFG, LMD GHOST
+  - Alternatives to forkfulness, e.g. classic PBFT. Prioritise safety over liveness.
 
 -->
 
@@ -217,6 +238,12 @@ HERE
 #### Reorgs and reversions
 
 [TODO: Insert diagram of reorg]::
+
+<!--
+
+  - When the head block changes.
+
+-->
 
 <!-- https://barnabe.substack.com/p/pos-ethereum-reorg -->
 
@@ -4085,6 +4112,8 @@ print("Success!")
 ```
 
 #### See also
+
+[What is a Merkle Tree?](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/) by Alin Tomescu is the best primer I have found on Merkle trees, and a great starting point if you are unsure about their construction and properties.
 
 The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
 
