@@ -55,7 +55,7 @@ module.exports.runChecks = (reporter) => {
   if (doSpellCheck) {
     reporter.info('Performing spellcheck...')
     try {
-      const out = execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8'})
+      const out = execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8', stdio: 'pipe'})
       if (out !== '') {
         reporter.warn('Found some misspellings:')
         printLines(out, reporter.warn)
