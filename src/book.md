@@ -147,61 +147,80 @@ TODO
 
 TODO
 
-## Consensus <!-- /part2/consensus* -->
+## Consensus <!-- /part2/consensus -->
 
 ### Introduction
 
-We have a challenge ahead of us. My task is to explain the following.
+We have a challenge ahead of us. My task is essentially to explain the following.
 
 > The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
 
-This is the opening sentence of [a recent paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol.
+This is the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol.
 
-My hope is that by the end of this chapter that sentence will make perfect sense to you. There's a lot there to unpack, but we'll be taking a fairly long run up to it, and in this introductory section I will just be covering some basic concepts and terminology that will be frequently appearing.
+My hope is that, by the end of this chapter, this sentence will make perfect sense to you. There's a lot to unpack, but we'll be taking a fairly long run up to it, and in this introductory section I will just be covering some basic concepts and terminology that will be frequently appearing.
 
 [TODO: That paper is a great starting place for an exposition of PoS]::
 
 #### What is a consensus protocol?
 
-The Ethereum network consists of large numbers of individual nodes. Each node acts independently and nodes communicate over a potentially unreliable, asynchronous network, the Internet. Any individual node might be honest &ndash; behaving correctly at all times &ndash; or faulty in any arbitrary way: simply down or non-communicative, following a different version of the protocol, actively trying to mislead other nodes, and so on. Grouped together, all non-correct node behaviour is called "Byzantine", and want our protocols to be [tolerant to Byzantine faults](#byzantine-fault-tolerance).
+The Ethereum network consists of large numbers of individual nodes. Each node acts independently, and nodes communicate over an unreliable, asynchronous network, the Internet. Any individual node might be honest &ndash; behaving correctly at all times &ndash; or faulty in any arbitrary way: simply down or non-communicative, following a different version of the protocol, actively trying to mislead other nodes, publishing contradictory messages, and so on. Grouped together, all non-correct node behaviour is called "Byzantine", and we want our protocols to be [tolerant to Byzantine faults](#byzantine-fault-tolerance).
 
 Users submit transactions to this network of nodes, and the goal of the consensus protocol is that all correct nodes eventually agree on a single, consistent view of the history of transactions. That is, the order in which transactions were processed and the outcome of that processing. So, if I have 1 ETH and I simultaneously tell the network that I am sending that 1 ETH to Alice and also to Bob, we expect that eventually the network will agree that either I sent it to Alice or I sent it to Bob. It would be a failure if both Alice and Bob received my Ether, or if neither did. (The former would be a safety failure, the latter a liveness failure - see [below](#safety-and-liveness).)
 
 A consensus protocol is the process by which this agreement on the ordering of transactions comes about.
 
-It should be said here that neither proof of work nor proof of stake is a consensus protocol in itself. Each is often, lazily, referred to as a consensus protocol, but they are both merely enablers for consensus. In particular, proof of work and proof of stake provide [Sybil resistance](/part2/incentives/staking#introduction) mechanisms that place a cost on participating in the protocol. This prevents attackers from overwhelming the protocol at low or zero cost. Each of proof of work and proof of stake enables many kinds of consensus protocol to be built on them. Section 7, Related Work, of the [Avalanche white paper](https://arxiv.org/pdf/1906.08936) provides a very nice survey of the zoo of different blockchain consensus mechanisms in use on both proof of work and proof of stake.
+It should be said here that neither proof of work nor proof of stake is a consensus protocol in itself. Each is often (lazily) referred to as a consensus protocol, but they are both merely enablers for consensus protocols. Specifically, proof of work and proof of stake are [Sybil resistance](/part2/incentives/staking#introduction) mechanisms that place a cost on participating in the protocol. This prevents attackers from overwhelming the protocol at low or zero cost. Both proof of work and proof of stake enable many kinds of different consensus protocols to be built on them. Section 7, Related Work, of the [Avalanche white paper](https://arxiv.org/pdf/1906.08936) provides a good survey of the zoo of different blockchain consensus mechanisms in use on both proof of work and proof of stake.
 
-#### Block trees and block chains
+Ethereum's proof of stake actually "bolts together" two consensus protocols. One is called [Casper FFG](/part2/consensus/casper_ffg), the other [LMD GHOST](/part2/consensus/lmd_ghost). The combination has become known as [Gasper](/part2/consensus/gasper).
 
-The basic primitive underlying blockchain technology is, of course, the block.
+#### Block chains
 
-A block comprises a set of transactions that a leader (block proposer) has assembled.
+The basic primitive that underlies blockchain technology is, of course, the block.
+
+A block comprises a set of transactions that a leader (block proposer) has assembled. A block's contents (or payload) may vary according to the protocol.
 
   - The payload of a block on Ethereum's proof of work chain is an ordered list of user transactions.
-  - The payload of a block on the proof of stake beacon chain is (mostly) a set of attestations made by other validators.
-  - If [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum then blocks will also contain blobs of data alongside the ordered list of user transactions.
+  - The payload of a block on the pre-Merge proof of stake beacon chain is (mostly) a set of attestations made by other validators.
+  - As and when [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum then blocks will contain blobs of data alongside the ordered list of user transactions.
+
+With the exception of the special Genesis block, every block builds on and points to a parent block. Thus we end up with a chain of blocks: a blockchain. Whatever the contents of blocks, the goal of the protocol is for all nodes on the network to agree on the precise history of the blockchain.
+
+[TODO: diagram of blocks in a chain]::
+
+The chain grows as nodes add their blocks to its tip. This is accomplished by temporarily selecting a "leader", an individual node that wins the right to extend the chain. In proof of work the leader is the miner that first solves the proof of work puzzle for its block. In Ethereum's proof of stake the leader is selected pseudo-randomly from the pool of active stakers.
+
+The leader (also called the block proposer) gets the right to add a single block to the chain, and has full responsibility for selecting and ordering the transactions in its block.
+
+The use of blocks is an optimisation. Each addition to the chain could in principle be a single transaction, but that would add a huge consensus overhead. So blocks are batches of transactions, and sometimes [people argue](https://www.bitrawr.com/bitcoin-block-size-debate-explained) about how big those blocks should be. In Bitcoin, the block size is limited by the number of bytes of data in the block. In Ethereum's proof of work chain, the block size is limited by the block gas limit. [Beacon block](/part3/containers/blocks#beaconblockbody) sizes are limited by hard-coded constants.
+
+#### Fork choice
+
+Unfortunately, our neat diagram of a nice linear chain often does not reflect reality. In practice, a block proposer might end up not building on the block at the head of the chain. This might be because it hasn't yet seen the head block when its turn to propose its block comes around, which can happen due to network delays. Or it might be because the proposer chose to build on a different block, perhaps to steal any high value transactions from the head block and keep them for its own block. These two situations are indistinguishable to the network at large.
+
+Either way, in general we need to be able to deal not with a block chain, but with a block tree.
+
+[TODO: Insert block tree diagram]::
+
+[TODO: Insert resolved block tree diagram]::
 
 <!--
 
-     - Leaders produce blocks and have full responsibility for ordering transactions in the blocks
-     - They append blocks to the chain according to their local view
-     - This can end up with a tree of blocks
-     - How do we make a chain from this tree?
-
--->
-
-TODO
-
-#### Fork Choice
-
-<!--
-
+  - Can end up with a tree: naturally or maliciously
+  - All fork choice rules have validity as a criterion. No correct node will build on a chain that contains invalid blocks (blocks that violate a protocol rule), and no correct node should consider such a chain valid.
   - This is how...
   - Examples of fork choice: PoW, FFG, LMD GHOST
 
 -->
 
 HERE
+
+#### Reorgs and reversions
+
+[TODO: Insert diagram of reorg]::
+
+<!-- https://barnabe.substack.com/p/pos-ethereum-reorg -->
+
+TODO
 
 #### Safety and Liveness
 
