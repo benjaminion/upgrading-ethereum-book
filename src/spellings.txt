@@ -4,6 +4,7 @@ ASICs
 Accessors
 Alexandros
 Algorand
+Alin
 Anders
 Arvind
 Attenborough
@@ -150,6 +151,7 @@ TODO
 Teku
 Teku's
 TiB
+Tomescu
 Umberto
 VDF
 VDFs

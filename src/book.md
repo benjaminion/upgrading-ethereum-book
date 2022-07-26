@@ -3971,6 +3971,8 @@ print("Success!")
 
 #### See also
 
+[What is a Merkle Tree?](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/) by Alin Tomescu is the best primer I have found on Merkle trees, and a great starting point if you are unsure about their construction and properties.
+
 The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
 
 A formal verification of Merkleization has been performed: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/merkleise-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/merkle).
