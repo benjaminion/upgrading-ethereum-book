@@ -199,11 +199,9 @@ The leader (also called the block proposer) gets the right to add a single block
 
 The use of blocks is an optimisation. Each addition to the chain could in principle be a single transaction, but that would add a huge consensus overhead. So blocks are batches of transactions, and sometimes [people argue](https://www.bitrawr.com/bitcoin-block-size-debate-explained) about how big those blocks should be. In Bitcoin, the block size is limited by the number of bytes of data in the block. In Ethereum's proof of work chain, the block size is limited by the block gas limit. [Beacon block](/part3/containers/blocks#beaconblockbody) sizes are limited by hard-coded constants.
 
-#### Fork choice
+#### Block trees
 
-Unfortunately, our neat diagram of a nice linear chain often does not reflect reality. In practice, a block proposer might end up not building on the block at the head of the chain. This might be because it hasn't yet seen the head block when its turn to propose its block comes around, which can happen due to network delays. Or it might be because the proposer chose to build on a different block, perhaps to steal any high value transactions from the head block and keep them for its own block. These two situations are indistinguishable to the network at large.
-
-Either way, in general we need to be able to deal not with a block chain, but with a block tree.
+Our neat diagram of a nice linear chain will generally reflect what we see in practice, but not always. Sometimes, due perhaps to network delays, or a dishonest block proposer, or client bugs, any particular node might see something more like the following.
 
 <a id="img_consensus_block_tree"></a>
 <div class="image" style="width: 90%">
@@ -213,6 +211,30 @@ In general we might end up with a block tree. Again, time moves from left to rig
 
 </div>
 
+In real networks we can end up with something more like a block tree than a block chain. In this example very few blocks are built on their "obvious" parent.
+
+Why did the proposer of Block $C$ build on Block $A$ rather than Block $B$?
+
+  - It may be that the proposer of $C$ had not received Block $B$ by the time it was ready to make its proposal.
+  - It may be that the proposer of $C$ deliberately wanted to exclude Block $B$ from its chain, for example to steal its transactions, or to censor some transaction in $B$.
+  - It may be that the proposer of $C$ thought that block $B$ was invalid for some reason.
+
+The first two reasons, at least, are indistinguishable to the wider network. All we know is that $C$ built on $A$, and we can never know why for certain.
+
+Similarly, why did the proposer of $D$ build on Block $B$ rather than Block $C$? Any of the above reasons apply, and we can add another:
+
+  - the proposer of $D$ may have decided on some basis that there was more chance of the wider network eventually including $B$ than $C$. Thus, building $D$ on $B$ gives it more chance of making it into the eventual block chain, than building $D$ on $C$.
+
+The various branches in the block tree are usually called "forks". Forks happen naturally as a consequence of network and processing delays, but they can also occur due to client faults, malicious client behaviour, or protocol upgrades that change the rules so as to make old blocks invalid with respect to the new rules. The last of these is often called a "hard fork".
+
+The existence of forking like this in a consensus protocol is a consequence of prioritising liveness over safety, in the terms discussed [below](#safety-and-liveness): if you were to consult nodes following different forks they would give you different answers regarding the state of the system. Non-forking consensus protocols exist, such as [PBFT](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.127.6130&rep=rep1&type=pdf) in the classical consensus world and [Tendermint](https://blog.cosmos.network/the-4-classes-of-faults-on-mainnet-bfabfbd2726c#a2f1) in the blockchain world. These protocols always produce a single linear chain and are thus formally "safe". However, they sacrifice liveness on asynchronous networks such as the Internet: rather than forking, they just stop entirely.
+
+#### Fork choice rules
+
+Ultimately, we want every node on the network to converge on an identical linear view of history and hence the current state of the system. This convergence is brought about by means of the protocol's fork choice rule.
+
+Given a block tree and some decision criteria, based on a node's local view of the network, the fork choice rule is designed to select from all the available branches the one that is most likely to eventually end up in the final linear, canonical chain. That is it will choose the branch least likely to be later pruned out of the block tree as nodes attempt to converge on a canonical view.
+
 <a id="img_consensus_block_tree_resolved"></a>
 <div class="image" style="width: 90%">
 
@@ -221,21 +243,23 @@ The fork choice rule selects a head block from among the candidates. This identi
 
 </div>
 
-<!--
+The fork choice rule selects a branch implicitly by choosing a block at the tip of a branch, called the head block.
 
-  - Can end up with a tree: naturally or maliciously
-  - Technically a DAG
-  - The branches of the block tree are called "forks"
-  - All fork choice rules have validity as a criterion. No correct node will build on a chain that contains invalid blocks (blocks that violate a protocol rule), and no correct node should consider such a chain valid.
-  - Input is a block tree, output is a head block, equivalently a block chain flowing the parent links since from any block gives a unique path back to genesis.
-  - Examples of fork choice: PoW, FFG, LMD GHOST
-  - Alternatives to forkfulness, e.g. classic PBFT. Prioritise safety over liveness.
+For any correct node, the first criterion for any fork choice rule is that the block it chooses must be valid according to the protocol's rules, and all its ancestors must be valid. Any invalid block is ignored, and any blocks built on an invalid block are themselves invalid.
 
--->
+There are many examples of fork choice rule.
 
-HERE
+  - The proof of work protocols in Ethereum and Bitcoin use a "heaviest chain rule"[^fn-no-ghost]. The head block is the tip of the chain that represents the most cumulative "work" done under proof of work.
+  - The fork choice rule in Ethereum's proof of stake Casper FFG protocol is "follow the chain containing the justified checkpoint of the greatest height", and to never revert a finalised block.
+  - The fork choice rule in Ethereum's proof of stake LMD GHOST protocol is specified in its name: take the "Greediest Heaviest Observed SubTree". It involves counting accumulated votes from validators for blocks and their descendents. It also applies the same rule as Casper FFG.
+
+We will properly unpack the second and third of these later in their respective sections.
+
+[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [does not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It has served us well.
 
 #### Reorgs and reversions
+
+HERE
 
 [TODO: Insert diagram of reorg]::
 
@@ -257,7 +281,7 @@ Two important concepts that you will come across frequently when studying consen
 
 Informally, an algorithm is said to be safe if "nothing bad ever happens"[^fn-safety-liveness].
 
-[^fn-safety-liveness]: The helpful, intuitive definitions of safety and liveness I've quoted appear in short form in Lamport's 1977 paper, [Proving the Correctness of Multiprocess Programs](https://lamport.azurewebsites.net/pubs/proving.pdf) and as stated here in Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf).
+[^fn-safety-liveness]: The helpful, intuitive definitions of safety and liveness I've quoted appear in short form in Lamport's 1977 paper, [Proving the Correctness of Multiprocess Programs](https://lamport.azurewebsites.net/pubs/proving.pdf), and as stated here in Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf).
 
 Examples of bad things that might happen in the blockchain context could be the double-spend of a coin, or the finalising of two conflicting checkpoints.
 
@@ -281,7 +305,7 @@ Let's say that somebody connected to the network of group $A$ sends a transactio
 
 In summary, the CAP theorem means that we cannot hope to design a consensus protocol that is both safe and live under all circumstances, since we have no option but to operate across an unreliable network, the Internet.[^fn-flp-theorem]
 
-[^fn-flp-theorem]: The CAP theorem is related to another famous result described by Fisher, Lynch and Paterson in their 1985 paper, [Impossibility of Distributed Consensus with One Faulty Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf) and usually called the FLP theorem. This proves that, even in a reliable network that is asynchronous (that is, there is no bound on how long messages can take to be transmitted and received), just one faulty node can prevent the system coming to consensus. That is, even this unpartitioned system cannot be both live and safe. Gilbert and Lynch's [paper](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf) discusses this in section 3.2.
+[^fn-flp-theorem]: The CAP theorem is related to another famous result described by Fisher, Lynch and Paterson in their 1985 paper, [Impossibility of Distributed Consensus with One Faulty Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf), usually called the FLP theorem. This proves that, even in a reliable asynchronous network (that is, with no bound on how long messages can take to be received), just one faulty node can prevent the system from coming to consensus. That is, even this unpartitioned system cannot be both live and safe. Gilbert and Lynch's [paper](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf) discusses the FLP theorem in section 3.2.
 
 ##### Ethereum prioritises liveness
 
