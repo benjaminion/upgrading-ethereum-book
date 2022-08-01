@@ -41,6 +41,7 @@ DVT
 Dankrad
 Danksharding
 DeFi
+Decentralization
 Devconnect
 Dfinity
 Dfinity's
@@ -51,6 +52,7 @@ ECDLP
 ECDSA
 EIP
 EIPs
+ETC's
 ETH
 ETHconomics
 Elowsson
@@ -61,6 +63,7 @@ Ethereum
 Ethereum's
 Ethresear
 FFG
+FLP
 FastAggregateVerify
 Feist
 Flashbots
@@ -87,6 +90,8 @@ Kyne
 LMD
 Lamport
 Lifecycle
+Liskov
+Liveness
 Lookahead
 MEV
 Math
@@ -97,8 +102,10 @@ Merkleize
 Merkleized
 Merkleizing
 MiMC
+Multiprocess
 Mutators
 NFTs
+Nakamoto
 Namib
 Narayanan
 Natale
@@ -108,6 +115,7 @@ PBFT
 PRNG
 Parametrizing
 ParticipationFlags
+Pease
 PegaSys
 Permissionless
 Peta
@@ -143,6 +151,7 @@ Serialization
 Serialize
 Shacham
 Sharding
+Shostak
 Signedness
 Slashings
 Stakers
@@ -150,6 +159,7 @@ Szilágyi
 TODO
 Teku
 Teku's
+Tendermint
 TiB
 Tomescu
 Umberto
@@ -261,6 +271,8 @@ parallelising
 parameterises
 performant
 permissionless
+permissionlessly
+permissionlessness
 pernickety
 piechart
 pre
@@ -301,6 +313,7 @@ unbiasable
 unboundedly
 underflows
 unforgeability
+unpartitioned
 unslashed
 unsuffixed
 uptime
