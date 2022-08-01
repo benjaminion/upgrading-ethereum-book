@@ -52,6 +52,7 @@ ECDLP
 ECDSA
 EIP
 EIPs
+ETC's
 ETH
 ETHconomics
 Elowsson
@@ -89,6 +90,7 @@ Kyne
 LMD
 Lamport
 Lifecycle
+Liskov
 Liveness
 Lookahead
 MEV
@@ -103,6 +105,7 @@ MiMC
 Multiprocess
 Mutators
 NFTs
+Nakamoto
 Namib
 Narayanan
 Natale
@@ -112,6 +115,7 @@ PBFT
 PRNG
 Parametrizing
 ParticipationFlags
+Pease
 PegaSys
 Permissionless
 Peta
@@ -147,6 +151,7 @@ Serialization
 Serialize
 Shacham
 Sharding
+Shostak
 Signedness
 Slashings
 Stakers
@@ -266,6 +271,7 @@ parallelising
 parameterises
 performant
 permissionless
+permissionlessly
 permissionlessness
 pernickety
 piechart
