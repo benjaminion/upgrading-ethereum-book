@@ -10,22 +10,38 @@ $\ = "\n"; # set output record separator
 
 my $inCode = 0;
 my $inMath = 0;
+my $inComment = 0;
 
 while(<>) {
 
+    # Code blocks
     if (/^```/) {
         $inCode = 1 - $inCode;
         print '^';
         next;
     }
 
+    # LaTeX blocks
     if (/^\$\$/) {
         $inMath = 1 - $inMath;
         print '^';
         next;
     }
 
-    if ($inMath or $inCode) {
+    # Multi-line HTML comments
+    if (/^<!--$/) {
+        $inComment = 1;
+        print '^';
+        next;
+    }
+
+    if (/^\s*-->$/) {
+        $inComment = 0;
+        print '^';
+        next;
+    }
+
+    if ($inMath or $inCode or $inComment) {
         print '^';
         next;
     }
@@ -66,3 +82,7 @@ while(<>) {
 
     print "^ $_";
 }
+
+die "Code block not closed!" unless $inCode == 0;
+die "Math block not closed!" unless $inMath == 0;
+die "HTML comment not closed!" unless $inComment == 0;
