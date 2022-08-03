@@ -1,6 +1,5 @@
 import React from "react"
 import { graphql } from "gatsby"
-import { Helmet } from 'react-helmet'
 
 import Layout from "../components/page"
 import Sidebar from "../components/sidebar"
@@ -11,13 +10,10 @@ import PageNavi from "../components/pagenavi"
 
 import "katex/dist/katex.min.css"
 
-export default function Template({
-  data,
-}) {
-  const { markdownRemark, site } = data
-  const { html, frontmatter } = markdownRemark
+export function Head({ data }) {
 
-  //console.log(JSON.stringify(markdownRemark, undefined, 2))
+  const { markdownRemark, site } = data
+  const { frontmatter } = markdownRemark
 
   const indexArray = frontmatter.path !== "/contents"
         ? frontmatter.index
@@ -29,6 +25,21 @@ export default function Template({
     const number = (indexArray.length >= 2) ? indexArray.join('.') : ''
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
+
+  return (
+    <title>{pageTitle}</title>
+  )
+}
+
+export default function Template({ data }) {
+
+  const { html, frontmatter } = data.markdownRemark
+
+  //console.log(JSON.stringify(markdownRemark, undefined, 2))
+
+  const indexArray = frontmatter.path !== "/contents"
+        ? frontmatter.index
+        : []
 
   return (
     <Layout>
@@ -50,9 +61,6 @@ export default function Template({
       <div className="page-navi">
         <PageNavi path={frontmatter.path} />
       </div>
-      <Helmet>
-        <title>{pageTitle}</title>
-      </Helmet>
     </Layout>
   )
 }
