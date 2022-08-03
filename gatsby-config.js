@@ -69,7 +69,6 @@ module.exports = {
       },
     },
     'gatsby-plugin-catch-links',
-    'gatsby-plugin-react-helmet',
     {
       resolve: 'gatsby-plugin-htaccess',
       options: {
