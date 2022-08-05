@@ -151,13 +151,13 @@ TODO
 
 ### Introduction
 
-We have a challenge ahead of us. My task is essentially to explain the following.
+Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol:
 
 > The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
 
-This is the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol.
+If that makes perfect sense to you then feel free to skip this chapter. Otherwise, read on!
 
-My hope is that, by the end of this chapter, this sentence will make perfect sense to you. There's a lot to unpack, but we'll be taking a fairly long run up to it, and in this introductory section I will just be covering some basic concepts and terminology that will be frequently appearing.
+Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. In this section we'll cover the basics like consensus, fork choice, and finality.
 
 #### Coming to consensus
 
@@ -167,7 +167,7 @@ Users submit transactions to this network of nodes, and the goal of the consensu
 
 A consensus protocol is the process by which this agreement on the ordering of transactions comes about.
 
-The consensus protocol in Ethereum&nbsp;2 actually "bolts together" two different consensus protocols. One is called [Casper FFG](/part2/consensus/casper_ffg), the other [LMD GHOST](/part2/consensus/lmd_ghost). The combination has become known as [Gasper](/part2/consensus/gasper). In the following pages we will be looking at these both separately and in combination.
+The consensus protocol in Ethereum&nbsp;2 actually "bolts together" two different consensus protocols. One is called [Casper FFG](/part2/consensus/casper_ffg), the other [LMD GHOST](/part2/consensus/lmd_ghost). The combination has become known as [Gasper](/part2/consensus/gasper). In subsequent pages we will be looking at these both separately and in combination.
 
 #### Byzantine generals
 
@@ -184,6 +184,18 @@ Lamport captures the faultiness of the system in the following way.
 > However, some of the generals may be traitors, trying to prevent the loyal generals from reaching agreement.
 
 These treacherous generals exhibit what we've come to call "Byzantine behaviour", or "Byzantine faults". They can act in any arbitrary way: delaying messages, reordering messages, outright lying, sending contradictory messages to different recipients, failing to respond at all, or any other behaviour we can think of.
+
+<a id="img_consensus_messages"></a>
+<div class="image" style="width: 40%">
+
+![A picture of a node with messages coming in](md/images/diagrams/consensus_messages.svg)
+
+</div>
+<div class="caption" style="width: 60%">
+
+I receive a ton of messages from other nodes, but I have no idea which are accurate, what order they were sent in, or if any are missing or just delayed. Somehow, though, we need to reach agreement.
+
+</div>
 
 The loyal generals need a method that reliably delivers the outcome the need:
 
@@ -333,7 +345,15 @@ The CAP theorem is a famous result in distributed systems theory that states tha
 
 It is easy to demonstrate the CAP theorem in our blockchain context. Imagine that Amazon Web Services goes offline, such that all the hosted nodes can communicate with each other, but none can can talk to the outside world. Or that a country firewalls all connections in and out so that no gossip traffic can pass. Either of these scenarios divide the nodes into two disjoint groups, $A$ and $B$.
 
-Let's say that somebody connected to the network of group $A$ sends a transaction. If the nodes in $A$ process that transaction then they will end up with a state that is different from the nodes in group $B$, so overall we have lost consistency, and therefore safety. The only option for avoiding this is for the nodes in group $A$ to to refuse to process the transaction, in which case we have lost availability, and therefore liveness.
+<a id="img_consensus_partition"></a>
+<div class="image" style="width: 50%">
+
+![A diagram of a network partition](md/images/diagrams/consensus_partition.svg)
+The network is partitioned: the nodes in A can talk among themselves, but cannot talk to any node in B, and vice versa.
+
+</div>
+
+Let's say that somebody connected to the network of group $A$ sends a transaction. If the nodes in $A$ process that transaction then they will end up with a state that is different from the nodes in group $B$, which didn't see the transaction. So, overall we have lost consistency between all the nodes, and therefore safety. The only way to avoid this is for the nodes in group $A$ to to refuse to process the transaction, in which case we have lost availability, and therefore liveness.
 
 In summary, the CAP theorem means that we cannot hope to design a consensus protocol that is both safe and live under all circumstances, since we have no option but to operate across an unreliable network, the Internet.[^fn-flp-theorem]
 
@@ -351,7 +371,21 @@ It's worth noting that typical proof of work based algorithms also prioritise li
 
 #### Finality
 
-TODO
+Ethereum's proof of stake mechanism prioritises liveness, but unlike proof of work it also strives to deliver a degree of safety.
+
+Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper FFG mechanism that we'll explore shortly. The idea is that, as the blockchain progresses, all honest nodes agree on blocks that they will never revert. That block (a checkpoint) and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer. Thus, finality is a safety property (nothing bad ever happens).
+
+<a id="img_consensus_finality"></a>
+<div class="image" style="width: 80%">
+
+![A diagram showing a finalised portion of chain and a forkful portion](md/images/diagrams/consensus_finality.svg)
+The honest nodes have agreed that the checkpoint and all its ancestor blocks are "final" and will never be reverted. There are therefore no forks before the checkpoint. The chain descending from the checkpoint remains liable to forking.
+
+</div>
+
+Finality in Ethereum&nbsp;2 is "economic finality". It is theoretically possible for the protocol to finalise two conflicting checkpoints. That is, two contradictory views of the chain's history. However, it is possible only at enormous and quantifiable cost. For all but the most extreme attack or failure scenarios, final means final.
+
+The next section, on Casper FFG, dives into the detail of how this finality mechanism works.
 
 #### See also
 
@@ -363,23 +397,15 @@ Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/0
 
 Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These design criteria strongly influence how we build our consensus protocols. Vitalik explores these issues in hist article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
 
-### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
-
-TODO
-
 ### Casper FFG <!-- /part2/consensus/casper_ffg* -->
 
 TODO
 
-### Finality <!-- /part2/consensus/finality* -->
+### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
 TODO
 
 ### Gasper <!-- /part2/consensus/gasper* -->
-
-TODO
-
-### The Inactivity Leak <!-- /part2/consensus/inactivity* -->
 
 TODO
 
