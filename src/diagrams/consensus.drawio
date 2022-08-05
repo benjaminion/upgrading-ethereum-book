@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-08-05T19:31:39.754Z" agent="5.0 (X11)" etag="ota6BVcB2xYaNY4P5JJE" version="20.2.3" type="github" pages="8">
+<mxfile host="app.diagrams.net" modified="2022-08-05T19:43:06.905Z" agent="5.0 (X11)" etag="FzoEldLZ_HAuxFt727UR" version="20.2.3" type="github" pages="8">
   <diagram id="f2ciFOSB5QWkLeRYvo7Q" name="block_chain">
     <mxGraphModel dx="2062" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -633,13 +633,13 @@
         <mxCell id="Ml2WwI-BO5Vb02eJoBEe-0" value="Head&lt;br&gt;Block" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;sketch=1;fillStyle=hachure;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=24;" vertex="1" parent="J80e4cAbBr0Swiec6uMj-1">
           <mxGeometry x="660" y="243" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="Ml2WwI-BO5Vb02eJoBEe-1" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=24;" edge="1" parent="J80e4cAbBr0Swiec6uMj-1">
+        <mxCell id="Ml2WwI-BO5Vb02eJoBEe-1" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=24;strokeColor=default;" edge="1" parent="J80e4cAbBr0Swiec6uMj-1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="680" y="230" as="sourcePoint" />
-            <mxPoint x="680" y="190" as="targetPoint" />
+            <mxPoint x="689" y="230" as="sourcePoint" />
+            <mxPoint x="659" y="186" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="670" y="200" />
-              <mxPoint x="695" y="223" />
+              <mxPoint x="677" y="195" />
+              <mxPoint x="668" y="219" />
             </Array>
           </mxGeometry>
         </mxCell>
