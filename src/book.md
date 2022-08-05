@@ -311,7 +311,23 @@ You can perhaps see that each of these fork choice rules is a way to assign a nu
 
 TODO
 
-[TODO: Insert diagram of reorg]::
+<a id="img_consensus_reversion_1"></a>
+<div class="image" style="width: 70%">
+
+![TODO](md/images/diagrams/consensus_reversion_1.svg)
+TODO
+
+</div>
+
+TODO
+
+<a id="img_consensus_reversion_2"></a>
+<div class="image" style="width: 70%">
+
+![TODO](md/images/diagrams/consensus_reversion_2.svg)
+TODO
+
+</div>
 
 TODO: [Case study](https://barnabe.substack.com/p/pos-ethereum-reorg).
 
