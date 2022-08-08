@@ -2128,6 +2128,14 @@ The beacon chain design has always used a RANDAO[^fn-randao-naming] mechanism to
 
 [^fn-randao-naming]: I'm not certain where the name RANDAO comes from, but it's modelled as a DAO (decentralised autonomous organisation) that deals in randomness. The Ethereum [randao project](https://github.com/randao/randao) from 2016 may be the origin of the name.
 
+To unpack that a little, the beacon chain maintains a RANDAO value. Every block included in the chain contains a verifiable random value provided by the validator that proposed it, its [`randao_reveal`](/part3/containers/blocks#beaconblockbody). As each block is processed the beacon chain's RANDAO value is mixed with the `randao_reveal` from the block. Thus, over time, the RANDAO accumulates randomness from all the block proposers.
+
+If $R_n$ is the RANDAO value after $n$ contributions, and $r_n$ is the $n$th `randao_reveal`, then the following holds. Here we are mixing in the new contribution using the `xor` function, $\oplus$. Alternatives might be to use a sum or a hash, but `xor` is simple and has useful properties.
+
+$$
+R_n = r_n \oplus R_{n-1}
+$$
+
 We can think of a RANDAO as being like a deck of cards that's passed round the table, each person shuffling it in turn: the deck gets repeatedly re-randomised. Even if one contributor's randomness is weak, the cumulative result has a high level of entropy.
 
 <a id="img_randomness_shuffle"></a>
@@ -2164,7 +2172,9 @@ For these reasons [we now use](https://github.com/ethereum/consensus-specs/pull/
 
 ##### Where does the entropy come from?
 
-Evidently the predominant source of randomness in the Ethereum 2 protocol is the secret keys of the validators. This amounts to some 85 million bits of entropy with 332,000 validators (assuming, reasonably, that the validators generated their secret keys randomly and uniformly).
+Evidently the predominant source of randomness in the Ethereum 2 protocol is the secret keys of the validators. If every validator key is generated uniformly randomly and independently then each contributes 256 bits of entropy to the overall pool. However, keys are sometimes not independently generated[^fn-vasily]. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) provides a way to derive multiple validator keys from a single entropy seed, and large stakers are likely to have done this. Thus, the total entropy from $N$ validator keys will be less than $N \times 256$ bits, but we don't know how much less.
+
+[^fn-vasily]: I am indebted to Vasiliy Shapovalov for reminding me of this.
 
 Some other sources of entropy for the RANDAO are noted in [EIP-4399](https://eips.ethereum.org/EIPS/eip-4399).
 
@@ -2573,7 +2583,9 @@ Although a [lot of work](https://www.vdfalliance.org/) has been done on designin
 
 #### See also
 
-Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation).
+Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https://notes.ethereum.org/@vbuterin/SkeyEI3xv#Aside-RANDAO-seeds-and-committee-generation). His article [Validator Ordering and Randomness in PoS](https://web.archive.org/web/20160723105229/https://vitalik.ca/files/randomness.html) summarises some early thinking on the options for random validator selection in proof of stake[^fn-paddy-randomness].
+
+[^fn-paddy-randomness]: This article seems only to be available now on the Internet Archive. I am grateful to Patrick McCorry for tracking it down.
 
 On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketches I presented in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
 
