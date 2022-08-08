@@ -279,6 +279,37 @@ div.footnotes {
   font-size: 85%;
 }
 
+/*** Footnote tooltips ***/
+
+sup[id^='fnref-'] {
+  position: relative;
+  display: inline;
+}
+
+.fn-span {
+  visibility: hidden;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 80%;
+  position: absolute;
+  color: #000;
+  background: #ddd;
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: calc(var(--main-width) / 4);
+  white-space: normal;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+
+sup[id^='fnref-']:hover span.fn-span {
+  visibility: visible;
+  opacity: 1;
+  z-index: 999;
+  top: 30px;
+  transform: translate(-50%, 0);
+}
+
 /*** Summary boxes ***/
 div.summary {
   width: 80%;
@@ -286,7 +317,6 @@ div.summary {
   padding: 1ex 1em;
   border: double #999 3.5px;
 }
-
 
 @media print {
   html, body, main, div.main-content {
@@ -324,6 +354,9 @@ div.summary {
     display: none;
   }
   a.footnote-backref {
+    display: none;
+  }
+  .fn-span {
     display: none;
   }
   /* Undo code styling */
