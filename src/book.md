@@ -261,15 +261,15 @@ In general we might end up with a block tree. Again, time moves from left to rig
 
 In real networks we can end up with something more like a block tree than a block chain. In this example very few blocks are built on their "obvious" parent.
 
-Why did the proposer of Block $C$ build on Block $A$ rather than Block $B$?
+Why did the proposer of block $C$ build on block $A$ rather than block $B$?
 
-  - It may be that the proposer of $C$ had not received Block $B$ by the time it was ready to make its proposal.
-  - It may be that the proposer of $C$ deliberately wanted to exclude Block $B$ from its chain, for example to steal its transactions, or to censor some transaction in $B$.
+  - It may be that the proposer of $C$ had not received block $B$ by the time it was ready to make its proposal.
+  - It may be that the proposer of $C$ deliberately wanted to exclude block $B$ from its chain, for example to steal its transactions, or to censor some transaction in $B$.
   - It may be that the proposer of $C$ thought that block $B$ was invalid for some reason.
 
 The first two reasons, at least, are indistinguishable to the wider network. All we know is that $C$ built on $A$, and we can never know why for certain.
 
-Similarly, why did the proposer of $D$ build on Block $B$ rather than Block $C$? Any of the above reasons apply, and we can add another:
+Similarly, why did the proposer of $D$ build on block $B$ rather than block $C$? Any of the above reasons apply, and we can add another:
 
   - the proposer of $D$ may have decided on some basis that there was more chance of the wider network eventually including $B$ than $C$. Thus, building $D$ on $B$ gives it more chance of making it into the eventual block chain, than building $D$ on $C$.
 
@@ -309,27 +309,39 @@ You can perhaps see that each of these fork choice rules is a way to assign a nu
 
 #### Reorgs and reversions
 
-TODO
+As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block it receives will be a child of the block that it currently views as the head block, and it automatically becomes the new head block if it is valid.
+
+However, sometimes the new block might be a descendent of some other block in the block tree. If the node doesn't already have the parent block of the new block it will need to ask its peers for it, and so on for any blocks it knows that it is missing.
+
+In any case, re-running the fork choice might indicate that the block the node now believes to be the best head is on a different branch from the previous head block. Under this circumstance, the node must perform a reorg (short for reorganisation), also known as a reversion. This means that it will kick out blocks that it had previously included in its chain, and will adopt blocks on a new branch.
+
+In the following diagram, the node has evaluated block $H$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. Block $C$ does not appear in this node's view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
 <div class="image" style="width: 70%">
 
-![TODO](md/images/diagrams/consensus_reversion_1.svg)
-TODO
+![A diagram of a blockchain prior to a reversion](md/images/diagrams/consensus_reversion_1.svg)
+At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \larr B \larr D \larr E \larr F]$.
 
 </div>
 
-TODO
+Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore the latter. But in this case we will imagine that the node, based on the fork choice rule, decides that $G$ is the better head block.
+
+Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain must be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
+
+After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. After doing this, the node will have completed the reorganisation of its chain.
 
 <a id="img_consensus_reversion_2"></a>
 <div class="image" style="width: 70%">
 
-![TODO](md/images/diagrams/consensus_reversion_2.svg)
-TODO
+![A diagram of a blockchain after a reversion](md/images/diagrams/consensus_reversion_2.svg)
+Now the node believes that block $G$ is the best head, and therefore its chain must change to blocks $[A \larr B \larr C \larr G]$.
 
 </div>
 
-TODO: [Case study](https://barnabe.substack.com/p/pos-ethereum-reorg).
+Sometime later, perhaps a block $H$ will appear that builds on $F$. If the fork choice rule indicates that $H$ ought to be the new head, then the node will perform a reorg once again, reverting blocks back to $B$ and replaying blocks on the other branch.
+
+Short reorgs of one or two blocks in both proof of work and Ethereum's proof of stake protocol are not uncommon due to network delays in block propagation. Much longer reorgs ought to be exceedingly rare, unless the chain is under attack, or there is a bug in formulation of &ndash; or the clients' implementations of &ndash; the fork choice rule.
 
 #### Safety and Liveness
 
@@ -408,6 +420,8 @@ The next section, on Casper FFG, dives into the detail of how this finality mech
 It's always worth reading anything that Lamport has had a hand in, and the original paper by Lamport, Shostak, and Pease on [The Byzantine Generals Problem](https://lamport.azurewebsites.net/pubs/byz.pdf) contains many insights. While the algorithm they propose is hopelessly inefficient in modern terms, the paper is a good introduction to reasoning about consensus protocols in general. The same is true of Castro and Liskov's seminal paper [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) which significantly influences the design of our Casper FFG protocol. However, you might like to contrast these "classical" approaches with the elegant simplicity of proof of work, as devised by Satoshi Nakamoto and described in the [Bitcoin white paper](https://bitcoinpaper.org/bitcoin.pdf). If proof of work has just one thing in its favour, it is its simplicity.
 
 We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). This is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
+
+The Eth2 beacon chain underwent a seven block reorg in May 2022 due to differences between client implementations of the fork choice rule. These differences were known at the time and thought to be harmless. That proved to be not so. Barnabé Monnot's [write up](https://barnabe.substack.com/p/pos-ethereum-reorg) of the incident is very instructive.
 
 Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality/) provides a deeper and more nuanced exploration of the concept of finality.
 
