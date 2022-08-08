@@ -2238,7 +2238,7 @@ The RANDAO seed at the end of epoch $N$ is used to compute validator duties for 
 
 Under normal circumstances, then, an attacker is not able to predict the duty assignments more than two epochs in advance. However, if an attacker has a large proportion of the stake or is, for example, able to mount a DoS attack against block proposers for a while, then it might be possible for the attacker to predict the output of the RANDAO further ahead than `MIN_SEED_LOOKAHEAD` would normally allow. The attacker might then use this foreknowledge to strategically exit validators or make deposits[^fn-instant-activations] in order to gain control of a committee, or a large number of block proposal slots.
 
-[^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](https://eth2book.info/altair/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
+[^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
 
 It's certainly not an easy attack. Nonetheless it's easy to defend against, so we might as well do so.
 
