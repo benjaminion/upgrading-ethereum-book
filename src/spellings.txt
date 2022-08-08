@@ -95,6 +95,7 @@ Liveness
 Lookahead
 MEV
 Math
+McCorry
 Medalla
 Merkle
 Merkleization
@@ -150,6 +151,7 @@ Satoshi
 Serialization
 Serialize
 Shacham
+Shapovalov
 Sharding
 Shostak
 Signedness
@@ -168,6 +170,7 @@ VDFs
 Validator
 ValidatorIndex
 Validators
+Vasiliy
 Verkle
 Vitalik
 Vitalik's
