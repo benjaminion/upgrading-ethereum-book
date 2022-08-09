@@ -24,6 +24,7 @@ BeaconState
 Biasability
 Bitlists
 Bitvectors
+Blockchain
 Blockchains
 Blst
 Boneh

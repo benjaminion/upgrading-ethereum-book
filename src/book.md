@@ -149,6 +149,18 @@ TODO
 
 ## Consensus <!-- /part2/consensus -->
 
+<div class="summary">
+
+  - Consensus is a way to build reliable distributed systems with unreliable components.
+  - Blockchain-based distributed systems aim to agree on an single history of transactions.
+  - Proof of work and proof of stake are not consensus protocols, but enable consensus protocols.
+  - Many blockchain consensus protocols are "forkful".
+  - Forkful chains use a fork choice rule, and sometimes undergo reorganisations.
+  - In a "safe" protocol, nothing bad ever happens.
+  - In a "live" protocol, something good always happens.
+
+</div>
+
 ### Introduction
 
 Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol:
