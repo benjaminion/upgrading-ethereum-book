@@ -12,8 +12,8 @@ do
     # Include credentials for github.com
     [[ "$x" =~ github.com ]] && creds="-u $github_secret" || creds=""
 
-    # beaconcha.in doesn't like HEAD requests
-    [[ "$x" =~ beaconcha.in ]] && head="" || head="--head"
+    # beaconcha.in and reddit don't like HEAD requests
+    [[ "$x" =~ beaconcha.in || "$x" =~ reddit.com ]] && head="" || head="--head"
 
     res=$(curl $creds -Lo /dev/null --silent $head --write-out '%{http_code}\n' $x)
 
