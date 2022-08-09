@@ -119,6 +119,13 @@ div.image {
   font-style: italic;
 }
 
+div.caption {
+  text-align: center;
+  padding: 0;
+  margin: -3ex auto 3ex auto;
+  font-style: italic;
+}
+
 div.image img {
   width: 100%;
 }

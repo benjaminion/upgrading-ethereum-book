@@ -16,6 +16,7 @@ Attesters
 BLS
 BLSPubkey
 BLSSignature
+Barnabé
 Barreto
 Baz
 BeaconBlockHeader
@@ -23,6 +24,7 @@ BeaconState
 Biasability
 Bitlists
 Bitvectors
+Blockchain
 Blockchains
 Blst
 Boneh
@@ -103,6 +105,7 @@ Merkleize
 Merkleized
 Merkleizing
 MiMC
+Monnot's
 Multiprocess
 Mutators
 NFTs
