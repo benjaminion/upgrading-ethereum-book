@@ -7,6 +7,7 @@ import Subsections from "../components/subsections"
 import PrevNext from "../components/prevnext"
 import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
+import FootnoteTooltips from "../components/footnote-tooltips"
 
 import "katex/dist/katex.min.css"
 
@@ -61,6 +62,7 @@ export default function Template({ data }) {
       <div className="page-navi">
         <PageNavi path={frontmatter.path} />
       </div>
+      <FootnoteTooltips />
     </Layout>
   )
 }
