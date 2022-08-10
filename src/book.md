@@ -149,6 +149,16 @@ TODO
 
 ## Consensus <!-- /part2/consensus -->
 
+Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) about attacks on the Ethereum&nbsp;2.0 consensus protocol:
+
+> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
+
+If that makes perfect sense to you then feel free to skip this chapter entirely. Otherwise, read on!
+
+Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. We'll begin with some [Preliminaries](/part2/consensus/preliminaries) covering the basics of consensus. Then we will look in turn at each of the two consensus mechanisms used by Ethereum's proof of stake protocol, starting with [Casper FFG](/part2/consensus/casper_ffg), which is used to achieve finality, and then [LMD GHOST](/part2/consensus/lmd_ghost) which provides slot by slot liveness. After considering them individually we will look at how they work together as the combined consensus protocol that's become known as [Gasper](/part2/consensus/gasper).
+
+### Preliminaries <!-- /part2/consensus/preliminaries -->
+
 <div class="summary">
 
   - Consensus is a way to build reliable distributed systems with unreliable components.
@@ -161,15 +171,9 @@ TODO
 
 </div>
 
-### Introduction
+#### Introduction
 
-Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol:
-
-> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
-
-If that makes perfect sense to you then feel free to skip this chapter. Otherwise, read on!
-
-Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. In this section we'll cover the basics like consensus, fork choice, and finality. Most of this section is not Ethereum-specific and is for general background understanding.
+In this section we'll cover the basics of consensus, fork choice, and finality. Most of this section is not specific to Ethereum and is for general background understanding.
 
 #### Coming to consensus
 
@@ -439,17 +443,51 @@ Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/0
 
 Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These design criteria strongly influence how we build our consensus protocols. Vitalik explores these issues in his article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
 
+### Gasper <!-- /part2/consensus/gasper* -->
+
+[Gasper](https://arxiv.org/pdf/2003.03052.pdf)
+
+#### Introduction
+
+TODO
+
+#### Attestations
+
+The currency of Gasper - fork choice decisions are made on the basis of attestations/votes.
+
+#### Slashing
+
+TODO. Reference the [Slasher](https://blog.ethereum.org/2014/01/15/slasher-a-punitive-proof-of-stake-algorithm/) post.
+
+#### Safety and liveness in Gasper
+
+TODO
+
 ### Casper FFG <!-- /part2/consensus/casper_ffg* -->
 
 TODO
+
+[Slasher](https://blog.ethereum.org/2014/01/15/slasher-a-punitive-proof-of-stake-algorithm/) - the germ of the Casper FFG concept. A proof of stake overlay, or augmentation, on a proof of work chain that confers "finality" (though that word is not used) to converge on a single history.
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
 TODO
 
-### Gasper <!-- /part2/consensus/gasper* -->
+#### Slashing for equivocation
 
-TODO
+When it is a validator's turn to produce a block in a particular slot, the validator should run the [fork choice rule](/part2/consensus/preliminaries#fork-choice-rules) in order to decide which existing block it will build its own block on. Its goal is to identify the fork that is most likely, based on the evidence it has, to be the one that eventually becomes canonical. That is, the one that the whole set of correct validators will converge on.
+
+TODO: Insert diagram showing a head block. Build here.
+
+However, why choose? Under proof of stake (unlike under proof of work) it is almost costless for validators to produce blocks. Therefore, a good strategy would seem to be to propose multiple blocks, one built on each possible head.
+
+TODO: Insert diagram showing multiple proposals, one on each candidate head.
+
+This is undesirable because simply prolongs forks and prevents the network from converging on a linear history. Users of the chain may not be able to work out which fork is correct, and that makes them vulnerable to double spend attacks, the very thing we wish to avoid.
+
+The solution to this is rather simple. LMD GHOST introduces a third slashing rule alongside the two Casper FFG slashing rules.
+
+TODO: describe proposer slashing.
 
 ### Weak Subjectivity <!-- /part2/consensus/weak_subjectivity* -->
 

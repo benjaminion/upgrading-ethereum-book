@@ -203,6 +203,7 @@ blockchain
 blockchains
 bls
 boolean
+costless
 creds
 crosslink
 crosslinked
