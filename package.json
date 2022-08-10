@@ -19,20 +19,16 @@
     "gatsby-plugin-catch-links": "^4.20.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
-    "gatsby-plugin-sharp": "^4.20.0",
     "gatsby-remark-autolink-headers": "^5.20.0",
     "gatsby-remark-copy-linked-files": "^5.20.0",
     "gatsby-remark-external-links": "^0.0.4",
-    "gatsby-remark-images": "^6.20.0",
     "gatsby-remark-katex": "^6.20.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
     "gatsby-remark-prismjs": "^6.20.0",
     "gatsby-source-filesystem": "^4.20.0",
     "gatsby-transformer-remark": "^5.20.0",
-    "gatsby-transformer-sharp": "^4.20.0",
     "markdownlint": "^0.26.2",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-helmet": "^6.1.0"
+    "react-dom": "^17.0.1"
   }
 }
