@@ -325,13 +325,13 @@ You can perhaps see that each of these fork choice rules is a way to assign a nu
 
 #### Reorgs and reversions
 
-As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block it receives will be a child of the block that it currently views as the head block In this case the new block automatically becomes the updated head block (as long as it is valid).
+As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block will be a child of the block that it currently views as the head block. In this case the new block automatically becomes the updated head block (as long as it is valid).
 
-However, sometimes the new block might be a descendent of some other block in the block tree. Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.
+However, sometimes the new block might be a descendent of some other block in the block tree. (Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.)
 
-In any case, running the fork choice rule on the updated block tree might result in a new head block that is on a different branch from the previous head block. In this circumstance, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt blocks on a different branch.
+In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the hew head's branch.
 
-In the following diagram, the node has evaluated block $H$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
+In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
 <div class="image" style="width: 70%">
@@ -341,7 +341,7 @@ At this point, the node believes that block $F$ is the best head, and therefore 
 
 </div>
 
-Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore it. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
+Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore $G$. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
 
 Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain must be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
 
@@ -355,7 +355,7 @@ Now the node believes that block $G$ is the best head, and therefore its chain m
 
 </div>
 
-Later, perhaps, a block $H$ might appear that builds on $F$. If the fork choice rule indicates that $H$ ought to be the new head, then the node will perform a reorg once again, reverting blocks back to $B$ and replaying the blocks on the other branch.
+Later, perhaps, a block $H$ might appear that builds on $F$. If the fork choice rule indicates that $H$ ought to be the new head, then the node will perform a reorg once again, reverting blocks back to $B$ and replaying the blocks on $H$'s branch.
 
 Short reorgs of one or two blocks in both proof of work and Ethereum's proof of stake protocol are not uncommon due to network delays in block propagation. Much longer reorgs ought to be exceedingly rare, unless the chain is under attack, or there is a bug in the formulation of &ndash; or the clients' implementations of &ndash; the fork choice rule.
 
@@ -449,7 +449,11 @@ Our ideal for the systems we are building is that they are _politically_ decentr
 
 #### Introduction
 
-TODO
+Ethereum's proof of stake consensus protocol is actually a combination of two separate consensus protocols, known as Casper FFG, and LMD GHOST. These two have been "bolted together" to form the consensus protocol we have implemented for Eth2, the combined protocol sometimes being known by the portmanteau "Gasper".
+
+This bolting-together is not always pretty. We can often see the joins, and the interaction between the two has sometimes led to subtle issues with the fork choice that we will discuss [elsewhere](/part2/consensus/issues).
+
+HERE - watch [this](https://www.youtube.com/watch?v=2nMS-TK_tMw)
 
 #### Attestations
 
@@ -468,6 +472,10 @@ TODO
 TODO
 
 [Slasher](https://blog.ethereum.org/2014/01/15/slasher-a-punitive-proof-of-stake-algorithm/) - the germ of the Casper FFG concept. A proof of stake overlay, or augmentation, on a proof of work chain that confers "finality" (though that word is not used) to converge on a single history.
+
+#### See also
+
+Vitalik provides great first-hand information on the background to the development of the Casper consensus protocols in a 2018 [Tweet storm](https://twitter.com/VitalikButerin/status/1029900695925706753). It's also available in a [single page format](https://hackmd.io/@liangcc/BJZDR1mIX?type=view).
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
