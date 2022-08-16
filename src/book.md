@@ -149,6 +149,16 @@ TODO
 
 ## Consensus <!-- /part2/consensus -->
 
+Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) about attacks on the Ethereum&nbsp;2.0 consensus protocol:
+
+> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
+
+If that makes perfect sense to you then feel free to skip this chapter entirely. Otherwise, read on!
+
+Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. We'll begin with some [Preliminaries](/part2/consensus/preliminaries) covering the basics of consensus. Then we will look in turn at each of the two consensus mechanisms used by Ethereum's proof of stake protocol, starting with [Casper FFG](/part2/consensus/casper_ffg), which is used to achieve finality, and then [LMD GHOST](/part2/consensus/lmd_ghost) which provides slot by slot liveness. After considering them individually we will look at how they work together as the combined consensus protocol that's become known as [Gasper](/part2/consensus/gasper).
+
+### Preliminaries <!-- /part2/consensus/preliminaries -->
+
 <div class="summary">
 
   - Consensus is a way to build reliable distributed systems with unreliable components.
@@ -161,15 +171,9 @@ TODO
 
 </div>
 
-### Introduction
+#### Introduction
 
-Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) on attacks on the Ethereum&nbsp;2.0 consensus protocol:
-
-> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant’s most recent vote (Latest Message Driven, LMD).
-
-If that makes perfect sense to you then feel free to skip this chapter. Otherwise, read on!
-
-Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. In this section we'll cover the basics like consensus, fork choice, and finality. Most of this section is not Ethereum-specific and is for general background understanding.
+In this section we'll cover the basics of consensus, fork choice, and finality. Most of this section is not specific to Ethereum and is for general background understanding.
 
 #### Coming to consensus
 
@@ -321,13 +325,13 @@ You can perhaps see that each of these fork choice rules is a way to assign a nu
 
 #### Reorgs and reversions
 
-As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block it receives will be a child of the block that it currently views as the head block In this case the new block automatically becomes the updated head block (as long as it is valid).
+As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block will be a child of the block that it currently views as the head block. In this case the new block automatically becomes the updated head block (as long as it is valid).
 
-However, sometimes the new block might be a descendent of some other block in the block tree. Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.
+However, sometimes the new block might be a descendent of some other block in the block tree. (Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.)
 
-In any case, running the fork choice rule on the updated block tree might result in a new head block that is on a different branch from the previous head block. In this circumstance, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt blocks on a different branch.
+In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the hew head's branch.
 
-In the following diagram, the node has evaluated block $H$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
+In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
 <div class="image" style="width: 70%">
@@ -337,7 +341,7 @@ At this point, the node believes that block $F$ is the best head, and therefore 
 
 </div>
 
-Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore it. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
+Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore $G$. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
 
 Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain must be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
 
@@ -351,7 +355,7 @@ Now the node believes that block $G$ is the best head, and therefore its chain m
 
 </div>
 
-Later, perhaps, a block $H$ might appear that builds on $F$. If the fork choice rule indicates that $H$ ought to be the new head, then the node will perform a reorg once again, reverting blocks back to $B$ and replaying the blocks on the other branch.
+Later, perhaps, a block $H$ might appear that builds on $F$. If the fork choice rule indicates that $H$ ought to be the new head, then the node will perform a reorg once again, reverting blocks back to $B$ and replaying the blocks on $H$'s branch.
 
 Short reorgs of one or two blocks in both proof of work and Ethereum's proof of stake protocol are not uncommon due to network delays in block propagation. Much longer reorgs ought to be exceedingly rare, unless the chain is under attack, or there is a bug in the formulation of &ndash; or the clients' implementations of &ndash; the fork choice rule.
 
