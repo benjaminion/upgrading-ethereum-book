@@ -437,6 +437,8 @@ It's always worth reading anything that Lamport has had a hand in, and the origi
 
 We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). It is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
 
+Joachim Neu's [presentation](https://www.youtube.com/watch?v=2nMS-TK_tMw), The Why and How of PoS Ethereum's Consensus Problem (at ETHconomics, Devconnect 2022), is a very accessible insight into the availabilty&ndash;finality trade-off, and how Ethereum seeks to manage it.
+
 The Eth2 beacon chain underwent a seven block reorg in May 2022 due to differences between client implementations of the fork choice rule. These differences were known at the time and thought to be harmless. That proved to be not so. Barnabé Monnot's [write up](https://barnabe.substack.com/p/pos-ethereum-reorg) of the incident is very instructive.
 
 Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality/) provides a deeper and more nuanced exploration of the concept of finality.
@@ -475,7 +477,11 @@ TODO
 
 #### See also
 
+The [Gasper paper](https://arxiv.org/abs/2003.03052), Combining GHOST and Casper (2020), is the ultimate reference.
+
 Vitalik provides great first-hand information on the background to the development of the Casper consensus protocols in a 2018 [Tweet storm](https://twitter.com/VitalikButerin/status/1029900695925706753). It's also available in a [single page format](https://hackmd.io/@liangcc/BJZDR1mIX?type=view).
+
+Once again, Joachim Neu's [presentation](https://www.youtube.com/watch?v=2nMS-TK_tMw), The Why and How of PoS Ethereum's Consensus Problem (at ETHconomics, Devconnect 2022), gives good insight into the design goals behind Gasper.
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost* -->
 
@@ -504,6 +510,8 @@ TODO
 ### Issues <!-- /part2/consensus/issues* -->
 
 TODO
+
+See from [here](https://youtu.be/2nMS-TK_tMw?t=1045) in Joachim Neu's presentation for a summary.
 
 ## The Progress of a Slot <!-- /part2/slot* -->
 
