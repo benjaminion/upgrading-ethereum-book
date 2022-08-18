@@ -437,7 +437,7 @@ It's always worth reading anything that Lamport has had a hand in, and the origi
 
 We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). It is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
 
-Joachim Neu's [presentation](https://www.youtube.com/watch?v=2nMS-TK_tMw), The Why and How of PoS Ethereum's Consensus Problem (at ETHconomics, Devconnect 2022), is a very accessible insight into the availabilty&ndash;finality trade-off, and how Ethereum seeks to manage it.
+Joachim Neu's [presentation](https://www.youtube.com/watch?v=2nMS-TK_tMw), The Why and How of PoS Ethereum's Consensus Problem (at ETHconomics, Devconnect 2022), is a very accessible insight into the availability&ndash;finality trade-off, and how Ethereum seeks to manage it.
 
 The Eth2 beacon chain underwent a seven block reorg in May 2022 due to differences between client implementations of the fork choice rule. These differences were known at the time and thought to be harmless. That proved to be not so. Barnabé Monnot's [write up](https://barnabe.substack.com/p/pos-ethereum-reorg) of the incident is very instructive.
 

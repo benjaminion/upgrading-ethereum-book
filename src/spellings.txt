@@ -87,6 +87,7 @@ Iteratively
 Iykyk
 JSON
 Jacek's
+Joachim
 Keccak
 Kyne
 LMD
@@ -113,6 +114,7 @@ Nakamoto
 Namib
 Narayanan
 Natale
+Neu's
 Neven
 Oisín
 PBFT
