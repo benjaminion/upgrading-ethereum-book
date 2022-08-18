@@ -15,7 +15,7 @@
     "links": "bin/util/urlcheck.sh src/book.md"
   },
   "dependencies": {
-    "gatsby": "^4.21.0",
+    "gatsby": "^4.21.1",
     "gatsby-plugin-catch-links": "^4.21.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
@@ -25,7 +25,7 @@
     "gatsby-remark-katex": "^6.21.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
     "gatsby-remark-prismjs": "^6.21.0",
-    "gatsby-source-filesystem": "^4.21.0",
+    "gatsby-source-filesystem": "^4.21.1",
     "gatsby-transformer-remark": "^5.21.0",
     "markdownlint": "^0.26.2",
     "react": "^17.0.1",
