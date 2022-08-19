@@ -2,25 +2,24 @@
 
 # Sanitise the spellings list by finding any unused entries
 
-check=$(dirname "$0")/../build/spellcheck.sh
-source=../../src/book.md
-words=../../src/spellings.txt
+here=$(dirname "$0")
+check=$here/../build/spellcheck.sh
+source=$here/../../src/book.md
+wordlist=$here/../../src/spellings.txt
 
 # Pre-requisite is to pass a normal spell check (no words missing)
-output=$($check $source $words)
-if [[ "$output" != "" ]]
-then
+output=$($check $source $wordlist)
+[[ "$output" == "" ]] || {
     echo "Existing spelling errors need to be fixed:"
     echo $output
     exit 1
-fi
+}
 
-# Now spell check against an empty list and save the output
-tmpin=$(mktemp)
-tmpout=$(mktemp)
+# Now spell check against an empty list and compare (no extra words)
+missing=$(mktemp)
 
-$check $source $tmpin | awk '{print $3}' | sort -u >> $tmpout
+$check $source /dev/null | awk '{print $3}' | sort -u > $missing
 
-diff $tmpout $words
+diff $missing $wordlist
 
-rm -f $tmpin $tmpout
+rm -f $missing
