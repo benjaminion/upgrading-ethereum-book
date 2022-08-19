@@ -11,7 +11,7 @@ wordlist=$here/../../src/spellings.txt
 output=$($check $source $wordlist)
 [[ "$output" == "" ]] || {
     echo "Existing spelling errors need to be fixed:"
-    echo $output
+    echo "$output"
     exit 1
 }
 
