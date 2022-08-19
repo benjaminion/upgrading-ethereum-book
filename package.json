@@ -12,7 +12,8 @@
     "serve": "gatsby serve --prefix-paths",
     "clean": "gatsby clean",
     "check": "node -e 'require(\"./bin/build/prebuild\").runChecks()'",
-    "links": "bin/util/urlcheck.sh src/book.md"
+    "links": "bin/util/urlcheck.sh src/book.md",
+    "spell": "bin/util/check_spellings_list.sh"
   },
   "dependencies": {
     "gatsby": "^4.21.1",

@@ -58,6 +58,7 @@ ETC's
 ETH
 ETHconomics
 Elowsson
+Elowsson's
 Endianness
 Eth
 EthStaker
@@ -88,11 +89,13 @@ Iykyk
 JSON
 Jacek's
 Keccak
-Kyne
+Kyne's
 LMD
 Lamport
+Lamport's
 Lifecycle
 Liskov
+Liskov's
 Liveness
 Lookahead
 MEV
@@ -155,7 +158,6 @@ Serialization
 Serialize
 Shacham
 Shapovalov
-Sharding
 Shostak
 Signedness
 Slashings
@@ -271,7 +273,6 @@ misbehaviours
 misconfiguration
 modularity
 monocultures
-num
 parallelise
 parallelising
 parameterises
@@ -326,7 +327,6 @@ uptime
 validator
 validator's
 validators
-vals
 verifiability
 verifiably
 verifier
