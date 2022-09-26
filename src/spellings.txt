@@ -88,7 +88,6 @@ Iteratively
 Iykyk
 JSON
 Jacek's
-Joachim
 Keccak
 Kyne's
 LMD
@@ -117,7 +116,6 @@ Nakamoto
 Namib
 Narayanan
 Natale
-Neu's
 Neven
 Oisín
 PBFT
@@ -207,7 +205,6 @@ blockchain
 blockchains
 bls
 boolean
-costless
 creds
 crosslink
 crosslinked
