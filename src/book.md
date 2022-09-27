@@ -165,7 +165,7 @@ Our aim is to understand that sentence in all its parts. There's a lot to unpack
   - Blockchain-based distributed systems aim to agree on a single history of transactions.
   - Proof of work and proof of stake are not consensus protocols, but enable consensus protocols.
   - Many blockchain consensus protocols are "forkful".
-  - Forkful chains use a fork choice rule, and sometimes undergo reorganisations.
+  - Forkful chains use a fork choice rule, and sometimes undergo reorganizations.
   - In a "safe" protocol, nothing bad ever happens.
   - In a "live" protocol, something good always happens.
 
