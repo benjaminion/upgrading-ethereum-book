@@ -13,7 +13,7 @@ In an ideal world, my plan is as follows:
   - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I hope to have done the following:
     - Completed [Part 2: Technical Overview](/part2)
     - Completed [Part 1: Building](/part1) (probably too ambitious)
-    - Made a start on [Part 4: Future](/part4) (unlikely before The Merge)
+    - Made a start on [Part 4: Future](/part5) (unlikely before The Merge)
   - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_.
   - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing's going to keep me busy for a while.
 
@@ -27,12 +27,12 @@ This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethere
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
 
-Although I am an Eth2 staker, and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
+Although I am an Ethereum staker and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking) may be relevant (once I have written it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
 
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
 
   - all things proof of stake and the beacon chain,
-  - the process of The Merge at which Ethereum&nbsp;1.0 moves to proof of stake,
+  - the process of The Merge by which Ethereum&nbsp;1.0 moved to proof of stake,
   - in-protocol data sharding, and
   - an array of potential future enhancements.
 
@@ -40,11 +40,13 @@ I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as
 
 It's a chunky list of exclusions, but there's still [plenty to talk about](/contents).
 
-## Altair
+## Bellatrix
 
-This edition covers the Altair version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021.
+This edition covers the Bellatrix version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021, and to Bellatrix on September 6th, 2022.
 
-Specifically, any reference to the consensus specifications is to the version [tagged v1.1.1](https://github.com/ethereum/consensus-specs/tree/v1.1.1).
+Specifically, unless otherwise stated, any reference to the consensus specifications is to the version [tagged v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0) (the [Ailuropoda melanoleuca](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) release[^fn-giant-panda]).
+
+[^fn-giant-panda]: To save you looking it up, Ailuropoda melanoleuca is the formal name of the [giant panda](https://en.wikipedia.org/wiki/Giant_panda).
 
 ## A note on Terminology
 
@@ -1443,7 +1445,7 @@ The penalty for validator $i$ is calculated as
 
 $$
 \begin{split}
-s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) \\
+s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_BELLATRIX}) \\
 = \frac{s_iB_i}{4 \times 50{,}331{,}648}
 \end{split}
 $$
@@ -1513,7 +1515,7 @@ When it comes to the punishment for being slashed it does not matter which rule 
 
 Slashing is triggered by the evidence of the offence being included in a beacon chain block. Once the evidence is confirmed by the network, the offending validator (or validators) is slashed.
 
-The offender immediately has one sixty-fourth ([`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair)) of its effective balance deducted from its actual balance. This is a maximum of 0.5 ETH due to the cap on effective balance.
+The offender immediately has one sixty-fourth ([`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#min_slashing_penalty_quotient)) of its effective balance deducted from its actual balance. This is a maximum of 1&nbsp;ETH due to the cap on effective balance.
 
 This initial penalty was [introduced](https://github.com/ethereum/consensus-specs/pull/624) to make it somewhat costly for validators to self-slash for any reason.
 
@@ -1534,7 +1536,7 @@ To be able to calculate this, the beacon chain maintains a record of the effecti
 The correlated penalty is calculated as follows.
 
  1. Compute the sum of the effective balances (as they were when the validators were slashed) of all validators that were slashed in the previous 36 days. That is, for the 18 days preceding and the 18 days following our validator's slashing.
- 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
+ 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier), but cap the result at `total_balance`, the total active balance of all validators.
  3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
 
 The slashing multiplier in Altair is set to 2. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
@@ -4273,26 +4275,6 @@ TODO
 
 TODO
 
-## Upgrades <!-- /part2/upgrades* -->
-
-### Introduction
-
-TODO
-
-### History of upgrades <!-- /part2/upgrades/history* -->
-
-## Altair
-
-TODO
-
-### Hard Forks <!-- /part2/upgrades/forks* -->
-
-TODO
-
-### Fork Digest <!-- /part2/upgrades/fork_digest* -->
-
-TODO
-
 ## Networking <!-- /part2/networking* -->
 
 ### Introduction
@@ -4366,21 +4348,21 @@ The contents of each are identical.
 
 ### Version information
 
-This edition of Upgrading Ethereum is based on the Altair version of the beacon chain specification, and corresponds to [Release v1.1.1](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.1), made on the 4th of October 2021.
+This edition of Upgrading Ethereum is based on the Bellatrix version of the beacon chain specification, and corresponds to [Release v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0), made on the 22nd of September 2022.
 
-At the time of writing, there is no single specification document for Altair. Instead, there is the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md) and an additional [Altair document](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/beacon-chain.md) describing the differences (a kind of text-based diff).
+At the time of writing, there is no single specification document for Bellatrix. Rather, we have the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md), an additional [Altair specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md), and the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md). Each builds on top of the previous version in a kind of text-based diff.
 
-For this work, I have consolidated the two specifications into one, omitting parts that were superseded by Altair. For the most part, I have tried to reflect the existing structure of the documents to make it easier to read side-by-side with the original spec. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/bls.md) and [Altair fork](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/fork.md) documents into the flow of this one.
+To make the whole thing easier to follow in this chapter, I have consolidated the three specifications, omitting any parts that were superseded by Altair and then Bellatrix. For the most part, I have tried to reflect the existing structure of the documents to make them easier to read side-by-side with the original specs. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document into the flow of this one.
 
 #### References
 
 The main references:
 
-  - [The Phase&nbsp;0](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md) beacon chain specification.
-  - [Altair updates](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/beacon-chain.md) to the beacon chain specification.
+  - [The Phase&nbsp;0](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md) beacon chain specification.
+  - [Altair updates](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md) to the beacon chain specification.
   - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
 
-Other excellent, but in places outdated references:
+Other useful, but in places outdated references:
 
   - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view)
   - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB?type=view)
@@ -4477,7 +4459,7 @@ Anyway, it's worth taking a moment in appreciation of the humble [cryptographic 
 
 #### Version
 
-Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept of a version number. It is expected that the protocol will be updated/upgraded from time to time, a process commonly known as a "hard-fork". For example, the upgrade from Phase&nbsp;0 to Altair took place on the 27th of October 2021, and was assigned [its own fork version](/part3/altair-fork#altair_fork_version).
+Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept of a version number. It is expected that the protocol will be updated/upgraded from time to time, a process commonly known as a "hard-fork". For example, the upgrade from Phase&nbsp;0 to Altair took place on the 27th of October 2021, and was assigned [its own fork version](/part3/config/configuration#altair_fork_version).
 
 `Version` is used when computing the [`ForkDigest`](#forkdigest).
 
@@ -4652,7 +4634,7 @@ These withdrawal credential prefixes are not yet significant in the core beacon 
 
 The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
 
-See the [Withdrawals](/part4/withdrawals) section for discussion on what the mechanism might look like.
+See the [Withdrawals](/part5/withdrawals) section for discussion on what the mechanism might look like.
 
 ##### `BLS_WITHDRAWAL_PREFIX`
 
@@ -4877,7 +4859,7 @@ To prevent this, we assume a maximum feasible lookahead that an attacker might a
 
 ##### `MIN_EPOCHS_TO_INACTIVITY_PENALTY`
 
-The inactivity penalty is discussed [below](#inactivity_penalty_quotient_altair). This parameter sets the length of time until it kicks in. If the last finalised epoch is longer ago than `MIN_EPOCHS_TO_INACTIVITY_PENALTY`, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
+The inactivity penalty is discussed [below](#inactivity_penalty_quotient). This parameter sets the length of time until it kicks in. If the last finalised epoch is longer ago than `MIN_EPOCHS_TO_INACTIVITY_PENALTY`, then the beacon chain starts operating in "leak" mode. In this mode, participating validators no longer get rewarded, and validators that are not participating get penalised.
 
 ##### `EPOCHS_PER_ETH1_VOTING_PERIOD`
 
@@ -4918,7 +4900,7 @@ At a time `EPOCHS_PER_SLASHINGS_VECTOR` `//` `2` after being slashed, a further 
 
 The idea of this is to disproportionately punish coordinated attacks, in which many validators break the slashing conditions around the same time, while only lightly penalising validators that get slashed by making a mistake. Early designs for Eth2 would always slash a validator's entire deposit.
 
-See also [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](#proportional_slashing_multiplier_altair).
+See also [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](#proportional_slashing_multiplier).
 
 ##### `HISTORICAL_ROOTS_LIMIT`
 
@@ -4947,12 +4929,19 @@ The maximum length of this list is `VALIDATOR_REGISTRY_LIMIT`, which is one tril
 | `INACTIVITY_PENALTY_QUOTIENT_ALTAIR` | `uint64(3 * 2**24)` (= 50,331,648) |
 | `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR` | `uint64(2**6)` (= 64) |
 | `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR` | `uint64(2)` |
+| `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` | `uint64(2**24)` (= 16,777,216) |
+| `MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX` | `uint64(2**5)` (= 32) |
+| `PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX` | `uint64(3)` |
 
-Note that there are similar constants with different values here, one version with an `_ALTAIR` suffix. This is [explained](https://github.com/ethereum/consensus-specs/tree/v1.1.1/configs#forking) in the specs repo as follows:
+Note that there are similar constants with different values here.
+
+  - The original beacon chain Phase&nbsp;0 constants have no suffix.
+  - Constants updated in the Altair upgrade have the suffix `_ALTAIR`.
+  - Constants updated in the Bellatrix upgrade have the suffix `_BELLATRIX`.
+
+This is [explained](https://github.com/ethereum/consensus-specs/tree/v1.2.0/configs#forking) in the specs repo as follows:
 
 > Variables are not replaced but extended with forks. This is to support syncing from one state to another over a fork boundary, without hot-swapping a config. Instead, for forks that introduce changes in a variable, the variable name is suffixed with the fork name.
-
-So, the unsuffixed versions are the Phase&nbsp;0 values, and the `_ALTAIR` suffixed versions are the values that apply to the current Altair fork.
 
 ##### `BASE_REWARD_FACTOR`
 
@@ -4978,13 +4967,15 @@ The whistleblower reward comes from new issuance of Ether on the beacon chain, b
 
 `PROPOSER_REWARD_QUOTIENT` was removed in the Altair upgrade in favour of [`PROPOSER_WEIGHT`](/part3/config/constants#incentivization-weights). It was used to apportion rewards between attesters and proposers when including attestations in blocks.
 
-##### `INACTIVITY_PENALTY_QUOTIENT_ALTAIR`
+<a id="inactivity_penalty_quotient"></a>
 
-This value supersedes `INACTIVITY_PENALTY_QUOTIENT`.
+##### `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`
 
-If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (` `INACTIVITY_SCORE_BIAS` ` * ` `INACTIVITY_PENALTY_QUOTIENT_ALTAIR` `)`.
+This value supersedes `INACTIVITY_PENALTY_QUOTIENT` and `INACTIVITY_PENALTY_QUOTIENT_ALTAIR`.
 
-In Altair, `inactivity_score` is a per-validator quantity, whereas previously validators were penalised by a globally calculated amount when they missed a duty during a leak. See [inactivity penalties](/part3/config/configuration#inactivity-penalties) for more on the rationale for this and how this score is calculated per validator.
+If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (` `INACTIVITY_SCORE_BIAS` ` * ` `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` `)`.
+
+Since the Altair upgrade, `inactivity_score` has become a per-validator quantity, whereas previously validators were penalised by a globally calculated amount when they missed a duty during a leak. See [inactivity penalties](/part3/config/configuration#inactivity-penalties) for more on the rationale for this and how this score is calculated per validator.
 
 During a leak, no validators receive rewards, and they continue to accrue the normal penalties when they fail to fulfil duties. In addition, for epochs in which validators do not make a correct, timely target vote, they receive a leak penalty.
 
@@ -4994,6 +4985,8 @@ The effective balance $B$ will remain constant for a while, by design, during wh
 
 In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_ALTAIR` at `3 * 2**24`, this equates to around seven thousand epochs, or 31.5 days.
 
+TODO - Bellatrix - recalculate the above.
+
 The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that, if a large fraction of the validator set were to go offline at the same time, it would not be possible to continue finalising checkpoints, since a majority vote from validators representing 2/3 of the total stake is required for finalisation.
 
 In order to recover, the inactivity leak gradually reduces the stakes of validators who are not making attestations until, eventually, the participating validators control 2/3 of the remaining stake. They can then begin to finalise checkpoints once again.
@@ -5002,29 +4995,33 @@ This inactivity penalty mechanism is designed to protect the chain long-term in 
 
 The value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from `2**24` to `2**26` for the beacon chain launch, with the intention of penalising validators less severely in case of non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the eleven months of Phase&nbsp;0 of the beacon chain.
 
-The value was decreased by one quarter in the Altair upgrade from `2**26` to `3 * 2**24` as a step towards eventually setting it to its final value. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
+The value was decreased by one quarter in the Altair upgrade from `2**26` (`INACTIVITY_PENALTY_QUOTIENT`) to `3 * 2**24` (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of `2**24` (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the Bellatrix upgrade. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
 
-##### `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`
+<a id="min_slashing_penalty_quotient"></a>
 
-When a validator is first convicted of a slashable offence, an initial penalty is applied. This is calculated as, `validator.effective_balance` ` // ` `MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`.
+##### `MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`
 
-Thus, the initial slashing penalty is between 0.25 Ether and 0.5 Ether depending on the validator's effective balance (which is between 16 and 32 Ether; note that effective balance is denominated in Gwei).
+When a validator is first convicted of a slashable offence, an initial penalty is applied. This is calculated as, `validator.effective_balance` ` // ` `MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`.
+
+Thus, the initial slashing penalty is between 0.5&nbsp;ETH and 1&nbsp;ETH depending on the validator's effective balance (which is between 16 and 32 Ether; note that effective balance is denominated in Gwei).
 
 A further slashing penalty is applied later based on the total amount of balance slashed during a period of [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector).
 
 The value of `MIN_SLASHING_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from `2**5` to `2**7` for the beacon chain launch, anticipating that unfamiliarity with the rules of Ethereum&nbsp;2.0 staking was likely to result in some unwary users getting slashed. In the event, a total of 157 validators were slashed during Phase&nbsp;0, all as a result of user error or misconfiguration as far as can be determined.
 
-The value was halved in the Altair upgrade from `2**7` to `2**6` as a step towards eventually setting it to its final value of `2**5`.
+The value of this parameter was halved in the Altair upgrade from `2**7` (`MIN_SLASHING_PENALTY_QUOTIENT`) to `2**6` (`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`), and set to its final value of `2**5` (`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`) in the Bellatrix upgrade.
 
-##### `PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`
+<a id="proportional_slashing_multiplier"></a>
+
+##### `PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`
 
 When a validator has been slashed, a further penalty is later applied to the validator based on how many other validators were slashed during a window of size [`EPOCHS_PER_SLASHINGS_VECTOR`](#epochs_per_slashings_vector) epochs centred on that slashing event (approximately 18 days before and after).
 
-The proportion of the validator's remaining effective balance that will be subtracted [is calculated](/part3/transition/epoch#slashings) as, `PROPORTIONAL_SLASHING_MULTIPLIER` multiplied by the sum of the effective balances of the slashed validators in the window, divided by the total effective balance of all validators. The idea of this mechanism is to punish accidents lightly (in which only a small number of validators were slashed) and attacks heavily (where many validators coordinated to double vote).
+The proportion of the validator's remaining effective balance that will be subtracted [is calculated](/part3/transition/epoch#slashings) as, `PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX` multiplied by the sum of the effective balances of the slashed validators in the window, divided by the total effective balance of all validators. The idea of this mechanism is to punish accidents lightly (in which only a small number of validators were slashed) and attacks heavily (where many validators coordinated to double vote).
 
 To finalise conflicting checkpoints, at least a third of the balance must have voted for both. That's why the "natural" setting of `PROPORTIONAL_SLASHING_MULTIPLIER` is three: in the event of an attack that finalises conflicting checkpoints, the attackers lose their entire stake. This provides "the maximal minimum accountable safety margin".
 
-However, for the initial stage of the beacon chain, Phase&nbsp;0, `PROPORTIONAL_SLASHING_MULTIPLIER` was set to one, and increased to two at the Altair upgrade. These lower values provide some insurance against client bugs that might cause mass slashings in the early days. It will eventually be increased to its final value of three in a later upgrade.
+However, for the initial stage of the beacon chain, Phase&nbsp;0, `PROPORTIONAL_SLASHING_MULTIPLIER` was set to one. It was increased to two at the Altair upgrade, and to its final value of three at the Bellatrix upgrade. The lower values provided some insurance against client bugs that might have caused mass slashings in the early days.
 
 #### Max operations per block
 
@@ -5078,11 +5075,24 @@ With 262,144 validators ($2^{18}$), the expected time between being selected for
 
 `EPOCHS_PER_SYNC_COMMITTEE_PERIOD` is around a day, and again is a trade-off between security (short enough that it's hard for an attacker to find and corrupt committee members) and efficiency (reducing the data load on light clients).
 
+#### Execution
+
+| Name | Value |
+| - | - |
+| `MAX_BYTES_PER_TRANSACTION` | `uint64(2**30)` (= 1,073,741,824) |
+| `MAX_TRANSACTIONS_PER_PAYLOAD` | `uint64(2**20)` (= 1,048,576) |
+| `BYTES_PER_LOGS_BLOOM` | `uint64(2**8)` (= 256) |
+| `MAX_EXTRA_DATA_BYTES` | `2**5` (= 32) |
+
+TODO - Bellatrix
+
+HERE
+
 ### Configuration <!-- /part3/config/configuration -->
 
 #### Genesis Settings
 
-With Altair, beacon chain genesis is long behind us. Nevertheless, the ability to spin-up testnets is useful in all sorts of scenarios, so the Altair spec retains genesis functionality, now called [initialisation](/part3/initialise#initialise-state).
+Beacon chain genesis is long behind us. Nevertheless, the ability to spin-up testnets is useful in all sorts of scenarios, so the spec retains genesis functionality, now called [initialisation](/part3/initialise#initialise-state).
 
 The following parameters refer to the actual mainnet beacon chain genesis and I'll explain them in that context. When starting up new testnets, these will of course be changed. For example, see the configuration file for the [Prater testnet](https://github.com/eth2-clients/eth2-networks/blob/274e71c7af8fb26f65b47016ffa6169079315e2c/shared/prater/config.yaml).
 
@@ -5113,9 +5123,21 @@ The beacon chain actually started at 12:00:23 UTC on the 1st of December 2020. T
 
 Unlike Ethereum&nbsp;1.0, the beacon chain gives in-protocol versions to its forks. See the [Version custom type](/part3/config/types#version) for more explanation.
 
-`GENESIS_FORK_VERSION` is the fork version the beacon chain starts with at its "genesis" event: the point at which the chain first starts producing blocks. In Altair, this value is used only when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages, which are valid across all forks.
+`GENESIS_FORK_VERSION` is the fork version the beacon chain starts with at its "genesis" event: the point at which the chain first starts producing blocks. In Bellatrix, this value is used only when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages, which are valid across all forks.
 
-`ALTAIR_FORK_VERSION` is defined [elsewhere](/part3/altair-fork#configuration).
+Fork versions and timings for the [Altair](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/fork.md#configuration) and [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork.md#configuration) upgrades are defined in their respective specifications as follows.
+
+<a id="altair_fork_version"></a>
+<a id="altair_fork_epoch"></a>
+<a id="bellatrix_fork_version"></a>
+<a id="bellatrix_fork_epoch"></a>
+
+| Name | Value |
+| - | - |
+| `ALTAIR_FORK_VERSION` | `Version('0x01000000')` |
+| `ALTAIR_FORK_EPOCH` | `Epoch(74240)` (Oct 27, 2021, 10:56:23am UTC) |
+| `BELLATRIX_FORK_VERSION` | `Version('0x02000000')` |
+| `BELLATRIX_FORK_EPOCH` | `Epoch(144896)` (Sept 6, 2022, 11:34:47am UTC) |
 
 ##### `GENESIS_DELAY`
 
@@ -5145,9 +5167,9 @@ Network delays are the main limiting factor in shortening the slot length. Three
 
 [TODO: find this discussion and link to it]::
 
-This slot length has to account for shard blocks as well in later phases. There was some discussion around having the beacon chain and shards on differing cadences, but the latest sharding design tightly couples the beacon chain with the shards. Shard blocks under this design will be much larger, which led to the extension of the slot to 12 seconds.
-
 There is a general intention to shorten the slot time in future, perhaps to [8 seconds](https://github.com/ethereum/consensus-specs/issues/1890#issue-638024803), if it proves possible to do this in practice. Or perhaps to lengthen it to [16 seconds](https://ethresear.ch/t/two-slot-proposer-builder-separation/10980?u=benjaminion).
+
+Post-Merge, the time taken by the execution client to validate the execution payload contents (that is, the normal Ethereum transactions) is now on the critical path for validators during step 1, the first four seconds. In order for the validator to attest correctly, the beacon block must first be broadcast, propagated and received, then validated by the consensus client, and also validated by the execution client, all within that initial four second window. In borderline cases, the extra time taken by execution validation can push the whole process beyond the four second point at which attestations must be made. This can lead to voting incorrectly for an empty slot. See Adrian Sutton's article [Understanding Attestation Misses](https://symphonious.net/2022/09/25/understanding-attestation-misses/) for further explanation.
 
 ##### `SECONDS_PER_ETH1_BLOCK`
 
@@ -5169,11 +5191,13 @@ This really anticipates the implementation of data shards. The [idea is](https:/
 
 [TODO: Update link to process deposits]::
 
-This is used to calculate the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise#initialise-state) process and the [processing of deposits](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
+This is used to calculate the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise#initialise-state) process and the [processing of deposits](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
 
 The value of `ETH1_FOLLOW_DISTANCE` is not based on the expected depth of any reorgs of the Eth1 chain, which are rarely if ever more than 2-3 blocks deep. It is about providing time to respond to an incident on the Eth1 chain such as a consensus failure between clients.
 
 This parameter [was increased](https://github.com/ethereum/consensus-specs/pull/2093/files) from 1024 to 2048 blocks for the beacon chain mainnet, to allow devs more time to respond if there were any trouble on the Eth1 chain.
+
+The whole follow distance concept has been made redundant by The Merge and may be removed in a future upgrade, so that validators can make deposits and become active more-or-less instantly.
 
 #### Validator Cycle
 
@@ -5185,7 +5209,7 @@ This parameter [was increased](https://github.com/ethereum/consensus-specs/pull/
 
 ##### `EJECTION_BALANCE`
 
-If a validator's effective balance falls to 16 Ether or below then it is exited from the system. This is most likely to happen as a result of the ["inactivity leak"](/part3/config/preset#inactivity_penalty_quotient_altair), which gradually reduces the balances of inactive validators in order to maintain the liveness of the beacon chain.
+If a validator's effective balance falls to 16 Ether or below then it is exited from the system. This is most likely to happen as a result of the ["inactivity leak"](/part3/config/preset#inactivity_penalty_quotient), which gradually reduces the balances of inactive validators in order to maintain the liveness of the beacon chain.
 
 Note that the dependence on effective balance means that the validator is queued for ejection as soon as its actual balance falls to 16.75 Ether.
 
@@ -5216,13 +5240,13 @@ This is used in conjunction with `MIN_PER_EPOCH_CHURN_LIMIT` to [calculate](/par
 
 ##### `INACTIVITY_SCORE_BIAS`
 
-If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR)`. See [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair) for discussion of the inactivity leak itself.
+If the beacon chain hasn't finalised an epoch for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs, then it enters "leak" mode. In this mode, any validator that does not vote (or votes for an incorrect target) is penalised an amount each epoch of `(effective_balance * inactivity_score) // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_BELLATRIX)`. See [`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#inactivity_penalty_quotient) for discussion of the inactivity leak itself.
 
-The per-validator `inactivity-score` is new in Altair. During Phase&nbsp;0, inactivity penalties were an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time nevertheless could be quite severely penalised due to the growth of the per-epoch inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair."
+The per-validator `inactivity-score` was introduced in the Altair upgrade. During Phase&nbsp;0, inactivity penalties were an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time nevertheless could be quite severely penalised due to the growth of the per-epoch inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair."
 
 In addition, if many validators are able to participate intermittently, it indicates that whatever event has befallen the chain is potentially recoverable (unlike a permanent network partition, or a super-majority network fork, for example). The inactivity leak is intended to bring finality to irrecoverable situations, so prolonging the time to finality if it's not irrecoverable is likely a good thing.
 
-With Altair, each validator has an individual inactivity score in the beacon state which is updated by [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates) as follows.
+Each validator has an individual inactivity score in the beacon state which is updated by [`process_inactivity_updates()`](/part3/transition/epoch#def_process_inactivity_updates) as follows.
 
   - Every epoch, irrespective of the inactivity leak,
     - decrease the score by one when the validator makes a correct timely target vote, and
@@ -5241,6 +5265,18 @@ When not in an inactivity leak, validators' inactivity scores are reduced by `IN
 The new scoring system means that some validators will continue to be penalised due to the leak, even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just 2/3 of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to 2/3 and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than 2/3, providing a margin that should help to prevent such behaviour.
 
 See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some more analysis of the inactivity score and some graphs of its effect.
+
+#### Transition settings
+
+| Name | Value |
+| - | - |
+| `TERMINAL_TOTAL_DIFFICULTY` | `58750000000000000000000` |
+| `TERMINAL_BLOCK_HASH` | `Hash32()` |
+| `TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH` | `FAR_FUTURE_EPOCH` |
+
+These values are not used in the main beacon chain specification, but are used in the Bellatrix [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) to determine the handover from proof of work to proof of stake for the execution chain.
+
+TODO - Bellatrix
 
 ## Containers <!-- /part3/containers -->
 
@@ -5404,7 +5440,7 @@ class PendingAttestation(Container):
     proposer_index: ValidatorIndex
 ```
 
-`PendingAttestation`s were removed in the Altair upgrade and now appear only in the process for [upgrading the state](/part3/altair-fork#upgrading-the-state) during the fork. The following is provided for historical reference.
+`PendingAttestation`s were removed in the Altair upgrade and now appear only in the process for [upgrading the state](/part4/history/altair) during the fork. The following is provided for historical reference.
 
 Prior to Altair, `Attestation`s received in blocks were verified then temporarily stored in beacon state in the form of `PendingAttestation`s, pending further processing at the end of the epoch.
 
@@ -5415,7 +5451,7 @@ A `PendingAttestation` is an [`Attestation`](/part3/containers/operations#attest
 
 Taken together, these rewards are designed to incentivise the whole network to collaborate to do efficient attestation aggregation (proposers want to include only well-aggregated attestations; validators want to get their attestations included, so will ensure that they get well aggregated).
 
-With Altair, this whole mechanism has been replaced by [`ParticipationFlags`](/part3/config/types#participationflags).
+This whole mechanism was replaced in the Altair upgrade by [`ParticipationFlags`](/part3/config/types#participationflags).
 
 #### `Eth1Data`
 
@@ -5629,7 +5665,11 @@ class BeaconBlockBody(Container):
     deposits: List[Deposit, MAX_DEPOSITS]
     voluntary_exits: List[SignedVoluntaryExit, MAX_VOLUNTARY_EXITS]
     sync_aggregate: SyncAggregate  # [New in Altair]
+    # Execution
+    execution_payload: ExecutionPayload  # [New in Bellatrix]
 ```
+
+TODO - Bellatrix, add execution payload.
 
 The two fundamental data structures for nodes are the `BeaconBlock` and the `BeaconState`. The `BeaconBlock` is how the leader (the chosen proposer in a slot) communicates network updates to all the other validators, and those validators update their own `BeaconState` by applying `BeaconBlock`s. The idea is that (eventually) all validators on the network come to agree on the same `BeaconState`.
 
@@ -5721,7 +5761,11 @@ class BeaconState(Container):
     # Sync
     current_sync_committee: SyncCommittee  # [New in Altair]
     next_sync_committee: SyncCommittee  # [New in Altair]
+    # Execution
+    latest_execution_payload_header: ExecutionPayloadHeader  # [New in Bellatrix]
 ```
+
+TODO - Bellatrix, add latest_execution_payload_header.
 
 All roads lead to the `BeaconState`. Maintaining this data structure is the sole purpose of all the apparatus in all of the spec documents. This state is the focus of consensus among the beacon nodes; it is what everybody, eventually, must agree on.
 
@@ -5840,6 +5884,56 @@ Sync committees were introduced in the Altair upgrade. The next sync committee i
 #### Historical Note
 
 There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of [SSZ tree hashing](/part2/building_blocks/merkleization), this was [no longer necessary](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
+
+### Execution
+
+#### `ExecutionPayload`
+
+```python
+class ExecutionPayload(Container):
+    # Execution block header fields
+    parent_hash: Hash32
+    fee_recipient: ExecutionAddress  # 'beneficiary' in the yellow paper
+    state_root: Bytes32
+    receipts_root: Bytes32
+    logs_bloom: ByteVector[BYTES_PER_LOGS_BLOOM]
+    prev_randao: Bytes32  # 'difficulty' in the yellow paper
+    block_number: uint64  # 'number' in the yellow paper
+    gas_limit: uint64
+    gas_used: uint64
+    timestamp: uint64
+    extra_data: ByteList[MAX_EXTRA_DATA_BYTES]
+    base_fee_per_gas: uint256
+    # Extra payload fields
+    block_hash: Hash32  # Hash of execution block
+    transactions: List[Transaction, MAX_TRANSACTIONS_PER_PAYLOAD]
+```
+
+TODO - Bellatrix
+
+#### `ExecutionPayloadHeader`
+
+```python
+class ExecutionPayloadHeader(Container):
+    # Execution block header fields
+    parent_hash: Hash32
+    fee_recipient: ExecutionAddress
+    state_root: Bytes32
+    receipts_root: Bytes32
+    logs_bloom: ByteVector[BYTES_PER_LOGS_BLOOM]
+    prev_randao: Bytes32
+    block_number: uint64
+    gas_limit: uint64
+    gas_used: uint64
+    timestamp: uint64
+    extra_data: ByteList[MAX_EXTRA_DATA_BYTES]
+    base_fee_per_gas: uint256
+    # Extra payload fields
+    block_hash: Hash32  # Hash of execution block
+    transactions_root: Root
+```
+
+TODO - Bellatrix
 
 ### Signed envelopes <!-- /part3/containers/envelopes -->
 
@@ -6298,6 +6392,39 @@ We use this function in [`process_deposit()`](/part3/transition/block#def_proces
 |-|-|
 | Used&nbsp;by | [`process_deposit()`](/part3/transition/block#def_process_deposit) |
 
+#### `is_merge_transition_complete`
+
+<a id="def_is_merge_transition_complete"></a>
+
+```python
+def is_merge_transition_complete(state: BeaconState) -> bool:
+    return state.latest_execution_payload_header != ExecutionPayloadHeader()
+```
+
+TODO - Bellatrix
+
+#### `is_merge_transition_block`
+
+<a id="def_is_merge_transition_block"></a>
+
+```python
+def is_merge_transition_block(state: BeaconState, body: BeaconBlockBody) -> bool:
+    return not is_merge_transition_complete(state) and body.execution_payload != ExecutionPayload()
+```
+
+TODO - Bellatrix
+
+#### `is_execution_enabled`
+
+<a id="def_is_execution_enabled"></a>
+
+```python
+def is_execution_enabled(state: BeaconState, body: BeaconBlockBody) -> bool:
+    return is_merge_transition_block(state, body) or is_merge_transition_complete(state)
+```
+
+TODO - Bellatrix
+
 ### Misc <!-- /part3/helper/misc -->
 
 #### `compute_shuffled_index`
@@ -6629,6 +6756,22 @@ This is exactly equivalent to adding the domain to an object and taking the hash
 | Uses | [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
 | See&nbsp;also | [`SigningData`](/part3/containers/dependencies#signingdata), [`Domain`](/part3/config/types#domain) |
 
+#### `compute_timestamp_at_slot`
+
+<!-- markdownlint-disable ul-style emphasis-style -->
+> *Note*: This function is unsafe with respect to overflows and underflows.
+<!-- markdownlint-enable ul-style emphasis-style -->
+
+<a id="def_compute_timestamp_at_slot"></a>
+
+```python
+def compute_timestamp_at_slot(state: BeaconState, slot: Slot) -> uint64:
+    slots_since_genesis = slot - GENESIS_SLOT
+    return uint64(state.genesis_time + slots_since_genesis * SECONDS_PER_SLOT)
+```
+
+TODO - Bellatrix
+
 ### Participation flags <!-- /part3/helper/participation -->
 
 These two simple utilities were added in the Altair upgrade.
@@ -6654,7 +6797,7 @@ This is simple and self-explanatory. The `2**flag_index` is a bit Pythonic. In a
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_attestation()`](/part3/transition/block#def_process_attestation), [`translate_participation()`](/part3/altair-fork#def_translate_participation) |
+| Used&nbsp;by | [`process_attestation()`](/part3/transition/block#def_process_attestation) |
 | See&nbsp;also | [`ParticipationFlags`](/part3/config/types#participationflags) |
 
 #### `has_flag`
@@ -7079,7 +7222,7 @@ As described under [`get_indexed_attestation()`](#def_get_indexed_attestation), 
 
 |||
 |-|-|
-| Used&nbsp;by | [`get_indexed_attestation()`](#def_get_indexed_attestation), [`process_attestation()`](/part3/transition/block#def_process_attestation), [`translate_participation()`](/part3/altair-fork#def_translate_participation) |
+| Used&nbsp;by | [`get_indexed_attestation()`](#def_get_indexed_attestation), [`process_attestation()`](/part3/transition/block#def_process_attestation) |
 | Uses | [`get_beacon_committee()`](#def_get_beacon_committee) |
 | See&nbsp;also | [`AttestationData`](/part3/containers/dependencies#attestationdata), [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) |
 
@@ -7126,7 +7269,7 @@ It's fairly clear why block proposers are selected with a probability proportion
 #### `get_next_sync_committee`
 
 <!-- markdownlint-disable emphasis-style -->
-> *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part3/altair-fork#upgrading-the-state).
+> *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part4/history/altair).
 <!-- markdownlint-enable emphasis-style -->
 
 The random seed that generates the sync committee is based on the number of the next epoch. [`get_next_sync_committee_indices()`](#def_get_next_sync_committee_indices) doesn't contain any check that the epoch corresponds to a sync-committee change boundary, which allowed the timing of the Altair upgrade to be more flexible. But a consequence is that you will get an incorrect committee if you call `get_next_sync_committee()` at the wrong time.
@@ -7150,7 +7293,7 @@ See the [`SyncCommittee`](/part3/containers/dependencies#synccommittee) type for
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_sync_committee_updates()`](/part3/transition/epoch#def_process_sync_committee_updates), [`initialize_beacon_state_from_eth1()`](/part3/initialise#def_initialize_beacon_state_from_eth1), [`upgrade_to_altair()`](/part3/altair-fork#def_upgrade_to_altair) |
+| Used&nbsp;by | [`process_sync_committee_updates()`](/part3/transition/epoch#def_process_sync_committee_updates), [`initialize_beacon_state_from_eth1()`](/part3/initialise#def_initialize_beacon_state_from_eth1) |
 | Uses | [`get_next_sync_committee_indices()`](#def_get_next_sync_committee_indices), [`eth_aggregate_pubkeys()`](/part3/helper/crypto#def_eth_aggregate_pubkeys) |
 | See&nbsp;also | [`SyncCommittee`](/part3/containers/dependencies#synccommittee) |
 
@@ -7257,7 +7400,7 @@ The timely inclusion requirements are new in Altair. In Phase&nbsp;0, all correc
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_attestation()`](/part3/transition/block#def_process_attestation), [`translate_participation()`](/part3/altair-fork#def_translate_participation) |
+| Used&nbsp;by | [`process_attestation()`](/part3/transition/block#def_process_attestation) |
 | Uses | [`get_block_root()`](#def_get_block_root), [`get_block_root_at_slot()`](#def_get_block_root_at_slot), [`integer_squareroot()`](/part3/helper/math#def_integer_squareroot) |
 | See&nbsp;also | [Participation flag indices](/part3/config/constants#participation-flag-indices), [`AttestationData`](/part3/containers/dependencies#attestationdata), [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset#min_attestation_inclusion_delay) |
 
@@ -7416,7 +7559,8 @@ def slash_validator(state: BeaconState,
     validator.slashed = True
     validator.withdrawable_epoch = max(validator.withdrawable_epoch, Epoch(epoch + EPOCHS_PER_SLASHINGS_VECTOR))
     state.slashings[epoch % EPOCHS_PER_SLASHINGS_VECTOR] += validator.effective_balance
-    decrease_balance(state, slashed_index, validator.effective_balance // MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR)
+    slashing_penalty = validator.effective_balance // MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX
+    decrease_balance(state, slashed_index, slashing_penalty)
 
     # Apply proposer and whistleblower rewards
     proposer_index = get_beacon_proposer_index(state)
@@ -7436,7 +7580,7 @@ When a validator is slashed, several things happen immediately:
   - The validator is marked as slashed. This information is used when calculating rewards and penalties: while being exited, whatever it does, a slashed validator receives penalties as if it had failed to propose or attest, including the inactivity leak if applicable.
   - Normally, as part of the exit process, the `withdrawable_epoch` for a validator (the point at which a validator's stake is in principle unlocked) is set to [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after it exits. When a validator is slashed, a much longer period of lock-up applies, namely [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector). This is to allow a further, potentially much greater, slashing penalty [to be applied later](/part3/transition/epoch#slashings) once the chain knows how many validators have been slashed together around the same time. The postponement of the withdrawable epoch is twice as long as required to apply the extra penalty, which is applied [half-way through](/part3/transition/epoch#slashings) the period. This simply means that slashed validators continue to accrue attestation penalties for some 18 days longer than necessary. Treating slashed validators fairly is not a big priority for the protocol.
   - The effective balance of the validator is added to the accumulated effective balances of validators slashed this epoch, and stored in the circular list, `state.slashings`. This will later be used by the slashing penalty calculation mentioned in the previous point.
-  - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair) is applied. With current values, this is a maximum of 0.5 Ether, increased from 0.25 Ether in Phase&nbsp;0. The plan is to increase this to 1 Ether at The Merge.
+  - An initial "slap on the wrist" slashing penalty of the validator's effective balance (in Gwei) divided by the [`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#min_slashing_penalty_quotient) is applied. For a validator with a full Effective Balance of 32 ETH, this initial penalty is 1 ETH.
   - The block proposer that included the slashing proof receives a reward.
 
 In short, a slashed validator receives an initial minor penalty, can expect to receive a further penalty later, and is marked for exit.
@@ -7447,7 +7591,7 @@ Note that the `whistleblower_index` defaults to `None` in the parameter list. Th
 |-|-|
 | Used&nbsp;by | [`process_proposer_slashing()`](/part3/transition/block#def_process_proposer_slashing), [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) |
 | Uses | [`initiate_validator_exit()`](#def_initiate_validator_exit), [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`decrease_balance()`](#def_decrease_balance), [`increase_balance()`](#def_increase_balance) |
-| See&nbsp;also | [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`MIN_SLASHING_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#min_slashing_penalty_quotient_altair), [`process_slashings()`](/part3/transition/epoch#def_process_slashings) |
+| See&nbsp;also | [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#min_slashing_penalty_quotient), [`process_slashings()`](/part3/transition/epoch#def_process_slashings) |
 
 ## Beacon Chain State Transition Function <!-- /part3/transition -->
 
@@ -7871,13 +8015,13 @@ def is_in_inactivity_leak(state: BeaconState) -> bool:
     return get_finality_delay(state) > MIN_EPOCHS_TO_INACTIVITY_PENALTY
 ```
 
-If the beacon chain has not managed to finalise a checkpoint for [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs (that is, four epochs), then the chain enters the [inactivity leak](/part3/config/preset#inactivity_penalty_quotient_altair). In this mode, penalties for non-participation are heavily increased, with the goal of reducing the proportion of stake controlled by non-participants, and eventually regaining finality.
+If the beacon chain has not managed to finalise a checkpoint for [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) epochs (that is, four epochs), then the chain enters the [inactivity leak](/part3/config/preset#inactivity_penalty_quotient). In this mode, penalties for non-participation are heavily increased, with the goal of reducing the proportion of stake controlled by non-participants, and eventually regaining finality.
 
 |||
 |-|-|
 | Used&nbsp;by | [`get_flag_index_deltas()`](/part3/helper/accessors#get_flag_index_deltas), [`process_inactivity_updates()`](#def_process_inactivity_updates) |
 | Uses | [`get_finality_delay()`](#def_get_finality_delay) |
-| See&nbsp;also | [inactivity leak](/part3/config/preset#inactivity_penalty_quotient_altair), [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) |
+| See&nbsp;also | [inactivity leak](/part3/config/preset#inactivity_penalty_quotient), [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) |
 
 <a id="def_get_eligible_validator_indices"></a>
 
@@ -7915,7 +8059,7 @@ def get_inactivity_penalty_deltas(state: BeaconState) -> Tuple[Sequence[Gwei], S
     for index in get_eligible_validator_indices(state):
         if index not in matching_target_indices:
             penalty_numerator = state.validators[index].effective_balance * state.inactivity_scores[index]
-            penalty_denominator = INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_ALTAIR
+            penalty_denominator = INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT_BELLATRIX
             penalties[index] += Gwei(penalty_numerator // penalty_denominator)
     return rewards, penalties
 ```
@@ -7924,7 +8068,7 @@ Validators receive penalties proportional to their individual inactivity scores,
 
 All unslashed validators that made a correct and timely [target vote](/part3/config/constants#participation-flag-indices) in the previous epoch are identified by [`get_unslashed_participating_indices()`](/part3/helper/accessors#get_unslashed_participating_indices), and all other active validators receive a penalty, including slashed validators.
 
-The penalty is proportional to the validator's effective balance and its inactivity score. See [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair) for more details of the calculation, and [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) for some charts of how the penalties accrue.
+The penalty is proportional to the validator's effective balance and its inactivity score. See [`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#inactivity_penalty_quotient) for more details of the calculation, and [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) for some charts of how the penalties accrue.
 
 The returned `rewards` is always an array of zeros. It's here just to make the Python syntax simpler in the calling routine.
 
@@ -7932,7 +8076,7 @@ The returned `rewards` is always an array of zeros. It's here just to make the P
 |-|-|
 | Used&nbsp;by | [`def_process_rewards_and_penalties()`](#def_process_rewards_and_penalties) |
 | Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#get_unslashed_participating_indices), [`get_eligible_validator_indices()`](/part3/transition/epoch#def_get_eligible_validator_indices) |
-| See&nbsp;also | [Inactivity Scores](#inactivity-scores), [`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`](/part3/config/preset#inactivity_penalty_quotient_altair), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) |
+| See&nbsp;also | [Inactivity Scores](#inactivity-scores), [`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#inactivity_penalty_quotient), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate) |
 
 ##### Process rewards and penalties
 
@@ -8026,7 +8170,10 @@ On first sight, you'd think that the activation epochs of the whole queue could 
 def process_slashings(state: BeaconState) -> None:
     epoch = get_current_epoch(state)
     total_balance = get_total_active_balance(state)
-    adjusted_total_slashing_balance = min(sum(state.slashings) * PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR, total_balance)
+    adjusted_total_slashing_balance = min(
+        sum(state.slashings) * PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX,
+        total_balance
+    )
     for index, validator in enumerate(state.validators):
         if validator.slashed and epoch + EPOCHS_PER_SLASHINGS_VECTOR // 2 == validator.withdrawable_epoch:
             increment = EFFECTIVE_BALANCE_INCREMENT  # Factored out from penalty numerator to avoid uint64 overflow
@@ -8042,10 +8189,10 @@ In `slash_validator()` the withdrawable epoch is set [`EPOCHS_PER_SLASHINGS_VECT
 To calculate the additional slashing penalty, we do the following:
 
  1. Find the sum of the effective balances (at the time of the slashing) of all validators that were slashed in the previous `EPOCHS_PER_SLASHINGS_VECTOR` epochs (36 days). These are stored as a vector in the state.
- 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair), but cap the result at `total_balance`, the total active balance of all validators.
+ 2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier), but cap the result at `total_balance`, the total active balance of all validators.
  3. For each slashed validator being considered, multiply its effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
 
-If only a single validator were slashed within the 36 days, then this secondary penalty is tiny (actually zero, see below). If one-third of validators were slashed (the minimum required to finalise conflicting blocks), then, with `PROPORTIONAL_SLASHING_MULTIPLIER` set to two, each slashed validator would lose two thirds of its effective balance. When `PROPORTIONAL_SLASHING_MULTIPLIER` is eventually set to its final value of three, a successful chain attack will result in the attackers losing their entire effective balances.
+If only a single validator were slashed within the 36 days, then this secondary penalty is tiny (actually zero, see below). If one-third of validators are slashed (the minimum required to finalise conflicting blocks), then, with `PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX` set to three, a successful chain attack will result in the attackers losing their entire effective balances.
 
 Interestingly, due to the way the integer arithmetic is constructed in this routine, in particular the factoring out of `increment`, the result of this calculation will be zero if `validator.effective_balance * adjusted_total_slashing_balance` is less than `total_balance`. Effectively, the penalty is rounded down to the nearest whole amount of Ether. Issues [1322](https://github.com/ethereum/consensus-specs/issues/1322) and [2161](https://github.com/ethereum/consensus-specs/issues/2161) discuss this. In the end, the consequence is that when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
 
@@ -8053,7 +8200,7 @@ Interestingly, due to the way the integer arithmetic is constructed in this rout
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
 | Uses | [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) |
-| See&nbsp;also | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`](/part3/config/preset#proportional_slashing_multiplier_altair) |
+| See&nbsp;also | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier) |
 
 #### Eth1 data votes updates
 
@@ -8704,7 +8851,7 @@ $$
 
 ### Introduction
 
-TODO: rework and synthesis - this text is from the original Genesis
+TODO: rework and synthesis - this text is from the original Genesis.
 
 Before the Ethereum beacon chain genesis has been triggered, and for every Ethereum proof-of-work block, let `candidate_state = initialize_beacon_state_from_eth1(eth1_block_hash, eth1_timestamp, deposits)` where:
 
@@ -8790,230 +8937,164 @@ Let `genesis_block = BeaconBlock(state_root=hash_tree_root(genesis_state))`.
 
 TODO
 
-## Altair Fork Logic <!-- /part3/altair-fork -->
+# Part 4: Upgrades <!-- /part4 -->
+
+## Hard forks <!-- /part4/forks* -->
+
+TODO
+
+### Fork Digest <!-- /part4/forks/digest* -->
+
+TODO
+
+## History <!-- /part4/history -->
+
+TODO
+
+### Altair <!-- /part4/history/altair* -->
+
+TODO
+
+### Bellatrix <!-- /part4/history/bellatrix* -->
+
+TODO
+
+### Capella <!-- /part4/history/capella -->
+
+Capella is the next anticipated upgrade to the beacon chain after Bellatrix. A working draft of its specification is available in the [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/specs/capella).
+
+At the time of writing, the only feature to be included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
+
+Two withdrawal mechanisms are [planned](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md).
+
+  1. Exited and withdrawable validators will have their full balances automatically transferred to their withdrawal addresses.
+  2. Excess balances from active validators will be regularly swept into their withdrawal addresses.
+
+The above operations are possible only for validators that have `0x01` type [credentials](/part3/config/constants#withdrawal-prefixes). A mechanism for [updating validators](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-process_bls_to_execution_change) from `0x00` to `0x01` credentials will also be provided.
+
+The Engine API will be [modified](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/validator.md) to allow withdrawal data to be passed from the consensus client to the execution client. The execution client will credit users' accounts accordingly.
+
+## The Merge <!-- /part4/merge* -->
+
+TODO
+
+### History <!-- /part4/merge/history* -->
+
+TODO
+
+#### Testing the Merge
+
+TODO
+
+### Architecture <!-- /part4/merge/architecture* -->
+
+TODO
+
+### Transition <!-- /part4/merge/transition* -->
+
+TODO
+
+### Engine API <!-- /part4/merge/api* -->
+
+TODO
+
+### Optimistic sync <!-- /part4/merge/optimistic-sync* -->
+
+TODO
+
+# Part 5: Future <!-- /part5 -->
+
+## Introduction <!-- /part5/introduction* -->
+
+TODO
+
+## Withdrawals <!-- /part5/withdrawals* -->
+
+TODO
+
+## Data Availability Sampling <!-- /part5/das* -->
+
+TODO
+
+### Proto-Danksharding <!-- /part5/das/proto* -->
+
+TODO
+
+### Full Danksharding <!-- /part5/das/danksharding* -->
+
+TODO
+
+## Distributed Validator Technology <!-- /part5/dvt* -->
 
 ### Introduction
 
 TODO
 
-From [fork.md](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/fork.md)
-
-### Configuration
+### Multi-party Compute <!-- /part5/dvt/mpc* -->
 
 TODO
 
-<a id="altair_fork_version"></a>
-<a id="altair_fork_epoch"></a>
-
-| Name | Value |
-| - | - |
-| `ALTAIR_FORK_VERSION` | `Version('0x01000000')` |
-| `ALTAIR_FORK_EPOCH` | `Epoch(74240)` (Oct 27, 2021, 10:56:23am UTC) |
-
-### Fork to Altair
-
-#### Fork trigger
-
-The fork is triggered at epoch `ALTAIR_FORK_EPOCH`.
-
-Note that for the pure Altair networks, we don't apply `upgrade_to_altair` since it starts with Altair version logic.
-
-#### Upgrading the state
-
-If `state.slot` ` % ` `SLOTS_PER_EPOCH` ` == ` `0` and `compute_epoch_at_slot(state.slot)` ` == ` `ALTAIR_FORK_EPOCH`, an irregular state change is made to upgrade to Altair.
-
-The upgrade occurs after the completion of the inner loop of `process_slots` that sets `state.slot` equal to `ALTAIR_FORK_EPOCH` ` * ` `SLOTS_PER_EPOCH`.
-Care must be taken when transitioning through the fork boundary as implementations will need a modified [state transition function](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#beacon-chain-state-transition-function) that deviates from the Phase 0 document.
-In particular, the outer `state_transition` function defined in the Phase 0 document will not expose the precise fork slot to execute the upgrade in the presence of skipped slots at the fork boundary. Instead the logic must be within `process_slots`.
-
-<a id="def_translate_participation"></a>
-
-```python
-def translate_participation(state: BeaconState, pending_attestations: Sequence[phase0.PendingAttestation]) -> None:
-    for attestation in pending_attestations:
-        data = attestation.data
-        inclusion_delay = attestation.inclusion_delay
-        # Translate attestation inclusion info to flag indices
-        participation_flag_indices = get_attestation_participation_flag_indices(state, data, inclusion_delay)
-
-        # Apply flags to all attesting validators
-        epoch_participation = state.previous_epoch_participation
-        for index in get_attesting_indices(state, data, attestation.aggregation_bits):
-            for flag_index in participation_flag_indices:
-                epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
-```
+### Consensus <!-- /part5/dvt/consensus* -->
 
 TODO
 
-<a id="def_upgrade_to_altair"></a>
-
-```python
-def upgrade_to_altair(pre: phase0.BeaconState) -> BeaconState:
-    epoch = phase0.get_current_epoch(pre)
-    post = BeaconState(
-        # Versioning
-        genesis_time=pre.genesis_time,
-        genesis_validators_root=pre.genesis_validators_root,
-        slot=pre.slot,
-        fork=Fork(
-            previous_version=pre.fork.current_version,
-            current_version=ALTAIR_FORK_VERSION,
-            epoch=epoch,
-        ),
-        # History
-        latest_block_header=pre.latest_block_header,
-        block_roots=pre.block_roots,
-        state_roots=pre.state_roots,
-        historical_roots=pre.historical_roots,
-        # Eth1
-        eth1_data=pre.eth1_data,
-        eth1_data_votes=pre.eth1_data_votes,
-        eth1_deposit_index=pre.eth1_deposit_index,
-        # Registry
-        validators=pre.validators,
-        balances=pre.balances,
-        # Randomness
-        randao_mixes=pre.randao_mixes,
-        # Slashings
-        slashings=pre.slashings,
-        # Participation
-        previous_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
-        current_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
-        # Finality
-        justification_bits=pre.justification_bits,
-        previous_justified_checkpoint=pre.previous_justified_checkpoint,
-        current_justified_checkpoint=pre.current_justified_checkpoint,
-        finalized_checkpoint=pre.finalized_checkpoint,
-        # Inactivity
-        inactivity_scores=[uint64(0) for _ in range(len(pre.validators))],
-    )
-    # Fill in previous epoch participation from the pre state's pending attestations
-    translate_participation(post, pre.previous_epoch_attestations)
-
-    # Fill in sync committees
-    # Note: A duplicate committee is assigned for the current and next committee at the fork boundary
-    post.current_sync_committee = get_next_sync_committee(post)
-    post.next_sync_committee = get_next_sync_committee(post)
-    return post
-```
-
-TODO
-
-# Part 4: Future <!-- /part4 -->
-
-## Introduction <!-- /part4/introduction* -->
-
-TODO
-
-## The Merge <!-- /part4/the_merge* -->
+## Light Clients <!-- /part5/light_clients* -->
 
 ### Introduction
 
 TODO
 
-### Architecture <!-- /part4/the_merge/architecture* -->
+### Syncing <!-- /part5/light_clients/syncing* -->
 
 TODO
 
-### Engine API <!-- /part4/the_merge/api* -->
+### Protocol <!-- /part5/light_clients/protocol* -->
 
 TODO
 
-### Optimistic Sync <!-- /part4/the_merge/sync* -->
-
-TODO
-
-### The Transition <!-- /part4/the_merge/transition* -->
-
-TODO
-
-## Withdrawals <!-- /part4/withdrawals* -->
-
-TODO
-
-## Data Availability Sampling <!-- /part4/das* -->
-
-TODO
-
-### Proto-Danksharding <!-- /part4/das/proto* -->
-
-TODO
-
-### Full Danksharding <!-- /part4/das/danksharding* -->
-
-TODO
-
-## Distributed Validator Technology <!-- /part4/dvt* -->
+## Active Research Topics <!-- /part5/research* -->
 
 ### Introduction
 
 TODO
 
-### Multi-party Compute <!-- /part4/dvt/mpc* -->
+### Proofs of Custody <!-- /part5/research/custody* -->
 
 TODO
 
-### Consensus <!-- /part4/dvt/consensus* -->
+### Builder / proposer split <!-- /part5/research/builders_proposers* -->
 
 TODO
 
-## Light Clients <!-- /part4/light_clients* -->
-
-### Introduction
+### Consensus changes <!-- /part5/research/consensus* -->
 
 TODO
 
-### Syncing <!-- /part4/light_clients/syncing* -->
+### Single slot finality <!-- /part5/research/single_slot_finality* -->
 
 TODO
 
-### Protocol <!-- /part4/light_clients/protocol* -->
+### Verkle trees <!-- /part5/research/verkle_trees* -->
 
 TODO
 
-## Active Research Topics <!-- /part4/research* -->
-
-### Introduction
+### Statelessness <!-- /part5/research/statelessness* -->
 
 TODO
 
-### Proofs of Custody <!-- /part4/research/custody* -->
+### Single Secret Leader Election <!-- /part5/research/ssle* -->
 
 TODO
 
-### Builder / proposer split <!-- /part4/research/builders_proposers* -->
+### Verifiable Delay Function <!-- /part5/research/vdf* -->
 
 TODO
 
-### Consensus changes <!-- /part4/research/consensus* -->
+### Post-quantum crypto <!-- /part5/research/post-quantum* -->
 
 TODO
 
-### Single slot finality <!-- /part4/research/single_slot_finality* -->
-
-TODO
-
-### Verkle trees <!-- /part4/research/verkle_trees* -->
-
-TODO
-
-### Statelessness <!-- /part4/research/statelessness* -->
-
-TODO
-
-### Single Secret Leader Election <!-- /part4/research/ssle* -->
-
-TODO
-
-### Verifiable Delay Function <!-- /part4/research/vdf* -->
-
-TODO
-
-### Post-quantum crypto <!-- /part4/research/post-quantum* -->
-
-TODO
-
-### S[NT]ARK-friendly state transitions <!-- /part4/research/snark* -->
+### S[NT]ARK-friendly state transitions <!-- /part5/research/snark* -->
 
 TODO
 

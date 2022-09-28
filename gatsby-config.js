@@ -1,6 +1,7 @@
 const execSync = require('child_process').execSync;
 
-var date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
+const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
+const version = 'bellatrix';
 
 function getGitHash() {
   try {
@@ -21,7 +22,7 @@ module.exports = {
     licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
     licence: 'CC BY-SA 4.0',
   },
-  pathPrefix: '/altair',
+  pathPrefix: '/' + version,
   plugins: [
     {
       resolve: 'gatsby-source-filesystem',
@@ -72,7 +73,7 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-htaccess',
       options: {
-        ErrorDocument: 'ErrorDocument 404 /altair/404.html',
+        ErrorDocument: 'ErrorDocument 404 /' + version + '/404.html',
       },
     },
     {
@@ -80,7 +81,7 @@ module.exports = {
       options: {
         siteId: '1',
         matomoUrl: 'https://eth2book.info/matomo',
-        siteUrl: 'https://eth2book.info/altair',
+        siteUrl: 'https://eth2book.info/' + version,
         matomoPhpScript: 'matomo.php',
         matomoJsScript: 'matomo.js',
         disableCookies: true,

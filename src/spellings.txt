@@ -2,6 +2,7 @@ ABI
 ADSL
 ASICs
 Accessors
+Ailuropoda
 Alexandros
 Algorand
 Alin
@@ -267,12 +268,14 @@ lookaheads
 mainnet
 masse
 md
+melanoleuca
 memoised
 middleware
 misbehaviours
 misconfiguration
 modularity
 monocultures
+nd
 parallelise
 parallelising
 parameterises
