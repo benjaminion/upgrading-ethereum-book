@@ -667,7 +667,7 @@ This turns out to be easy to quantify. To quote Vitalik's [Parametrizing Casper]
 
 Ethereum's proof of stake protocol has this property. In order to finalise a checkpoint ($H_1$), two-thirds of the validators must have attested to it. To finalise a conflicting checkpoint ($H_2$) requires two-thirds of validators to attest to that as well. Thus, at least one-third of validators must have attested to both checkpoints. Since individual validators sign their attestations, this is both detectable and attributable: it's easy to submit the evidence on-chain that those validators contradicted themselves, and they can be punished by the protocol.
 
-In the Altair implementation, if one-third of validators were to be slashed simultaneously, they would have around two-thirds of their stake burned (20 ETH each). The plan is to increase this later to their full stake (32 ETH each). At that point with, say, nine million Ether staked, the cost of reverting a finalised block would be three million of the attackers' Ether being permanently burned and the attackers being expelled from the network.
+If one-third of validators were to be slashed simultaneously, they would have their entire effective balances burned (up to 32 ETH each). At that point with, say, fifteen million Ether staked in total, the cost of reverting a finalised block would be five million of the attackers' Ether being permanently burned and the attackers being expelled from the network.
 
 It is obligatory at this point to quote (or paraphrase) Vlad Zamfir: comparing proof of stake to proof of work, "it's as though your ASIC farm burned down if you participated in a 51% attack".
 
@@ -845,9 +845,9 @@ The [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) is the big k
 
 Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, burned transaction fees and so forth is sometimes referred to as inflation, or supply growth.
 
-The Eth1 chain issues new Ether in the form of block and uncle rewards. Since the London upgrade this issuance has been offset in part, or even at times exceeded by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
+Pre-Merge, the Eth1 chain issued new Ether in the form of block and uncle rewards. Since the London upgrade this issuance was been offset in part, or even at times exceeded by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
 
-During the current Altair period, issuance on the beacon chain is additional to that on the Eth1 chain, but is much smaller (around 10% as much). After The Merge, there will no longer be any block or uncle rewards on the Eth1 chain. But the base fee burn will remain, and it is very likely that the net issuance will become negative &ndash; more Ether will be destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that there will be [a circulating supply equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) arising from Ether issuance by proof of stake and Ether destruction due to EIP-1559.
+Post-Merge, there are no longer any block or uncle rewards issued on the Eth1 chain. But the base fee burn remains. It is possible for the net issuance to become negative &ndash; such that more Ether is destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that there will be [a circulating supply equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) arising from Ether issuance by proof of stake and Ether destruction due to EIP-1559.
 
 [^fn-ultrasound-money]: You can see Ethereum's current issuance and play with various scenarios at [ultrasound.money](https://ultrasound.money/).
 
@@ -1389,7 +1389,7 @@ In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the squa
 
 For Phase&nbsp;0 of the beacon chain, the value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from $2^{24}$ to $2^{26}$, so that validators would be penalised less severely if there were non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the whole eleven months of Phase&nbsp;0 of the beacon chain.
 
-The value was decreased by one quarter in the Altair upgrade from $2^{26}$ to $3 \times 2^{24}$ as a step towards eventually setting it to its final value. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
+The value was decreased by one quarter in the Altair upgrade from `2**26` (`INACTIVITY_PENALTY_QUOTIENT`) to `3 * 2**24` (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of `2**24` (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the Bellatrix upgrade. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
 
 #### Inactivity scores
 
@@ -1539,15 +1539,17 @@ The correlated penalty is calculated as follows.
  2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier), but cap the result at `total_balance`, the total active balance of all validators.
  3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
 
-The slashing multiplier in Altair is set to 2. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
+TODO - Bellatrix - update the following
+
+The slashing multiplier in Bellatrix is set to 3. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
 
 $$
-\text{Correlation penalty} = \min(B, \frac{2SB}{T})
+\text{Correlation penalty} = \min(B, \frac{3SB}{T})
 $$
 
-Interestingly, [due to](https://github.com/ethereum/consensus-specs/issues/1322) the way the integer arithmetic is constructed in [the implementation](/part3/transition/epoch#def_process_slashings) the result of this calculation will be zero if $2SB < T$. Effectively, the penalty is rounded down to the nearest whole amount of Ether. As a consequence, when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
+Interestingly, [due to](https://github.com/ethereum/consensus-specs/issues/1322) the way the integer arithmetic is constructed in [the implementation](/part3/transition/epoch#def_process_slashings) the result of this calculation will be zero if $3SB < T$. Effectively, the penalty is rounded down to the nearest whole amount of Ether. As a consequence, when there are few slashings there is no extra correlated slashing penalty at all, which is probably a good thing.
 
-The intention is to raise the proportional slashing multiplier from 2 to 3 around The Merge, three being its "correct" cryptoeconomic value. To successfully finalise conflicting blocks at least one third of validators need to break attestation slashing rules. With the multiplier set to 3, that third would lose their entire stakes through this mechanism, which is optimal for security.
+The proportional slashing multiplier was increased gradually through the early deployment of the beacon chain. At Genesis it was set to one (`PROPORTIONAL_SLASHING_MULTIPLIER`), at Altair it was increased to two (`PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR`), and at Bellatrix set to its final value of three (`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`). This was intended to punish slashed validators less harshly while we were becoming accustomed to running the beacon chain. As it happened, no correlated slashings occurred that incurred a penalty greater than zero under this mechanism.
 
 ##### Other penalties
 
@@ -2893,7 +2895,7 @@ A goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic fin
 
 If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes too much for modest hardware. This is where committees help. The work of attesting is divided among subsets of the validator set (committees) and spread across an epoch (6.4 minutes). Each validator participates in only one of the committees.
 
-The Altair spec has two types of committees, beacon committees and sync committees, each having quite a different function. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
+The Altair spec introduced two types of committees, beacon committees and sync committees, each having quite a different function. We will focus on beacon committees in this section, and deal with sync committees in a [later section](/part2/building_blocks/sync_committees).
 
 The current beacon committee structure was strongly influenced by a previous roadmap that included in-protocol data sharding. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally intended to map directly to 64 shards as "crosslink committees" but no longer have that function. Nonetheless, beacon committees still serve a useful purpose in parallelising the aggregation of attestations. Whether 64 remains the right number of committees per slot has not been analysed to my knowledge. The trade-off is that fewer beacon committees would reduce the amount of block space needed for aggregate attestations, but would increase the time needed for [aggregators](/part2/building_blocks/aggregator) to do their work.
 
