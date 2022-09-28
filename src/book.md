@@ -162,7 +162,7 @@ Our aim is to understand that sentence in all its parts. There's a lot to unpack
 <div class="summary">
 
   - Consensus is a way to build reliable distributed systems with unreliable components.
-  - Blockchain-based distributed systems aim to agree on an single history of transactions.
+  - Blockchain-based distributed systems aim to agree on a single history of transactions.
   - Proof of work and proof of stake are not consensus protocols, but enable consensus protocols.
   - Many blockchain consensus protocols are "forkful".
   - Forkful chains use a fork choice rule, and sometimes undergo reorganisations.
