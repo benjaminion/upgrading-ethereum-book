@@ -461,7 +461,7 @@
     }
 
     const balanceUpdate = (balance, score) => {
-      const inactivity_penalty_quotient = 50331648; // 3 * 2**24 (Altair)
+      const inactivity_penalty_quotient = 16777216; // 2**24 (Bellatrix)
       const inactivity_score_bias = 4;
       // Assume effective balance does not fall below 32 (i.e. balance remains above 31.75)
       return balance - 32 * score / (inactivity_score_bias * inactivity_penalty_quotient);
