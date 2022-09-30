@@ -8,15 +8,6 @@ The first pretty much complete part is [Part 3: The Annotated Spec](/part3). The
 
 I'm now working on [Part 2: Technical Overview](/part2) which wraps a first, hopefully more accessible, layer around the Annotated Spec. Again, I'm writing this backwards, starting with the protocol's [Building Blocks](/part2/building_blocks) and its [Incentive Mechanisms](/part2/incentives) and working forwards towards a higher level narrative of how it all fits together.
 
-In an ideal world, my plan is as follows:
-
-  - Deliver _Edition 1.0: Altair_ at some point before The Merge (the point at which Ethereum moves to proof of stake). By then, I hope to have done the following:
-    - Completed [Part 2: Technical Overview](/part2)
-    - Completed [Part 1: Building](/part1) (probably too ambitious)
-    - Made a start on [Part 4: Future](/part5) (unlikely before The Merge)
-  - Some while after The Merge, I'll publish a fully revised _Edition 2.0: The Merge_.
-  - Editions _2.5_ (with post-Merge clean-ups) and _3.0_ (a full revision for sharding) are also in view. This thing's going to keep me busy for a while.
-
 Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, PDF versions, maybe NFTs... who knows?
 
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
@@ -1985,7 +1976,7 @@ Two useful examples of how aggregate signatures are used in practice are in aggr
 
 Aggregate attestations are a very compact way store and prove which validators made a particular attestation.
 
-Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attesting).
+Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attesting).
 
 An [`Attestation`](/part3/containers/operations#attestation) object looks like this:
 
@@ -1998,9 +1989,9 @@ class Attestation(Container):
 
 When making its attestation, the validator sets a single bit in the `aggregation_bits` field to indicate which member of the committee it is. That is sufficient, in conjunction with the slot number and the committee index, to uniquely identify the attesting validator in the global validator set.
 
-The `signature` field is the validator's [signature](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregate-signature) over the `AttestationData` in the `data` field.
+The `signature` field is the validator's [signature](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregate-signature) over the `AttestationData` in the `data` field.
 
-This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
+This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
 
 This aggregate attestation will be gossiped around the network and eventually included in a block. At each step the aggregate signature will be verified.
 
@@ -2036,7 +2027,7 @@ class SyncCommittee(Container):
     aggregate_pubkey: BLSPubkey
 ```
 
-Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
+Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
 
 The main points of interest are that the `SyncCommittee` object contains the actual public keys of all the members (possibly with duplicates), rather than validator indices. It also contains a pre-computed `aggregate_pubkey` field that is the aggregate of all the public keys in the committee.
 
@@ -2118,7 +2109,7 @@ In case someone overnight unveils a sufficiently capable quantum computer, [EIP-
 
 #### BLS library functions
 
-As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
 
   - `def` [`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
     - Sign a message with the validator's secret (private) key.
@@ -2129,7 +2120,7 @@ As a reference, the following are the BLS library functions used in the Ethereum
   - `def` [`FastAggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4)`(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) - bool`
     - Verify an aggregate signature given the message and the list of public keys corresponding to the validators that contributed to the aggregate signature.
   - `def` [`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
-    - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
+    - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
   - `def` [`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
     - Checks that a public key is valid. That is, it lies on the elliptic curve, it is not the group's identity point (corresponding to the zero secret key), and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
 
@@ -2262,7 +2253,7 @@ Some other sources of entropy for the RANDAO are noted in [EIP-4399](https://eip
 
 When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using it's normal signing secret key.
 
-The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
+The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
 
 ```python
 def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) -> BLSSignature:
@@ -2696,7 +2687,7 @@ For example, formally committees are assigned by shuffling the full validator li
 
 #### Swap-or-not Specification
 
-The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
+The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
 
 ```python
 def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) -> uint64:
@@ -3106,10 +3097,10 @@ In the current beacon chain design, voting is done in committees with the goal o
 
 The process of aggregation is as follows:
 
-1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s or [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that the whole committee is subscribed to.
+1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s or [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that the whole committee is subscribed to.
 2. A subset of the committee is selected to be aggregators for that committee.
-3. The aggregators listen on the subnet for votes, then aggregate all the votes they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#synccommitteecontribution)).
-4. Each aggregator wraps its aggregate vote with a proof that it was indeed an aggregator for that committee, and it signs the resulting data ([`SignedAggregateAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#signedaggregateandproof) or [`SignedContributionAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#signedcontributionandproof))
+3. The aggregators listen on the subnet for votes, then aggregate all the votes they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#synccommitteecontribution)).
+4. Each aggregator wraps its aggregate vote with a proof that it was indeed an aggregator for that committee, and it signs the resulting data ([`SignedAggregateAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#signedaggregateandproof) or [`SignedContributionAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#signedcontributionandproof))
 5. Finally the aggregator broadcasts its aggregated vote and proof to a global channel to be received by the next block proposer.
 
 This section is concerned with steps 2 and 4: how the aggregators are selected for duty, and how they prove that they were indeed selected.
@@ -3130,15 +3121,15 @@ First, the size of the resulting aggregator set. With very high probability we w
 
 Second, secrecy. We'd prefer that nobody be able to calculate who the aggregators are until after they have broadcast their aggregations. This helps to avoid denial of service (DoS) attacks. Disrupting consensus would be much simpler via a network DoS attack against a small number of aggregators than against a whole committee. The secrecy property prevents this.
 
-Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make and broadcast aggregate attestations to ensure that at least one aggregate includes their own attestation. This would destroy the benefits of the whole aggregator scheme.
+Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make and broadcast aggregate attestations to ensure that at least one aggregate includes their own attestation. This would destroy the benefits of the whole aggregator scheme.
 
 #### Aggregator selection details
 
-The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#aggregation-selection).
+The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection).
 
 It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures). Each validator in the committee generates a signature over the current slot number using its secret signing key. If that signature modulo a given number is zero then it is an aggregator, otherwise it is not an aggregator.
 
-The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
+The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
 
 <a id="def_get_slot_signature"></a>
 
@@ -3262,7 +3253,7 @@ On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://gi
 
 On the second, when we receive an object over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a deserialise/reserialise round trip.
 
-SSZ does not make any effort to compact or compress the serialised data, and there were concerns that this might make it inefficient for the wire transfer protocol. These concerns were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#encoding-strategies) on the wire, as is already done in Ethereum&nbsp;1.
+SSZ does not make any effort to compact or compress the serialised data, and there were concerns that this might make it inefficient for the wire transfer protocol. These concerns were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#encoding-strategies) on the wire, as is already done in Ethereum&nbsp;1.
 
 ##### SSZ development
 
@@ -3280,7 +3271,7 @@ There was one final substantial re-work of the SSZ spec in [June 2019](https://g
 
 #### Overview
 
-The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is maintained in the main consensus specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
+The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is maintained in the main consensus specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
 
 The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
@@ -3299,7 +3290,7 @@ Unlike RLP, SSZ is not self-describing. You can decode RLP data into a structure
 
 #### Specification
 
-I don't plan to go into every last detail of SSZ &ndash; that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is for &ndash; rather, we'll take a general overview and then dive into a [worked example](#worked-example).
+I don't plan to go into every last detail of SSZ &ndash; that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is for &ndash; rather, we'll take a general overview and then dive into a [worked example](#worked-example).
 
 The building blocks of SSZ are its basic types and its composite types.
 
@@ -3355,7 +3346,7 @@ A list is an ordered variable-length homogeneous collection with a maximum of `N
 
 In the SSZ spec a list is denoted by `List[type, N]`. For example, `List[uint64, 100]` is a list containing anywhere between zero and one hundred `uint64` types.
 
-The maximum length parameter, `N`, on lists is [not used](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216) in serialisation or deserialisation. It is used, however, in Merkleization, and in particular enables [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/merkle-proofs.md#generalized-merkle-tree-index) in Merkle proof generation.
+The maximum length parameter, `N`, on lists is [not used](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216) in serialisation or deserialisation. It is used, however, in Merkleization, and in particular enables [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/merkle-proofs.md#generalized-merkle-tree-index) in Merkle proof generation.
 
 [TODO: link to Merkleization and generalised indices]::
 
@@ -3527,22 +3518,20 @@ It's not only containers that use this format, it applies to any type that conta
 
 ##### Aliases
 
-Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#aliases) here for completeness:
+Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#aliases) here for completeness:
 
-<!-- markdownlint-disable ul-style emphasis-style -->
 > For convenience we alias:
 >
->   * `bit` to `boolean`
->   * `byte` to `uint8` (this is a basic type)
->   * `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is *not* a basic type)
->   * `ByteList[N]` to `List[byte, N]`
-<!-- markdownlint-enable ul-style emphasis-style -->
+>   - `bit` to `boolean`
+>   - `byte` to `uint8` (this is a basic type)
+>   - `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is _not_ a basic type)
+>   - `ByteList[N]` to `List[byte, N]`
 
 In the main beacon chain spec, a bunch of [custom types](/part3/config/types#table_custom_types) are also defined in terms of the standard SSZ types and aliases. For example, `Slot` is an SSZ `uint64` type, `BLSPubkey` is an SSZ `Bytes48` type, and so on.
 
 ##### Default values
 
-Finally, each type has a default value. Once again directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#default-values):
+Finally, each type has a default value. Once again directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#default-values):
 
 | Type | Default Value |
 | ---- | ------------- |
@@ -3594,8 +3583,8 @@ Now we have enough information to build the `IndexedAttestation` object and calc
 
 ```python
 from eth2spec.utils.ssz.ssz_typing import *
-from eth2spec.altair import mainnet
-from eth2spec.altair.mainnet import *
+from eth2spec.bellatrix import mainnet
+from eth2spec.bellatrix.mainnet import *
 
 attestation = IndexedAttestation(
     attesting_indices = [33652, 59750, 92360],
@@ -3733,7 +3722,7 @@ Serialisation of the `AttesterSlashing` container.
 
 #### See also
 
-The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source. There is also a curated list of [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138).
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is the authoritative source. There is also a curated list of [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138).
 
 The historical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not are a goldmine of insight and wisdom.
 
@@ -3747,7 +3736,7 @@ Other SSZ resources:
   - [SSZ encoding diagrams](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
   - Formal verification of the SSZ specification: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
   - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
-  - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
+  - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0, Altair and Bellatrix available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
 ### Hash Tree Roots and Merkleization <!-- /part2/building_blocks/merkleization -->
 
@@ -3788,7 +3777,7 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 <!-- markdownlint-disable code-block-style -->
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
-    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
 <!-- markdownlint-enable code-block-style -->
 
 Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
@@ -3862,7 +3851,7 @@ The difference with Merkleization is that the Merkle tree is computed on-the-fly
 'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
 ```
 
-The Merkleization function (called `merkleize()` in the SSZ spec, and [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) in the executable spec) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
+The Merkleization function (called `merkleize()` in the SSZ spec, and [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) in the executable spec) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
 
 The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks so that the total number of chunks is rounded up to the next whole power of two, such that we conceptually have a full binary tree. Thus a list of three chunks gets implicitly padded with an extra zero chunk:
 
@@ -3895,12 +3884,12 @@ The hash tree root is a generalisation of Merkleization that we can apply to the
 
 Calculating the hash tree root of an SSZ object is recursive. Given a composite SSZ object, we iteratively move through the layers of its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we move back through the structure using the calculated hash tree roots as chunks themselves.
 
-The process of calculating a hash tree root is defined in the [Simple Serialize specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization), and that's the place to go for the full details. However, in simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when finding an object's hash tree root.
+The process of calculating a hash tree root is defined in the [Simple Serialize specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization), and that's the place to go for the full details. However, in simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when finding an object's hash tree root.
 
   - For basic types or collections of basic types (lists and vectors), we just pack and Merkleize directly.
   - For containers and collections of composite types, we recursively find the hash tree roots of the contents.
 
-The following two rules are a simplified summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization).
+The following two rules are a simplified summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization).
 
  1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bitvector, then `hash_tree_root(X) = merkleize_chunks(pack(X))`. The `pack()` function returns a list of chunks that can be Merkleized directly.
  2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize_chunks([hash_tree_root(x) for x in X])`. The list comprehension is a list of hash tree roots, which is equivalent to a list of chunks.
@@ -3911,7 +3900,7 @@ We'll see plenty of concrete applications of these two rules in the [worked exam
 
 Merkleization operates on lists of "chunks" which are 32-byte blobs of data. Lists generated by means of step 2 above are already in this form. However, step 1 involves basic objects that require a "packing and chunking" operation prior to Merkleization.
 
-The [spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization) gives the precise rules, but it basically looks like this:
+The [spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization) gives the precise rules, but it basically looks like this:
 
   - The object (a basic type, a list/vector of basic types, or a bitlist/bitvector) is serialised via SSZ. The sentinel bit is omitted from the serialisation of bitlist types.
   - The serialisation is right-padded with zero bytes up to the next full chunk (32 byte boundary).
@@ -3953,7 +3942,7 @@ Bitlists require a similar treatment since we remove the sentinel bit before Mer
 
 #### Summaries and Expansions
 
-The SSZ spec describes features of Merkleization called [summaries and expansions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#summaries-and-expansions). These are not explicit functions of Merkleization, but implicitly arise as consequences of the design.
+The SSZ spec describes features of Merkleization called [summaries and expansions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#summaries-and-expansions). These are not explicit functions of Merkleization, but implicitly arise as consequences of the design.
 
 Simply put, anywhere in the process, an entire SSZ object can be replaced with its hash tree root without affecting the final result.
 
@@ -4017,7 +4006,7 @@ assert(a.hash_tree_root() == merkleize_chunks(
     ]))
 ```
 
-The [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) function is provided by the `merkle_minimal.py` library. We can apply this function directly as the hash tree roots in the list already constitute chunks. (We could also use the [`get_merkle_root()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L30) function, but then we'd have to specify a `pad_to` value of 4 to get a tree of the correct depth.)
+The [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) function is provided by the `merkle_minimal.py` library. We can apply this function directly as the hash tree roots in the list already constitute chunks. (We could also use the [`get_merkle_root()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L30) function, but then we'd have to specify a `pad_to` value of 4 to get a tree of the correct depth.)
 
 ##### The `attesting_indices` root
 
@@ -4161,8 +4150,8 @@ Illustrating the steps required to calculate the hash tree root of an `IndexedAt
 The following code illustrates all the points from the worked example. You can run it by setting up the executable spec as described in [the Appendix](/appendices/running). If everything goes well the only thing it should print is `Success!`.
 
 ```python
-from eth2spec.altair import mainnet
-from eth2spec.altair.mainnet import *
+from eth2spec.bellatrix import mainnet
+from eth2spec.bellatrix.mainnet import *
 from eth2spec.utils.ssz.ssz_typing import *
 from eth2spec.utils.merkle_minimal import merkleize_chunks
 
@@ -4259,7 +4248,7 @@ print("Success!")
 
 [What is a Merkle Tree?](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/) by Alin Tomescu is the best primer I have found on Merkle trees, and a great starting point if you are unsure about their construction and properties.
 
-The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
 
 A formal verification of Merkleization has been performed: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/merkleise-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/merkle).
 
@@ -4391,7 +4380,7 @@ Throughout the spec, (almost) all integers are unsigned 64 bit numbers, `uint64`
 
 Regarding "unsigned", there was [much discussion](https://github.com/ethereum/consensus-specs/issues/626) around whether Eth2 should use signed or unsigned integers, and eventually unsigned was chosen. As a result, it is critical to preserve the order of operations in some places to avoid inadvertently causing underflows since negative numbers are forbidden.
 
-And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](https://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair fork, which has type `uint8`, and is really a `byte` type.
+And regarding "64 bit", early versions of the spec used [other](https://github.com/ethereum/consensus-specs/commit/4c3c8510d4abf969a7170fce10dcfb5d4df408c8) bit lengths than 64 (a "[premature optimisation](https://wiki.c2.com/?PrematureOptimization)"), but arithmetic integers are now [standardised at 64 bits](https://github.com/ethereum/consensus-specs/pull/1746) throughout the spec, the only exception being [`ParticipationFlags`](#participationflags), introduced in the Altair upgrade, which has type `uint8`, and is really a `byte` type.
 
 <a id="table_custom_types"></a>
 
@@ -4461,7 +4450,7 @@ Anyway, it's worth taking a moment in appreciation of the humble [cryptographic 
 
 #### Version
 
-Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept of a version number. It is expected that the protocol will be updated/upgraded from time to time, a process commonly known as a "hard-fork". For example, the upgrade from Phase&nbsp;0 to Altair took place on the 27th of October 2021, and was assigned [its own fork version](/part3/config/configuration#altair_fork_version).
+Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept of a version number. It is expected that the protocol will be updated/upgraded from time to time, a process commonly known as a "hard-fork". For example, the upgrade from Phase&nbsp;0 to Altair took place on the 27th of October 2021, and was assigned [its own fork version](/part3/config/configuration#altair_fork_version). Similarly with the upgrade from Altair to [Bellatrix](/part3/config/configuration#bellatrix_fork_version).
 
 `Version` is used when computing the [`ForkDigest`](#forkdigest).
 
@@ -4471,7 +4460,7 @@ Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept 
 
 #### DomainType
 
-`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Altair](/part3/config/constants#domain-types).
+`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Bellatrix](/part3/config/constants#domain-types).
 
 #### ForkDigest
 
@@ -4480,7 +4469,7 @@ Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept 
 The `ForkDigest` serves two purposes.
 
   1. Within the consensus protocol to prevent, for example, attestations from validators on one fork (that maybe haven't upgraded yet) being counted on a different fork.
-  2. Within the networking protocol to help to distinguish between useful peers that on the same chain, and useless peers that are on a different chain. This usage is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice), where `ForkDigest` appears frequently.
+  2. Within the networking protocol to help to distinguish between useful peers that on the same chain, and useless peers that are on a different chain. This usage is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice), where `ForkDigest` appears frequently.
 
 Specifically, `ForkDigest` is the first four bytes of the hash tree root of the [`ForkData`](/part3/containers/dependencies#forkdata) object containing the current chain [`Version`](#version) and the [`genesis_validators_root`](/part3/containers/state#genesis_validators_root) which was created at beacon chain [initialisation](/part3/initialise#def_initialize_beacon_state_from_eth1). It is computed in [`compute_fork_digest()`](/part3/helper/misc#def_compute_fork_digest).
 
@@ -4701,7 +4690,7 @@ Briefly, at each slot, validators are selected to aggregate attestations from th
 
 These four are not part of the consensus-critical state-transition, but are nonetheless important to the healthy functioning of the chain.
 
-This mechanism is described in the [Phase&nbsp;0 honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection) for attestation aggregation, and in the [Altair honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#aggregation-selection) for sync committee aggregation.
+This mechanism is described in the [Phase&nbsp;0 honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection) for attestation aggregation, and in the [Altair honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection) for sync committee aggregation.
 
 #### Crypto
 
@@ -4715,11 +4704,11 @@ This is the compressed [serialisation](https://github.com/zcash/librustzcash/blo
 
 It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS signature standard would reject these.
 
-`G2_POINT_AT_INFINITY` is described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/bls.md) document, but included here for convenience.
+`G2_POINT_AT_INFINITY` is described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document, but included here for convenience.
 
 ### Preset <!-- /part3/config/preset -->
 
-The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/v1.1.1/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/v1.1.1/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/v1.1.1/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
+The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/v1.2.0/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/v1.2.0/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/v1.2.0/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
 
 All the values discussed below are from the mainnet configuration.
 
@@ -4791,7 +4780,7 @@ These calculations are done in [`process_effective_balance_updates()`](/part3/tr
 
 ##### `MIN_DEPOSIT_AMOUNT`
 
-`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the beacon chain specification document. Rather, it is enforced in the [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
+`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the beacon chain specification document. Rather, it is enforced in the [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
 
 Allowing stakers to make deposits smaller than a full stake is useful for topping-up a validator's balance if its effective balance has dropped below 32&nbsp;Ether, so as to maintain full productivity. However, this actually led to a [vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) for some staking pools, involving the front-running of deposits. In some circumstances, a front-running attacker could change a genuine depositor's withdrawal credentials to their own.
 
@@ -4869,7 +4858,7 @@ In order to safely onboard new validators, the beacon chain needs to take a view
 
 `EPOCHS_PER_ETH1_VOTING_PERIOD` ` * ` `SLOTS_PER_EPOCH` is the total number of votes for Eth1 blocks that are collected. As soon as half of this number of votes are for the same Eth1 block, that block is adopted by the beacon chain and deposit processing can continue.
 
-Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
+Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
 
 This parameter [was increased](https://github.com/ethereum/consensus-specs/pull/2093/files) from 32 to 64 epochs for the beacon chain mainnet. This increase is intended to allow devs more time to respond if there is any trouble on the Eth1 chain, in addition to the eight hours grace provided by `ETH1_FOLLOW_DISTANCE`.
 
@@ -5466,8 +5455,8 @@ class Eth1Data(Container):
 
 Proposers include their view of the Ethereum&nbsp;1 chain in blocks, and this is how they do it. The beacon chain stores these votes up in the [beacon state](/part3/containers/state#beaconstate) until there is a simple majority consensus, then the winner is committed to beacon state. This is to allow the [processing](/part3/transition/block#deposits) of Eth1 deposits, and creates a simple "honest-majority" one-way bridge from Eth1 to Eth2. The 1/2 majority assumption for this (rather than 2/3 for committees) is considered safe as the number of validators voting each time is large: [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) `*` [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) = 64 `*` 32 = 2048.
 
-  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
-  - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.1.1/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
+  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
+  - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
   - `block_hash` is the hash of the Eth1 block being voted for. This doesn't have any current use within the Eth2 protocol, but is "too potentially useful to not throw in there", to quote Danny Ryan.
 
 #### `HistoricalBatch`
@@ -5981,9 +5970,7 @@ Through the magic of [SSZ hash tree roots](/part2/building_blocks/merkleization)
 
 ### Preamble
 
-<!-- markdownlint-disable emphasis-style -->
-> *Note*: The definitions below are for specification purposes and are not necessarily optimal implementations.
-<!-- markdownlint-enable emphasis-style -->
+> _Note_: The definitions below are for specification purposes and are not necessarily optimal implementations.
 
 This note in the spec is super important for implementers! There are many, many optimisations of the below routines that are being used in practice; a naive implementation would be impractically slow for mainnet configurations. As long as the optimised code produces identical results to the code here, then all is fine.
 
@@ -6077,14 +6064,14 @@ def bytes_to_uint64(data: bytes) -> uint64:
 
 `bytes_to_uint64()` is the inverse of [`uint_to_bytes()`](#def_uint_to_bytes), and is used by the [shuffling algorithm](/part3/helper/misc#compute_shuffled_index) to create a random index from the output of a hash.
 
-It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#aggregation-selection).
+It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection).
 
 `int.from_bytes` is a [built-in](https://docs.python.org/3/library/stdtypes.html#int.from_bytes) Python&nbsp;3 method. The `uint64` cast is provided by the spec's SSZ implementation.
 
 |||
 |-|-|
 | Used&nbsp;by | [`compute_shuffled_index`](/part3/helper/misc#def_compute_shuffled_index) |
-| See&nbsp;also | [attestation aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection), [sync committee aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/validator.md#aggregation-selection) |
+| See&nbsp;also | [attestation aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection), [sync committee aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection) |
 
 ### Crypto <!-- /part3/helper/crypto -->
 
@@ -6106,7 +6093,7 @@ The hash function serves two purposes within the protocol. The main use, computa
 
 <a id="def_hash_tree_root"></a>
 
-> `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization).
+> `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization).
 
 The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
 
@@ -6137,7 +6124,7 @@ The detailed specification of the cryptographic functions underlying Ethereum&nb
 
 Our intention in conforming to the in-progress standard is to provide for maximal interoperability with other chains, applications, and cryptographic libraries. Ethereum Foundation researchers and Eth2 developers had input to the [development](https://github.com/cfrg/draft-irtf-cfrg-bls-signature) of the standard. Nevertheless, there were some challenges involved in trying to keep up as the standard evolved. For example, the [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09) standard was still changing [rather late](https://hackmd.io/@benjaminion/BkdbG45II#Multiclient-testnet-discussion) in the beacon chain testing phase. In the end, everything worked out fine.
 
-The following two functions are described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/altair/bls.md) document, but included here for convenience.
+The following two functions are described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document, but included here for convenience.
 
 #### `eth_aggregate_pubkeys`
 
@@ -6404,6 +6391,10 @@ def is_merge_transition_complete(state: BeaconState) -> bool:
 ```
 
 TODO - Bellatrix
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_execution_payload()`](/part3/transition/block#def_process_execution_payload) |
 
 #### `is_merge_transition_block`
 
@@ -6685,7 +6676,7 @@ def compute_fork_digest(current_version: Version, genesis_validators_root: Root)
 
 Extracts the first four bytes of the [fork data root](#compute_fork_data_root) as a [`ForkDigest`](/part3/config/types#forkdigest) type. It is primarily used for domain separation on the peer-to-peer networking layer.
 
-`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice) to distinguish between independent beacon chain networks or forks: it is important that activity on one chain does not interfere with other chains.
+`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice) to distinguish between independent beacon chain networks or forks: it is important that activity on one chain does not interfere with other chains.
 
 |||
 |-|-|
@@ -6760,9 +6751,7 @@ This is exactly equivalent to adding the domain to an object and taking the hash
 
 #### `compute_timestamp_at_slot`
 
-<!-- markdownlint-disable ul-style emphasis-style -->
-> *Note*: This function is unsafe with respect to overflows and underflows.
-<!-- markdownlint-enable ul-style emphasis-style -->
+> _Note_: This function is unsafe with respect to overflows and underflows.
 
 <a id="def_compute_timestamp_at_slot"></a>
 
@@ -6773,6 +6762,10 @@ def compute_timestamp_at_slot(state: BeaconState, slot: Slot) -> uint64:
 ```
 
 TODO - Bellatrix
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_execution_payload()`](/part3/transition/block#def_process_execution_payload) |
 
 ### Participation flags <!-- /part3/helper/participation -->
 
@@ -7061,7 +7054,7 @@ This function returns the list of committee members given a slot number and an i
 
 Note that, since this uses [`get_seed()`](#def_get_seed), we can obtain committees only up to [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) epochs into the past (minus [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead)).
 
-`get_beacon_committee` is used by [`get_attesting_indices()`](#def_get_attesting_indices) and [`process_attestation()`](/part3/transition/block#def_process_attestation) when processing attestations coming from a committee, and by validators when checking their [committee assignments](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#validator-assignments) and [aggregation duties](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/phase0/validator.md#aggregation-selection).
+`get_beacon_committee` is used by [`get_attesting_indices()`](#def_get_attesting_indices) and [`process_attestation()`](/part3/transition/block#def_process_attestation) when processing attestations coming from a committee, and by validators when checking their [committee assignments](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#validator-assignments) and [aggregation duties](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection).
 
 |||
 |-|-|
@@ -7270,9 +7263,7 @@ It's fairly clear why block proposers are selected with a probability proportion
 
 #### `get_next_sync_committee`
 
-<!-- markdownlint-disable emphasis-style -->
-> *Note*: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part4/history/altair).
-<!-- markdownlint-enable emphasis-style -->
+> _Note_: The function `get_next_sync_committee` should only be called at sync committee period boundaries and when [upgrading state to Altair](/part4/history/altair).
 
 The random seed that generates the sync committee is based on the number of the next epoch. [`get_next_sync_committee_indices()`](#def_get_next_sync_committee_indices) doesn't contain any check that the epoch corresponds to a sync-committee change boundary, which allowed the timing of the Altair upgrade to be more flexible. But a consequence is that you will get an incorrect committee if you call `get_next_sync_committee()` at the wrong time.
 
@@ -7587,7 +7578,7 @@ When a validator is slashed, several things happen immediately:
 
 In short, a slashed validator receives an initial minor penalty, can expect to receive a further penalty later, and is marked for exit.
 
-Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/v1.1.1/specs/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
+Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
 
 |||
 |-|-|
@@ -7718,6 +7709,34 @@ Therefore, to be able to verify the state transition, we use the convention that
 | Uses | [`hash_tree_root`](/part3/helper/crypto#hash_tree_root) |
 | See&nbsp;also | [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) |
 
+### Execution engine <!-- /part3/transition/execution -->
+
+> The implementation-dependent `ExecutionEngine` protocol encapsulates the execution sub-system logic via:
+>
+>   - a state object `self.execution_state` of type `ExecutionState`
+>   - a notification function `self.notify_new_payload` which may apply changes to the `self.execution_state`
+>
+> _Note_: `notify_new_payload` is a function accessed through the `EXECUTION_ENGINE` module which instantiates the `ExecutionEngine` protocol.
+>
+> The body of this function is implementation dependent.
+> The Engine API may be used to implement this and similarly defined functions via an external execution engine.
+
+#### `notify_new_payload`
+
+```python
+def notify_new_payload(self: ExecutionEngine, execution_payload: ExecutionPayload) -> bool:
+    """
+    Return ``True`` if and only if ``execution_payload`` is valid with respect to ``self.execution_state``.
+    """
+    ...
+```
+
+TODO - Bellatrix
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_execution_payload()`](/part3/transition/block#def_process_execution_payload) |
+
 ### Epoch processing <!-- /part3/transition/epoch -->
 
 <a id="def_process_epoch"></a>
@@ -7738,7 +7757,7 @@ def process_epoch(state: BeaconState) -> None:
     process_sync_committee_updates(state)  # [New in Altair]
 ```
 
-The long laundry list of things that need to be done at the end of an epoch. You can see from the comments that a bunch of extra work was added in Altair.
+The long laundry list of things that need to be done at the end of an epoch. You can see from the comments that a bunch of extra work was added in Altair. By contrast, no substantive changes were made to epoch processing in the Bellatrix upgrade.
 
 |||
 |-|-|
@@ -7888,7 +7907,7 @@ def process_inactivity_updates(state: BeaconState) -> None:
             state.inactivity_scores[index] -= min(INACTIVITY_SCORE_RECOVERY_RATE, state.inactivity_scores[index])
 ```
 
-With Altair, each validator has an individual inactivity score in the beacon state which is updated as follows.
+Since the Altair upgrade, each validator has an individual inactivity score in the beacon state which is updated as follows.
 
   - Every epoch, irrespective of the inactivity leak,
     - decrease the score by one when the validator makes a correct [timely target vote](/part3/config/constants#participation-flag-indices), and
@@ -8352,11 +8371,17 @@ Sync committees are rotated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/co
 
 ### Block processing <!-- /part3/transition/block -->
 
+> _Note_: The call to the `process_execution_payload` must happen before the call to the `process_randao` as the former depends on the `randao_mix` computed with the reveal of the previous block.
+
+TODO - Bellatrix
+
 <a id="def_process_block"></a>
 
 ```python
 def process_block(state: BeaconState, block: BeaconBlock) -> None:
     process_block_header(state, block)
+    if is_execution_enabled(state, block.body):
+        process_execution_payload(state, block.body.execution_payload, EXECUTION_ENGINE)  # [New in Bellatrix]
     process_randao(state, block.body)
     process_eth1_data(state, block.body)
     process_operations(state, block.body)  # [Modified in Altair]
@@ -8409,6 +8434,50 @@ The version of the block header object that this routine stores in the state is 
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
 | Uses | [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
 | See&nbsp;also | [BeaconBlockHeader](/part3/containers/dependencies#beaconblockheader), [`process_slot()`](/part3/transition#def_process_slot) |
+
+#### Execution payload
+
+##### `process_execution_payload`
+
+<a id="def_process_execution_payload"></a>
+
+```python
+def process_execution_payload(state: BeaconState, payload: ExecutionPayload, execution_engine: ExecutionEngine) -> None:
+    # Verify consistency of the parent hash with respect to the previous execution payload header
+    if is_merge_transition_complete(state):
+        assert payload.parent_hash == state.latest_execution_payload_header.block_hash
+    # Verify prev_randao
+    assert payload.prev_randao == get_randao_mix(state, get_current_epoch(state))
+    # Verify timestamp
+    assert payload.timestamp == compute_timestamp_at_slot(state, state.slot)
+    # Verify the execution payload is valid
+    assert execution_engine.notify_new_payload(payload)
+    # Cache execution payload header
+    state.latest_execution_payload_header = ExecutionPayloadHeader(
+        parent_hash=payload.parent_hash,
+        fee_recipient=payload.fee_recipient,
+        state_root=payload.state_root,
+        receipts_root=payload.receipts_root,
+        logs_bloom=payload.logs_bloom,
+        prev_randao=payload.prev_randao,
+        block_number=payload.block_number,
+        gas_limit=payload.gas_limit,
+        gas_used=payload.gas_used,
+        timestamp=payload.timestamp,
+        extra_data=payload.extra_data,
+        base_fee_per_gas=payload.base_fee_per_gas,
+        block_hash=payload.block_hash,
+        transactions_root=hash_tree_root(payload.transactions),
+    )
+```
+
+TODO - Bellatrix
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`is_merge_transition_complete()`](/part3/helper/predicates#def_is_merge_transition_complete), [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix), [`compute_timestamp_at_slot()`](/part3/helper/misc#def_compute_timestamp_at_slot), [`notify_new_payload()`](/part3/transition/execution), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
+| See&nbsp;also | [`ExecutionPayloadHeader`](/part3/containers/state#executionpayloadheader) |
 
 #### RANDAO
 
@@ -8725,7 +8794,7 @@ Here, we process a deposit from a block. If the deposit is valid, either a new v
 
 The call to [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch) ensures that it is not possible to fake a deposit. The `eth1data.deposit_root` from the deposit contract has been [agreed](/part3/transition/block#eth1-data) by the beacon chain and includes all pending deposits visible to the beacon chain. The deposit itself contains a Merkle proof that it is included in that root. The `state.eth1_deposit_index` counter ensures that deposits are processed in order. In short, the proposer provides `leaf` and `branch`, but neither `index` nor `root`.
 
-Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain forks (such as Phase&nbsp;0 and Altair), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
+Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain upgrades (such as Phase&nbsp;0, Altair, and Bellatrix), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
 
 If the Merkle branch check fails, then the whole block is invalid. However, individual deposits can fail the signature check without invalidating the block. This allows incorrectly signed deposits to be de-queued (via `state.eth1_deposit_index += 1`) without blocking further progress (that increment would have to be reverted if the block were invalid).
 
@@ -9145,7 +9214,7 @@ We can also run the spec ourselves to do interesting things. In this exercise we
 ```python
 from inspect import getmembers, isclass
 from eth2spec.utils.ssz.ssz_typing import Container
-from eth2spec.altair import mainnet
+from eth2spec.bellatrix import mainnet
 
 def get_spec_ssz_types():
     return [
@@ -9213,9 +9282,10 @@ Finally we can simply run the Python script from above. Copy it into a file call
 
 The pipe to `jq` is optional, you will just get less pretty output without it.
 
-#### Full output
+<details>
+<summary>Full output</summary>
 
-Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` turns out to be 139TiB!
+Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns out to be 139TiB, or that `BeaconBlockBody` can be enormous. These sizes are based on the notional maximum list lengths they contain, and are not realistic in practice.
 
 ```none
 {
@@ -9235,19 +9305,19 @@ Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` t
     "max_size": 33232
   },
   "BeaconBlock": {
-    "min_size": 464,
-    "max_size": 157816
+    "min_size": 976,
+    "max_size": 1125899911195288
   },
   "BeaconBlockBody": {
-    "min_size": 380,
-    "max_size": 157732
+    "min_size": 892,
+    "max_size": 1125899911195204
   },
   "BeaconBlockHeader": {
     "size": 112
   },
   "BeaconState": {
-    "min_size": 2736629,
-    "max_size": 152832656015861
+    "min_size": 2737169,
+    "max_size": 152832656016433
   },
   "Checkpoint": {
     "size": 40
@@ -9270,6 +9340,14 @@ Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` t
   "Eth1Data": {
     "size": 72
   },
+  "ExecutionPayload": {
+    "min_size": 508,
+    "max_size": 1125899911037468
+  },
+  "ExecutionPayloadHeader": {
+    "min_size": 536,
+    "max_size": 568
+  },
   "Fork": {
     "size": 16
   },
@@ -9283,12 +9361,24 @@ Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` t
     "min_size": 228,
     "max_size": 16612
   },
+  "LightClientBootstrap": {
+    "size": 24896
+  },
+  "LightClientFinalityUpdate": {
+    "size": 584
+  },
+  "LightClientOptimisticUpdate": {
+    "size": 280
+  },
   "LightClientUpdate": {
-    "size": 25364
+    "size": 25368
   },
   "PendingAttestation": {
     "min_size": 149,
     "max_size": 405
+  },
+  "PowBlock": {
+    "size": 96
   },
   "ProposerSlashing": {
     "size": 416
@@ -9298,8 +9388,8 @@ Values are bytes. Don't be too alarmed that that maximum size of `BeaconState` t
     "max_size": 693
   },
   "SignedBeaconBlock": {
-    "min_size": 564,
-    "max_size": 157916
+    "min_size": 1076,
+    "max_size": 1125899911195388
   },
   "SignedBeaconBlockHeader": {
     "size": 208
