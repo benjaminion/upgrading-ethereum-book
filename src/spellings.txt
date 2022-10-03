@@ -285,6 +285,7 @@ permissionless
 permissionlessly
 permissionlessness
 pernickety
+piecewise
 piechart
 pre
 precompile

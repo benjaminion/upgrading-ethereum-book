@@ -1372,11 +1372,11 @@ As with penalties, the amounts subtracted from validators' beacon chain accounts
 
 Let's study the effect of the leak on a single validator's balance, assuming that during the period of the inactivity leak (non-finalisation) the validator is completely offline.
 
-At each epoch, the offline validator will be penalised an amount proportional to $tB / \alpha$, where $t$ is the number of epochs since the chain last finalised, $B$ is the validator's effective balance, and $\alpha$ is the [`INACTIVITY_PENALTY_QUOTIENT`](/part3/config/preset#rewards-and-penalties).
+At each epoch, the offline validator will be penalised an amount proportional to $tB / \alpha$, where $t$ is the number of epochs since the chain last finalised, $B$ is the validator's effective balance, and $\alpha$ is the prevailing [inactivity penalty quotient](/part3/config/preset#rewards-and-penalties) (currently `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`).
 
-The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $t$ epochs would be $t(t+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{tB}{\alpha}$, which can be solved to give the exponential $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
+The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $t$ epochs would be $t(t+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{tB}{\alpha}$, which can be solved to give the exponential $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two (piecewise quadratic) since the effective balance is neither constant nor continuously variable but decreases in a step-wise fashion.
 
-In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT` at `3 * 2**24`, this equates to around seven thousand epochs, or 31.5 days.
+In the continuous approximation, the inactivity penalty quotient, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` at `2**24`, this equates to 4096 epochs, or 18.2 days.
 
 For Phase&nbsp;0 of the beacon chain, the value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from $2^{24}$ to $2^{26}$, so that validators would be penalised less severely if there were non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the whole eleven months of Phase&nbsp;0 of the beacon chain.
 
@@ -1461,6 +1461,48 @@ The balance retained by each of the five validator personas after the inactivity
 
 We can see that the new scoring system means that some validators will continue to be penalised due to the leak even after finalisation starts again. This is [intentional](https://github.com/ethereum/consensus-specs/issues/2098). When the leak causes the beacon chain to finalise, at that point we have just two-thirds of the stake online. If we immediately stop the leak (as we used to), then the amount of stake online would remain close to two-thirds and the chain would be vulnerable to flipping in and out of finality as small numbers of validators come and go. We saw this behaviour on some of the testnets prior to launch. Continuing the leak after finalisation serves to increase the balances of participating validators to greater than two-thirds, providing a buffer that should mitigate such behaviour.
 
+#### Ejection
+
+It is not necessary for non-participating validators to be ejected from the active validator set in order for the inactivity leak to be effective at regaining finality. Reducing the proportion of the total stake held by those non-participating validators is sufficient.
+
+Nonetheless, a validator will be exited when its effective balance drops to [`EJECTION_BALANCE`](/part3/config/configuration#ejection_balance). This is taken care of in the end of epoch [registry updates](/part3/transition/epoch#registry-updates). Note that, due to the way that effective balance is calculated, the ejection will happen when the actual balance drops below 16.75&nbsp;ETH.
+
+We can simulate how long it would take for a completely offline validator to be ejected due solely to the inactivity leak. It will be slightly sooner in reality due to the additional penalties for missing attestations.
+
+For a validator starting the leak period with an actual balance of 32&nbsp;ETH, the simulation shows that it would take 4686 epochs (almost 3 weeks) for it to be ejected. We can also take this as a rough upper-bound on how long it would take the beacon chain to recover finality, however many validators went offline[^fn-ejection-queue].
+
+[^fn-ejection-queue]: This is complicated by the need for validators to be queued for exit, and the rate-limit on processing that queue. It is not possible to instantly exit validators en masse. Exiting validators remain subject to the inactivity leak while they sit in the queue, so their effective balances could drop lower than 16&nbsp;ETH.
+
+<details>
+<summary>Ejection simulation code</summary>
+
+```python
+GWEI = 10 ** 9
+EJECTION_BALANCE = 16 * GWEI
+MAX_EFFECTIVE_BALANCE = 32 * GWEI
+HYSTERESIS_QUOTIENT = 4
+INACTIVITY_PENALTY_QUOTIENT = 2 ** 24
+
+# Simplified hysteresis for monotonically decreasing balance
+def calc_effective_balance(balance):
+    return min(MAX_EFFECTIVE_BALANCE, (balance + GWEI // HYSTERESIS_QUOTIENT) // GWEI * GWEI)
+
+epoch = 0
+balance = 32 * GWEI
+effective_balance = calc_effective_balance(balance)
+
+while effective_balance > EJECTION_BALANCE:
+    balance -= effective_balance * epoch // INACTIVITY_PENALTY_QUOTIENT
+    effective_balance = calc_effective_balance(balance)
+    epoch += 1
+
+print(balance / GWEI)
+print(effective_balance // GWEI)
+print(epoch)
+```
+
+</details>
+
 #### See also
 
 From the spec:
@@ -1529,8 +1571,6 @@ The correlated penalty is calculated as follows.
  1. Compute the sum of the effective balances (as they were when the validators were slashed) of all validators that were slashed in the previous 36 days. That is, for the 18 days preceding and the 18 days following our validator's slashing.
  2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier), but cap the result at `total_balance`, the total active balance of all validators.
  3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
-
-TODO - Bellatrix - update the following
 
 The slashing multiplier in Bellatrix is set to 3. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
 
@@ -4970,13 +5010,11 @@ Since the Altair upgrade, `inactivity_score` has become a per-validator quantity
 
 During a leak, no validators receive rewards, and they continue to accrue the normal penalties when they fail to fulfil duties. In addition, for epochs in which validators do not make a correct, timely target vote, they receive a leak penalty.
 
-To examine the effect of the leak on a single validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing `INACTIVITY_PENALTY_QUOTIENT`.
+To examine the effect of the leak on a single validator's balance, assume that during a period of inactivity leak (non-finalisation) the validator is completely offline. At each epoch, the offline validator will be penalised an extra amount $nB / \alpha$, where $n$ is the number of epochs since the leak started, $B$ is the validator's effective balance, and $\alpha$ is the prevailing inactivity penalty quotient (currently `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`).
 
-The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{Bt}{\alpha}$, which can be solved to give $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two since the effective balance decreases in a step-wise fashion.
+The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $n$ epochs would be $n(n+1)B / 2\alpha$. This is sometimes called the "quadratic leak" since it grows as $n^2$ to first order. If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{Bt}{\alpha}$, which can be solved to give $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two (piecewise quadratic) since the effective balance is neither constant nor continuously variable but decreases in a step-wise fashion.
 
-In the continuous case, the `INACTIVITY_PENALTY_QUOTIENT`, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_ALTAIR` at `3 * 2**24`, this equates to around seven thousand epochs, or 31.5 days.
-
-TODO - Bellatrix - recalculate the above.
+In the continuous approximation, the inactivity penalty quotient, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` at `2**24`, this equates to 4096 epochs, or 18.2 days.
 
 The idea for the inactivity leak (aka the quadratic leak) was proposed in the original [Casper FFG paper](https://arxiv.org/abs/1710.09437). The problem it addresses is that, if a large fraction of the validator set were to go offline at the same time, it would not be possible to continue finalising checkpoints, since a majority vote from validators representing 2/3 of the total stake is required for finalisation.
 
@@ -9426,6 +9464,8 @@ Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns
   }
 }
 ```
+
+</details>
 
 ### Sizes of containers <!-- /appendices/reference/sizes* -->
 
