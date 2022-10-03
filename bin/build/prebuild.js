@@ -19,7 +19,6 @@ const spellChecker = 'bin/build/spellcheck.sh'
 const mdSplitter = 'bin/build/update.sh'
 
 const sourceMarkdown = 'src/book.md'
-const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
 const ourSpellings = 'src/spellings.txt'
 
 module.exports.runChecks = (reporter) => {
@@ -98,6 +97,7 @@ module.exports.runChecks = (reporter) => {
     if (sourceLintSucceeded) {
       reporter.info('Linting split markdown...')
       try {
+        const splitMarkdown = glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})
         const out = lintSplitMarkdown(splitMarkdown)
         if (out !== null) {
           reporter.warn('Found some linting issues:')
