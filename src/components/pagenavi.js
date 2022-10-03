@@ -41,7 +41,11 @@ const PageNavi = ({path}) => {
     hide: false
   })})
   
-  return (<NestedList items={items} level={2} idx={0} />)
+  return (
+    <div id="page-navi">
+      <NestedList items={items} level={2} idx={0} />
+    </div>
+  )
 }
 
 export default PageNavi
