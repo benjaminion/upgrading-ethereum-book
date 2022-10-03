@@ -6,7 +6,7 @@ const Banner = () => {
 
   return (
     <div id="banner">
-      <p>You are viewing an outdated version of the text (Altair). The most recent version of the book is <a href="/latest">here</a>.</p>
+      <p>You are viewing an outdated version (Altair). The most recent version of the book is <a href="/latest">here</a>.</p>
     </div>
   )
 }
