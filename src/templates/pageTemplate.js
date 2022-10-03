@@ -43,27 +43,25 @@ export default function Template({ data }) {
         : []
 
   return (
-    <Layout>
-      <Sidebar index={frontmatter.index} />
-      <div className="main-content">
-        <PrevNext seq={frontmatter.sequence} />
-        <div className="container">
-          <div className="section">
-            <div
-              className="section-content"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-            <Subsections indexArray={indexArray} />
-          </div>
+      <Layout>
+        <Sidebar index={frontmatter.index} />
+        <div id="main-content">
+            <PrevNext seq={frontmatter.sequence} />
+          <main>
+            <div className="section">
+              <div
+                className="section-content"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+              <Subsections indexArray={indexArray} />
+            </div>
+          </main>
+          <Footer />
+          <PrevNext seq={frontmatter.sequence} />
         </div>
-        <Footer />
-        <PrevNext seq={frontmatter.sequence} />
-      </div>
-      <div className="page-navi">
         <PageNavi path={frontmatter.path} />
-      </div>
-      <FootnoteTooltips />
-    </Layout>
+        <FootnoteTooltips />
+      </Layout>
   )
 }
 
