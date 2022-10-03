@@ -1,6 +1,6 @@
 {
   "name": "upgrading-ethereum-book",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "A technical handbook on Ethereum's move to proof of stake and beyond",
   "author": "Ben Edgington",
