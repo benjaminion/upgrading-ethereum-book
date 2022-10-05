@@ -66,6 +66,7 @@ EthStaker
 Ethereum
 Ethereum's
 Ethresear
+ExecutionAddress
 FFG
 FLP
 FastAggregateVerify
@@ -183,6 +184,7 @@ Vitalik
 Vitalik's
 WASM
 WB
+YP
 ZK
 Zamfir
 Zamfir's
@@ -277,10 +279,12 @@ misconfiguration
 modularity
 monocultures
 nd
+ommers
 parallelise
 parallelising
 parameterises
 performant
+permalink
 permissionless
 permissionlessly
 permissionlessness
@@ -323,6 +327,7 @@ unaggregated
 unapologetically
 unbiasable
 unboundedly
+unburnt
 underflows
 unforgeability
 unpartitioned

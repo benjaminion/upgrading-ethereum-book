@@ -4440,6 +4440,8 @@ And regarding "64 bit", early versions of the spec used [other](https://github.c
 | `BLSPubkey`          | `Bytes48`      | a BLS12-381 public key                                     |
 | `BLSSignature`       | `Bytes96`      | a BLS12-381 signature                                      |
 | `ParticipationFlags` | `uint8`        | a succinct representation of 8 boolean participation flags |
+| `Transaction`        | `ByteList[MAX_BYTES_PER_TRANSACTION]` | either a [typed transaction envelope](https://eips.ethereum.org/EIPS/eip-2718#opaque-byte-array-rather-than-an-rlp-array) or a legacy transaction |
+| `ExecutionAddress`   | `Bytes20` | Address of account on the execution layer |
 
 #### Slot
 
@@ -4544,6 +4546,20 @@ Prior to Altair, all attestations seen in blocks were stored in state for two ep
 Three of the eight bits are [currently used](/part3/config/constants#participation-flag-indices); five are reserved for future use.
 
 As an aside, it might have been more intuitive if `ParticipationFlags` were a `Bytes1` type, rather than introducing a weird `uint8` into the spec. After all, it is not used as an arithmetic integer. However, `Bytes1` is a composite type in SSZ, really an alias for `Vector[uint8, 1]`, whereas `uint8` is a basic type. When computing the hash tree root of a `List` type, multiple basic types can be packed into a single leaf, while composite types take a leaf each. This would result in 32 times as many hashing operations for a list of `Bytes1`. For similar reasons the type of `ParticipationFlags` [was changed](https://github.com/ethereum/consensus-specs/pull/2176#pullrequestreview-566879992) from `bitlist` to `uint8`.
+
+#### Transaction
+
+The Transaction type was introduced in the Bellatrix pre-Merge upgrade to allow for Ethereum transactions to be included in beacon blocks. It appears in [`ExecutionPayload`](/part3/containers/execution#executionpayload) objects.
+
+Transactions are completely opaque to the beacon chain and are exclusively handled in the execution layer. A note reflecting this is included in the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md):
+
+> _Note_: The `Transaction` type is a stub which is not final.
+
+The maximum size of a transaction is [`MAX_BYTES_PER_TRANSACTION`](/part3/config/preset#max_bytes_per_transaction) which looks huge, but since the underlying type is an SSZ `ByteList` (which is a [`List`](/part2/building_blocks/ssz#lists)), a Transaction object will only occupy as much space as necessary.
+
+#### ExecutionAddress
+
+The ExecutionAddress type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20 byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
 
 #### References
 
@@ -5070,8 +5086,6 @@ However, for the initial stage of the beacon chain, Phase&nbsp;0, `PROPORTIONAL_
 
 These parameters are used to size lists in the beacon block bodies for the purposes of SSZ serialisation, as well as constraining the maximum size of beacon blocks so that they can propagate efficiently, and avoid DoS attacks.
 
-[TODO: calculate the sizes of things - see the appendix]::
-
 Some comments on the chosen values:
 
   - I have suggested [elsewhere](https://github.com/ethereum/consensus-specs/issues/2152) reducing `MAX_DEPOSITS` from sixteen to one to ensure that more validators must process deposits, which encourages them to run Eth1 clients.
@@ -5106,6 +5120,11 @@ With 262,144 validators ($2^{18}$), the expected time between being selected for
 
 #### Execution
 
+<a id="max_bytes_per_transaction"></a>
+<a id="max_transactions_per_payload"></a>
+<a id="bytes_per_logs_bloom"></a>
+<a id="max_extra_data_bytes"></a>
+
 | Name | Value |
 | - | - |
 | `MAX_BYTES_PER_TRANSACTION` | `uint64(2**30)` (= 1,073,741,824) |
@@ -5113,9 +5132,11 @@ With 262,144 validators ($2^{18}$), the expected time between being selected for
 | `BYTES_PER_LOGS_BLOOM` | `uint64(2**8)` (= 256) |
 | `MAX_EXTRA_DATA_BYTES` | `2**5` (= 32) |
 
-TODO - Bellatrix
+These constants were introduced at the Bellatrix pre-Merge upgrade and are used only to size some fields within the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
 
-HERE
+The execution payload (formerly known as an Eth1 block) contains a list of up to `MAX_TRANSACTIONS_PER_PAYLOAD` normal Ethereum transactions. Each of these has size up to `MAX_BYTES_PER_TRANSACTION`. These constants are needed only because [SSZ list types](/part2/building_blocks/ssz#lists) require a maximum size to be specified. They are set ludicrously large, but that's not a problem in practice.
+
+`BYTES_PER_LOGS_BLOOM` and `MAX_EXTRA_DATA_BYTES` are a direct carry-over from Eth1 blocks as specified in the [Yellow Paper](https://ethereum.org/615606b8e1e1da72687e66dba79771e9/yellow-paper-berlin.pdf), being the size of a block's Bloom filter and the size of a block's extra data field respectively. The execution payload's extra data is analogous to a beacon block's graffiti - the block builder can set it to any value they choose.
 
 ### Configuration <!-- /part3/config/configuration -->
 
@@ -5698,8 +5719,6 @@ class BeaconBlockBody(Container):
     execution_payload: ExecutionPayload  # [New in Bellatrix]
 ```
 
-TODO - Bellatrix, add execution payload.
-
 The two fundamental data structures for nodes are the `BeaconBlock` and the `BeaconState`. The `BeaconBlock` is how the leader (the chosen proposer in a slot) communicates network updates to all the other validators, and those validators update their own `BeaconState` by applying `BeaconBlock`s. The idea is that (eventually) all validators on the network come to agree on the same `BeaconState`.
 
 Validators are randomly selected to propose beacon blocks, and there ought to be exactly one beacon block per slot if things are running correctly. If a validator is offline, or misses its slot, or proposes an invalid block, or has its block orphaned, then a slot can be empty.
@@ -5710,6 +5729,7 @@ The following objects are always present in a valid beacon block.
   - See [Eth1Data](/part3/containers/dependencies#eth1data) for `eth1_data`. In principle, this is mandatory, but it is not checked, and there is no penalty for making it up.
   - `graffiti` is left free for the proposer to insert whatever data it wishes. It has no protocol level significance. It can be left as zero; most clients set the client name and version string as their own default graffiti value.
   - `sync_aggregate` is a record of which validators in the current sync committee voted for the chain head in the previous slot.
+  - `execution_payload` is what was known as an Eth1 block pre-Merge. Ethereum user transactions are now included within beacon blocks in the form of an [`ExecutionPayload`](/part3/containers/execution#executionpayload) structure.
 
 Deposits are a special case. They are mandatory only if there are pending deposits to be processed. There is no explicit reward for including deposits, except that a block is invalid without any that ought to be there.
 
@@ -5794,8 +5814,6 @@ class BeaconState(Container):
     latest_execution_payload_header: ExecutionPayloadHeader  # [New in Bellatrix]
 ```
 
-TODO - Bellatrix, add latest_execution_payload_header.
-
 All roads lead to the `BeaconState`. Maintaining this data structure is the sole purpose of all the apparatus in all of the spec documents. This state is the focus of consensus among the beacon nodes; it is what everybody, eventually, must agree on.
 
 The beacon chain's state is monolithic: everything is bundled into a single state object (sometimes referred to as the "[God object](https://github.com/ethereum/consensus-specs/issues/582#issuecomment-461591281)"). Some [have argued](https://github.com/ethereum/consensus-specs/issues/582) for more granular approaches that might be more efficient, but at least the current approach is simple.
@@ -5818,9 +5836,24 @@ How do we know which chain we're on, and where we are on it? The information her
 
 [TODO: internal link to fork choice]::
 
-The [fork choice rule](https://github.com/ethereum/consensus-specs/blob/v1.0.0/specs/phase0/fork-choice.md) uses `genesis_time` to work out what slot we're in.
+`genesis_time` is used by the [fork choice rule](https://github.com/ethereum/consensus-specs/blob/v1.0.0/specs/phase0/fork-choice.md) to work out what slot we're in, and (since Bellatrix) to [validate execution payloads](/part3/transition/block#process_execution_payload).
 
-The `fork` object is manually updated as part of beacon chain upgrades, also called hard forks. This invalidates blocks and attestations from validators not following the new fork.
+The values of these two fields is fixed for the life of the chain. For the mainnet beacon chain they have the following values:
+
+|||
+|-|-|
+| `genesis_time` | 1606824023 |
+| `genesis_validators_root` | `0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95` |
+
+The `fork` [object](/part3/containers/dependencies#fork) is manually updated as part of beacon chain upgrades, also called hard forks. This invalidates blocks and attestations from validators not following the new fork.
+
+Since the Bellatrix fork, the `fork` field has contained the following values:
+
+|||
+|-|-|
+| `previous_version` | `0x01000000` |
+| `current_version` | `0x02000000` |
+| `epoch` | 144896 |
 
 [TODO: link to upgrades section]::
 
@@ -5910,11 +5943,18 @@ This is logically part of "Registry", above, and would be better placed there. I
 
 Sync committees were introduced in the Altair upgrade. The next sync committee is calculated and stored so that participating validators can prepare in advance by subscribing to the required p2p subnets.
 
+```code
+    # Execution
+    latest_execution_payload_header: ExecutionPayloadHeader  # [New in Bellatrix]
+```
+
+Since the Merge, the [header](/part3/containers/execution#executionpayloadheader) of the most recent execution payload is cached in the beacon state. This serves two functions for now, though possibly more in future. First, it allows the chain to check whether the Merge has been completed or not. See [`is_merge_transition_complete()`](/part3/helper/predicates#is_merge_transition_complete). Second, it allows the beacon chain to check that the execution chain is unbroken when processing a new execution payload. See [`process_execution_payload()`](/part3/transition/block#process_execution_payload).
+
 #### Historical Note
 
 There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of [SSZ tree hashing](/part2/building_blocks/merkleization), this was [no longer necessary](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
 
-### Execution
+### Execution <!-- /part3/containers/execution -->
 
 #### `ExecutionPayload`
 
@@ -5938,7 +5978,32 @@ class ExecutionPayload(Container):
     transactions: List[Transaction, MAX_TRANSACTIONS_PER_PAYLOAD]
 ```
 
-TODO - Bellatrix
+Since The Merge, blocks on the beacon chain contain Ethereum transaction data, formerly known as Eth1 blocks, and now called execution payloads.
+
+This is a significant change, and is what led to the name "The Merge".
+
+  - Pre-Merge, there were two types of block in the Ethereum system:
+    - Eth1 blocks contained users' transactions and were gossiped between Eth1 nodes;
+    - Eth2 blocks (beacon blocks) contained only consensus information and were gossiped between Eth2 nodes.
+  - Post-Merge, there is only one kind of block, the merged beacon block:
+    - Beacon blocks contain execution payloads that in turn contain users' transactions. These blocks are gossiped only between consensus (Eth2) nodes.
+
+The `ExecutionPayload` is contained in the [`BeaconBlock`](/part3/containers/blocks#beaconblock) structure.
+
+The fields of `ExecutionPayload` mostly reflect the old structure of Eth1 blocks as described in Ethereum's [Yellow Paper](https://ethereum.org/615606b8e1e1da72687e66dba79771e9/yellow-paper-berlin.pdf)[^fn-yellow-paper-berlin], section 4.3. Differences from the Eth1 block structure are noted in the comments.
+
+[^fn-yellow-paper-berlin]: This is intended to be a permalink to the Yellow Paper's "Berlin" edition, a pre-Merge version of the YP. At the time of writing, the YP has not been updated for the "London" upgrade and thus is missing the [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) field `base_fee_per_gas`.
+
+The execution payload differs from an old Eth1 block in the following respects:
+
+  - `ommersHash` (also known as `uncle_hashes`), `difficulty`, `mixHash` and `nonce` were not carried over from Eth1 blocks as they were specific to the proof of work mechanism.
+  - `fee_recipient` is the Ethereum account address that will receive the unburnt portion of the transaction fees (the priority fees). This has been called various things at various times: the original Yellow Paper calls it `beneficiary`; [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) calls it `author`. In any case, the proposer of the block sets the `fee_recipient` to specify where the appropriate transaction fees for the block are to be sent. Under proof of work this was the same address as the `COINBASE` address that received the block reward. Under proof of stake, the block reward is credited to the validator's beacon chain balance, and the transaction fees are credited to the `fee_recipient` Ethereum address.
+  - `prev_randao` replaces `difficulty`. The Eth1 chain did not have access to good quality randomness. Sometimes the block hash or difficulty of the block were used to seed randomness, but these were low quality. The `prev_randao` field gives the execution layer access to the beacon chain's randomness. This is [better](/part2/building_blocks/randomness), but still not of cryptographic quality.
+  - `block_number` in the execution layer is the block height in that chain, picking up from the Eth1 block height at the Merge. It increments by one for every beacon block produced. The beacon chain itself does not track block height, only slot number, which can differ from block height due to empty slots.
+  - The execution payload `block_hash` is included. The consensus layer does not know how to calculate the root hashes of execution blocks, but needs access to them when checking that the execution chain is unbroken during [execution payload processing](/part3/transition/block#process_execution_payload).
+  - Despite being flagged in the comments as an "extra payload field", a list of transactions was always part of Eth1 blocks. However, the list of ommers/uncles is no longer present.
+
+Individual transactions are represented by the [Transaction](/part3/config/types#transaction) custom type. There can be up to [`MAX_TRANSACTIONS_PER_PAYLOAD`](/part3/config/preset#max_transactions_per_payload) of them in a single execution payload. The values of `MAX_BYTES_PER_TRANSACTION` and `MAX_TRANSACTIONS_PER_PAYLOAD` are huge, and suggest that an execution payload could be up to a petabyte in size. These sizes are specified only because [SSZ `List`](/part2/building_blocks/ssz#lists) types require them. In practice they will occupy only the minimum necessary space.
 
 #### `ExecutionPayloadHeader`
 
@@ -5962,7 +6027,9 @@ class ExecutionPayloadHeader(Container):
     transactions_root: Root
 ```
 
-TODO - Bellatrix
+The same as [`ExecutionPayload`](#executionpayload) but with the transactions represented only by their root. By the [magic of Merkleization](/part2/building_blocks/merkleization#summaries-and-expansions), the [hash tree root](/part2/building_blocks/merkleization#the-hash-tree-root) of an `ExecutionPayloadHeader` will be the same as the hash tree root of its corresponding `ExecutionPayload`.
+
+The most recent `ExecutionPayloadHeader` is stored in the [beacon state](/part3/containers/state#beacon-state).
 
 ### Signed envelopes <!-- /part3/containers/envelopes -->
 
@@ -6428,11 +6495,16 @@ def is_merge_transition_complete(state: BeaconState) -> bool:
     return state.latest_execution_payload_header != ExecutionPayloadHeader()
 ```
 
-TODO - Bellatrix
+A simple test for whether the given beacon state is pre- or post-Merge. If the `latest_execution_payload_header` in the state is a default `ExecutionPayloadHeader` then the chain is pre-Merge, otherwise it is post-Merge.
+
+Although the mainnet beacon chain is decidedly post-Merge now, this remains useful for syncing nodes from pre-Merge starting points.
+
+This function was added in the Bellatrix pre-Merge upgrade.
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_execution_payload()`](/part3/transition/block#def_process_execution_payload) |
+| Used&nbsp;by | [`process_execution_payload()`](/part3/transition/block#def_process_execution_payload), [`is_merge_transition_block()`](#def_is_merge_transition_block), [`is_execution_enabled()`](#def_is_execution_enabled) |
+| See&nbsp;also | [`ExecutionPayloadHeader`](/part3/containers/execution#executionpayloadheader) |
 
 #### `is_merge_transition_block`
 
@@ -6443,7 +6515,17 @@ def is_merge_transition_block(state: BeaconState, body: BeaconBlockBody) -> bool
     return not is_merge_transition_complete(state) and body.execution_payload != ExecutionPayload()
 ```
 
-TODO - Bellatrix
+If the Merge transition is not complete (meaning that the beacon state still has the default execution payload header in it), yet our block has a non-default execution payload, then this must be the first block we've seen with an execution payload. It is therefore the Merge transition block.
+
+[TODO - link to Merge transition info]::
+
+This function was added in the Bellatrix pre-Merge upgrade.
+
+|||
+|-|-|
+| Uses | [`is_merge_transition_complete()`](#def_is_merge_transition_complete) |
+| Used&nbsp;by | [`is_execution_enabled()`](#def_is_execution_enabled) |
+| See&nbsp;also | [`ExecutionPayload`](/part3/containers/execution#executionpayload) |
 
 #### `is_execution_enabled`
 
@@ -6454,7 +6536,14 @@ def is_execution_enabled(state: BeaconState, body: BeaconBlockBody) -> bool:
     return is_merge_transition_block(state, body) or is_merge_transition_complete(state)
 ```
 
-TODO - Bellatrix
+If the block that we have is the first block with an execution payload (the Merge transition block), or we know from the state that we have previously seen a block with an execution payload then execution is enabled, the execution and consensus chains have Merged.
+
+This function was added in the Bellatrix pre-Merge upgrade.
+
+|||
+|-|-|
+| Uses | [`is_merge_transition_block()`](#def_is_merge_transition_block), [`is_merge_transition_complete()`](#def_is_merge_transition_complete) |
+| Used&nbsp;by | [`process_block()`](/part3/transition/block#def_process_block) |
 
 ### Misc <!-- /part3/helper/misc -->
 
@@ -6799,7 +6888,9 @@ def compute_timestamp_at_slot(state: BeaconState, slot: Slot) -> uint64:
     return uint64(state.genesis_time + slots_since_genesis * SECONDS_PER_SLOT)
 ```
 
-TODO - Bellatrix
+A simple utility for calculating the Unix timestamp at the start of the given slot. This is used when [validating execution payloads](/part3/transition/block#process_execution_payload).
+
+This function was added in the Bellatrix pre-Merge upgrade.
 
 |||
 |-|-|
@@ -7749,6 +7840,10 @@ Therefore, to be able to verify the state transition, we use the convention that
 
 ### Execution engine <!-- /part3/transition/execution -->
 
+TODO - Bellatrix
+
+The [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) characterises the execution engine as follows.
+
 > The implementation-dependent `ExecutionEngine` protocol encapsulates the execution sub-system logic via:
 >
 >   - a state object `self.execution_state` of type `ExecutionState`
@@ -7770,6 +7865,8 @@ def notify_new_payload(self: ExecutionEngine, execution_payload: ExecutionPayloa
 ```
 
 TODO - Bellatrix
+
+This function was added in the Bellatrix pre-Merge upgrade.
 
 |||
 |-|-|
@@ -8409,10 +8506,6 @@ Sync committees are rotated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/co
 
 ### Block processing <!-- /part3/transition/block -->
 
-> _Note_: The call to the `process_execution_payload` must happen before the call to the `process_randao` as the former depends on the `randao_mix` computed with the reveal of the previous block.
-
-TODO - Bellatrix
-
 <a id="def_process_block"></a>
 
 ```python
@@ -8430,10 +8523,16 @@ These are the tasks that the beacon node performs in order to process a block an
 
 [`process_operations()`](#def_process_operations) covers the processing of any slashing reports (proposer and attester) in the block, any attestations, any deposits, and any voluntary exits.
 
+TODO - Bellatrix - fix up the following
+
+The call to [`process_execution_payload()`](#def_process_execution_payload) was added in the Bellatrix pre-Merge upgrade.
+
+> _Note_: The call to the `process_execution_payload` must happen before the call to the `process_randao` as the former depends on the `randao_mix` computed with the reveal of the previous block.
+
 |||
 |-|-|
 | Used&nbsp;by | [`state_transition()`](/part3/transition#def_state_transition) |
-| Uses | [`process_block_header()`](#def_process_block_header), [`process_randao()`](#def_process_randao), [`process_eth1_data()`](#def_process_eth1_data), [`process_operations()`](#def_process_operations), [`process_sync_aggregate()`](#def_process_sync_aggregate) |
+| Uses | [`process_block_header()`](#def_process_block_header), [`process_execution_payload()`](#def_process_execution_payload) | [`is_execution_enabled()`](/part3/helper/predicates#def_is_execution_enabled) | [`process_randao()`](#def_process_randao), [`process_eth1_data()`](#def_process_eth1_data), [`process_operations()`](#def_process_operations), [`process_sync_aggregate()`](#def_process_sync_aggregate) |
 
 #### Block header
 
@@ -8509,13 +8608,17 @@ def process_execution_payload(state: BeaconState, payload: ExecutionPayload, exe
     )
 ```
 
+NB Doesn't "process" in any meaningful way; done on Eth1 side. Just validity checks and storage.
+
 TODO - Bellatrix
+
+This function was added in the Bellatrix pre-Merge upgrade.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
 | Uses | [`is_merge_transition_complete()`](/part3/helper/predicates#def_is_merge_transition_complete), [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix), [`compute_timestamp_at_slot()`](/part3/helper/misc#def_compute_timestamp_at_slot), [`notify_new_payload()`](/part3/transition/execution), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
-| See&nbsp;also | [`ExecutionPayloadHeader`](/part3/containers/state#executionpayloadheader) |
+| See&nbsp;also | [`ExecutionPayloadHeader`](/part3/containers/execution#executionpayloadheader) |
 
 #### RANDAO
 
@@ -9323,7 +9426,7 @@ The pipe to `jq` is optional, you will just get less pretty output without it.
 <details>
 <summary>Full output</summary>
 
-Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns out to be 139TiB, or that `BeaconBlockBody` can be enormous. These sizes are based on the notional maximum list lengths they contain, and are not realistic in practice.
+Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns out to be 139TiB, or that `BeaconBlockBody` can be enormous. These sizes are based on the notional [maximum SSZ list lengths](/part2/building_blocks/ssz#lists) they contain, and are not realistic in practice.
 
 ```none
 {
