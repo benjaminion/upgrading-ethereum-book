@@ -172,6 +172,7 @@ Teku's
 Tendermint
 TiB
 Tomescu
+TTD
 Umberto
 VDF
 VDFs

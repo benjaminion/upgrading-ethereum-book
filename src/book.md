@@ -5324,9 +5324,21 @@ See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some 
 | `TERMINAL_BLOCK_HASH` | `Hash32()` |
 | `TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH` | `FAR_FUTURE_EPOCH` |
 
-These values are not used in the main beacon chain specification, but are used in the Bellatrix [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) to determine the handover from proof of work to proof of stake for the execution chain.
+These values are not used in the main beacon chain specification, but are used in the Bellatrix [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) and [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/validator.md) to determine the point of handover from proof of work to proof of stake for the execution chain.
 
-TODO - Bellatrix
+All previous upgrades to the Ethereum proof of work chain took place at a pre-defined block height. That approach was deemed to be insecure for the Merge due to the irreversible dynamics of the switch to proof of stake. The rationale is given in the Security Considerations section of [EIP-3675](https://eips.ethereum.org/EIPS/eip-3675).
+
+> Using a pre-defined block number for the hardfork is unsafe in this context due to the PoS fork choice taking priority during the transition.
+>
+> An attacker may use a minority of hash power to build a malicious chain fork that would satisfy the block height requirement. Then the first PoS block may be maliciously proposed on top of the PoW block from this adversarial fork, becoming the head and subverting the security of the transition.
+>
+> To protect the network from this attack scenario, difficulty accumulated by the chain (total difficulty) is used to trigger the upgrade.
+
+Thus, the Bellatrix upgrade defined a terminal total difficulty (TTD) at which the Merge would take place. Each block on the Ethereum proof of work chain has a "difficulty" associated with it, which corresponds to the expected number of hashes it would take to mine it. The total difficulty is the monotonically increasing accumulated difficulty of all the blocks so far.
+
+The first block to exceed `TERMINAL_TOTAL_DIFFICULTY` was Ethereum block number [15537393](https://etherscan.io/block/15537393). That block thus became the last canonical block to be produced under proof of work. The [next execution payload](https://etherscan.io/block/15537394) was included in the beacon chain at slot [4700013](https://beaconcha.in/slot/4700013), which was produced at 06:42:59 UTC on September the 15th, 2022.
+
+`TERMINAL_BLOCK_HASH` and `TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH` are present in case a need arose to manually select a particular proof of work fork to follow in case of trouble. `TERMINAL_BLOCK_HASH` would have been set in clients, by a manual override or a client update, to point to a specific proof of work block chosen by agreement to be the terminal block. In the event this functionality was not needed.
 
 ## Containers <!-- /part3/containers -->
 
@@ -7719,6 +7731,34 @@ Note that the `whistleblower_index` defaults to `None` in the parameter list. Th
 
 ### Preamble
 
+#### State transitions
+
+The state transition function is at the heart of what blockchains do. Each node on the network maintains a [state](/part3/containers/state#beaconstate) that corresponds to its view of the state of the world.
+
+Classically, the node's state is updated by applying blocks, in order, with a "state transition function". The state transition function is "pure" in that its output depends only on the input, and it has no side-effects. This makes it deterministic: if every node starts with the same state (the [Genesis](/part3/initialise#initialise-state) state), and applies the same sequence of blocks, then all nodes must end up with the same resulting state. If for some reason they don't, then we have a consensus failure.
+
+If $S$ is a beacon state, and $B$ a beacon block, then the state transition function $f$ can be written
+
+$$
+S' \equiv f(S, B)
+$$
+
+In this equation we call $S$ the pre-state (the state before applying the block $B$), and $S'$ the post-state. The function $f$ is then iterated as we receive new blocks to constantly update the state.
+
+That's the essence of blockchain progress in its purist form, as it existed under proof of work; under proof of work, the state transition function is driven exclusively by processing blocks.
+
+The beacon chain, however, is not block-driven. Rather, it is slot-driven. Updates to the state depends on the progress of slots, whether or not that slot has a block associated with it.
+
+Thus, the beacon chain's state transition function comprises three elements.
+
+1. A per-slot transition function, $S' \equiv f_s(S)$. (The state contains the slot number, so we do not need to supply it.)
+2. A per-block transition function $S' \equiv f_b(S, B)$.
+3. A per-epoch transition function $S' \equiv f_e(S)$.
+
+Each of these state transition functions needs to be run at the appropriate point when updating the chain, and it is the role of this part of the beacon chain specification to define all of this precisely.
+
+#### Validity conditions
+
 <a id="assert"></a>
 
 > The post-state corresponding to a pre-state `state` and a signed block `signed_block` is defined as `state_transition(state, signed_block)`. State transitions that trigger an unhandled exception (e.g. a failed `assert` or an out-of-range list access) are considered invalid. State transitions that cause a `uint64` overflow or underflow are also considered invalid.
@@ -7727,7 +7767,9 @@ This is a very important statement of how the spec deals with invalid conditions
 
 People who do [formal verification](https://github.com/ConsenSys/eth2.0-dafny) of the specification [don't much like this](https://github.com/ethereum/consensus-specs/issues/1797), as having assert statements in running code is an anti-pattern: it is better to ensure that your code can simply never fail.
 
-Anyway, the beacon chain state transition has three elements:
+#### Specification
+
+Anyway, as discussed above, the beacon chain state transition has three elements:
 
   1. [slot processing](#def_process_slots), which is performed for every slot regardless of what else is happening;
   2. [epoch processing](/part3/transition/epoch#epoch-processing), which happens every [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) (32) slots, again regardless of whatever else is going on; and,
@@ -7750,7 +7792,7 @@ def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, valida
         assert block.state_root == hash_tree_root(state)
 ```
 
-As the spec is written, a state transition is triggered by receiving a block to process. That means that we first need to fast forward from our current slot number in the state (which is the slot at which we last processed a block) to the slot of the block we are processing. We treat intervening slots, if any, as empty. This "fast-forward" is done by [`process_slots()`](#def_process_slots), which also triggers epoch processing as required.
+Although the beacon chain's state transition is conceptually slot-driven, as the spec is written a state transition is triggered by receiving a block to process. That means that we first need to fast forward from our current slot number in the state (which is the slot at which we last processed a block) to the slot of the block we are processing. We treat intervening slots, if any, as empty. This "fast-forward" is done by [`process_slots()`](#def_process_slots), which also triggers epoch processing as required.
 
 In actual client implementations, state updates will usually be time-based, triggered by moving to the next slot if a block has not been received. However, the fast-forward functionality will be used when exploring different forks in the block tree.
 
@@ -7840,9 +7882,11 @@ Therefore, to be able to verify the state transition, we use the convention that
 
 ### Execution engine <!-- /part3/transition/execution -->
 
-TODO - Bellatrix
+Ethereum's "Merge" to proof of stake occurred on the 15th of September 2022. As far as the beacon chain was concerned, the most significant change was that an extra block validity condition now applies. Post-Merge Beacon blocks contain a new [`ExecutionPayload`](/part3/containers/execution#executionpayload) object which is basically an Eth1 block. For the beacon block to be valid, the contents of its execution payload must be valid according to Ethereum's longstanding block and transaction execution rules (minus any proof of work conditions).
 
-The [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) characterises the execution engine as follows.
+The beacon chain does not know how to validate Ethereum transactions. The entire point of the Merge was to enable beacon chain clients to hand-off the validation of the execution payload to a locally connected execution client (formerly an Eth1 client). The beacon chain consensus client does this hand-off via the `notify_new_payload()` function described below.
+
+Architecturally, the `notify_new_payload()` function is accessed via a new interface called the Engine API which the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) characterises as follows.
 
 > The implementation-dependent `ExecutionEngine` protocol encapsulates the execution sub-system logic via:
 >
@@ -7854,7 +7898,11 @@ The [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v
 > The body of this function is implementation dependent.
 > The Engine API may be used to implement this and similarly defined functions via an external execution engine.
 
+[TODO - link to execution API chapter when written]::
+
 #### `notify_new_payload`
+
+<a id="def_notify_new_payload"></a>
 
 ```python
 def notify_new_payload(self: ExecutionEngine, execution_payload: ExecutionPayload) -> bool:
@@ -7864,9 +7912,7 @@ def notify_new_payload(self: ExecutionEngine, execution_payload: ExecutionPayloa
     ...
 ```
 
-TODO - Bellatrix
-
-This function was added in the Bellatrix pre-Merge upgrade.
+This function is called during [block processing](/part3/transition/block) to verify the validity of a beacon block's execution payload. The contents of the execution payload are largely opaque to the consensus layer (hence the `...` in the function definition) and validation of the execution payload relies almost entirely on the execution client. You can think of it as just an external black-box library call if that helps.
 
 |||
 |-|-|
@@ -8521,18 +8567,16 @@ def process_block(state: BeaconState, block: BeaconBlock) -> None:
 
 These are the tasks that the beacon node performs in order to process a block and update the state. If any of the called functions triggers an `assert` failure or any other kind of exception, then the [entire block is invalid](/part3/transition#assert), and any state changes must be rolled back.
 
-[`process_operations()`](#def_process_operations) covers the processing of any slashing reports (proposer and attester) in the block, any attestations, any deposits, and any voluntary exits.
-
-TODO - Bellatrix - fix up the following
-
-The call to [`process_execution_payload()`](#def_process_execution_payload) was added in the Bellatrix pre-Merge upgrade.
-
 > _Note_: The call to the `process_execution_payload` must happen before the call to the `process_randao` as the former depends on the `randao_mix` computed with the reveal of the previous block.
+
+The call to [`process_execution_payload()`](#def_process_execution_payload) was added in the Bellatrix pre-Merge upgrade. The [`EXECUTION_ENGINE` object](/part3/transition/execution) is not really defined in the beacon chain spec, but corresponds to an API that calls out to an attached execution client (formerly Eth1 client) that will do most of the payload validation.
+
+[`process_operations()`](#def_process_operations) covers the processing of any slashing reports (proposer and attester) in the block, any attestations, any deposits, and any voluntary exits.
 
 |||
 |-|-|
 | Used&nbsp;by | [`state_transition()`](/part3/transition#def_state_transition) |
-| Uses | [`process_block_header()`](#def_process_block_header), [`process_execution_payload()`](#def_process_execution_payload) | [`is_execution_enabled()`](/part3/helper/predicates#def_is_execution_enabled) | [`process_randao()`](#def_process_randao), [`process_eth1_data()`](#def_process_eth1_data), [`process_operations()`](#def_process_operations), [`process_sync_aggregate()`](#def_process_sync_aggregate) |
+| Uses | [`process_block_header()`](#def_process_block_header), [`is_execution_enabled()`](/part3/helper/predicates#def_is_execution_enabled), [`process_execution_payload()`](#def_process_execution_payload), [`process_randao()`](#def_process_randao), [`process_eth1_data()`](#def_process_eth1_data), [`process_operations()`](#def_process_operations), [`process_sync_aggregate()`](#def_process_sync_aggregate) |
 
 #### Block header
 
@@ -8608,16 +8652,26 @@ def process_execution_payload(state: BeaconState, payload: ExecutionPayload, exe
     )
 ```
 
-NB Doesn't "process" in any meaningful way; done on Eth1 side. Just validity checks and storage.
+Since the Merge, the execution payload (formerly an Eth1 block) now forms part of the beacon block.
 
-TODO - Bellatrix
+There isn't much beacon chain processing to be done for execution payloads as they are for the most part opaque blobs of data that are meaningful only to the execution client. However, the beacon chain does need to know whether the execution payload is valid in the view of the execution client. An execution payload that is invalid by the rules of the execution (Eth1) chain makes the beacon block containing it invalid.
+
+Some initial sanity checks are performed:
+
+  - Unless this is the very first execution payload that we have seen then its `parent_hash` must match the `block_hash` that we have in the beacon state, that of the last execution payload we processed. This ensures that the chain of execution payloads is continuous, since it is essentially a blockchain within a blockchain.
+  - We check that the `prev_randao` value is correctly set, otherwise a block proposer could trivially control the randomness on the execution layer.
+  - The timestamp on the execution payload must match the slot timestamp. Again, this prevents proposers manipulating the execution layer time for any smart contracts that depend on it.
+
+Next we send the payload over to the execution engine via the Engine&nbsp;API, using the [`notify_new_payload()`](/part3/transition/execution#def_notify_new_payload) function it provides. This serves two purposes: first it requests that the execution client check the validity of the payload, and second, if the payload is valid, it allows the execution layer to update its own state by running the transactions contained in the payload.
+
+Finally, the header of the execution payload is stored in the [beacon state](/part3/containers/state#beaconstate), primarily so that the `block_hash`&ndash;`parent_hash` check can be made next time this function is called. The remainder of the execution header data is not currently used in the beacon chain specification, despite being stored.
 
 This function was added in the Bellatrix pre-Merge upgrade.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
-| Uses | [`is_merge_transition_complete()`](/part3/helper/predicates#def_is_merge_transition_complete), [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix), [`compute_timestamp_at_slot()`](/part3/helper/misc#def_compute_timestamp_at_slot), [`notify_new_payload()`](/part3/transition/execution), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
+| Uses | [`is_merge_transition_complete()`](/part3/helper/predicates#def_is_merge_transition_complete), [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix), [`compute_timestamp_at_slot()`](/part3/helper/misc#def_compute_timestamp_at_slot), [`notify_new_payload()`](/part3/transition/execution#def_notify_new_payload), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
 | See&nbsp;also | [`ExecutionPayloadHeader`](/part3/containers/execution#executionpayloadheader) |
 
 #### RANDAO
