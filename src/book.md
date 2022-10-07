@@ -9211,6 +9211,10 @@ TODO
 
 # Part 4: Upgrades <!-- /part4 -->
 
+<!-- Protocol upgrades, sometimes called hard forks, are backward-incompatible changes to the specification. This is how Ethereum has historically delivered improvements and extra capabilities to the Eth1 chain, and now to the Eth2 beacon chain. -->
+
+TODO
+
 ## Hard forks <!-- /part4/forks* -->
 
 TODO
@@ -9222,6 +9226,8 @@ TODO
 ## Upgrade History <!-- /part4/history -->
 
 ### Introduction
+
+HERE
 
 TODO
 
@@ -9269,8 +9275,8 @@ The following changes were made for sync committee support.
 The reforms to the accounting were extensive and I won't list them all here as they are thoroughly covered elsewhere in the annotated spec and book. But in summary,
 
   - There was a [move away](https://github.com/ethereum/consensus-specs/pull/2176#issue-779590549) from doing all the accounting for attestation inclusion at epoch boundaries to performing much of the work on an ongoing basis during epochs. The epoch transition is quite heavy in any case; this spreads the workload and is simpler overall.
-  - Incentives were tweaked for different behaviours, such as late attestations. We also took the opportunity to simplify the rewards and penalties calculations.
-  - The [inactivity leak](/part2/incentives/inactivity) was made to apply per-validator rather than globally.
+  - Incentives were tweaked for different behaviours, such as late attestations and block proposal rewards. We also took the opportunity to simplify the rewards and penalties calculations.
+  - The [inactivity leak](/part2/incentives/inactivity) was changed so that it is now applied on a per-validator basis rather than globally.
 
 As for the penalty parameters, the following parameters were updated. These had been softened at genesis as we got used to running the beacon chain:
 
