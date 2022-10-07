@@ -149,6 +149,7 @@ RLP
 RPC
 Randao
 Remerkleable
+Req
 Rogaway
 Runtime
 SHA

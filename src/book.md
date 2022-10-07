@@ -6,7 +6,7 @@ I am writing this book backwards. Bottom up. Starting with the details and worki
 
 The first pretty much complete part is [Part 3: The Annotated Spec](/part3). These are the guts of the machine. Like the innards of a computer, all the components are showing and the wires are hanging out: everything is on display. But with the guts in place, everything else can be built around them with the messiness all neatly tucked away.
 
-I'm now working on [Part 2: Technical Overview](/part2) which wraps a first, hopefully more accessible, layer around the Annotated Spec. Again, I'm writing this backwards, starting with the protocol's [Building Blocks](/part2/building_blocks) and its [Incentive Mechanisms](/part2/incentives) and working forwards towards a higher level narrative of how it all fits together.
+I'm now working on [Part 2: Technical Overview](/part2) which wraps a first, hopefully more accessible, layer around the Annotated Spec. Again, I'm writing this backwards, starting with the protocol's [Building Blocks](/part2/building_blocks) and its [Incentive Mechanisms](/part2/incentives) and working forwards towards a higher level narrative of how it all fits together. The current focus is on the [Consensus](/part2/consensus) chapter.
 
 Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, PDF versions, maybe NFTs... who knows?
 
@@ -4725,6 +4725,8 @@ These domain types are used in three ways: for seeds, for signatures, and for se
 
 When random numbers are required in-protocol, one way they are generated is by hashing the RANDAO mix with other quantities, one of them being a domain type (see [`get_seed()`](/part3/helper/accessors#def_get_seed)). The [original motivation](https://github.com/ethereum/consensus-specs/pull/1415) was to avoid occasional collisions between Phase&nbsp;0 committees and Phase&nbsp;1 persistent committees, back when they were a thing. So, when computing the beacon block proposer, `DOMAIN_BEACON_PROPOSER` is hashed into the seed, when computing attestation committees, `DOMAIN_BEACON_ATTESTER` is hashed in, and when computing sync committees, `DOMAIN_SYNC_COMMITTEE` is hashed in.
 
+See the [Randomness](/part2/building_blocks/randomness) chapter for more information.
+
 ##### As signatures
 
 In addition, as a cryptographic nicety, each of the protocol's signature types is augmented with the appropriate domain before being signed:
@@ -4738,6 +4740,8 @@ In addition, as a cryptographic nicety, each of the protocol's signature types i
 
 In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
 
+See the [BLS signatures](/part2/building_blocks/signatures) chapter for more information.
+
 ##### Aggregator selection
 
 The remaining four types, suffixed `_PROOF` are not used directly in the beacon chain specification. They [were introduced](https://github.com/ethereum/consensus-specs/pull/1615) to implement [attestation subnet validations](https://github.com/ethereum/consensus-specs/issues/1595) for denial of service resistance. The technique was [extended](https://github.com/ethereum/consensus-specs/pull/2266) to sync committees with the Altair upgrade.
@@ -4747,6 +4751,8 @@ Briefly, at each slot, validators are selected to aggregate attestations from th
 These four are not part of the consensus-critical state-transition, but are nonetheless important to the healthy functioning of the chain.
 
 This mechanism is described in the [Phase&nbsp;0 honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection) for attestation aggregation, and in the [Altair honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection) for sync committee aggregation.
+
+See the [Aggregator Selection](/part2/building_blocks/aggregator) chapter for more information.
 
 #### Crypto
 
@@ -9213,17 +9219,90 @@ TODO
 
 TODO
 
-## History <!-- /part4/history -->
+## Upgrade History <!-- /part4/history -->
+
+### Introduction
 
 TODO
 
-### Altair <!-- /part4/history/altair* -->
+### Phase 0 <!-- /part4/history/phase0 -->
 
-TODO
+For historical reasons, the initial configuration of the beacon chain at its genesis was called Phase&nbsp;0.
 
-### Bellatrix <!-- /part4/history/bellatrix* -->
+[TODO - link to "historical reasons" when written]::
 
-TODO
+Beacon chain genesis took place at 12:00:23 UTC on the 1st of December, 2020. The extra 23 seconds comes from the timestamp of the first Eth1 block to meet the [genesis criteria](/part3/initialise#genesis-state), [block 11320899](https://etherscan.io/block/11320899). It is a little remnant of proof of work forever embedded in the beacon chain's history.
+
+|||
+| - | - |
+| `MIN_GENESIS_TIME` | `uint64(1606824000)` (Dec 1, 2020, 12pm UTC) |
+| `GENESIS_FORK_VERSION` | `Version('0x00000000')` |
+
+See the [Phase 0 specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) for the full description. These specs still apply to the beacon chain today, except where they were superseded by the [Altair](/part4/history/altair) or [Bellatrix](/part4/history/bellatrix) upgrades.
+
+### Altair <!-- /part4/history/altair -->
+
+The Altair upgrade took place at 10:56:23 UTC on October the 27th, 2021.
+
+|||
+| - | - |
+| `ALTAIR_FORK_VERSION` | `Version('0x01000000')` |
+| `ALTAIR_FORK_EPOCH` | `Epoch(74240)` (Oct 27, 2021, 10:56:23am UTC) |
+
+The main goals of the Altair upgrade were to
+
+1. introduce sync committees for supporting light clients,
+2. significantly rework the beacon chain reward and penalty accounting, and
+3. begin increasing some penalty parameters towards their final values.
+
+The following changes were made for sync committee support.
+
+  - New [cryptographic domains](/part3/config/constants#domain-types) for the sync committee functions.
+  - New data structures to support sync committees. Namely, [`SyncAggregate`](/part3/containers/operations#syncaggregate) and [`SyncCommittee`](/part3/containers/dependencies#synccommittee).
+  - Functions for managing sync committees:
+    - [`get_next_sync_committee_indices()`](/part3/helper/accessors#def_get_next_sync_committee_indices);
+    - [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee);
+    - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate), which takes care of reward and penalty accounting for sync committee participation); and
+    - [`process_sync_committee_updates()`](/part3/transition/epoch#def_process_sync_committee_updates).
+  - Gossip topics were added to the [P2P specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/p2p-interface.md) to support sync committee activity
+
+The reforms to the accounting were extensive and I won't list them all here as they are thoroughly covered elsewhere in the annotated spec and book. But in summary,
+
+  - There was a [move away](https://github.com/ethereum/consensus-specs/pull/2176#issue-779590549) from doing all the accounting for attestation inclusion at epoch boundaries to performing much of the work on an ongoing basis during epochs. The epoch transition is quite heavy in any case; this spreads the workload and is simpler overall.
+  - Incentives were tweaked for different behaviours, such as late attestations. We also took the opportunity to simplify the rewards and penalties calculations.
+  - The [inactivity leak](/part2/incentives/inactivity) was made to apply per-validator rather than globally.
+
+As for the penalty parameters, the following parameters were updated. These had been softened at genesis as we got used to running the beacon chain:
+
+  - [`INACTIVITY_PENALTY_QUOTIENT`](/part3/config/preset#inactivity_penalty_quotient_bellatrix) decreased from $2^{26}$ to $3 \times 2^{24}$. This reduces stakes more quickly during an inactivity leak.
+  - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset#min_slashing_penalty_quotient_bellatrix) decreased from 128 to 64. This sets the initial slashing penalty to 0.5&nbsp;ETH for a validator with a full stake rather than the 0.25&nbsp;ETH of Phase&nbsp;0.
+  - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset#proportional_slashing_multiplier_bellatrix) increased from 1 to 2 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of two-thirds of their stakes rather than the one-third of Phase&nbsp;0.
+
+The full description of the changes between Phase&nbsp;0 and Altair is in the [Altair specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair).
+
+### Bellatrix <!-- /part4/history/bellatrix -->
+
+The Bellatrix upgrade took place at 11:34:47 UTC on September the 6th, 2022.
+
+|||
+| - | - |
+| `BELLATRIX_FORK_VERSION` | `Version('0x02000000')` |
+| `BELLATRIX_FORK_EPOCH` | `Epoch(144896)` (Sept 6, 2022, 11:34:47am UTC) |
+
+The primary goal of Bellatrix was to ready the beacon chain for [the Merge](/part4/merge) that took place nine days later. It included the following elements.
+
+  - Data structures for holding execution payloads were added, namely [`ExecutionPayload`](/part3/containers/execution#executionpayload) and [`ExecutionPayloadHeader`](/part3/containers/execution#executionpayloadheader).
+  - The [processing of execution payloads](/part3/transition/block#process_execution_payload) was added to [block processing](/part3/transition/block#block-processing).
+  - The [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) was updated to recognise the transition from proof of work to proof of stake on the beacon chain side.
+  - The maximum size of gossip messages and Req/Resp chunks was increased in the [P2P spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/p2p-interface.md) to allow for the extra size of beacon blocks due to the execution payload. Also, the validity rules for gossiped blocks were updated.
+
+In addition, continuing the changes from Altair, some penalty parameters were updated to their final values. These had been softened pre-Merge as we got used to running the beacon chain:
+
+  - [`INACTIVITY_PENALTY_QUOTIENT`](/part3/config/preset#inactivity_penalty_quotient_bellatrix) decreased from $3 \times 2^{24}$ to $2^{24}$. This reduces stakes more quickly during an inactivity leak.
+  - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset#min_slashing_penalty_quotient_bellatrix) decreased from 64 to 32. This sets the initial slashing penalty to 1&nbsp;ETH for a validator with a full stake rather than 0.5&nbsp;ETH.
+  - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset#proportional_slashing_multiplier_bellatrix) increased from 2 to 3 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of their entire stakes.
+
+The full description of the changes between Altair and Bellatrix is in the [Bellatrix specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix).
 
 ### Capella <!-- /part4/history/capella -->
 
