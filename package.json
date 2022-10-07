@@ -16,7 +16,7 @@
     "spell": "bin/util/check_spellings_list.sh"
   },
   "dependencies": {
-    "gatsby": "^4.24.1",
+    "gatsby": "^4.24.3",
     "gatsby-plugin-catch-links": "^4.24.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
