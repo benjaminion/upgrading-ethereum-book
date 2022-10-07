@@ -2,9 +2,9 @@
 
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
-You can read it at [eth2book.info](https://eth2book.info/altair) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/altair)).
+You can read it at [eth2book.info](https://eth2book.info/latest) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/latest)).
 
-It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/altair/preface).
+It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/latest/preface).
 
 ## Licence
 
@@ -26,11 +26,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v16.17.0
+v16.17.1
 > npm --version
-8.15.0
+8.19.2
 > gatsby --version
-Gatsby CLI version: 4.21.0
+Gatsby CLI version: 4.24.0
 ```
 
 `gatsby-cli` can be installed with,
