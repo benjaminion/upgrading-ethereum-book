@@ -322,7 +322,7 @@ As a node receives new blocks (and, under proof of stake, new votes for blocks) 
 
 However, sometimes the new block might be a descendent of some other block in the block tree. (Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.)
 
-In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the hew head's branch.
+In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the new head's branch.
 
 In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
