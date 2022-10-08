@@ -1,6 +1,6 @@
 # Upgrading Ethereum
 
-** You are viewing the Altair branch, which is outdated and unmaintained. **
+**You are viewing the Altair branch, which is outdated and unmaintained.**
 
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
