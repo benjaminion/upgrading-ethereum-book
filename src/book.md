@@ -23,7 +23,7 @@ Although I am an Ethereum staker and an Ethereum user, I am not writing primaril
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
 
   - all things proof of stake and the beacon chain,
-  - the process of The Merge by which Ethereum&nbsp;1.0 moved to proof of stake,
+  - the process of The Merge by which Ethereum moved to proof of stake,
   - in-protocol data sharding, and
   - an array of potential future enhancements.
 
@@ -236,8 +236,9 @@ The basic primitive that underlies blockchain technology is, of course, the bloc
 
 A block comprises a set of transactions that a leader (the block proposer) has assembled. A block's contents (its payload) may vary according to the protocol.
 
-  - The payload of a block on Ethereum's proof of work chain is an ordered list of user transactions.
-  - The payload of a block on the pre-Merge proof of stake beacon chain is (mostly) a set of attestations made by other validators.
+  - The payload of a block on Ethereum's proof of work chain is a list of user transactions.
+  - The payload of a block on the pre-Merge proof of stake beacon chain was (mostly) a set of attestations made by other validators.
+  - Post-Merge beacon chain blocks also contain the execution payload (the user transactions).
   - As and when [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum then blocks will contain opaque blobs of data alongside the ordered list of user transactions.
 
 With the exception of the special Genesis block, every block builds on and points to a parent block. Thus we end up with a chain of blocks: a blockchain. Whatever the contents of blocks, the goal of the protocol is for all nodes on the network to agree on the same history of the blockchain.
@@ -912,7 +913,7 @@ That would rule out the first, $p=0$, option. The risk with $p = 0$ is that, if 
 
 The arguments for selecting $p = \frac{1}{2}$ over $p = 1$ are quite subtle and relate to [discouragement attacks](/part2/incentives/rewards#discouragement-attacks). With $p \ne 0$, a set of validators may act against other validators by censoring them, or performing other types of denial of service, in order to persuade them to exit the system, thus increasing the rewards for themselves. Subject to various assumptions and models, we find that we require $p \le \frac{1}{2}$ for certain kinds of attack to be profitable. Essentially, we don't want to increase rewards too much for validators that succeed in making other validators exit the beacon chain.
 
-Note that after the Merge, validators' income will include a significant component from transaction tips and MEV, which will have the effect of pushing $p$ closer to $1$, and much of this reasoning will become moot. Discouragement attacks in that regime are an unsolved problem.
+Note that since the Merge, validators' income can include a significant component from transaction priority fees and MEV. This has the effect of pushing $p$ closer to $1$, and much of the reasoning above becomes moot. Discouragement attacks in this regime are an unsolved problem.
 
 #### See also
 
@@ -1204,7 +1205,7 @@ First, the Altair upgrade did not change the expected reward per validator, but 
 
 Second, there are further sources of variation that the above analysis doesn't account for. For example, if my validator proposes a block right after a skipped slot, in which there was no block, then my block proposal could be worth up to 71.4% more than a normal block proposal. This is because I get to include attestations from the skipped slot as well as from my own slot, and benefit from the extra source and target votes (but not the extra head votes, which will be too late, or the extra sync committee inclusion).
 
-Third (and most significantly), post-Merge, validators will additionally receive the transaction tips from execution blocks, and potentially MEV-related income as well. These will substantially increase the percentage earnings, and variance in earnings, for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance.
+Third (and most significantly), post-Merge, validators additionally receive the transaction priority fees from execution payloads, and potentially MEV-related income as well. These can substantially increase the percentage earnings and variance in earnings for stakers, but will not affect overall issuance on the beacon chain since they come from recycled Ether rather than new issuance.
 
 #### Rewards scale with participation
 
@@ -1556,7 +1557,7 @@ This initial penalty was [introduced](https://github.com/ethereum/consensus-spec
 
 Along with the initial penalty, the validator is queued for exit, and has its withdrawability epoch set to around 36 days ([`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), which is 8192 epochs) in the future.
 
-During Phase&nbsp;0, this initial penalty was $\frac{1}{128}$ of the offender's effective balance. It is expected to be raised to its full value of $\frac{1}{32}$ of the effective balance, a maximum of 1 ETH, as part of The Merge.
+During Phase&nbsp;0 this initial penalty was $\frac{1}{128}$ of the offender's effective balance. It was raised to its full value of $\frac{1}{32}$ of the effective balance, a maximum of 1&nbsp;ETH, in the pre-Merge Bellatrix upgrade.
 
 ##### The correlation penalty
 
@@ -2676,7 +2677,7 @@ The expected gain may be higher if we consider using the two last slots, or the 
 
 We've seen that, although the RANDAO is biasable, it is not so biasable as to break the protocol: for our purposes the randomness is "good enough".
 
-Nonetheless, it is interesting to explore how it might be improved, especially as, with The Merge, the RANDAO contents will be available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus layer.
+Nonetheless, it is interesting to explore how it might be improved, especially as, with The Merge, the RANDAO value is now available to Ethereum's smart contract layer. Randomness biasability in a large lottery contract, for example, could be more of a problem than biasability in the consensus protocol.
 
 The long-term fix for biasability is to use a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best that any other device could do is to obtain the result in, say, 5 seconds.
 
@@ -5253,7 +5254,7 @@ The value of `ETH1_FOLLOW_DISTANCE` is not based on the expected depth of any re
 
 This parameter [was increased](https://github.com/ethereum/consensus-specs/pull/2093/files) from 1024 to 2048 blocks for the beacon chain mainnet, to allow devs more time to respond if there were any trouble on the Eth1 chain.
 
-The whole follow distance concept has been made redundant by The Merge and may be removed in a future upgrade, so that validators can make deposits and become active more-or-less instantly.
+The whole follow distance concept has been made redundant by the Merge and may be removed in a future upgrade, so that validators can make deposits and become active more-or-less instantly.
 
 #### Validator Cycle
 
@@ -5996,7 +5997,7 @@ class ExecutionPayload(Container):
     transactions: List[Transaction, MAX_TRANSACTIONS_PER_PAYLOAD]
 ```
 
-Since The Merge, blocks on the beacon chain contain Ethereum transaction data, formerly known as Eth1 blocks, and now called execution payloads.
+Since the Merge, blocks on the beacon chain contain Ethereum transaction data, formerly known as Eth1 blocks, and now called execution payloads.
 
 This is a significant change, and is what led to the name "The Merge".
 
@@ -9227,15 +9228,26 @@ TODO
 
 ### Introduction
 
-HERE
+Through an open process in February 2021 we decided that beacon chain upgrades would be [named after stars](https://github.com/ethereum/eth2.0-pm/issues/202#issuecomment-775789449). We're taking them in English alphabetical order, with the first being [Altair](https://github.com/ethereum/consensus-specs/issues/2218). The genesis configuration remains Phase&nbsp;0 due to its origin in the now defunct [three-phase plan](https://web.archive.org/web/20220916204934/https://docs.ethhub.io/ethereum-roadmap/ethereum-2.0/eth-2.0-phases/) for delivering Ethereum&nbsp;2.0.
 
-TODO
+A summary of upgrades to date follows, with more detailed descriptions in the next sections.
+
+| Name | Epoch | Date (UTC) | Comments | Spec tag |
+| - | - | - | - | - |
+| [Phase&nbsp;0](/part4/history/phase0) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) |
+| [Altair](/part4/history/altair)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |
+| [Bellatrix](/part4/history/bellatrix) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) |
+| [Capella](/part4/history/capella)     | TBD    | TBD                 | The next planned upgrade | TBD  |
+
+The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention.
+
+[TODO: link to Merge section when done]::
+
+The specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.2.0). The specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/das) (data-availability sampling), [eip4844](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/eip4844), [custody_game](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/sharding). These reflect different research directions and are in varying states of currency.
 
 ### Phase 0 <!-- /part4/history/phase0 -->
 
 For historical reasons, the initial configuration of the beacon chain at its genesis was called Phase&nbsp;0.
-
-[TODO - link to "historical reasons" when written]::
 
 Beacon chain genesis took place at 12:00:23 UTC on the 1st of December, 2020. The extra 23 seconds comes from the timestamp of the first Eth1 block to meet the [genesis criteria](/part3/initialise#genesis-state), [block 11320899](https://etherscan.io/block/11320899). It is a little remnant of proof of work forever embedded in the beacon chain's history.
 
@@ -9302,7 +9314,7 @@ The primary goal of Bellatrix was to ready the beacon chain for [the Merge](/par
   - The [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) was updated to recognise the transition from proof of work to proof of stake on the beacon chain side.
   - The maximum size of gossip messages and Req/Resp chunks was increased in the [P2P spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/p2p-interface.md) to allow for the extra size of beacon blocks due to the execution payload. Also, the validity rules for gossiped blocks were updated.
 
-In addition, continuing the changes from Altair, some penalty parameters were updated to their final values. These had been softened pre-Merge as we got used to running the beacon chain:
+In addition, continuing the changes from Altair, some penalty parameters were updated to their final values. These had been softened for the pre-Merge releases as we got used to running the beacon chain:
 
   - [`INACTIVITY_PENALTY_QUOTIENT`](/part3/config/preset#inactivity_penalty_quotient_bellatrix) decreased from $3 \times 2^{24}$ to $2^{24}$. This reduces stakes more quickly during an inactivity leak.
   - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset#min_slashing_penalty_quotient_bellatrix) decreased from 64 to 32. This sets the initial slashing penalty to 1&nbsp;ETH for a validator with a full stake rather than 0.5&nbsp;ETH.
@@ -9312,7 +9324,7 @@ The full description of the changes between Altair and Bellatrix is in the [Bell
 
 ### Capella <!-- /part4/history/capella -->
 
-Capella is the next anticipated upgrade to the beacon chain after Bellatrix. A working draft of its specification is available in the [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/specs/capella).
+Capella is the next anticipated upgrade to the beacon chain after Bellatrix.
 
 At the time of writing, the only feature to be included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
 
@@ -9324,6 +9336,8 @@ Two withdrawal mechanisms are [planned](https://github.com/ethereum/consensus-sp
 The above operations are possible only for validators that have `0x01` type [credentials](/part3/config/constants#withdrawal-prefixes). A mechanism for [updating validators](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-process_bls_to_execution_change) from `0x00` to `0x01` credentials will also be provided.
 
 The Engine API will be [modified](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/validator.md) to allow withdrawal data to be passed from the consensus client to the execution client. The execution client will credit users' accounts accordingly.
+
+A working draft of changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/dev/specs/capella).
 
 ## The Merge <!-- /part4/merge* -->
 

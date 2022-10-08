@@ -167,13 +167,14 @@ Signedness
 Slashings
 Stakers
 Szilágyi
+TBD
 TODO
+TTD
 Teku
 Teku's
 Tendermint
 TiB
 Tomescu
-TTD
 Umberto
 VDF
 VDFs
@@ -220,6 +221,7 @@ cryptoeconomic
 cryptographic
 cryptographically
 crystallized
+das
 de
 decentralization
 decrementing
@@ -235,6 +237,7 @@ dev
 devs
 discretisation
 disincentivise
+eip
 else's
 endian
 endianness
