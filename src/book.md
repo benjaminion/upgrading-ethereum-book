@@ -606,7 +606,7 @@ The main practical constraint on the number of validators in a monolithic[^fn-mo
 [^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
 
     - More on the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
-    - More on modularity: [The lay of the modular blockchain land](https://polynya.medium.com/the-lay-of-the-modular-blockchain-land-d937f7df4884) by Polynya.
+    - More on modularity: [Modular Blockchains: A Deep Dive](https://volt.capital/blog/modular-blockchains) by Alec Chen of Volt Capital.
 <!-- markdownlint-enable code-block-style -->
 
 Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and we want a time to finality of $f$, then we can have participation from at most $n$ validators, where
@@ -4382,8 +4382,8 @@ The main references:
 
 Other excellent, but in places outdated references:
 
-  - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view)
-  - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB?type=view)
+  - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN)
+  - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB)
   - [Phase 0 design notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr) (Justin Drake)
   - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
 
@@ -4817,7 +4817,7 @@ There is a concept of "effective balance" for validators: whatever a validator's
 
 The `MAX_EFFECTIVE_BALANCE` is the highest effective balance that a validator can have: 32 Ether. Any balance above this is ignored. Note that this means that staking rewards don't compound in the usual case (unless a validator's effective balance somehow falls below 32&nbsp;Ether, in which case rewards kind of compound).
 
-There is a discussion in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Why-32-ETH-validator-sizes) of why 32 Ether was chosen as the staking amount. In short, we want enough validators to keep the chain both alive and secure under attack, but not so many that the message overhead on the network becomes too high.
+There is a discussion in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes) of why 32 Ether was chosen as the staking amount. In short, we want enough validators to keep the chain both alive and secure under attack, but not so many that the message overhead on the network becomes too high.
 
 ##### `EFFECTIVE_BALANCE_INCREMENT`
 
@@ -4827,7 +4827,7 @@ This discretisation of effective balance is intended to reduce the amount of has
 
 Effective balance is changed according to a process with hysteresis to avoid situations where it might change frequently. See [`HYSTERESIS_QUOTIENT`](#hysteresis-parameters).
 
-You can read more about effective balance in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN?type=view#Effective-balances) and in [this article](https://www.attestant.io/posts/understanding-validator-effective-balance/).
+You can read more about effective balance in the [Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Effective-balances) and in [this article](https://www.attestant.io/posts/understanding-validator-effective-balance/).
 
 #### Time parameters
 
