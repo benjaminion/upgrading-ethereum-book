@@ -1,11 +1,14 @@
 import React from "react"
 
+import Banner from "../components/banner"
+
 import "./page.css"
 
 const Layout = ({ children }) => {
   return (
     <>
-      <main>{children}</main>
+      <Banner />
+      <div id="page">{children}</div>
     </>
   )
 }

@@ -18,7 +18,7 @@ body {
   display: contents;
 }
 
-main {
+#page {
   display: flex;
   flex-direction: row;
   width: 100vw;
@@ -29,7 +29,7 @@ main {
   overflow-x: auto;
 }
 
-div.main-content {
+#main-content {
   box-sizing: border-box;
   margin: 0px;
   margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
@@ -288,7 +288,7 @@ div.summary {
 }
 
 @media print {
-  html, body, main, div.main-content {
+  html, body, #page, #main-content {
     display: block !important;
     overflow: visible !important;
     width: 100% !important;
@@ -297,7 +297,7 @@ div.summary {
     margin: initial !important;
     padding: initial !important;
   }
-  div.main-content {
+  #main-content {
     font-size: 12pt !important;
     padding: 0 12mm !important;
   }
@@ -343,7 +343,7 @@ div.summary {
 }
 
 @media screen and (max-width: 1200px) {
-  div.main-content {
+  #main-content {
     margin: 0 auto;
     width: 100%;
     padding: 0.75rem 1.5rem;

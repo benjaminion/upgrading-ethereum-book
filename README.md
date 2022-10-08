@@ -1,16 +1,24 @@
 # Upgrading Ethereum
 
+** You are viewing the Altair branch, which is outdated and unmaintained. **
+
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
-You can read it at [eth2book.info](https://eth2book.info/altair) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/altair)).
+You can read it at [eth2book.info](https://eth2book.info/latest) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/latest)).
 
-It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/altair/preface).
-
-I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_. Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript. (But PRs for typos break my workflow so please raise issues instead.)
+It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/latest/preface).
 
 ## Licence
 
 This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) licence.
+
+## Contributing
+
+I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_.
+
+Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
+
+Kindly note that [British spelling](https://www.oxfordinternationalenglish.com/differences-in-british-and-american-spelling/) is not a typo.
 
 ## Installing
 
@@ -20,11 +28,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v16.17.0
+v16.17.1
 > npm --version
-8.15.0
+8.19.2
 > gatsby --version
-Gatsby CLI version: 4.21.0
+Gatsby CLI version: 4.24.0
 ```
 
 `gatsby-cli` can be installed with,
