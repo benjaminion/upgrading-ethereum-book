@@ -130,4 +130,4 @@ Kind souls sometimes ask for a way to send me a cup of coffee or make a donation
   - `0xd262d146e869915444d0f34ecdaabab5ab43007e` on Ethereum, ZkSync, Polygon, Optimism, Arbitrum.
   - Also at `benjaminion.eth`
 
-Any whales out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
+Any whales or large treasuries out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
