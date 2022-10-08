@@ -122,3 +122,12 @@ Pre-requisites:
   - _roughviz.min.js_ needs to be [downloaded](https://raw.githubusercontent.com/benjaminion/roughViz/master/dist/roughviz.min.js) from my repo and put in the _charts_ directory.
   - _svg-text-to-path.js_ needs to be [downloaded](https://raw.githubusercontent.com/paulzi/svg-text-to-path/master/dist/svg-text-to-path.js), also to the _charts_ directory.
   - The _Gaegu-Light.ttf_ file needs to be extracted from the [Gaegu](https://fonts.google.com/specimen/Gaegu) Google font and put in the _charts/font_ directory.
+
+## Coffee
+
+Kind souls sometimes ask for a way to send me a cup of coffee or make a donation. My account info is below - donations are absolutely not expected or necessary, but are always very encouraging and gratefully received.
+
+  - `0xd262d146e869915444d0f34ecdaabab5ab43007e` on Ethereum, ZkSync, Polygon, Optimism, Arbitrum.
+  - Also at `benjaminion.eth`
+
+Any whales out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
