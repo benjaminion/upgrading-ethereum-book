@@ -7752,7 +7752,7 @@ $$
 
 In this equation we call $S$ the pre-state (the state before applying the block $B$), and $S'$ the post-state. The function $f$ is then iterated as we receive new blocks to constantly update the state.
 
-That's the essence of blockchain progress in its purist form, as it existed under proof of work; under proof of work, the state transition function is driven exclusively by processing blocks.
+That's the essence of blockchain progress in its purest form, as it existed under proof of work; under proof of work, the state transition function is driven exclusively by processing blocks.
 
 The beacon chain, however, is not block-driven. Rather, it is slot-driven. Updates to the state depends on the progress of slots, whether or not that slot has a block associated with it.
 
