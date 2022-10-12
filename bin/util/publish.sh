@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=bellatrix
+version=altair
 
 # Set the host variable
 source ../priv/server.sh
