@@ -132,7 +132,6 @@ Piecharts
 Pintail's
 PoS
 PoW
-Polynya
 Potuz
 Pre
 Proto
@@ -275,7 +274,6 @@ lookahead
 lookaheads
 mainnet
 masse
-md
 melanoleuca
 memoised
 middleware
@@ -337,7 +335,6 @@ underflows
 unforgeability
 unpartitioned
 unslashed
-unsuffixed
 uptime
 validator
 validator's
