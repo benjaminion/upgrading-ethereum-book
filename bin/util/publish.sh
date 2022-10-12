@@ -3,7 +3,7 @@
 version=altair
 
 # Set the host variable
-source ../priv/server.sh
+source $(dirname "$0")/../priv/server.sh
 
 gatsby clean
 gatsby build --prefix-paths
