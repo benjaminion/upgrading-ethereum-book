@@ -66,7 +66,7 @@ Instead of building and serving, you can run `gatsby develop` and point your bro
 
 The entire text for the book is in the _src/book.md_ file. Everything under _src/md/pages_ is auto-generated and any changes there will be lost.
 
-There are various npm script commands to help with building:
+There are various npm script commands to help with building and testing:
 
   - `npm run clean` runs `gatsby clean`.
     - Do this after adding new graphics or if anything weird happens.
@@ -79,6 +79,8 @@ There are various npm script commands to help with building:
     - Visit http://localhost:9000/bellatrix/ to see the result.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
+  - `npm run spell` can be used to maintain the list of spellings.
+  - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
 
 ## How to
 

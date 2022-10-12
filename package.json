@@ -6,14 +6,15 @@
   "author": "Ben Edgington",
   "keywords": [],
   "scripts": {
-    "develop": "gatsby develop",
+    "devel": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build --prefix-paths",
     "serve": "gatsby serve --prefix-paths",
     "clean": "gatsby clean",
     "check": "node -e 'require(\"./bin/build/prebuild\").runChecks()'",
     "links": "bin/util/urlcheck.sh src/book.md",
-    "spell": "bin/util/check_spellings_list.sh"
+    "spell": "bin/util/check_spellings_list.sh",
+    "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'"
   },
   "dependencies": {
     "gatsby": "^4.24.4",
