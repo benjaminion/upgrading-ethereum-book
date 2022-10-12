@@ -19,8 +19,10 @@ export default function NestedList({idx, items, level}) {
       if (i + 1 < items.length && items[i + 1].level > level) {
         foo = <NestedList key={i + 1} items={items} level={level + 1} idx={i + 1} />
       }
+      // See https://github.com/facebook/react/issues/14725#issuecomment-460378418
       ret.push(
-          <li key={i}><ConditionalLink to={item.link} nolink={item.hide}>{labelSpan} {item.title}</ConditionalLink>{foo}</li>
+          // <li key={i}><ConditionalLink to={item.link} nolink={item.hide}>{labelSpan} {item.title}</ConditionalLink>{foo}</li>
+          <li key={i}><ConditionalLink to={item.link} nolink={item.hide}>{labelSpan}{` ${item.title}`}</ConditionalLink>{foo}</li>
       )
       i++
       while (i < items.length && items[i].level > level)
