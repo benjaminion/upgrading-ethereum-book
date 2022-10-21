@@ -790,7 +790,19 @@ These are applied at the end of each epoch during [effective balance updates](/p
 
 The effect of the hysteresis is that the effective balance cannot change more often than it takes for a validator's actual balance to change by 0.5 ETH, which would normally take several weeks or months.
 
-Historical note: the initial implementation of hysteresis effectively [had](https://github.com/ethereum/consensus-specs/pull/1627#discussion_r387294528) `QUOTIENT = 2`, `DOWNWARD_MULTIPLIER = 0`, and `UPWARD_MULTIPLIER = 3`. This meant that a validator starting with 32 ETH actual balance but suffering a minor initial outage would immediately drop to 31 ETH effective balance. To get back to 32 ETH effective balance it would need to achieve a 32.5 ETH actual balance, and meanwhile the validator's rewards would be 3.1% lower due to the reduced effective balance. This [seemed unfair](https://github.com/ethereum/consensus-specs/issues/1609), and incentivised stakers to "over-deposit" Ether to avoid the risk of an initial effective balance drop. Hence the [change](https://github.com/ethereum/consensus-specs/pull/1627) to the current parameters.
+###### An edge case
+
+The hysteresis design gives rise to an interesting [edge case](https://github.com/ethereum/consensus-specs/issues/3049) in deposit processing. The [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol) allows a staker to deposit any amount greater than or equal to 1&nbsp;ETH; a deposit doesn't have to be the full 32&nbsp;ETH. This allows a stake to be accumulated from multiple deposits. For example, a deposit of 24&nbsp;ETH followed by a separate deposit of 8&nbsp;ETH makes up a full stake and will activate the validator once the second deposit has been processed.
+
+The edge case occurs when the final deposit for a validator takes its actual balance to 32&nbsp;ETH or more but, due to the hysteresis, is not sufficient to update its effective balance to 32&nbsp;ETH. For example, after a deposit of 31&nbsp;ETH the validator's actual and effective balances will both be 31&nbsp;ETH. A further deposit of 1&nbsp;ETH will take the validator's actual balance to 32&nbsp;ETH &ndash; which makes it technically eligible for activation &ndash; but will leave its effective balance at 31&nbsp;ETH due to the hysteresis calculation. Thus it will not be activated.
+
+Validator [418408](https://beaconcha.in/validator/b6c1531b7896e3493806a8dd72fa9c3387f4f7a2fdc565bf1e8e66becb0666f8c3938270a757703e3865619dcc34bf7c#deposits) is an example of this occurring on mainnet. The penultimate deposit of 1&nbsp;ETH took the validator's total balance to 32&nbsp;ETH, but it was not activated until a further deposit of 1&nbsp;ETH was made in order to force an update to effective balance.
+
+[TODO: link to deposit contract section when written]::
+
+###### A historical note
+
+The initial implementation of hysteresis effectively [had](https://github.com/ethereum/consensus-specs/pull/1627#discussion_r387294528) `QUOTIENT = 2`, `DOWNWARD_MULTIPLIER = 0`, and `UPWARD_MULTIPLIER = 3`. This meant that a validator starting with an actual balance of 32 ETH, but suffering a minor initial outage, would immediately drop to 31 ETH effective balance. To get back to 32 ETH effective balance it would need to achieve a 32.5 ETH actual balance, and meanwhile the validator's rewards would be 3.1% lower due to the reduced effective balance. This [seemed unfair](https://github.com/ethereum/consensus-specs/issues/1609), and incentivised stakers to "over-deposit" Ether to avoid the risk of an initial effective balance drop. Hence the [change](https://github.com/ethereum/consensus-specs/pull/1627) to the current parameters.
 
 #### See also
 
