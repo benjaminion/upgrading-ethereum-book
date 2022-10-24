@@ -45,6 +45,7 @@ Dankrad
 Danksharding
 DeFi
 Decentralization
+Devcon
 Devconnect
 Dfinity
 Dfinity's
@@ -81,6 +82,7 @@ Gwei
 Hashtree
 Hauner
 Hoang
+Hsiao
 IETF
 Incentivisation
 Incentivization
@@ -139,6 +141,7 @@ Protoarray
 Protolambda
 Prysm
 Psomas
+Pyspec
 Pythonic
 Péter
 RANDAO

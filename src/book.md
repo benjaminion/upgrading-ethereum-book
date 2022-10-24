@@ -4394,24 +4394,27 @@ The contents of each are identical.
 
 This edition of Upgrading Ethereum is based on the Bellatrix version of the beacon chain specification, and corresponds to [Release v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0), made on the 22nd of September 2022.
 
-At the time of writing, there is no single specification document for Bellatrix. Rather, we have the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md), an additional [Altair specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md), and the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md). Each builds on top of the previous version in a kind of text-based diff.
+There is no single specification document that covers Bellatrix. Rather, we have the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md), an additional [Altair specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md), and the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md). Each builds on top of the previous version in a kind of text-based diff.
 
-To make the whole thing easier to follow in this chapter, I have consolidated the three specifications, omitting any parts that were superseded by Altair and then Bellatrix. For the most part, I have tried to reflect the existing structure of the documents to make them easier to read side-by-side with the original specs. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document into the flow of this one.
+To make the whole thing easier to follow in this chapter, I have consolidated the three specifications, omitting most of the parts that were superseded by Altair and then Bellatrix. In general I have tried to reflect the existing structure of the documents to make them easier to read side-by-side with the original specs. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document into the flow of this one.
 
-#### References
+#### See also
 
 The main references:
 
   - [The Phase&nbsp;0](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md) beacon chain specification.
   - [Altair updates](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md) to the beacon chain specification.
-  - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
+  - [Bellatrix updates](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) to the beacon chain specification.
 
 Other useful, but in places outdated references:
 
+  - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
   - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN)
   - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB)
   - [Phase 0 design notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr) (Justin Drake)
   - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
+
+Hsiao-Wei Wang gave a [Lightning Talk](https://archive.devcon.org/archive/watch/6/how-to-use-executable-consensus-pyspec/) on the consensus Pyspec at Devcon VI that briefly describes its structure and how it can be executed.
 
 ## Types, Constants, Presets, and Configuration <!-- /part3/config -->
 
@@ -9543,7 +9546,7 @@ print(json.dumps(type_bounds))
 
 #### Set up
 
-We have a bunch of hoops to jump through to get things installed for the first time. The below works well for me on Linux, but I haven't tested extensive variations. Just use the commands prefixed with `>`, I've included some of the output so you can check whether things are on the right lines.
+We have a few hoops to jump through to get things installed for the first time. The below works well for me on Linux, but I haven't tested extensive variations. Just use the commands prefixed with `>`, I've included some of the output so you can check whether things are on the right lines.
 
 First, set up a Python virtual environment.
 
@@ -9591,7 +9594,7 @@ The pipe to `jq` is optional, you will just get less pretty output without it.
 <details>
 <summary>Full output</summary>
 
-Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns out to be 139TiB, or that `BeaconBlockBody` can be enormous. These sizes are based on the notional [maximum SSZ list lengths](/part2/building_blocks/ssz#lists) they contain, and are not realistic in practice.
+Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns out to be 139TiB, or that `BeaconBlockBody` can be enormous. These sizes are based on the notional [maximum SSZ list lengths](/part2/building_blocks/ssz#lists) they contain, and are not realistic in practice.
 
 ```none
 {
@@ -9734,6 +9737,10 @@ Values are bytes. Don't be alarmed that that maximum size of `BeaconState` turns
 ```
 
 </details>
+
+#### See also
+
+Hsiao-Wei Wang gave a [Lightning Talk](https://archive.devcon.org/archive/watch/6/how-to-use-executable-consensus-pyspec/) on the consensus Pyspec at Devcon VI. She swiftly covers how it is structured, how to run it, and how to build test cases.
 
 ### Sizes of containers <!-- /appendices/reference/sizes* -->
 
