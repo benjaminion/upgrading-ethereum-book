@@ -9740,7 +9740,7 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
 
 #### See also
 
-Hsiao-Wei Wang gave a [Lightning Talk](https://archive.devcon.org/archive/watch/6/how-to-use-executable-consensus-pyspec/) on the consensus Pyspec at Devcon VI. She swiftly covers how it is structured, how to run it, and how to build test cases.
+Hsiao-Wei Wang gave a [Lightning Talk](https://archive.devcon.org/archive/watch/6/how-to-use-executable-consensus-pyspec/) on the consensus Pyspec at Devcon VI. She swiftly covers how it is structured, how to run it, and how to build test cases. The [presentation slides](https://docs.google.com/presentation/d/10HdtwTaFdTVLaiIGQJClyCs8AzrPXS20i78LZnPXHyo/edit?usp=sharing) are available.
 
 ### Sizes of containers <!-- /appendices/reference/sizes* -->
 
