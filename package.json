@@ -17,7 +17,7 @@
     "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'"
   },
   "dependencies": {
-    "gatsby": "^4.24.4",
+    "gatsby": "^4.24.5",
     "gatsby-plugin-catch-links": "^4.24.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.13.0",
