@@ -216,7 +216,7 @@ Achieving consensus in such a Byzantine distributed system is not an easy proble
 
 The first mainstream solution was the [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) (PBFT) algorithm published by Liskov and Castro in 1999. This relies on a relatively small and limited set of known consensus participants (called _replicas_). PBFT is always "safe", in the terms discussed [below](#safety) and does not have forks.
 
-Nakamoto consensus, [invented by](https://bitcoinpaper.org/bitcoin.pdf) Satoshi Nakamoto for Bitcoin in 2008, takes a fundamentally different approach. Rather than limiting participants to a known set it uses proof of work to permissionlessly select a temporary leader for the consensus. Unlike PBFT, Nakamoto consensus allows forks and and is not formally "safe".
+Nakamoto consensus, [invented by](https://bitcoinpaper.org/bitcoin.pdf) Satoshi Nakamoto for Bitcoin in 2008, takes a fundamentally different approach. Rather than limiting participants to a known set it uses proof of work to permissionlessly select a temporary leader for the consensus. Unlike PBFT, Nakamoto consensus allows forks and is not formally "safe".
 
 Many, many variants of these and other novel alternatives, such as the [Avalanche family](https://arxiv.org/pdf/1906.08936) of protocols, have since sprung up. Section 7, Related Work, of the [Avalanche white paper](https://arxiv.org/pdf/1906.08936) provides a good survey of the zoo of different consensus protocols currently in use in the blockchain world.
 
@@ -381,7 +381,7 @@ In a blockchain context we generally understand this to mean that the chain can 
 
 The CAP theorem is a famous result in distributed systems theory that states that no distributed system can provide all three of (1) consistency, (2) availability, and (3) partition tolerance. Partition tolerance is the ability to function when communication between nodes is not reliable. For example, a network fault might split the nodes into two or more groups that can't communicate with each other.
 
-It is easy to demonstrate the CAP theorem in our blockchain context. Imagine that Amazon Web Services goes offline, such that all the AWS hosted nodes can communicate with each other, but none can can talk to the outside world. Or that a country firewalls all connections in and out so that no gossip traffic can pass. Either of these scenarios divide the nodes into two disjoint groups, $A$ and $B$.
+It is easy to demonstrate the CAP theorem in our blockchain context. Imagine that Amazon Web Services goes offline, such that all the AWS hosted nodes can communicate with each other, but none can talk to the outside world. Or that a country firewalls all connections in and out so that no gossip traffic can pass. Either of these scenarios divide the nodes into two disjoint groups, $A$ and $B$.
 
 <a id="img_consensus_partition"></a>
 <div class="image" style="width: 50%">
@@ -2240,7 +2240,7 @@ Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is used to b
 
 [^fn-pseudo-random]: I'm not going to distinguish the niceties of randomness and pseudo-randomness in this section. We are actually using pseudo-randomness seeded with (presumed) genuine randomness. It must be the case as it is impossible to come to consensus on genuine randomness. However, I will just call it "randomness" throughout.
 
-In this section we will look at the way that randomness is introduced into the beacon chain, some of the ways in which is is used, and finally some of the issues with the current scheme.
+In this section we will look at the way that randomness is introduced into the beacon chain, some of the ways in which it is used, and finally some of the issues with the current scheme.
 
 #### The RANDAO
 
@@ -3216,7 +3216,7 @@ The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the mi
 <div class="image">
 
 ![A bar chart showing the probability of different numbers of aggregators in a committee of 256](md/images/charts/committee_aggregators.svg)
-The probability of of having $k$ aggregators in a beacon committee of size 256. The expected number is 16.
+The probability of having $k$ aggregators in a beacon committee of size 256. The expected number is 16.
 
 </div>
 
