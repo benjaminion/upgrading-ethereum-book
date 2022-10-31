@@ -1561,15 +1561,15 @@ When it comes to the punishment for being slashed it does not matter which rule 
 
 Slashing is triggered by the evidence of the offence being included in a beacon chain block. Once the evidence is confirmed by the network, the offending validator (or validators) is slashed.
 
-The offender immediately has one sixty-fourth ([`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#min_slashing_penalty_quotient)) of its effective balance deducted from its actual balance. This is a maximum of 1&nbsp;ETH due to the cap on effective balance.
+The offender immediately has $\frac{1}{32}$ ([`MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset#min_slashing_penalty_quotient)) of its effective balance deducted from its actual balance. This is a maximum of 1&nbsp;ETH due to the cap on effective balance.
 
-This initial penalty was [introduced](https://github.com/ethereum/consensus-specs/pull/624) to make it somewhat costly for validators to self-slash for any reason.
+This initial penalty was [introduced](https://github.com/ethereum/consensus-specs/pull/624) to make it somewhat costly for validators to self-slash for any reason[^fn-initial-penalty].
 
-[TODO: why would anyone wish to self-slash? Vitalik says "to DoS the chain" - how would that work?]::
+[^fn-initial-penalty]: It is not clear to me under what circumstances self-slashing would give any advantage under the beacon chain's current design. To date, the only effect of the initial penalty has been to punish small stakers for misconfiguring their staking setups (by running keys in more than one place) which seems to me unduly harsh. I have argued that it ought to be removed entirely. Nonetheless, it remains.
 
 Along with the initial penalty, the validator is queued for exit, and has its withdrawability epoch set to around 36 days ([`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), which is 8192 epochs) in the future.
 
-During Phase&nbsp;0 this initial penalty was $\frac{1}{128}$ of the offender's effective balance. It was raised to its full value of $\frac{1}{32}$ of the effective balance, a maximum of 1&nbsp;ETH, in the pre-Merge Bellatrix upgrade.
+During Phase&nbsp;0 the initial penalty was $\frac{1}{128}$ of the offender's effective balance, and during Altair, $\frac{1}{64}$. It was raised to its full value of $\frac{1}{32}$ of the slashed validator's effective balance, a maximum of 1&nbsp;ETH, in the pre-Merge Bellatrix upgrade.
 
 ##### The correlation penalty
 
@@ -1601,13 +1601,13 @@ Validators that exit normally (by sending a voluntary exit message) are expected
 
 A validator that is slashed continues to receive attestation penalties until its withdrawable epoch, which is set to 8192 epochs (36 days) after the slashing, and they are unable to receive any attestation rewards during this time. They are also subject for this entire period to any [inactivity leak](/part2/incentives/inactivity) that might be in operation. Whatever the slashed validator does, it is penalised exactly as if it is failing to participate.[^fn-slashed-validators]
 
-[^fn-slashed-validators]: It's not clear to me why we have such a large hang-over from being slashed during which validators continue to receive penalties. It seems like kicking a man when he's down, especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty. Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit.
+[^fn-slashed-validators]: Having such a long overhang from being slashed during which validators continue to receive penalties seems like "kicking a man when he's down", especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty. Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit.
 
 So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 106{,}987{,}520 \text{ Gwei} = 0.107 \text{ ETH}$, based on 300k validators, assuming that the chain is not in an inactivity leak. And (much) more if it is.
 
 Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to skip slashed validators, but that is not how it is implemented currently.)
 
-In an interesting edge case, however, slashed validators are eligible to be selected for sync committee duty until they reach their exit epoch and to receive the rewards for sync committee participation. Though the odds of this happening, absent a mass slashing event, are pretty tiny.
+In an interesting edge case, however, slashed validators are eligible to be selected for sync committee duty until they reach their exit epoch and to receive the rewards for sync committee participation. The odds of this happening, though, absent a mass slashing event, are pretty tiny.
 
 #### The value of reporting a slashing
 
@@ -9051,7 +9051,7 @@ A voluntary exit message is submitted by a validator to indicate that it wishes 
 
 Most of the checks are straightforward, as per the comments in the code. Note the following.
 
-  - Voluntary exits are ignored if they are included in blocks before the given `epoch`, so nodes might buffer any future-dated exits they see before putting them in a block.
+  - Voluntary exits are invalid if they are included in blocks before the given `epoch`, so nodes should buffer any future-dated exits they see before putting them in a block.
   - A validator must have been active for at least [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs (27 hours). See [there](/part3/config/configuration#shard_committee_period) for the rationale.
   - Voluntary exits are signed with the validator's usual signing key. There is some discussion about [changing this](https://github.com/ethereum/consensus-specs/issues/1578) to also allow signing of a voluntary exit with the validator's withdrawal key.
 

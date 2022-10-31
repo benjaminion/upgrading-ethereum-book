@@ -282,6 +282,7 @@ memoised
 middleware
 misbehaviours
 misconfiguration
+misconfiguring
 modularity
 monocultures
 nd
