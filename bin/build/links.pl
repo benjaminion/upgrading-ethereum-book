@@ -87,12 +87,12 @@ while(<$fh>) {
     /$newPagePath/ and $pagePath = $2;
 
     # Footnote references
-    while (/^.+\[\^(.+?)\]/g) {
+    while (/.\[\^(.+?)\]/g) {
         my $fn = $1;
         if (exists($fns{$fn})) {
             delete $fns{$fn};
         } else {
-            print "Missing footnote: $fn , line $.";
+            print "Missing footnote: $fn, line $.";
         }
     }
 
