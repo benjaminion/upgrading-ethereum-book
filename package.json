@@ -12,9 +12,10 @@
     "serve": "gatsby serve --prefix-paths",
     "clean": "gatsby clean",
     "check": "node -e 'require(\"./bin/build/prebuild\").runChecks()'",
-    "links": "bin/util/urlcheck.sh src/book.md",
+    "links": "bin/util/check_urls.sh src/book.md",
     "spell": "bin/util/check_spellings_list.sh",
-    "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'"
+    "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'",
+    "gramm": "bin/util/check_grammar.sh src/book.md"
   },
   "dependencies": {
     "gatsby": "^4.24.6",

@@ -1,0 +1,23 @@
+{
+  "language": "en-GB",
+  "disabledRules": {
+    "en-GB": [
+      "MORFOLOGIK_RULE_EN_GB",
+      "OXFORD_SPELLING_Z_NOT_S",
+      "ARROWS",
+      "WHITESPACE_RULE",
+      "WANNA",
+      "EN_WORD_COHERENCY",
+      "SOME_OF_THE",
+      "SMALL_NUMBER_OF"
+    ]
+  },
+  "markdown": {
+    "nodes": {}
+  },
+  "hiddenFalsePositives": {
+    "en-GB": [
+      "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"block chain\"}"
+    ]
+  }
+}
