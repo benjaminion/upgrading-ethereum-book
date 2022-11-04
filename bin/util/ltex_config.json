@@ -9,15 +9,22 @@
       "WANNA",
       "EN_WORD_COHERENCY",
       "SOME_OF_THE",
-      "SMALL_NUMBER_OF"
+      "SMALL_NUMBER_OF",
+      "LARGE_NUMBER_OF"
     ]
-  },
-  "markdown": {
-    "nodes": {}
   },
   "hiddenFalsePositives": {
     "en-GB": [
-      "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"block chain\"}"
+      "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"[Bb]lock chain\"}",
+      "{\"rule\": \"ADVERB_VERB_ADVERB_REPETITION\", \"sentence\": \"per slot per shard\"}",
+      "{\"rule\": \"PEOPLE_VBZ\", \"sentence\": \"people is a joy\"}",
+      "{\"rule\": \"THE_SUPERLATIVE\", \"sentence\": \"Latest Message Driven\"}",
+      "{\"rule\": \"MISSING_GENITIVE\", \"sentence\": \"(Nakamoto consensus)|(Ethereum transaction)|(Merkle roots)\"}",
+      "{\"rule\": \"TO_DO_HYPHEN\", \"sentence\": \"to DoS\"}",
+      "{\"rule\": \"WHETHER\", \"sentence\": \"whether or not\"}"
     ]
+  },
+  "markdown": {
+    "nodes": {"BlockQuote": "ignore"}
   }
 }
