@@ -5,17 +5,20 @@ const glob = require('glob')
 // Performs the following prebuild tasks:
 //  - Checks that internal document links look ok
 //  - Spellcheck
+//  - Repeated words check
 //  - Lints the source markdown (see lintSourceMarkdown in this file)
 //  - Splits the source markdown into individual pages
 //  - Lints the split markdown (see lintSplitMarkdown in this file)
 
 const doInternalLinks = true
 const doSpellCheck = true
+const doRepeatCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
 const linkChecker = 'bin/build/links.pl'
 const spellChecker = 'bin/build/spellcheck.sh'
+const repeatChecker = 'bin/build/repeatcheck.sh'
 const mdSplitter = 'bin/build/update.sh'
 
 const sourceMarkdown = 'src/book.md'
@@ -65,6 +68,22 @@ module.exports.runChecks = (reporter) => {
     }
   } else {
     reporter.warn('Skipping spellcheck')
+  }
+
+  if (doRepeatCheck) {
+    reporter.info('Performing repeated words check...')
+    try {
+      const out = execSync(`${repeatChecker} ${sourceMarkdown}`, {encoding: 'utf8', stdio: 'pipe'})
+      if (out !== '') {
+        reporter.warn('Found some repeated words:')
+        printLines(out, reporter.warn)
+      }
+    } catch (err) {
+      reporter.warn('Unable to perform repeat check:')
+      printLines(err.toString(), reporter.warn)
+    }
+  } else {
+    reporter.warn('Skipping repeat check')
   }
 
   if (doSourceLint) {
