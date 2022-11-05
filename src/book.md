@@ -161,6 +161,7 @@ Our aim is to understand that sentence in all its parts. There's a lot to unpack
   - Forkful chains use a fork choice rule, and sometimes undergo reorganisations.
   - In a "safe" protocol, nothing bad ever happens.
   - In a "live" protocol, something good always happens.
+  - No practical protocol can be always safe and always live.
 
 </div>
 
@@ -411,7 +412,7 @@ It's worth noting that typical proof of work based algorithms also prioritise li
 
 Ethereum's proof of stake mechanism prioritises liveness, but unlike proof of work it also strives to offer a safety guarantee under favourable circumstances.
 
-Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper FFG mechanism that we'll explore shortly. The idea is that, as the blockchain progresses, all honest nodes agree on blocks that they will never revert. That block (a checkpoint) and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer. Thus, finality is a safety property: nothing bad ever happens.
+Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper FFG mechanism that we'll explore shortly. The idea is that, as the blockchain progresses, all honest validators agree on blocks that they will never revert. That block (a checkpoint) and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer. Thus, finality is a safety property: once finality has been conferred, nothing bad ever happens.
 
 <a id="img_consensus_finality"></a>
 <div class="image" style="width: 80%">
@@ -427,7 +428,7 @@ The next section, on Casper FFG, dives into the detail of how this finality mech
 
 #### See also
 
-It's always worth reading anything that Lamport has had a hand in, and the original paper by Lamport, Shostak, and Pease on [The Byzantine Generals Problem](https://lamport.azurewebsites.net/pubs/byz.pdf) contains many insights. While the algorithm they propose is hopelessly inefficient in modern terms, the paper is a good introduction to reasoning about consensus protocols in general. The same is true of Castro and Liskov's seminal paper [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) which significantly influences the design of Ethereum's Casper FFG protocol. However, you might like to contrast these "classical" approaches with the elegant simplicity of proof of work, as devised by Satoshi Nakamoto and described in the [Bitcoin white paper](https://bitcoinpaper.org/bitcoin.pdf). If proof of work has just one thing in its favour, it is its simplicity.
+It's always worth reading anything that Leslie Lamport has had a hand in, and the original paper by Lamport, Shostak, and Pease on [The Byzantine Generals Problem](https://lamport.azurewebsites.net/pubs/byz.pdf) contains many insights. While the algorithm they propose is hopelessly inefficient in modern terms, the paper is a good introduction to reasoning about consensus protocols in general. The same is true of Castro and Liskov's seminal paper [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) which significantly influenced the design of Ethereum's Casper FFG protocol. However, you might like to contrast these "classical" approaches with the elegant simplicity of proof of work, as described by Satoshi Nakamoto in the [Bitcoin white paper](https://bitcoinpaper.org/bitcoin.pdf). If proof of work has just one thing in its favour, it is its simplicity.
 
 We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). It is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
 
@@ -435,7 +436,7 @@ The Eth2 beacon chain underwent a seven block reorg in May 2022 due to differenc
 
 Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality/) provides a deeper and more nuanced exploration of the concept of finality.
 
-Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These design criteria strongly influence how we build our consensus protocols. Vitalik explores these issues in his article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
+Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These criteria strongly influence how we design our consensus protocols. Vitalik explores these issues in his article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
 
 ### Casper FFG <!-- /part2/consensus/casper_ffg* -->
 
@@ -641,7 +642,7 @@ Given the capacity of current p2p networks, 32 ETH per stake is about as low as 
 
 An alternative approach might be to [cap the number](https://github.com/ethereum/consensus-specs/issues/2137) of validators active at any one time to put an upper bound on the number of messages exchanged. With something like that in place, we could explore reducing the stake below 32 ETH, allowing many more validators to participate, but each participating only on a part-time basis.
 
-Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (a large number of which can be hosted by a single node). A design goal of the Ethereum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus we ought to be careful to apply our analyses to the most distributed case, that of one-validator per node.
+Note that this analysis overlooks the distinction between nodes (which actually have to handle the messages) and validators (a large number of which can be hosted by a single node). A design goal of the Ethereum&nbsp;2 protocol is to minimise any economies of scale, putting the solo-staker on as equal as possible footing with staking pools. Thus, we ought to be careful to apply our analyses to the most distributed case, that of one-validator per node.
 
 Fun fact: the original hybrid Casper FFG PoS proposal ([EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md)) called for a minimum deposit size of 1500 ETH as the system design could handle up to around 900 active validators. While 32 ETH now represents a great deal of money for most people, decentralised staking pools that can take less than 32 ETH are now becoming available.
 
@@ -695,7 +696,7 @@ Using the effective balance achieves two goals, one to do with economics, the ot
 
 #### Economic aspects of effective balance
 
-The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32 ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64 ETH but an effective balance of only 32 ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.
+The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32 ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64 ETH but an effective balance of only 32 ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead, we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.
 
 The scope of effective balance quickly grew, and now it completely represents the weight of a validator in the consensus protocol.
 
@@ -849,7 +850,7 @@ The [`BASE_REWARD_FACTOR`](/part3/config/preset#base_reward_factor) is the big k
 
 Issuance is the amount of new Ether created by the protocol in order to incentivise its participants. The net issuance, after accounting for penalties, burned transaction fees and so forth is sometimes referred to as inflation, or supply growth.
 
-Pre-Merge, the Eth1 chain issued new Ether in the form of block and uncle rewards. Since the London upgrade this issuance was been offset in part, or even at times exceeded by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
+Pre-Merge, the Eth1 chain issued new Ether in the form of block and uncle rewards. Since the London upgrade this issuance has been offset in part, or even at times exceeded, by the burning of transaction base fees due to [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md).
 
 Post-Merge, there are no longer any block or uncle rewards issued on the Eth1 chain. But the base fee burn remains. It is possible for the net issuance to become negative &ndash; such that more Ether is destroyed than created[^fn-ultrasound-money] &ndash; at least in the short to medium term. In the longer term, Anders Elowsson argues that there will be [a circulating supply equilibrium](https://ethresear.ch/t/circulating-supply-equilibrium-for-ethereum-and-minimum-viable-issuance-during-the-proof-of-stake-era/10954?u=benjaminion) arising from Ether issuance by proof of stake and Ether destruction due to EIP-1559.
 
@@ -1679,7 +1680,7 @@ In this situation no validators will receive rewards for attesting. Users of non
 
 The situation becomes potentially much worse when X hosts around half of the validators. If X were to have a consensus bug, but otherwise keep running, the beacon chain would split into two similarly sized chains. Each chain would see half its validators missing and start leaking out the stakes of those validators. Within three to four weeks each chain would have leaked out enough of the stake of the missing validators that the present validators would control two-thirds of the remaining stake, meaning that the chains could each finalise separately. It would be extremely difficult &ndash; effectively impossible &ndash; to reunite these chains ever again since they would contain conflicting finalised checkpoints. The beacon chain would be permanently partitioned.
 
-Hopefully, 3-4 weeks is sufficient time for client X to fix its bug or for users of X to migrate to other clients. Meanwhile users of X are suffering large inactivity penalties on the correct chain as per scenario 2.
+Hopefully, 3-4 weeks is sufficient time for client X to fix its bug or for users of X to migrate to other clients. Meanwhile, users of X are suffering large inactivity penalties on the correct chain as per scenario 2.
 
 ##### 4. Client X approaches or exceeds two-thirds of the stake
 
@@ -1997,7 +1998,7 @@ In summary:
 
   - We can verify a single signature with two pairings.
   - We can naively verify $N$ signatures with $2N$ pairings.
-  - Or we can verify $N$ signatures via aggregation with just two pairings, $N-1$ additions in $G_1$, and $N-1$ additions in $G_2$. Each elliptic curve point additions is much, much cheaper than a pairing.
+  - Or we can verify $N$ signatures via aggregation with just two pairings, $N-1$ additions in $G_1$, and $N-1$ additions in $G_2$. Each elliptic curve point addition is much, much cheaper than a pairing.
 
 ###### Space benefits
 
@@ -2304,7 +2305,7 @@ Some other sources of entropy for the RANDAO are noted in [EIP-4399](https://eip
 
 #### Updating the RANDAO
 
-When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using it's normal signing secret key.
+When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using its normal signing secret key.
 
 The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
 
@@ -2360,7 +2361,7 @@ Under normal circumstances, then, an attacker is not able to predict the duty as
 
 [^fn-instant-activations]: In the current protocol you'd need to predict the RANDAO for around 16 hours ahead for deposits to be useful in manipulating it, due to [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) and [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period). However, at some point post-Merge, it may become possible to onboard deposits more-or-less immediately.
 
-It's certainly not an easy attack. Nonetheless it's easy to defend against, so we might as well do so.
+It's certainly not an easy attack. Nonetheless, it is easy to defend against, so we might as well do so.
 
 To prevent this, we assume a maximum feasible lookahead that an attacker might achieve, [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) and delay all activations and exits by this amount, which allows time for new randomness to come in via block proposals from honest validators, making irrelevant any manipulation by the entering or exiting validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOKAHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
@@ -2446,7 +2447,7 @@ The bottom axis is $r$, and the side axis is my expected proposals tail length $
 
 Now we will calculate $E^{(k)}(r)$, the expected length of tail I can achieve in the next epoch by using my previous tail of length $k$ to grind the options.
 
-Consider the case where I have a tail of length $k = 1$ in some epoch. This gives me two options: I can publish my RANDAO contribution or I can withhold my RANDAO contribution (by withholding my block). My strategy is to choose the longest tail for the next epoch that I can gain via either of these options.
+Consider the case where I have a tail of length $k = 1$ in some epoch. This gives me two options: I can publish my RANDAO contribution, or I can withhold my RANDAO contribution (by withholding my block). My strategy is to choose the longest tail for the next epoch that I can gain via either of these options.
 
 The probability, $p^{(1)}_j$, of gaining a tail of exactly length $j$ as a result of having a tail of length 1 is,
 
@@ -2514,7 +2515,7 @@ The bottom axis is $r$, and the side axis is the probability that my best tail l
 
 ###### Discussion of RANDAO takeover
 
-What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing tail length: with high probability the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely. With high enough $r$, the $2^k$ options I have for grinding the RANDAO overwhelm the probability of losing tail proposals. For large values of $k$ it will not be practical to grind through all these options, but we need to arrive at only one good combination in order to succeed so we might not need to do the full calculation.
+What can we conclude from this? If I control less than about half the stake, then I cannot expect to be able to climb the ladder of increasing tail length: with high probability the length of tail I have will decrease rather than increase. Whereas, if I have more than half the stake, my expected length of tail increases each epoch, so I am likely to be able to eventually take over the RANDAO completely. With high enough $r$, the $2^k$ options I have for grinding the RANDAO overwhelm the probability of losing tail proposals. For large values of $k$ it will not be practical to grind through all these options. However, we need to arrive at only one good combination in order to succeed, so we might not need to do the full calculation.
 
 The good news is that, if attackers control more than half the stake, they have more interesting attacks available, such as taking over the LMD fork choice rule. So we generally assume in the protocol that any attacker has less than half the stake, in which case the RANDAO takeover attack appears to be infeasible.
 
@@ -3039,7 +3040,7 @@ Since all committees in a slot are voting on exactly the same information (sourc
 
 If it were not for the `index` then all these $N$ aggregate attestations could be further aggregated into a single aggregate attestation, combining the votes from all the validators voting at that slot.
 
-As a thought experiment we can calculate the potential space savings of doing this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4KB with the maximum 64 committees. This seems nice to have, but would likely make the [committee aggregation process](/part2/building_blocks/aggregator) more complex.
+As a thought experiment we can calculate the potential space savings of doing this. Given a committee size of $k$ and $N$ committees per slot, the current space required for $N$ aggregate `Attestation` objects is $N * (229 + \lfloor k / 8 \rfloor)$ bytes. If we could remove the committee index from the signed data and combine all of these into a single aggregate `Attestation` the space required would be $221 + \lfloor kN / 8 \rfloor$ bytes. So we could save $229N - 221$ bytes per block, which is 14.4&nbsp;KB with the maximum 64 committees. This seems nice to have, but would likely make the [committee aggregation process](/part2/building_blocks/aggregator) more complex.
 
 There is another index that appears when assigning validators to committees in [`compute_committee()`](/part3/helper/misc#compute_committee): an epoch-based committee index that I shall call $j$. The indices $i$ and $j$ are related as $i = \mod(j, N)$ and $j = Ns + i$  where $s$ is the slot number in the epoch.
 
@@ -3413,7 +3414,7 @@ Both vectors and lists have the same serialisation when they are treated as stan
 '010203'
 ```
 
-So why not use lists everywhere? Since lists are variable sized objects in SSZ they are encoded differently from fixed sized vectors when contained within another object, so there is a small overhead. The container `Foo` holding the variable sized list is encoded with an extra four byte offset at the start. We'll see why a bit later.
+So why not use lists everywhere? Since lists are variable sized objects in SSZ they are encoded differently from fixed sized vectors when contained within another object, so there is a small overhead. The container `Foo` holding the variable sized list is encoded with an extra four-byte offset at the start. We'll see why a bit later.
 
 ```python
 >>> from eth2spec.utils.ssz.ssz_typing import uint8, Vector, List, Container
@@ -3811,7 +3812,7 @@ Other SSZ resources:
 
 While discussing [SSZ](/part2/building_blocks/ssz), I asserted that serialisation is important for consensus without going into the details. In this section we will unpack that and take a deep dive into how Ethereum&nbsp;2 nodes know that they share a view of the world.
 
-Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41MB in size and takes several seconds to transmit over the Internet. This is completely impractical for a global consensus protocol.
+Let's say that you and I want to compare our beacon states to see if we have an identical view of the state of the chain. One way we could do this is by serialising our respective beacon states and sending them to each other. We could then compare them byte-by-byte to check that they match. The problem with this is that the serialised beacon state at the time of writing is over 41&nbsp;MB in size and takes several seconds to transmit over the Internet. This is completely impractical for a global consensus protocol.
 
 What we need is a _digest_ of the state: a brief summary that is enough to determine with a very high degree of confidence whether you and I have the same state, or whether they differ. The digest must also have the property that no-one can fake it. That is, you can't convince me that you have the same state as I do while actually having a different state.
 
@@ -3856,7 +3857,7 @@ With these definitions, calculating the hash tree root of an SSZ object _uses_ M
 
 To understand Merkleization we first need to understand [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree). These are not at all new, and date back to the 1970s.
 
-The idea is that we have a set of "leaves", which is our data, and we iteratively reduce those leaves down to a single, short root via hashing. This reduction is done by hashing the leaves in pairs to make a "parent" node. We repeat the process on the parent nodes to make grand-parent nodes, and so on to build a binary tree structure that culminates in a single ancestral root. In Merkleization we will be dealing only with structures that have a power of two number of leaves, so we have a full binary tree.
+The idea is that we have a set of "leaves", which is our data, and we iteratively reduce those leaves down to a single, short root via hashing. This reduction is done by hashing the leaves in pairs to make a "parent" node. We repeat the process on the parent nodes to make grandparent nodes, and so on to build a binary tree structure that culminates in a single ancestral root. In Merkleization we will be dealing only with structures that have a power of two number of leaves, so we have a full binary tree.
 
 In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, and $D$. These can be any string of data, though in Merkleization they will be 32 byte "chunks". The function $H$ is our hash function, and the operator $+$ concatenates strings. So $H(A+B)$ is the hash of the concatenation of strings $A$ and $B$[^fn-roots-and-leaves].
 
@@ -4137,7 +4138,7 @@ The `Slot` and the `CommitteeIndex` are just basic `uint64` types. Their hash tr
 '0900000000000000000000000000000000000000000000000000000000000000'
 ```
 
-The `Root` is `Bytes32` type, which is equivalent to a `Vector[unit8, 32]`. Handily, the hash tree root is just the `Root` value itself since its only a single chunk.
+The `Root` is `Bytes32` type, which is equivalent to a `Vector[unit8, 32]`. Handily, the hash tree root is just the `Root` value itself since it is only a single chunk.
 
 ```python
 >>> a.data.beacon_block_root.hex()
@@ -4575,7 +4576,7 @@ The maximum size of a transaction is [`MAX_BYTES_PER_TRANSACTION`](/part3/config
 
 #### ExecutionAddress
 
-The ExecutionAddress type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20 byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
+The ExecutionAddress type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20-byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
 
 #### References
 
@@ -5607,9 +5608,9 @@ class BeaconBlockHeader(Container):
 
 A standalone version of a beacon block header: [`BeaconBlock`](/part3/containers/blocks#beaconblock)s contain their own header. It is identical to [`BeaconBlock`](/part3/containers/blocks#beaconblock), except that `body` is replaced by `body_root`. It is `BeaconBlock`-lite.
 
-`BeaconBlockHeader` is stored in beacon state to record the last processed block header. This is used to ensure that we proceed along a continuous chain of blocks that always point to their predecessor[^its-a-blockchain-yo]. See [`process_block_header()`](/part3/transition/block#def_process_block_header).
+`BeaconBlockHeader` is stored in beacon state to record the last processed block header. This is used to ensure that we proceed along a continuous chain of blocks that always point to their predecessor[^fn-its-a-blockchain-yo]. See [`process_block_header()`](/part3/transition/block#def_process_block_header).
 
-[^its-a-blockchain-yo]: It's a blockchain, yo!
+[^fn-its-a-blockchain-yo]: It's a blockchain, yo!
 
 The [signed version](/part3/containers/envelopes#signedbeaconblockheader) is used in [proposer slashings](/part3/containers/operations#proposerslashing).
 

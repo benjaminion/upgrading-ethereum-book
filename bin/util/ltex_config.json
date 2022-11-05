@@ -16,12 +16,14 @@
   "hiddenFalsePositives": {
     "en-GB": [
       "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"[Bb]lock chain\"}",
+      "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"space saving\"}",
       "{\"rule\": \"ADVERB_VERB_ADVERB_REPETITION\", \"sentence\": \"per slot per shard\"}",
       "{\"rule\": \"PEOPLE_VBZ\", \"sentence\": \"people is a joy\"}",
       "{\"rule\": \"THE_SUPERLATIVE\", \"sentence\": \"Latest Message Driven\"}",
       "{\"rule\": \"MISSING_GENITIVE\", \"sentence\": \"(Nakamoto consensus)|(Ethereum transaction)|(Merkle roots)\"}",
       "{\"rule\": \"TO_DO_HYPHEN\", \"sentence\": \"to DoS\"}",
-      "{\"rule\": \"WHETHER\", \"sentence\": \"whether or not\"}"
+      "{\"rule\": \"WHETHER\", \"sentence\": \"whether or not\"}",
+      "{\"rule\": \"FINAL_ADVERB_COMMA\", \"sentence\": \"acting honestly\"}"
     ]
   },
   "markdown": {
