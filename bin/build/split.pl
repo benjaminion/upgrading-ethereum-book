@@ -83,7 +83,7 @@ while (<>)  {
         print $ofh
             "---",
             "hide: $hide",
-            "path: $path",
+            "path: $path/",
             "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]",
             "index: [$idx]",
             "sequence: $sequence",

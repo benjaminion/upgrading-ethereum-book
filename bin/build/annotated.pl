@@ -14,7 +14,7 @@ my $inPart3 = 0;
 
 print
     "---",
-    "path: /annotated-spec",
+    "path: /annotated-spec/",
     "titles: [\"One Page Annotated Spec\",\"\",\"\"]",
     "index: [999]",
     "sequence: 990",

@@ -10,7 +10,7 @@ const Subsections = ({indexArray}) => {
   const data = useStaticQuery(graphql`
     {
       allMarkdownRemark(
-        sort: {fields: [frontmatter___sequence]}
+        sort: {frontmatter: {sequence: ASC}}
         filter: {frontmatter: {index: {ne: null}}}
     ) {
         edges {
