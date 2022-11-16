@@ -2,7 +2,7 @@ import React from "react"
 import { Link } from "gatsby"
 import { useStaticQuery, graphql } from "gatsby"
 
-import "./prevnext.css"
+import "../css/prevnext.css"
 
 function PrevNextLink(props) {
   if (props.page === null || props.page === undefined) return null

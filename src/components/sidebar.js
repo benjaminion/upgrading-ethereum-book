@@ -3,7 +3,7 @@ import { Link } from "gatsby"
 import { useStaticQuery, graphql } from "gatsby"
 
 import PageList from "./pagelist"
-import "./sidebar.css"
+import "../css/sidebar.css"
 
 const Sidebar = (props) => {
   const data = useStaticQuery(graphql`

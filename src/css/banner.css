@@ -1,0 +1,23 @@
+@media print {
+  #banner {
+    display: none;
+  }
+}
+
+#banner {
+  margin: 0;
+  padding: 1ex 0;;
+  width: 100%;
+  background: #666;
+  text-align: center;
+}
+
+#banner p {
+  color: #fff;
+  margin: 0;
+}
+
+#banner p a {
+  color: inherit;
+  text-decoration: underline;
+}
