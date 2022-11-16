@@ -1124,7 +1124,7 @@ $$
 
 The $T$ here is the total increments of the whole active validator set, so this is a large number. The per-epoch per-validator reward is 32 times this.
 
-The maximum issuance per epoch to sync committee members is then
+The maximum issuance per epoch to sync committee members in respect of their sync contributions is then
 
 $$
 I_Y = \frac{W_y}{W_{\Sigma}}Tb
@@ -1138,7 +1138,7 @@ $$
 R_{Y_P} = 512\frac{W_p}{W_{\Sigma} - W_p}R_Y
 $$
 
-So the maximum issuance per epoch to sync committee proposers is
+So the maximum issuance per epoch to proposers for including sync committee contributions is
 
 $$
 I_{Y_P} = \frac{W_p}{W_{\Sigma} - W_p}I_Y
@@ -1232,7 +1232,7 @@ For a more quantitative analysis, see on [discouragement attacks](#discouragemen
 
 One interesting side effect of this is that, if participation drops by 10% (due to 10% of validators being offline, say), then total issuance of rewards due to attestations will fall by 19%, in addition to a further reduction from penalties.
 
-We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestations is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7\%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/incentives/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
+We can calculate the participation rate at which net issuance due to attestations turns negative. With a participation rate $p$, the reward for a fully correct attestation is $0.844nbp$, and the penalty for a missed attestation is $0.625Tb$. This gives us a net issuance of $p^2(0.844Tb) - (1-p)(0.625Tb)$. The positive root of this is $p = 56.7\%$. But since this is below the 2/3 participation rate for finalisation, the [inactivity leak](/part2/incentives/inactivity) will kick-in before we reach this level and completely change the reward and penalty profile, so the calculation is of theoretical interest only.
 
 Note that the proposer reward is not scaled like this &ndash; proposers are already well incentivised to include all relevant attestations &ndash; and neither are sync committee rewards. Penalties do not scale with participation, either.
 
@@ -1244,7 +1244,7 @@ Quoting from Vitalik's [Discouragement Attacks paper](https://github.com/ethereu
 
 Attackers might do this to gain more rewards with fewer participants in the system. Or they might do it as preparation for an attack on the chain: by reducing the number of validators they decrease their own cost of attack.
 
-The paper goes into some quantitative analysis of different kinds of discouragement attacks. I would _en_courage you to read it and think through these things. As per the conclusion:
+The paper goes into some quantitative analysis of different kinds of discouragement attacks. I would encourage you to read it and think through these things. As per the conclusion:
 
 > In general, this is still an active area of research, and more research on counter-strategies is desired.
 
@@ -1451,7 +1451,7 @@ The penalty for validator $i$ is calculated as
 $$
 \begin{split}
 s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_BELLATRIX}) \\
-= \frac{s_iB_i}{4 \times 50{,}331{,}648}
+= \frac{s_iB_i}{4 \times 16{,}777{,}216}
 \end{split}
 $$
 
@@ -2028,7 +2028,7 @@ Two useful examples of how aggregate signatures are used in practice are in aggr
 
 ###### Aggregate attestations
 
-Aggregate attestations are a very compact way store and prove which validators made a particular attestation.
+Aggregate attestations are a very compact way to store and prove which validators made a particular attestation.
 
 Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attesting).
 
