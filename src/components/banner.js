@@ -1,12 +1,14 @@
 import React from "react"
 
-import "./banner.css"
+import "../css/banner.css"
 
-const Banner = () => {
+const Banner = ({path}) => {
 
+  const newPage = "/latest" + path
+  
   return (
     <div id="banner">
-      <p>You are viewing an outdated version (Altair). The most recent version of the book is <a href="/latest">here</a>.</p>
+      <p>You are viewing an outdated version (Altair). The latest version of this page may be <a href={newPage}>here</a>, and the book <a href="/latest">here</a>.</p>
     </div>
   )
 }

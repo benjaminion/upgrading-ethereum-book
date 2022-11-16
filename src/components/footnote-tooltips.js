@@ -1,6 +1,6 @@
 import { Component } from 'react'
 
-import "./footnote-tooltips.css"
+import "../css/footnote-tooltips.css"
 
 // Modify the page to duplicate any footnotes into tooltips.
 class FootnoteTooltips extends Component {
