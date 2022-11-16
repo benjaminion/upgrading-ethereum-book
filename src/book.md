@@ -867,11 +867,13 @@ With $365.25 \times 225 = 82181.25$ epochs per year, and [`BASE_REWARD_FACTOR`](
 $$
 \begin{aligned}
 \text{Max issuance per year} &= 82181.25 \times \frac{32 \times 64 \times N}{\sqrt{32 \times 10^9 \times N}} \text{ETH} \\
-                             &= 940.87 \sqrt{N} \\
+                             &= 940.8659 \sqrt{N} \\
 \end{aligned}
 $$
 
-With 300,000 validators this equates to 515,333&nbsp;ETH per year, plus change. For comparison, under proof of work, Ethereum's block and uncle rewards amounted to almost five million ETH per year.
+<!-- Number of validators -->
+
+With 500,000 validators this equates to 665,292&nbsp;ETH per year, plus change. For comparison, under proof of work, Ethereum's block and uncle rewards amounted to almost five million ETH per year.
 
 We can graph the maximum issuance as a function of the number of validators. It's just a scaled square root curve.
 
@@ -898,7 +900,9 @@ $$
 \end{aligned}
 $$
 
-For example, with 300,000 validators participating, this amounts to an expected return of 5.37% on a validator's effective balance.
+<!-- Number of validators -->
+
+For example, with 500,000 validators participating, this amounts to an expected return of 4.16% on a validator's effective balance.
 
 Graphing this give us an inverse square root curve.
 
@@ -1112,11 +1116,13 @@ Thus, a proposer is strongly incentivised to include high value attestations, wh
 
 #### Sync committee rewards
 
-Once every [256](/part3/config/preset#epochs_per_sync_committee_period) epochs (27.3 hours), [512](/part3/config/preset#sync_committee_size) validators are selected to participate in the sync committee. For any given validator this will happen rarely; with 300,000 validators, the expected interval between being chosen for duty is around 22 months. However, during the 27-hour period of participation the rewards are relatively very large.
+<!-- Number of validators -->
+
+Once every [256](/part3/config/preset#epochs_per_sync_committee_period) epochs (27.3 hours), [512](/part3/config/preset#sync_committee_size) validators are selected to participate in the sync committee. For any given validator this will happen rarely; with 500,000 validators, the expected interval between being chosen for sync committee duty is around 37 months. However, during the 27-hour period of participation the rewards are relatively very large.
 
 [TODO: link to explanation of sync committees when done]::
 
-Sync committee participants receive a reward every slot that they correctly perform their duties. With 512 members in the committee, and 32 slots per epoch, the reward per validator per slot for correct participation is
+Sync committee participants receive a reward for every slot that they correctly perform their duties. With 512 members in the committee, and 32 slots per epoch, the reward per validator per slot for correct participation is
 
 $$
 R_Y = \frac{W_y}{32 \times 512 \times W_{\Sigma}}Tb
@@ -1180,34 +1186,40 @@ as expected.
 
 #### Rewards in numbers
 
-The following calculations are based on 300 thousand active validators, all performing perfectly and all with 32&nbsp;ETH of effective balance.
+<!-- Number of validators -->
 
-  - Base reward per increment
-    - $b = 653$ Gwei
+The following calculations are based on 500 thousand active validators, all performing perfectly and all with 32&nbsp;ETH of effective balance.
+
+  - [Base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment)
+    - $b = \frac{1{,}000{,}000{,}000 \times 64}{\sqrt{32{,}000{,}000{,}000 \times 500{,}000}} = 505$ Gwei
   - Value of a single attestation
-    - $R_A = \frac{14 + 26 + 14}{64}32b = 17{,}631$ Gwei
+    - $R_A = \frac{14 + 26 + 14}{64}32b = 13{,}635$ Gwei
   - Value of a single sync committee contribution
-    - $R_Y = \frac{2}{32 \times 512 \times 64}300{,}000 \times 32b = 11{,}957$ Gwei
+    - $R_Y = \frac{2}{32 \times 512 \times 64}500{,}000 \times 32b = 15{,}411$ Gwei
   - Value of a block proposal due to attestations
-    - $R_{A_P} = \frac{300{,}000}{32}\frac{8}{64-8}R_A = 23{,}612{,}946$ Gwei
+    - $R_{A_P} = \frac{500{,}000}{32}\frac{8}{64-8}R_A = 30{,}435{,}267$ Gwei
     - Note: this can actually be higher if the chain is not performing perfectly, as after a skip slot the proposer can include high value attestations from the missed slot.
   - Value of a block proposal due to sync committee contributions
-    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 874{,}569$ Gwei
+    - $R_{Y_P} = 512\frac{8}{64-8}R_Y = 1{,}127{,}204$ Gwei
 
-Putting it all together, the total available reward per epoch across all validators is $300{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 6{,}268{,}800{,}000$ Gwei (to 5 significant figures)
+Putting it all together, the total available reward per epoch across all validators is $500{,}000R_A + 32(512R_Y + R_{A_P} + R_{Y_P}) = 8{,}080{,}000{,}000$ Gwei (to 5 significant figures)
 
-Finally, as a check-sum, $Tb = 300{,}000 \times 32b = 6{,}268{,}800{,}000 \text{ Gwei} = 6.268 \text{ ETH}$.
+Finally, as a check-sum, $Tb = 500{,}000 \times 32b = 8{,}080{,}000{,}000 \text{ Gwei} = 8.080 \text{ ETH}$ issued per epoch.
 
 #### Individual validator rewards vary
 
 Actual individual validator returns, even on an optimally running beacon chain, will vary above and below the expected amounts, since block proposals and sync committee duties are assigned randomly. This leads to variance in the rewards, with some validators earning more and some earning less. Nonetheless, an average validator over a long period can expect to earn a return in line with $nb$ per epoch.
 
-The following chart shows the expected distribution of rewards for 300,000 validators, all participating perfectly, each with 32&nbsp;ETH of effective balance. The mean reward is 1.7177&nbsp;ETH/year (the 5.37% number from [earlier](/part2/incentives/issuance#validator-rewards)), and the median 1.7188&nbsp;ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.596&nbsp;ETH in rewards over the year, and 10% more than 1.866&nbsp;ETH, due solely to randomness in assigning duties.
+<!-- Number of validators -->
+
+The following chart shows the expected distribution of rewards for 500,000 validators, all participating perfectly, each with 32&nbsp;ETH of effective balance. The mean reward is 1.3305&nbsp;ETH/year (the 4.16% number from [earlier](/part2/incentives/issuance#validator-rewards)), and the median 1.3123&nbsp;ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.2175&nbsp;ETH in rewards over the year, and 10% more than 1.4704&nbsp;ETH, due solely to randomness in assigning duties.
 
 <a id="img_reward_variance"></a>
 <div class="image">
 
-![A bar chart of the distribution of rewards for 300,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
+<!-- Number of validators -->
+
+![A bar chart of the distribution of rewards for 500,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
 Distribution of beacon chain rewards for 500,000 validators with 32&nbsp;ETH staked.
 
 </div>
@@ -1604,7 +1616,9 @@ A validator that is slashed continues to receive attestation penalties until its
 
 [^fn-slashed-validators]: Having such a long overhang from being slashed during which validators continue to receive penalties seems like "kicking a man when he's down", especially since slashed validators are locked in for twice as long as needed to calculate the correlation penalty. Vitalik [says](https://notes.ethereum.org/@vbuterin/Sys3GLJbD#Aside-note-on-a-validators-life-cycle) that this measure "is included to prevent self-slashing from being a way to escape inactivity leaks." But validators don't need to self-slash to avoid this; they could just make a normal voluntary exit.
 
-So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 106{,}987{,}520 \text{ Gwei} = 0.107 \text{ ETH}$, based on 300k validators, assuming that the chain is not in an inactivity leak. And (much) more if it is.
+<!-- Number of validators -->
+
+So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 82{,}739{,}200 \text{ Gwei} = 0.0827 \text{ ETH}$, based on 500k validators, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment). This assumes that the chain is not in an inactivity leak; the penalties will be much higher if it is.
 
 Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to skip slashed validators, but that is not how it is implemented currently.)
 
@@ -1618,7 +1632,7 @@ In order for the beacon chain to verify slashings and take action against the of
 
 At the point of the initial slashing report being included in a block, the proposer of the block receives a reward of `validator.effective_balance` / [`WHISTLEBLOWER_REWARD_QUOTIENT`](/part3/config/preset#whistleblower_reward_quotient), which is $B / 512$ if $B$ is the effective balance of the validator being slashed.
 
-A report of a proposer slashing violation can slash only one validator, but a report of an attestation slashing violation can simultaneously slash up to an entire committee, which might be hundreds of validators. This could be extremely lucrative for the proposer including the reports. A single block can contain up to 16 proposer slashing reports and up to 2 attester slashing reports.
+A report of a proposer slashing violation can slash only one validator, but a report of an attestation slashing violation can simultaneously slash up to an entire committee, which might be hundreds of validators. This could be very lucrative for the proposer including the reports. A single block can contain up to 16 proposer slashing reports and up to 2 attester slashing reports.
 
 Note that no new issuance is required to pay for this reward. The proposer reward is much less than the initial slashing applied to the validator, so the net issuance due to a slashing event is always negative.
 
@@ -1782,7 +1796,9 @@ Alongside their usual function of identifying message senders, digital signature
 
 #### Background
 
-One of the characteristics of proof of stake protocols is the sheer number of protocol messages that need to be handled. With 300,000 active validators, the current beacon chain design calls for over 780 attestations per second to be gossiped globally. That's a sustained average, there are much higher bursts in practice. Not only do these messages need to travel over the network, but each individual digital signature needs to be verified by every node, which is a CPU-intensive operation. Not to mention having to store all those signed messages in the block history. These challenging requirements have typically limited the validator numbers in proof of stake or proof of authority networks. Pure PBFT-based consensus protocols tend to have validator sets that number in the dozens rather than the thousands.
+<!-- Number of validators -->
+
+One of the characteristics of proof of stake protocols is the sheer number of protocol messages that need to be handled. With 500,000 active validators, the current beacon chain design calls for over 1,300 attestations per second to be gossiped across the network. That's a sustained average, there are much higher bursts in practice. Not only do these messages need to travel over the network, but each individual digital signature needs to be verified by every node, which is a CPU-intensive operation. Not to mention having to store all those signed messages in the block history. These challenging requirements have typically limited the validator numbers in proof of stake or proof of authority networks. Pure PBFT-based consensus protocols tend to have validator sets that number in the dozens rather than the thousands.
 
 The prevailing work-in-progress design in early 2018 for Ethereum's (partial) move to proof of stake, [EIP-1011](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1011.md), estimated that the protocol could handle a maximum of around 900 validators due to this message overhead, and accordingly set a hefty stake size of 1500&nbsp;ETH per validator.
 
@@ -5135,7 +5151,9 @@ Only a single sync committee is active at any one time, and contains a randomly 
 
 A sync committee does its duties (and receives rewards for doing so) for only `EPOCHS_PER_SYNC_COMMITTEE_PERIOD` epochs until the next committee takes over.
 
-With 262,144 validators ($2^{18}$), the expected time between being selected for sync committee duty is over 19 months. The probability of being in the current sync committee would be 1/512 per validator.
+<!-- Number of validators -->
+
+With 500,000 validators, the expected time between being selected for sync committee duty is around 37 months. The probability of being in the current sync committee would be $\frac{512}{500{,}000}$ per validator.
 
 `SYNC_COMMITTEE_SIZE` is a [trade-off](https://github.com/ethereum/consensus-specs/pull/2130) between [security](https://notes.ethereum.org/iMxxlEkuQMiPkEL1S6SfbQ) (ensuring that enough honest validators are always present) and efficiency for light clients (ensuring that they do not have to handle too much computation). The value 512 is conservative in terms of safety. It would be catastrophic for trustless bridges to other protocols, for example, if a sync committee voted in an invalid block.
 
@@ -5290,11 +5308,9 @@ Note that the dependence on effective balance means that the validator is queued
 
 Validators are allowed to exit the system and cease validating, and new validators may apply to join at any time. For [interesting reasons](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Exiting), a design decision was made to apply a rate-limit to entries (activations) and exits. Basically, it is important in proof of stake protocols that the validator set not change too quickly.
 
-In the normal case, a validator is able to exit fairly swiftly: it just needs to wait [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) (currently four) epochs. However, if there are large numbers of validators wishing to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](/part3/helper/accessors#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
+In the normal case, a validator is able to exit fairly swiftly: it just needs to wait [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) (currently four) epochs. However, if a large number of validators wishes to exit at the same time, a queue forms with a limited number of exits allowed per epoch. The minimum number of exits per epoch (the minimum "churn") is `MIN_PER_EPOCH_CHURN_LIMIT`, so that validators can always eventually exit. The actual allowed churn per epoch is [calculated](/part3/helper/accessors#get_validator_churn_limit) in conjunction with `CHURN_LIMIT_QUOTIENT`.
 
 The same applies to new validator activations, once a validator has been marked as eligible for activation.
-
-In concrete terms, this means that up to four validators can enter or exit the active validator set each epoch (900 per day) until we have 327,680 active validators, at which point the limit rises to five.
 
 The rate at which validators can exit is strongly related to the concept of weak subjectivity, and the weak subjectivity period.
 
@@ -7122,7 +7138,9 @@ The "churn limit" applies when [activating](/part3/transition/epoch#registry-upd
 
 Some small amount of churn is always allowed, set by [`MIN_PER_EPOCH_CHURN_LIMIT`](/part3/config/configuration#min_per_epoch_churn_limit), and the amount of per-epoch churn allowed increases by one for every extra [`CHURN_LIMIT_QUOTIENT`](/part3/config/configuration#churn_limit_quotient) validators that are currently active (once the minimum has been exceeded).
 
-In concrete terms, this means that up to four validators can enter or exit the active validator set each epoch (900 per day) until we have 327,680 active validators, at which point the limit rises to five.
+<!-- Number of validators -->
+
+In concrete terms, with 500,000 validators, this means that up to seven validators can enter or exit the active validator set each epoch (1,575 per day).  At 524,288 active validators the limit will rise to eight per epoch (1,800 per day).
 
 |||
 |-|-|
@@ -8958,7 +8976,7 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
     )
 ```
 
-Create a newly initialised validator object from a deposit. This was [factored out](https://github.com/ethereum/consensus-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the sharding spec.
+Create a newly initialised validator object from a deposit. This was [factored out](https://github.com/ethereum/consensus-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the (now deprecated) sharding spec.
 
 The `state` parameter in the input argument list is an oversight: it is not used or required.
 
