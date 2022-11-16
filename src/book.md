@@ -1208,7 +1208,7 @@ The following chart shows the expected distribution of rewards for 300,000 valid
 <div class="image">
 
 ![A bar chart of the distribution of rewards for 300,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
-Distribution of rewards for 300,000 validators with 32&nbsp;ETH staked.
+Distribution of beacon chain rewards for 500,000 validators with 32&nbsp;ETH staked.
 
 </div>
 
