@@ -536,10 +536,6 @@ TODO
 
 ## The Incentive Layer <!-- /part2/incentives -->
 
-|||||
-|-|-|-|-|
-| First cut | $\checkmark$ | Revision | TODO |
-
 ### Carrots and Sticks and Sudden Death
 
 Permissionless blockchains are cryptoeconomic systems: cryptography enforces correct behaviour where possible; economics incentivises correct behaviour where it cannot be enforced. The correct behaviours we're looking for roughly correspond to availability and security. We want the chain to keep making progress, and we want the chain to give reliable, non-contradictory results under all reasonable circumstances.
@@ -1765,10 +1761,6 @@ These are the topics that I've picked out for special attention.
 
 ### BLS Signatures <!-- /part2/building_blocks/signatures -->
 
-|||||
-|-|-|-|-|
-| First cut | $\checkmark$ | Revision | TODO |
-
 <div class="summary">
 
   - Proof of stake protocols use digital signatures to identify their participants and hold them accountable.
@@ -2732,10 +2724,6 @@ A good place to start exploring verifiable delay functions is the [VDF Alliance 
 
 ### Shuffling <!-- /part2/building_blocks/shuffling -->
 
-|||||
-|-|-|-|-|
-| First cut | $\checkmark$ | Revision | TODO |
-
 <div class="summary">
 
   - Shuffling is used to randomly assign validators to committees and choose block proposers.
@@ -3254,10 +3242,6 @@ However, there are implicit incentives. For one, if I produce a high quality agg
 A possible approach to implementing distributed validator technology (DVT) is for the multiple validators representing a single validator to operate independently, alongside a middleware that combines their signed attestations. This works because BLS signatures are additive: each validator has part of the key, and the signed attestations can be combined with a [threshold signature](/part2/building_blocks/signatures#threshold-signatures) scheme into a signature from the full key. While this works in principle, in practice the current interface between the beacon node and the validator client makes it difficult for these validators to determine whether they have been selected to be aggregators or not. Oisín Kyne's [ethresear.ch article](https://ethresear.ch/t/distributed-validator-middlewares-and-the-aggregation-duty/13044?u=benjaminion) explores this problem and proposes a solution.
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
-
-|||||
-|-|-|-|-|
-| First cut | $\checkmark$ | Revision | TODO |
 
 <div class="summary">
 
@@ -3809,10 +3793,6 @@ Other SSZ resources:
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0, Altair and Bellatrix available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
 ### Hash Tree Roots and Merkleization <!-- /part2/building_blocks/merkleization -->
-
-|||||
-|-|-|-|-|
-| First cut | $\checkmark$ | Revision | TODO |
 
 <div class="summary">
 
