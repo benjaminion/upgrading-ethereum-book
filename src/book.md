@@ -316,7 +316,7 @@ We will properly unpack the second and third of these later in their respective 
 
 You can perhaps see that each of these fork choice rules is a way to assign a numeric score to a block. The winning block, the head block, has the highest score. The idea is that all correct nodes, when they eventually see a certain block, will unambiguously agree that it is the head and choose to follow its branch whatever else is going on in their own views of the network. Thus, all correct nodes will eventually converge on a common view of a single canonical chain going back to genesis.
 
-[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [does not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It has served us well.
+[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [does not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it, and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It has served us well.
 
 #### Reorgs and reversions
 
@@ -760,7 +760,7 @@ The following chart illustrates the behaviour.
   - The actual balance and the effective balance both start at 32&nbsp;ETH.
   - Initially the actual balance rises. Effective balance is capped at 32&nbsp;ETH, so it does not get updated.
   - Only when the actual balance falls below 31.75&nbsp;ETH does the effective balance get reduced to 31&nbsp;ETH.
-  - Although the actual balance rises and oscillates around 32&nbsp;ETH, no effective balance update is triggered and it remains at 31&nbsp;ETH.
+  - Although the actual balance rises and oscillates around 32&nbsp;ETH, no effective balance update is triggered, and it remains at 31&nbsp;ETH.
   - Eventually the actual balance rises above 32.25&nbsp;ETH, and the effective balance is updated to 32&nbsp;ETH.
   - Despite the actual balance falling again, it does not fall below 31.75&nbsp;ETH, so the effective balance remains at 32&nbsp;ETH.
 
@@ -799,7 +799,7 @@ Validator [418408](https://beaconcha.in/validator/b6c1531b7896e3493806a8dd72fa9c
 
 ###### A historical note
 
-The initial implementation of hysteresis effectively [had](https://github.com/ethereum/consensus-specs/pull/1627#discussion_r387294528) `QUOTIENT = 2`, `DOWNWARD_MULTIPLIER = 0`, and `UPWARD_MULTIPLIER = 3`. This meant that a validator starting with an actual balance of 32&nbsp;ETH, but suffering a minor initial outage, would immediately drop to 31&nbsp;ETH effective balance. To get back to 32&nbsp;ETH effective balance it would need to achieve a 32.5&nbsp;ETH actual balance, and meanwhile the validator's rewards would be 3.1% lower due to the reduced effective balance. This [seemed unfair](https://github.com/ethereum/consensus-specs/issues/1609), and incentivised stakers to "over-deposit" Ether to avoid the risk of an initial effective balance drop. Hence the [change](https://github.com/ethereum/consensus-specs/pull/1627) to the current parameters.
+The initial implementation of hysteresis effectively [had](https://github.com/ethereum/consensus-specs/pull/1627#discussion_r387294528) `QUOTIENT = 2`, `DOWNWARD_MULTIPLIER = 0`, and `UPWARD_MULTIPLIER = 3`. This meant that a validator starting with an actual balance of 32&nbsp;ETH, but suffering a minor initial outage, would immediately drop to 31&nbsp;ETH effective balance. To get back to 32&nbsp;ETH effective balance it would need to achieve a 32.5&nbsp;ETH actual balance, and meanwhile the validator's rewards would be 3.1% lower due to the reduced effective balance. This [seemed unfair](https://github.com/ethereum/consensus-specs/issues/1609), and incentivised stakers to "over-deposit" Ether to avoid the risk of an initial effective balance drop, hence the [change](https://github.com/ethereum/consensus-specs/pull/1627) to adopt the current parameters.
 
 #### See also
 
@@ -987,7 +987,7 @@ These proportions are set by the [incentivisation weights](/part3/config/constan
 | `PROPOSER_WEIGHT`      | `uint64(8)`  | 12.5% | $W_p$ |
 | `WEIGHT_DENOMINATOR`   | `uint64(64)` | 100%  | $W_{\Sigma}$ |
 
-One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare and we will ignore it in this section (see [Slashing](/part2/incentives/slashing) for more on this).
+One further reward is available to block proposers for reporting violations of the slashing rules, but this ought to be very rare, and we will ignore it in this section (see [Slashing](/part2/incentives/slashing) for more on this).
 
 Rewards are newly created Ether that is simply added to validators' balances on the beacon chain.
 
@@ -2145,7 +2145,7 @@ One relatively simple defence against this &ndash; the one we are using in Ether
 
 In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/2020/03/12/scalable-bls-threshold-signatures.html). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
 
-Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $M-N$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
+Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However, they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $M-N$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
 
 Threshold signatures also find a place in Distributed Validator Technology, which I will write about in a different chapter.
 
@@ -2413,7 +2413,7 @@ If an attacker gets a string of proposals at the end of an epoch then it has mor
 
 #### Biasability analyses
 
-This section is fully optional. I got a bit carried away with the maths and it's fine to skip to the [next section](#verifiable-delay-functions).
+This section is fully optional. I got a bit carried away with the maths; it's fine to skip to the [next section](#verifiable-delay-functions).
 
 To make discussion of RANDAO biasability more concrete I shall try to quantify what it means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently and correctly. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
 
@@ -3129,7 +3129,7 @@ In any case, a committee size of 128 is very safe against an attacker with 1/3 o
 
 Odds of one-in-trillion may sound like over-engineering, but we must also consider that an attacker might gain some [power over](/part2/building_blocks/randomness#randao-biasability) the RANDAO, so some safety margin is desirable.
 
-Notwithstanding all of this, in the current beacon chain design the minimum target committee size is irrelevant as committees never operate alone. As long as we have at least 8192 active validators, each slot has multiple committees all operating together and it is their aggregate size that confers security, not the size of any individual committee. As previously mentioned, the current committee design is influenced by an old data sharding model that is now superseded. Nonetheless, individual committees might find a role in future versions of the protocol, so the minimum target size is worth preserving.
+Notwithstanding all of this, in the current beacon chain design the minimum target committee size is irrelevant as committees never operate alone. As long as we have at least 8192 active validators, each slot has multiple committees all operating together, and it is their aggregate size that confers security, not the size of any individual committee. As previously mentioned, the current committee design is influenced by an old data sharding model that is now superseded. Nonetheless, individual committees might find a role in future versions of the protocol, so the minimum target size is worth preserving.
 
 #### See also
 
@@ -3715,7 +3715,7 @@ Start of Part 2 (variable size elements)
 e4 748300000000000066e9000000000000c868010000000000
 ```
 
-The first thing to notice is that the `attesting_indices` list is variable size, so it is represented in Part&nbsp;1 by an offset pointing to where the actual data is. In this case, at `0xe4` bytes (228 bytes) from the start of the serialised data. The actual length of the list can be calculated as the length of the whole string (252 bytes) minus 228 bytes (the start of the list) divided by 8 bytes, one per element. Thus we recover our list of three validator indices.
+The first thing to notice is that the `attesting_indices` list is variable size, so it is represented in Part&nbsp;1 by an offset pointing to where the actual data is. In this case, at `0xe4` bytes (228 bytes) from the start of the serialised data. The actual length of the list can be calculated as the length of the whole string (252 bytes) minus 228 bytes (the start of the list) divided by 8 bytes, one per element. And so, we recover our list of three validator indices.
 
 All the remaining items are fixed size, and are encoded in-place, including recursively encoding the fixed size `AttestationData` object, and its fixed size `Checkpoint` children.
 
@@ -5165,7 +5165,7 @@ The execution payload (formerly known as an Eth1 block) contains a list of up to
 
 Beacon chain genesis is long behind us. Nevertheless, the ability to spin-up testnets is useful in all sorts of scenarios, so the spec retains genesis functionality, now called [initialisation](/part3/initialise#initialise-state).
 
-The following parameters refer to the actual mainnet beacon chain genesis and I'll explain them in that context. When starting up new testnets, these will of course be changed. For example, see the configuration file for the [Prater testnet](https://github.com/eth2-clients/eth2-networks/blob/274e71c7af8fb26f65b47016ffa6169079315e2c/shared/prater/config.yaml).
+The following parameters refer to the actual mainnet beacon chain genesis, and I'll explain them in that context. When starting up new testnets, these will of course be changed. For example, see the configuration file for the [Prater testnet](https://github.com/eth2-clients/eth2-networks/blob/274e71c7af8fb26f65b47016ffa6169079315e2c/shared/prater/config.yaml).
 
 | Name | Value |
 | - | - |
@@ -6677,7 +6677,7 @@ To account for the need to weight by effective balance, this function implements
 
 The `if` test is where the weighting by effective balance is done. If the candidate has `MAX_EFFECTIVE_BALANCE`, it will always pass this test and be returned as the proposer. If the candidate has a fraction of `MAX_EFFECTIVE_BALANCE` then that fraction is the probability of being returned as proposer.
 
-If the candidate is not chosen, then `i` is incremented and we try again. Since the minimum effective balance is half of the maximum, then this ought to terminate fairly swiftly. In the worst case, all validators have 16 Ether effective balance and the chance of having to do another iteration is 50%, in which case there is a one in a million chance of having to do 20 iterations.
+If the candidate is not chosen, then `i` is incremented, and we try again. Since the minimum effective balance is half of the maximum, then this ought to terminate fairly swiftly. In the worst case, all validators have 16 Ether effective balance, so the chance of having to do another iteration is 50%, in which case there is a one in a million chance of having to do 20 iterations.
 
 Note that this dependence on the validators' effective balances, which are updated at the end of each epoch, means that proposer assignments are valid [only in the current epoch](https://github.com/ethereum/consensus-specs/pull/772#issuecomment-475574357). This is different from attestation committee assignments, which are valid with a one epoch look-ahead.
 
@@ -7094,7 +7094,7 @@ def get_active_validator_indices(state: BeaconState, epoch: Epoch) -> Sequence[V
 
 Steps through the entire list of validators and returns the list of only the active ones. That is, the list of validators that have been activated but not exited as determined by [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator).
 
-This function is heavily used and I'd expect it to be [memoised](https://en.wikipedia.org/wiki/Memoization) in practice.
+This function is heavily used, and I'd expect it to be [memoised](https://en.wikipedia.org/wiki/Memoization) in practice.
 
 |||
 |-|-|
@@ -9298,7 +9298,7 @@ The following changes were made for sync committee support.
     - [`process_sync_committee_updates()`](/part3/transition/epoch#def_process_sync_committee_updates).
   - Gossip topics were added to the [P2P specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/p2p-interface.md) to support sync committee activity
 
-The reforms to the accounting were extensive and I won't list them all here as they are thoroughly covered elsewhere in the annotated spec and book. But in summary,
+The reforms to the accounting were extensive, and I won't list them all here as they are thoroughly covered elsewhere in the annotated spec and book. But in summary,
 
   - There was a [move away](https://github.com/ethereum/consensus-specs/pull/2176#issue-779590549) from doing all the accounting for attestation inclusion at epoch boundaries to performing much of the work on an ongoing basis during epochs. The epoch transition is quite heavy in any case; this spreads the workload and is simpler overall.
   - Incentives were tweaked for different behaviours, such as late attestations and block proposal rewards. We also took the opportunity to simplify the rewards and penalties calculations.

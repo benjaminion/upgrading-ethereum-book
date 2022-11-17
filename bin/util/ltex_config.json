@@ -24,6 +24,8 @@
       "{\"rule\": \"ADVERB_WORD_ORDER\", \"sentence\": \"happen rarely\"}",
       "{\"rule\": \"AGREEMENT_SENT_START\", \"sentence\": \"Slashings balances updates\"}",
       "{\"rule\": \"CD_NN\", \"sentence\": \"ETH\"}",
+      "{\"rule\": \"COMMA_COMPOUND_SENTENCE\", \"sentence\": \"(recovered and we are no longer)\"}",
+      "{\"rule\": \"COMMA_COMPOUND_SENTENCE_2\", \"sentence\": \"(components are showing and the wires)|(will fail and the block)\"}",
       "{\"rule\": \"DID_FOUND_AMBIGUOUS\", \"sentence\": \"bound the score\"}",
       "{\"rule\": \"DT_JJ_NO_NOUN\", \"sentence\": \"a boolean is either True or False\"}",
       "{\"rule\": \"EN_A_VS_AN\", \"sentence\": \"(an xor)|(a uint)|(the list a)\"}",
