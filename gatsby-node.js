@@ -50,7 +50,7 @@ exports.onCreateWebpackConfig = () => {
   try {
     crypto.createHash('md4')
   } catch (e) {
-    console.warn('Hash type "md4" is not supported by this Node version')
+    console.warn('Hash type `md4` is not supported by this Node version, using `md5`.')
     const origCreateHash = crypto.createHash
     crypto.createHash = (alg, opts) => {
       return origCreateHash(alg === 'md4' ? 'md5' : alg, opts)
