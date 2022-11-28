@@ -316,7 +316,7 @@ We will properly unpack the second and third of these later in their respective 
 
 You can perhaps see that each of these fork choice rules is a way to assign a numeric score to a block. The winning block, the head block, has the highest score. The idea is that all correct nodes, when they eventually see a certain block, will unambiguously agree that it is the head and choose to follow its branch whatever else is going on in their own views of the network. Thus, all correct nodes will eventually converge on a common view of a single canonical chain going back to genesis.
 
-[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [does not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it, and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It has served us well.
+[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [did not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it, and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It served us well.
 
 #### Reorgs and reversions
 
