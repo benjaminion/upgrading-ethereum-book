@@ -40,8 +40,8 @@ altair_proposer_reward = total_reward * PROPOSER_WEIGHT // SLOTS_PER_EPOCH // WE
 altair_att_reward = base_reward * (HEAD_WEIGHT + SOURCE_WEIGHT + TARGET_WEIGHT) // WEIGHT_DENOMINATOR
 sync_reward = total_reward * COMMITTEE_EPOCHS * SYNC_WEIGHT // COMMITTEE_VALIDATORS // WEIGHT_DENOMINATOR
 
-max_committees = 5
-max_proposals = 20
+max_committees = 4
+max_proposals = 15
 
 # distribution of committee selections per year
 n_committees = [el for el in range(max_committees + 1)]
@@ -51,7 +51,7 @@ pmf_committees = binom.pmf(n_committees, committees_per_year, COMMITTEE_VALIDATO
 n_proposals = [el for el in range(max_proposals + 1)]
 pmf_proposals = binom.pmf(n_proposals, slots_per_year, 1 / NUM_VALIDATORS)
 
-# calculate all possible reward levels (up to 20 block proposals and 5 committee selections)
+# calculate all possible reward levels
 altair_pmf = {}
 attestation_rewards = epochs_per_year * altair_att_reward
 for comms in n_committees:
@@ -65,9 +65,9 @@ for comms in n_committees:
 
 #min_reward = attestation_rewards / GWEI_PER_ETH
 #max_reward = (max_committees * sync_reward + max_proposals * altair_proposer_reward + attestation_rewards) / GWEI_PER_ETH
-min_reward = 1.064
+min_reward = 1.1
 max_reward = 1.8
-n_bins = 23
+n_bins = 35
 bins = [min_reward + i * (max_reward - min_reward) / n_bins for i in range(n_bins)]
 altair_hist = [0] * n_bins
 

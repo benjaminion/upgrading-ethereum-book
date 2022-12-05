@@ -1208,15 +1208,15 @@ Actual individual validator returns, even on an optimally running beacon chain, 
 
 <!-- Number of validators -->
 
-The following chart shows the expected distribution of rewards for 500,000 validators, all participating perfectly, each with 32&nbsp;ETH of effective balance. The mean reward is 1.3305&nbsp;ETH/year (the 4.16% number from [earlier](/part2/incentives/issuance#validator-rewards)), and the median 1.3123&nbsp;ETH/year, but there is a large standard deviation of 0.1025 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.2175&nbsp;ETH in rewards over the year, and 10% more than 1.4704&nbsp;ETH, due solely to randomness in assigning duties.
+The following chart shows the expected distribution of annual rewards for 500,000 validators, all participating perfectly, each with 32&nbsp;ETH of effective balance. The mean reward is 1.3302&nbsp;ETH/year (the 4.16% number from [earlier](/part2/incentives/issuance#validator-rewards)), and the median 1.3123&nbsp;ETH/year, but there is a large standard deviation of 0.1037 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.2175&nbsp;ETH in rewards over the year, and 10% more than 1.4704&nbsp;ETH, due solely to randomness in assigning duties.
 
 <a id="img_reward_variance"></a>
 <div class="image">
 
 <!-- Number of validators -->
 
-![A bar chart of the distribution of rewards for 500,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
-Distribution of beacon chain rewards for 500,000 validators with 32&nbsp;ETH staked.
+![A bar chart of the distribution of annual reward for 500,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
+Distribution of annual beacon chain rewards for 500,000 perfectly performing validators with 32&nbsp;ETH staked. The variance comes from the probabilities of different numbers block proposals or sync committee assignments. Some values are not attainable in this idealised model.
 
 </div>
 
