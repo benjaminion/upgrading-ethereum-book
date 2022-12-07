@@ -3181,7 +3181,7 @@ Within a beacon committee, all members send their individual attestations to a g
 
 Aggregator selection has been designed with three properties in mind.
 
-First, the size of the resulting aggregator set. With very high probability we want a small, non-empty subset of the committee to be selected. It doesn't matter too much if our set of aggregators is slightly on the large side, but we really want to avoid having no aggregators. Bearing in mind that there's a chance of validators being down or malicious, selecting only one or two aggregators is also risky.
+First, the size of the resulting aggregator set. With very high probability we want a small, non-empty subset of the committee to be selected in order that we have a very high chance of selecting at least one honest, well-connected aggregator. It doesn't matter too much if our set of aggregators is slightly on the large side, but we really want to avoid having no aggregators at all. Bearing in mind that there's a chance of validators being down or malicious, selecting only one or two aggregators is also risky.
 
 Second, secrecy. We'd prefer that nobody be able to calculate who the aggregators are until after they have broadcast their aggregations. This helps to avoid denial of service (DoS) attacks. Disrupting consensus would be much simpler via a network DoS attack against a small number of aggregators than against a whole committee. The secrecy property prevents this.
 
@@ -3245,7 +3245,11 @@ However, there are implicit incentives. For one, if I produce a high quality agg
 
 #### See also
 
-A possible approach to implementing distributed validator technology (DVT) is for the multiple validators representing a single validator to operate independently, alongside a middleware that combines their signed attestations. This works because BLS signatures are additive: each validator has part of the key, and the signed attestations can be combined with a [threshold signature](/part2/building_blocks/signatures#threshold-signatures) scheme into a signature from the full key. While this works in principle, in practice the current interface between the beacon node and the validator client makes it difficult for these validators to determine whether they have been selected to be aggregators or not. Oisín Kyne's [ethresear.ch article](https://ethresear.ch/t/distributed-validator-middlewares-and-the-aggregation-duty/13044?u=benjaminion) explores this problem and proposes a solution.
+Hsiao-Wei Wang has documented the [original research](https://notes.ethereum.org/@hww/aggregation) around aggregator selection.
+
+This aggregation strategy presents a difficulty for building distributed validator technology (DVT). One approach to implementing DVT is for the multiple validators representing a single validator to operate independently, alongside a middleware that combines their signed attestations. This works because BLS signatures are additive: each validator has part of the key, and the signed attestations can be combined with a [threshold signature](/part2/building_blocks/signatures#threshold-signatures) scheme into a signature from the full key. However, the process of hashing the (combined) signature can't be done in a distributed way, so it is difficult for the individual validators to determine whether the collective validator has been selected to be an aggregator or not. Oisín Kyne's [ethresear.ch article](https://ethresear.ch/t/distributed-validator-middlewares-and-the-aggregation-duty/13044?u=benjaminion) explores this problem and suggests a solution, which appears (slightly modified) in the [proposed addition](https://github.com/ethereum/beacon-APIs/pull/224) of two endpoints to the Beacon API spec.
+
+[TODO: link to DVT when done]::
 
 ### SSZ: Simple Serialize <!-- /part2/building_blocks/ssz -->
 
