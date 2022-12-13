@@ -1547,20 +1547,28 @@ For the original description of the mechanics of the inactivity leak, see the [C
 
 #### Introduction
 
-Slashing occurs when validators break very specific protocol rules when submitting attestations or block proposals which could constitute attacks on the chain. Getting slashed means losing a potentially significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty". The good news is that stakers can take simple precautions to protect against ever being slashed.
+Slashing occurs when validators make attestations or block proposals that break very specific protocol rules. It applies to behaviour that could potentially be part of an attack on the chain. Getting slashed means losing a significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty". The good news is that stakers can take simple precautions to protect against ever being slashed.
 
-Validators' stakes can be slashed for two distinct behaviours:
+The behaviours that lead to slashing are as follows.
 
-1. as attesters, for breaking the Casper commandments, the two rules on voting for source and target checkpoints; and
-2. as proposers, for proposing two different blocks at the same height (equivocation).
+1. Related to Casper FFG consensus,
+    - making two attestations for the same target checkpoint, or
+    - making an attestation whose source and target votes "surround" those in another attestation from the same validator.
+2. Related to LMD GHOST consensus,
+    - proposing more than one distinct block at the same height, or
+    - attesting to different head blocks in the same epoch.
 
-The slashing of misbehaving attesters is what underpins Ethereum&nbsp;2.0's [economic finality](/part2/incentives/staking#economic-finality) guarantee by enforcing the Casper FFG protocol rules.
+[TODO: Link to Casper FFG and LMD GHOST sections when done]::
 
-Proposer slashing, however, is not part of the Casper FFG protocol, and is not directly related to economic finality. It punishes a proposer that spams the block tree with multiple blocks that could partition the network, for example in a [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion).
+All of these slashable behaviours relate to "equivocation", which is when a validator contradicts something it previously advertised to the network.[^fn-avoid-slashing]
 
-[TODO: Link to Casper FFG section when done]::
+[^fn-avoid-slashing]: To avoid being slashed, simply be sure not to equivocate. Any normally operating client (in the absence of bugs) will never do so. As far as can be determined, every Ethereum slashing to date has been due to a node operator simultaneously running the same validator keys on two different nodes, perhaps as a misguided way to improve uptime. Don't do this.
 
-As with penalties, the amounts removed from validators' beacon chain accounts due to slashing are effectively burned, reducing the overall net issuance of the beacon chain.
+The slashing conditions related to Casper FFG underpin Ethereum&nbsp;2.0's [economic finality](/part2/incentives/staking#economic-finality) guarantee. They effectively impose a well-determined price on reverting finality.
+
+The slashing conditions related to LMD GHOST are less robustly supported by consensus theory, and are not directly related to economic finality. Nonetheless, they punish bad behaviour that could lead to serious issues such as the [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion). Since we already had the slashing mechanism available for use with Casper FFG, it was simple enough to extend it to LMD GHOST.
+
+As with penalties, any amount removed from validators' beacon chain accounts due to slashing is effectively burned, reducing the overall net issuance of the beacon chain.
 
 #### The cost of being slashed
 
