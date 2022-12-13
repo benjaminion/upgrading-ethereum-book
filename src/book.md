@@ -1552,13 +1552,15 @@ Slashing occurs when validators make attestations or block proposals that break 
 The behaviours that lead to slashing are as follows.
 
 1. Related to Casper FFG consensus,
-    - making two attestations for the same target checkpoint, or
+    - making two differing attestations for the same target checkpoint, or
     - making an attestation whose source and target votes "surround" those in another attestation from the same validator.
 2. Related to LMD GHOST consensus,
     - proposing more than one distinct block at the same height, or
-    - attesting to different head blocks in the same epoch.
+    - attesting to different head blocks, with the same source and target checkpoints[^fn-slash-different-heads].
 
 [TODO: Link to Casper FFG and LMD GHOST sections when done]::
+
+[^fn-slash-different-heads]: This condition is not very obvious in the [code](/part3/helper/predicates#is_slashable_attestation_data). It comes about because two attestations with the same source and target votes but different head votes differ from each other. They are therefore counted as conflicting votes for the same target and slashed under the first Casper FFG rule.
 
 All of these slashable behaviours relate to "equivocation", which is when a validator contradicts something it previously advertised to the network.[^fn-avoid-slashing]
 
