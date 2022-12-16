@@ -41,19 +41,3 @@ exports.createPages = async ({ actions, graphql }) => {
   })
 }
 
-exports.onCreateWebpackConfig = () => {
-  // Node 18 uses openssl v3 which no longer supports md4 as a digest.
-  // Unfortunately, md4 is hard-coded into file-loader@6.2.0, which breaks Webpack.
-  // (See node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js line 43.)
-  // As a workaround we wrap crypto.createHash() to switch to md5 whenever md4 is used.
-  const crypto = require('crypto');
-  try {
-    crypto.createHash('md4')
-  } catch (e) {
-    console.warn('Hash type `md4` is not supported by this Node version, using `md5`.')
-    const origCreateHash = crypto.createHash
-    crypto.createHash = (alg, opts) => {
-      return origCreateHash(alg === 'md4' ? 'md5' : alg, opts)
-    }
-  }
-}
