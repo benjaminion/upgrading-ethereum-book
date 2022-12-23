@@ -196,9 +196,9 @@ Lamport captures the faultiness of the system in the following way.
 These treacherous generals exhibit what we've come to call "Byzantine behaviour", or "Byzantine faults". They can act in any arbitrary way: delaying messages, reordering messages, outright lying, sending contradictory messages to different recipients, failing to respond at all, or any other behaviour we can think of.
 
 <a id="img_consensus_messages"></a>
-<div class="image" style="width: 40%">
+<div class="image diagram" style="width: 40%">
 
-![A picture of a node with messages coming in](md/images/diagrams/consensus_messages.svg)
+![A picture of a node with messages coming in](images/diagrams/consensus-messages.svg)
 
 </div>
 <div class="caption" style="width: 60%">
@@ -245,9 +245,10 @@ A block comprises a set of transactions that a leader (the block proposer) has a
 Except for the special Genesis block, every block builds on and points to a parent block. Thus, we end up with a chain of blocks: a blockchain. Whatever the contents of blocks, the goal of the protocol is for all nodes on the network to agree on the same history of the blockchain.
 
 <a id="img_consensus_block_chain"></a>
-<div class="image" style="width: 90%">
+<div class="image diagram" style="width: 90%">
 
-![A picture of a linear chain of blocks](md/images/diagrams/consensus_block_chain.svg)
+![A picture of a linear chain of blocks](images/diagrams/consensus-block_chain.svg)
+
 A blockchain. Time moves from left to right and, except for the Genesis block, each block points to the parent block it builds on.
 
 </div>
@@ -263,9 +264,10 @@ The use of blocks is an optimisation. Each addition to the chain could in princi
 Our neat diagram of a nice linear chain will for the most part reflect what we see in practice, but not always. Sometimes, due perhaps to network delays, or a dishonest block proposer, or client bugs, any particular node might see something more like the following.
 
 <a id="img_consensus_block_tree"></a>
-<div class="image" style="width: 90%">
+<div class="image diagram" style="width: 90%">
 
-![A diagram of a block tree](md/images/diagrams/consensus_block_tree.svg)
+![A diagram of a block tree](images/diagrams/consensus-block_tree.svg)
+
 In general, we might end up with a block tree rather than a block chain. Again, time moves from left to right and each block points to the parent block it builds on.
 
 </div>
@@ -295,9 +297,10 @@ Ultimately, we want every correct node on the network to converge on an identica
 Given a block tree and some decision criteria based on a node's local view of the network, the fork choice rule is designed to select, from all the available branches, the one that is most likely to eventually end up in the final linear, canonical chain. That is, it will choose the branch least likely to be later pruned out of the block tree as nodes attempt to converge on a canonical view.
 
 <a id="img_consensus_block_tree_resolved"></a>
-<div class="image" style="width: 90%">
+<div class="image diagram" style="width: 90%">
 
-![A diagram of a block chain as a subset of the block tree](md/images/diagrams/consensus_block_tree_resolved.svg)
+![A diagram of a block chain as a subset of the block tree](images/diagrams/consensus-block_tree_resolved.svg)
+
 The fork choice rule selects a head block from among the candidates. This identifies a unique linear block chain running back to the Genesis block.
 
 </div>
@@ -329,9 +332,10 @@ In any case, running the fork choice rule on the updated block tree might indica
 In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
-<div class="image" style="width: 70%">
+<div class="image diagram" style="width: 70%">
 
-![A diagram of a blockchain prior to a reversion](md/images/diagrams/consensus_reversion_1.svg)
+![A diagram of a blockchain prior to a reversion](images/diagrams/consensus-reversion_1.svg)
+
 At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \larr B \larr D \larr E \larr F]$.
 
 </div>
@@ -343,9 +347,10 @@ Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed fr
 After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. After doing this, the node will have completed the reorganisation of its chain.
 
 <a id="img_consensus_reversion_2"></a>
-<div class="image" style="width: 70%">
+<div class="image diagram" style="width: 70%">
 
-![A diagram of a blockchain after a reversion](md/images/diagrams/consensus_reversion_2.svg)
+![A diagram of a blockchain after a reversion](images/diagrams/consensus-reversion_2.svg)
+
 Now the node believes that block $G$ is the best head, and therefore its chain must change to the blocks $[A \larr B \larr C \larr G]$.
 
 </div>
@@ -385,9 +390,10 @@ The CAP theorem is a famous result in distributed systems' theory that states th
 It is easy to demonstrate the CAP theorem in our blockchain context. Imagine that Amazon Web Services goes offline, such that all the AWS hosted nodes can communicate with each other, but none can talk to the outside world. Or that a country firewalls all connections in and out so that no gossip traffic can pass. Either of these scenarios divide the nodes into two disjoint groups, $A$ and $B$.
 
 <a id="img_consensus_partition"></a>
-<div class="image" style="width: 50%">
+<div class="image diagram" style="width: 50%">
 
-![A diagram of a network partition](md/images/diagrams/consensus_partition.svg)
+![A diagram of a network partition](images/diagrams/consensus-partition.svg)
+
 The network is partitioned: the nodes in $A$ can talk among themselves, but cannot talk to any node in $B$, and vice versa.
 
 </div>
@@ -415,9 +421,10 @@ Ethereum's proof of stake mechanism prioritises liveness, but unlike proof of wo
 Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper FFG mechanism that we'll explore shortly. The idea is that, as the blockchain progresses, all honest validators agree on blocks that they will never revert. That block (a checkpoint) and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer. Thus, finality is a safety property: once finality has been conferred, nothing bad ever happens.
 
 <a id="img_consensus_finality"></a>
-<div class="image" style="width: 80%">
+<div class="image diagram" style="width: 80%">
 
-![A diagram showing a finalised portion of chain and a forkful portion](md/images/diagrams/consensus_finality.svg)
+![A diagram showing a finalised portion of chain and a forkful portion](images/diagrams/consensus-finality.svg)
+
 The honest nodes have agreed that the checkpoint and all its ancestor blocks are "final" and will never be reverted. There are therefore no forks before the checkpoint. The chain descending from the checkpoint remains liable to forking.
 
 </div>
@@ -614,10 +621,11 @@ We would like to keep $\omega$ small to allow the broadest possible participatio
 
 This is a classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
-<a id="img_scalability_trilemma"></a>
-<div class="image" style="width: 60%">
+<a id="img_incentives_scalability_trilemma"></a>
+<div class="image diagram" style="width: 60%">
 
-![A version of the scalability trilemma](md/images/diagrams/scalability_trilemma.svg)
+![A version of the scalability trilemma](images/diagrams/incentives-scalability_trilemma.svg)
+
 A version of the scalability trilemma: pick any two.
 
 </div>
@@ -765,9 +773,10 @@ The following chart illustrates the behaviour.
   - Despite the actual balance falling again, it does not fall below 31.75&nbsp;ETH, so the effective balance remains at 32&nbsp;ETH.
 
 <a id="img_hysteresis"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph illustrating actual balance versus effective balance](md/images/charts/hysteresis.svg)
+![A graph illustrating actual balance versus effective balance](images/charts/hysteresis.svg)
+
 Illustration of the relationship between the actual balance (solid line) and the effective balance (dashed line) of a validator. The dotted lines are the thresholds at which the effective balance gets updated - the hysteresis.
 
 </div>
@@ -874,9 +883,10 @@ With 500,000 validators this equates to 665,292&nbsp;ETH per year, plus change. 
 We can graph the maximum issuance as a function of the number of validators. It's just a scaled square root curve.
 
 <a id="img_issuance_curve"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](md/images/charts/issuance_curve.svg)
+![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](images/charts/issuance_curve.svg)
+
 Maximum annual protocol issuance on the beacon chain as a function of the number of active validators.
 
 </div>
@@ -903,9 +913,10 @@ For example, with 500,000 validators participating, this amounts to an expected 
 Graphing this give us an inverse square root curve.
 
 <a id="img_rewards_curve"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](md/images/charts/rewards_curve.svg)
+![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](images/charts/rewards_curve.svg)
+
 The expected annual percentage rewards for stakers as a function of the number of active validators.
 
 </div>
@@ -968,10 +979,11 @@ The first of these, making attestations, happens regularly every epoch and accou
 
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
-<a id="img_weights"></a>
-<div class="image" style="width:50%">
+<a id="img_incentives_weights"></a>
+<div class="image diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each activity](md/images/diagrams/weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each activity](images/diagrams/incentives-weights.svg)
+
 The proportion of a validator's total reward derived from each activity.
 
 </div>
@@ -995,10 +1007,10 @@ Rewards are newly created Ether that is simply added to validators' balances on 
 
 There are three relevant milestones in a validator's lifecycle: its activation epoch, its exit epoch, and its withdrawable epoch. Eligibility for rewards, penalties and slashing vary based on these.
 
-<a id="img_rewards_eligibility"></a>
-<div class="image" style="width:80%">
+<a id="img_incentives_rewards_eligibility"></a>
+<div class="image diagram" style="width:80%">
 
-![A timeline of the eligibility of validators for rewards](md/images/diagrams/rewards_eligibility.svg)
+![A timeline of the eligibility of validators for rewards](images/diagrams/incentives-rewards_eligibility.svg)
 
 </div>
 
@@ -1070,9 +1082,10 @@ The new timeliness reward better reflect the relative importance of the votes. A
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.[^fn-five-slots]
 
 <a id="img_reward_timeliness"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](md/images/charts/reward_timeliness.svg)
+![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](images/charts/reward_timeliness.svg)
+
 It is plausible that setting the inclusion distance for correct source to 5 gives a kind of exponential reduction in reward with time. This graph shows the net reward (reward + penalty) for a completely correct attestation as it gets older plotted against an exponential curve for comparison.
 
 </div>
@@ -1154,10 +1167,11 @@ This factor works out to be $\frac{8}{56} = \frac{1}{7}$ which means that $\frac
 
 In the following charts, I have separated out the validator rewards from the proposer rewards, and we can see that they have exactly the same division among the duties. The chart on the right should probably be one seventh of the size of the one on the left for true accuracy.
 
-<a id="img_reward_split"></a>
-<div class="image">
+<a id="img_incentives_reward_split"></a>
+<div class="image diagram">
 
-![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](md/images/diagrams/reward_split.svg)
+![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](images/diagrams/incentives-reward_split.svg)
+
 On the left, the breakdown of expected rewards for validators for performing duties. On the right, the breakdown of rewards for proposers for including evidence of those duties.
 
 </div>
@@ -1211,11 +1225,12 @@ Actual individual validator returns, even on an optimally running beacon chain, 
 The following chart shows the expected distribution of annual rewards for 500,000 validators, all participating perfectly, each with 32&nbsp;ETH of effective balance. The mean reward is 1.3302&nbsp;ETH/year (the 4.16% number from [earlier](/part2/incentives/issuance#validator-rewards)), and the median 1.3123&nbsp;ETH/year, but there is a large standard deviation of 0.1037 due to the randomness of being selected to propose blocks or participate in sync committees. In fact, ten percent of validators will earn less than 1.2175&nbsp;ETH in rewards over the year, and 10% more than 1.4704&nbsp;ETH, due solely to randomness in assigning duties.
 
 <a id="img_reward_variance"></a>
-<div class="image">
+<div class="image chart">
 
 <!-- Number of validators -->
 
-![A bar chart of the distribution of annual reward for 500,000 validators with 32&nbsp;ETH staked](md/images/charts/reward_variance.svg)
+![A bar chart of the distribution of annual reward for 500,000 validators with 32&nbsp;ETH staked](images/charts/reward_variance.svg)
+
 Distribution of annual beacon chain rewards for 500,000 perfectly performing validators with 32&nbsp;ETH staked. The variance comes from the probabilities of different numbers block proposals or sync committee assignments. Some values are not attainable in this idealised model.
 
 </div>
@@ -1418,10 +1433,11 @@ To improve this, the Altair upgrade introduced individual validator inactivity s
 
 Graphically, the flow-chart looks like this.
 
-<a id="img_inactivity_scores_flow"></a>
-<div class="image">
+<a id="img_incentives_inactivity_scores_flow"></a>
+<div class="image diagram">
 
-![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
+
 How each validator's inactivity score is updated. The happy flow is right through the middle.
 
 </div>
@@ -1443,9 +1459,10 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 5. Always offline: the inactivity score increases rapidly during the leak, and declines even more rapidly once the leak is over.
 
 <a id="img_inactivity_scores"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph illustrating inactivity score scenarios](md/images/charts/inactivity_scores.svg)
+![A graph illustrating inactivity score scenarios](images/charts/inactivity_scores.svg)
+
 The inactivity scores of five different validator personas in an inactivity leak that starts at zero and ends at epoch 100 (labelled "End" and shown with a dashed line). The dotted lines labelled "A" and "B" mark the start and end of the offline period for the fourth validator.
 
 </div>
@@ -1474,9 +1491,10 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 5. Always offline: we can clearly see the quadratic nature of the penalty in the initial parabolic shape of the curve. After the end of the leak it takes around 35 epochs for the penalties to return to zero.
 
 <a id="img_inactivity_balances"></a>
-<div class="image">
+<div class="image chart">
 
-![A graph showing the effect of the inactivity leak in five different scenarios](md/images/charts/inactivity_balances.svg)
+![A graph showing the effect of the inactivity leak in five different scenarios](images/charts/inactivity_balances.svg)
+
 The balance retained by each of the five validator personas after the inactivity leak penalty has been applied. The scenario is identical to the chart above.
 
 </div>
@@ -1839,9 +1857,10 @@ More mathematically, things look like this. We use two subgroups of the BLS12-38
 4. The signature, $\sigma$, is also a member of the $G_2$ group, namely $[sk]H(m)$.
 
 <a id="img_bls_key"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram showing how we will depict the various components in the diagrams below](md/images/diagrams/bls_key.svg)
+![Diagram showing how we will depict the various components in the diagrams below](images/diagrams/bls-key.svg)
+
 The key to the keys. This is how we will depict the various components in the diagrams below. Variants of the same object are hatched differently. The secret key is mathematically a scalar; public keys are $G_1$ group members; message roots are mapped to $G_2$ group members; and signatures are $G_2$ group members.
 
 </div>
@@ -1857,9 +1876,10 @@ The secret key is supposed to be uniformly randomly generated in the range $[1,r
 The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/@benjaminion/bls12-381#Point-compression) serialised form as a string of 48 bytes.
 
 <a id="img_bls_setup"></a>
-<div class="image" style="width:50%">
+<div class="image diagram" style="width:50%">
 
-![Diagram of the generation of the public key](md/images/diagrams/bls_setup.svg)
+![Diagram of the generation of the public key](images/diagrams/bls-setup.svg)
+
 A validator randomly generates its secret key. Its public key is then derived from that.
 
 </div>
@@ -1881,9 +1901,10 @@ $$
 Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it serialises to a 96 byte string in compressed form.
 
 <a id="img_bls_signing"></a>
-<div class="image" style="width:65%">
+<div class="image diagram" style="width:65%">
 
-![Diagram of signing a message](md/images/diagrams/bls_signing.svg)
+![Diagram of signing a message](images/diagrams/bls-signing.svg)
+
 A validator applies its secret key to a message to generate a unique digital signature.
 
 </div>
@@ -1928,9 +1949,10 @@ $$
 Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
 
 <a id="img_bls_verifying"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram of verifying a signature](md/images/diagrams/bls_verifying.svg)
+![Diagram of verifying a signature](images/diagrams/bls-verifying.svg)
+
 To verify that a particular validator signed a particular message we use the validator's public key, the original message, and the signature. The verification operation outputs true if the signature is correct and false otherwise.
 
 </div>
@@ -1956,9 +1978,10 @@ In the following we will only consider aggregation of signatures over the same m
 The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like normal the addition of numbers that we are familiar with, but the operation is completely analogous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, thus the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
 
 <a id="img_bls_signature_aggregation"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram showing aggregation of signatures](md/images/diagrams/bls_signature_aggregation.svg)
+![Diagram showing aggregation of signatures](images/diagrams/bls-signature_aggregation.svg)
+
 Aggregation of signatures is simply group addition in the $G_2$ group.
 
 </div>
@@ -1968,9 +1991,10 @@ Aggregation of signatures is simply group addition in the $G_2$ group.
 To verify an aggregate signature, we need an aggregate public key. As long as we know exactly which validators signed the original message, this is equally easy to construct. Once again we simply "add up" the public keys of the signers. This time the addition is the group operation of the $G_1$ elliptic curve group, and the result will also be a member of the $G_1$ group, so it is mathematically indistinguishable from a non-aggregated public key, and has the same 48 byte size.
 
 <a id="img_bls_pubkey_aggregation"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram of public key aggregation](md/images/diagrams/bls_pubkey_aggregation.svg)
+![Diagram of public key aggregation](images/diagrams/bls-pubkey_aggregation.svg)
+
 Aggregation of public keys is simply group addition in the $G_1$ group.
 
 </div>
@@ -1980,9 +2004,10 @@ Aggregation of public keys is simply group addition in the $G_1$ group.
 Since aggregate signatures are indistinguishable from normal signatures, and aggregate public keys are indistinguishable from normal public keys, we can simply feed them into our normal verification algorithm.
 
 <a id="img_bls_aggregate_verify"></a>
-<div class="image" style="width:70%">
+<div class="image diagram" style="width:70%">
 
-![Diagram of verification of an aggregate signature](md/images/diagrams/bls_aggregate_verify.svg)
+![Diagram of verification of an aggregate signature](images/diagrams/bls-aggregate_verify.svg)
+
 Verification of an aggregate signature is identical to verification of a normal signature as long as we use the corresponding aggregate public key.
 
 </div>
@@ -2033,9 +2058,10 @@ If we know in advance who the members of the committee are and how they are orde
 This diagram illustrates the full flow from signing, through aggregating, to verifying. There are three validators in this case, although there could be many more, and each is signing the same message contents. Each validator has its own unique secret key and public key pair. The workflow is entirely non-interactive, and any of the actions before the verification can happen independently. Even the aggregation can be done incrementally.
 
 <a id="img_bls_aggregation"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram showing the end-to-end aggregate signature workflow](md/images/diagrams/bls_aggregation.svg)
+![Diagram showing the end-to-end aggregate signature workflow](images/diagrams/bls-aggregation.svg)
+
 The end-to-end aggregate signature workflow. Verifying the single aggregate signature is much faster than verifying the original signatures separately.
 
 </div>
@@ -2278,9 +2304,10 @@ $$
 We can think of a RANDAO as being like a deck of cards that's passed round the table, each person shuffling it in turn: the deck gets repeatedly re-randomised. Even if one contributor's randomness is weak, the cumulative result has a high level of entropy.
 
 <a id="img_randomness_shuffle"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram illustrating repeated shuffling of a deck of cards](md/images/diagrams/randomness_shuffle.svg)
+![Diagram illustrating repeated shuffling of a deck of cards](images/diagrams/randomness-shuffle.svg)
+
 We can imagine the RANDAO as a deck of cards that accumulates randomness over time as each participant shuffles the deck in turn.
 
 </div>
@@ -2361,9 +2388,10 @@ First, the signature is verified using the proposer's public key before being mi
 Second, the hash of the signature is mixed in to the beacon state's RANDAO using an `xor` operation. We apply the hash operation to reduce the length of the RANDAO accumulator from about 762 bits &ndash; the length of a compressed BLS signature, an inconvenient number of bits to work with &ndash; to 256 bits. The uniformity of the output of hash functions is also better established than that of BLS signatures.
 
 <a id="img_randomness_reveal"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram illustrating updating the RANDAO](md/images/diagrams/randomness_reveal.svg)
+![Diagram illustrating updating the RANDAO](images/diagrams/randomness-reveal.svg)
+
 What's really happening when the RANDAO is shuffled. The signature over the epoch number is the RANDAO reveal that the proposer includes in its block. This is hashed then mixed in to the existing RANDAO with an `xor` operation.
 
 </div>
@@ -2390,9 +2418,10 @@ It's certainly not an easy attack. Nonetheless, it is easy to defend against, so
 To prevent this, we assume a maximum feasible lookahead that an attacker might achieve, [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead) and delay all activations and exits by this amount, which allows time for new randomness to come in via block proposals from honest validators, making irrelevant any manipulation by the entering or exiting validators. With `MAX_SEED_LOOKAHEAD` set to 4, if only 10% of validators are online and honest, then the chance that an attacker can succeed in forecasting the seed beyond (`MAX_SEED_LOOKAHEAD` ` - ` `MIN_SEED_LOOKAHEAD`) = 3 epochs is $0.9^{3\times 32}$, which is about 1 in 25,000.
 
 <a id="img_randomness_lookahead"></a>
-<div class="image" style="width:90%">
+<div class="image diagram" style="width:90%">
 
-![Diagram showing min and max lookahead](md/images/diagrams/randomness_lookahead.svg)
+![Diagram showing min and max lookahead](images/diagrams/randomness-lookahead.svg)
+
 The RANDAO value at the end of epoch $N$ is used to set duties for epoch $N+2$, which is controlled by `MIN_SEED_LOOKAHEAD`. A validator exiting in epoch $N+1$ remains active until at least the end of epoch $N+5$ (depending on the exit queue). This is controlled by `MAX_SEED_LOOKAHEAD`.
 
 </div>
@@ -2408,9 +2437,10 @@ As currently implemented, both the minimum and maximum lookaheads smell a little
 The RANDAO value for an epoch is set at the end of the previous epoch, and duty assignments for the entire epoch (proposals and committee memberships) depend on that value. (Actually &ndash; due to [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead) &ndash; on the RANDAO value at the end of the last-but-one epoch, but we'll overlook that in what follows.)
 
 <a id="img_randomness_assignments"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram illustrating calculation of duties based on the RANDAO](md/images/diagrams/randomness_assignments.svg)
+![Diagram illustrating calculation of duties based on the RANDAO](images/diagrams/randomness-assignments.svg)
+
 Future duty assignments for validators &ndash; block proposers, committee members, sync committee duty &ndash; are calculated based on the state of the RANDAO at the end of each epoch.
 
 </div>
@@ -2418,9 +2448,10 @@ Future duty assignments for validators &ndash; block proposers, committee member
 Thus, when a validator happens to be assigned to propose a block in the last slot of an epoch, it gains a small amount of control over the assignments for the next epoch. This is because it can choose to reveal its block, which mixes in its RANDAO reveal, or it can choose (at a cost) to withhold its block and keep the existing RANDAO value, knowing that there will be no subsequent RANDAO change before duties are calculated. In this way, a validator is able to exert a little influence over the proposer and committee assignments in the next epoch. This is called "one bit of influence" over the RANDAO as the validator has a choice of two outcomes.
 
 <a id="img_randomness_biasing"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram illustrating biasing the RANDAO](md/images/diagrams/randomness_biasing.svg)
+![Diagram illustrating biasing the RANDAO](images/diagrams/randomness-biasing.svg)
+
 The last proposer in an epoch has a choice. It can propose its block as usual, updating the RANDAO, resulting in a set of duty assignments $A$. Or it can withhold its block, leaving the RANDAO as-is, resulting in a set of duty assignments $B$. If outcome $B$ gives the owner of the validator sufficient advantage to compensate for having missed a proposal, then it is an opportunity to "cheat".
 
 </div>
@@ -2462,9 +2493,10 @@ E(r) = \sum_{n=1}^{32} n q_n = \sum_{n=1}^{31} n (1-r) r^n + 32 r^{32}
 $$
 
 <a id="img_randao_tail"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](md/images/charts/randao_tail.svg)
+![Graph of the expected RANDAO tail](images/charts/randao_tail.svg)
+
 The bottom axis is $r$, and the side axis is my expected proposals tail length $E(r)$ assuming no RANDAO manipulation.
 
 </div>
@@ -2484,9 +2516,10 @@ We can think about this as follows. With $k = 1$ we get two attempts, therefore 
 Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded area of the next diagram.
 
 <a id="img_randomness_tail_probabilities"></a>
-<div class="image" style="width:40%">
+<div class="image diagram" style="width:40%">
 
-![Matrix of tail length probabilities](md/images/diagrams/randomness_tail_probabilities.svg)
+![Matrix of tail length probabilities](images/diagrams/randomness-tail_probabilities.svg)
+
 The probability that we get a maximum tail length of exactly two with two attempts is the sum of the terms in the shaded areas. Despite the overlap, each term is included only once.
 
 </div>
@@ -2504,9 +2537,10 @@ $$
 Graphing this for various values of $k$ we get the following. Note that the solid, $k = 0$, line is the same as $E(r)$ above - the expected tail with no manipulation. That is, $E^{(0)}(r) = E(r)$ as you'd expect.
 
 <a id="img_randao_extend_0"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](md/images/charts/randao_extend_0.svg)
+![Graph of the expected RANDAO tail](images/charts/randao_extend_0.svg)
+
 The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length, $E^{(k)}(r)$ given various values of tail length $k$ that I can play with. Note that $E^{(0)}(r) = E(r)$ from the graph above.
 
 </div>
@@ -2518,9 +2552,10 @@ The important question is, under what circumstances can I use this ability in or
 To investigate this, consider the following graph. Here, for each $k$ line we have plotted $E^{(k)}(r) - k$. This allows us to see whether our expected tail in the next epoch is greater or less than our current tail. If $E^{(k)}(r) - k$ is negative then I can expect to have fewer proposals in the next epoch than I have in this one.
 
 <a id="img_randao_extend_1"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph of the expected change in RANDAO tail](md/images/charts/randao_extend_1.svg)
+![Graph of the expected change in RANDAO tail](images/charts/randao_extend_1.svg)
+
 The bottom axis is $r$, and the side axis is my subsequent expected proposals tail length minus my current tail length, $E^{(k)}(r) - k$ for various values of $k$.
 
 </div>
@@ -2530,9 +2565,10 @@ We can see that for $r$ less than around 0.5, especially as $k$ grows, we expect
 For completeness, we shouldn't only look at expectations, but also at probabilities. The following graph shows the probability that if I have a tail of length $k$ then I will have a tail of length less than $k$ in the next epoch. As $k$ increases you can see that a step function is forming: for a proportion of stake less than about 50% it becomes practically certain that my tail will decrease in length from one epoch to the next despite my best efforts to grow it; conversely, for a proportion of stake greater than a little over 50% it becomes practically certain that I can maintain or grow my tail of block proposals.
 
 <a id="img_randao_extend_2"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph of the probability that my tail will shrink](md/images/charts/randao_extend_2.svg)
+![Graph of the probability that my tail will shrink](images/charts/randao_extend_2.svg)
+
 The bottom axis is $r$, and the side axis is the probability that my best tail length in the next epoch is less than my current tail length for various values of tail length $k$.
 
 </div>
@@ -2637,9 +2673,10 @@ Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be include
 [^fn-hyper-hurts-head]: You can see why I am restricting this example to tails of length just zero or one: I don't want to think about what this looks like in a $2^k$ dimensional space.
 
 <a id="img_randomness_propose_probabilities"></a>
-<div class="image" style="width:40%">
+<div class="image diagram" style="width:40%">
 
-![Matrix of proposal number probabilities](md/images/diagrams/randomness_propose_probabilities.svg)
+![Matrix of proposal number probabilities](images/diagrams/randomness-propose_probabilities.svg)
+
 The probability that we get a net number of exactly two proposals with two attempts is the sum of the terms in the shaded areas. Despite the overlap, each term is included only once.
 
 </div>
@@ -2651,9 +2688,10 @@ E'_{N+1} = \sum_{n=1}^{32} n \left((1 - \frac{E'_N}{32}) q_n + \frac{E'_N}{32} p
 $$
 
 <a id="img_randao_proposals"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
+![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](images/charts/randao_proposals.svg)
+
 The solid line is $E$, the expected number of block proposals per epoch for a proportion of the stake that does not seek to bias the RANDAO. The dashed line is $E'$, the long-term expected number of block proposals per epoch for a proportion of the stake that coordinates to bias the RANDAO in its favour.
 
 </div>
@@ -2661,9 +2699,10 @@ The solid line is $E$, the expected number of block proposals per epoch for a pr
 The maximum percentage gain in block proposals that I can acquire is shown in the following graph.
 
 <a id="img_randao_proposals_percent"></a>
-<div class="image" style="width:100%">
+<div class="image chart" style="width:100%">
 
-![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
+![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](images/charts/randao_proposals_percent.svg)
+
 The long-term percentage increase in the expected number of proposals per epoch that can be gained by a proportion of the stake coordinating to bias the RANDAO. An entity with 25% of the stake can gain an extra 2.99% of proposals (8.24 per epoch rather than exactly 8), assuming that the remaining stakers are uncoordinated.
 
 </div>
@@ -2822,9 +2861,10 @@ First, we pick a pivot index $p$. This is pseudo-randomly chosen, based on the r
 With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$. That is, $m_1 = p / 2$. (We will simplify by ignoring off-by-one rounding issues for the purposes of this explanation.)
 
 <a id="img_shuffling_0"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![A diagram showing the pivot and the first mirror index](md/images/diagrams/shuffling_0.svg)
+![A diagram showing the pivot and the first mirror index](images/diagrams/shuffling-0.svg)
+
 The pivot and the first mirror index.
 
 </div>
@@ -2840,9 +2880,10 @@ If we do decide to swap, then we exchange the list element at $i$ with that at $
 We make the same swap-or-not decision for each index between $m_1$ and $p$.
 
 <a id="img_shuffling_1"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![A diagram showing swapping or not from the first mirror up to the pivot](md/images/diagrams/shuffling_1.svg)
+![A diagram showing swapping or not from the first mirror up to the pivot](images/diagrams/shuffling-1.svg)
+
 Swapping or not from the first mirror up to the pivot.
 
 </div>
@@ -2854,9 +2895,10 @@ The decision whether to swap or not is based on hashing together the random seed
 After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we now find a second mirror index at $m_2$, which is the point equidistant between $p$ and the end of the list: $m_2 = m_1 + n / 2$.
 
 <a id="img_shuffling_2"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![A diagram showing the second mirror index](md/images/diagrams/shuffling_2.svg)
+![A diagram showing the second mirror index](images/diagrams/shuffling-2.svg)
+
 The second mirror index.
 
 </div>
@@ -2866,9 +2908,10 @@ The second mirror index.
 Finally, we repeat the swap-or-not process, considering all the points $j$ from the pivot, $p$ to the second mirror $m_2$. If we choose not to swap, we just move on. If we choose to swap then we exchange the element at $j$ with its image at $j'$ in the mirror index $m_2$. Here, $j' = m_2 + (m_2 - j)$.
 
 <a id="img_shuffling_3"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![A diagram showing swapping or not from the pivot to the second mirror](md/images/diagrams/shuffling_3.svg)
+![A diagram showing swapping or not from the pivot to the second mirror](images/diagrams/shuffling-3.svg)
+
 Swapping or not from the pivot to the second mirror.
 
 </div>
@@ -2880,9 +2923,10 @@ At the end of the round, we have considered all the indices between $m_1$ and $m
 The next round begins by incrementing (or decrementing for a reverse shuffle) the round number, which gives us a new pivot index, and off we go again.
 
 <a id="img_shuffling_4"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![A diagram showing the whole process running from one mirror to the other in a single round](md/images/diagrams/shuffling_4.svg)
+![A diagram showing the whole process running from one mirror to the other in a single round](images/diagrams/shuffling-4.svg)
+
 The whole process running from one mirror to the other in a single round.
 
 </div>
@@ -2975,9 +3019,10 @@ During an epoch, every active validator is a member of exactly one beacon commit
 The composition of the committees for an epoch is fully determined at the start of an epoch by (1) the active validator set for that epoch, and (2) the [RANDAO seed](/part2/building_blocks/randomness#lookahead) value at the start of the previous epoch.
 
 <a id="img_committees_random"></a>
-<div class="image" style="width: 80%">
+<div class="image diagram" style="width: 80%">
 
-![Diagram showing circles and triangles randomly divided into committees](md/images/diagrams/committees_random.svg)
+![Diagram showing circles and triangles randomly divided into committees](images/diagrams/committees-random.svg)
+
 Here we have divided thirty circles and fifteen triangles into five committees at random. The attacking triangles do not have a majority in any committee.
 
 </div>
@@ -2985,9 +3030,10 @@ Here we have divided thirty circles and fifteen triangles into five committees a
 We assign validators to committees randomly in order to defend against a minority attacker being able to capture any single committee. If committee assignments were not random, or were calculable long in advance, then it might be possible for an attacker with a minority of validators to organise them so that they became a supermajority in some committees. They might do this by manipulating the entries and exits of their validators, for example.
 
 <a id="img_committees_organised"></a>
-<div class="image" style="width: 80%">
+<div class="image diagram" style="width: 80%">
 
-![Diagram showing circles and triangles divided into committees under the influence of an attacker](md/images/diagrams/committees_organised.svg)
+![Diagram showing circles and triangles divided into committees under the influence of an attacker](images/diagrams/committees-organised.svg)
+
 It would be improbable for the triangles to gain a 2/3 supermajority in a committee purely by chance. But if the attacker could manipulate the assignments then they might gain a supermajority in some committees, such as the first two here.
 
 </div>
@@ -3005,9 +3051,10 @@ The protocol adjusts the total number of committees in each epoch according to t
 Clearly, the first goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` validators &ndash; is a committee a committee if nobody is in it? &ndash; and the second goal is not achievable if there are fewer than `SLOTS_PER_EPOCH` `*` `TARGET_COMMITTEE_SIZE` (4096) validators. The protocol could hardly be considered secure with fewer than 4096 validators, so this is not a significant issue in practice.
 
 <a id="img_committees_all"></a>
-<div class="image" style="width: 90%">
+<div class="image diagram" style="width: 90%">
 
-![A diagram showing N committees at each slot and 32 slots per epoch](md/images/diagrams/committees_all.svg)
+![A diagram showing N committees at each slot and 32 slots per epoch](images/diagrams/committees-all.svg)
+
 Every slot in an epoch has the same number of committees, $N$, up to a maximum of `MAX_COMMITTEES_PER_SLOT`. Every active validator in the epoch appears in exactly one committee, so the committees are all disjoint.
 
 </div>
@@ -3082,9 +3129,10 @@ def compute_committee_size(n, j, N):
 The length of the vector returned will be either `n // (32 * N)` or `1 + n // (32 * N)`. The function [`compute_shuffled_index()`](/part3/helper/misc#compute_shuffled_index) is described in the [previous section](/part2/building_blocks/shuffling).
 
 <a id="img_committees_selection"></a>
-<div class="image" style="width: 95%">
+<div class="image diagram" style="width: 95%">
 
-![A diagram showing how the validator set is sliced up into committees](md/images/diagrams/committees_selection.svg)
+![A diagram showing how the validator set is sliced up into committees](images/diagrams/committees-selection.svg)
+
 Conceptually, to calculate the committee assignments for an epoch, the entire active validator set is shuffled into a list of length $n$, then sliced into $32N$ committees of as close to the same size as possible. $N$ is the number of committees per slot. The epoch-based committee number, $j$, is shown.
 
 </div>
@@ -3180,9 +3228,10 @@ The process of aggregation is as follows:
 This section is concerned with steps 2 and 4: how the aggregators are selected for duty, and how they prove that they were indeed selected.
 
 <a id="img_aggregators"></a>
-<div class="image" style="width: 80%">
+<div class="image diagram" style="width: 80%">
 
-![A diagram of the workflow of aggregating attestations from beacon committees](md/images/diagrams/aggregators.svg)
+![A diagram of the workflow of aggregating attestations from beacon committees](images/diagrams/aggregators.svg)
+
 Within a beacon committee, all members send their individual attestations to a gossip subnet. Aggregators are a chosen subset of the committee who listen to the subnet and aggregate the attestations they receive. The aggregators broadcast their aggregates to the global channel for the next block proposer to pick up.
 
 </div>
@@ -3234,9 +3283,10 @@ Assuming that BLS signatures are uniformly random, then in a committee of size $
 The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the minimum target committee size of $N = 128$ this is 1 in 26 million, and for the maximum committee size of $N = 2048$, 1 in 9.5 million. So we would expect to see a beacon committee with no aggregators about once every 13,000 epochs (8 weeks) in the former case and once every 5000 epochs (3 weeks) in the latter. Each committee comprises only a fraction $1/2048$ of the total validator set, so occasionally having no aggregator is insignificant for the protocol, but it is unfortunate for those in that committee who will most likely not have their attestations included in a block as a result.
 
 <a id="img_committee_aggregators"></a>
-<div class="image">
+<div class="image chart">
 
-![A bar chart showing the probability of different numbers of aggregators in a committee of 256](md/images/charts/committee_aggregators.svg)
+![A bar chart showing the probability of different numbers of aggregators in a committee of 256](images/charts/committee_aggregators.svg)
+
 The probability of having $k$ aggregators in a beacon committee of size 256. The expected number is 16.
 
 </div>
@@ -3492,10 +3542,11 @@ As an example, this bitlist with three elements is encoded into a single byte. T
 '08'
 ```
 
-<a id="img_bitlist"></a>
-<div class="image" style="width: 60%">
+<a id="img_ssz_bitlist"></a>
+<div class="image diagram" style="width: 60%">
 
-![A diagram showing how the bitlist sentinel works](md/images/diagrams/bitlist.svg)
+![A diagram showing how the bitlist sentinel works](images/diagrams/ssz-bitlist.svg)
+
 The sentinel bit indicates the end of the bitlist. All bits beyond the sentinel are zero.
 
 </div>
@@ -3575,9 +3626,10 @@ Start of Part 2 (variable size elements)
 In Part&nbsp;1, instead of directly encoding the variable size list in place, it is replaced with a pointer (an offset) to its serialisation in Part&nbsp;2. So, for any container, the size of Part&nbsp;1 is known and fixed no matter what kinds of variable size types are present. The actual lengths of the variable size objects can be deduced from the offsets in Part&nbsp;1 and the overall length of the serialisation string.
 
 <a id="img_ssz_examples_baz"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram of the serialisation of the Baz container](md/images/diagrams/ssz_examples_Baz.svg)
+![Diagram of the serialisation of the Baz container](images/diagrams/ssz-examples_Baz.svg)
+
 Serialisation of the `Baz` container. Fixed size parts are done first, with an offset specified for the variable size `List` data.
 
 </div>
@@ -3740,9 +3792,10 @@ The first thing to notice is that the `attesting_indices` list is variable size,
 All the remaining items are fixed size, and are encoded in-place, including recursively encoding the fixed size `AttestationData` object, and its fixed size `Checkpoint` children.
 
 <a id="img_ssz_examples_indexedattestation"></a>
-<div class="image" style="width:72%">
+<div class="image diagram" style="width:72%">
 
-![Diagram of the serialisation of the IndexedAttestation container](md/images/diagrams/ssz_examples_IndexedAttestation.svg)
+![Diagram of the serialisation of the IndexedAttestation container](images/diagrams/ssz-examples_IndexedAttestation.svg)
+
 Serialisation of the `IndexedAttestation` container.
 
 </div>
@@ -3787,9 +3840,10 @@ This time we have two variable length types, so they are both replaced by offset
 Another thing to note is that, since `attestation_1` and `attestation_2` are identical, their serialisations within this compound object are identical, _including_ their internal offsets to their own variable length parts. That is, both attestations have variable length data at offset `0xe4` within their own serialisations; the offset is relative to the start of each sub-object's serialisation, not the entire string. This property simplifies recursive serialisation and deserialisation: a given object will have the same serialisation no matter what context it is found in.
 
 <a id="img_ssz_examples_attesterslashing"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram of the serialisation of the AttesterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
+![Diagram of the serialisation of the AttesterSlashing container](images/diagrams/ssz-examples_AttesterSlashing.svg)
+
 Serialisation of the `AttesterSlashing` container.
 
 </div>
@@ -3880,9 +3934,10 @@ In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, 
 [^fn-roots-and-leaves]: For some reason, in computer science, trees are traditionally depicted the other way up. Call me eccentric, but I like my trees to have their leaves at the top and their roots at the bottom.
 
 <a id="img_merkleization_tree"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram of a Merkle tree](md/images/diagrams/merkleization_tree.svg)
+![Diagram of a Merkle tree](images/diagrams/merkleization-tree.svg)
+
 Example of a Merkle tree.
 
 </div>
@@ -4058,9 +4113,10 @@ We will create an instance of this just as we did [previously](/part2/building_b
 A container's hash tree root is the Merkleization of the list of hash tree roots of the objects it contains (by rule 2). Diagrammatically we are building the following tree and finding its root.
 
 <a id="img_merkleization_indexedattestation"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation.svg)
+![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation.svg)
+
 Calculating the hash tree root of an `IndexedAttestation`. In this and the following diagrams, $R(X)$ is the Merkleization of $X$, $S(X)$ is the SSZ serialisation of $X$. Each box is a 32 byte chunk, and the small digits are the number of leaves in the Merkleization operation.
 
 </div>
@@ -4112,9 +4168,10 @@ assert(a.attesting_indices.hash_tree_root() ==
 In diagram form the hash tree root calculation for the list looks like this.
 
 <a id="img_merkleization_attestingindices"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a List type](md/images/diagrams/merkleization_AttestingIndices.svg)
+![Diagram showing how to calculate the hash tree root of a List type](images/diagrams/merkleization-AttestingIndices.svg)
+
 Calculating the hash tree root of the `attesting_indices`. This is a `List[uint256, 2048]` type, and our example list has three elements, comprising a single chunk. Note the extra `mix_in_length()` step that's applied to lists.
 
 </div>
@@ -4177,9 +4234,10 @@ assert(a.data.hash_tree_root() == merkleize_chunks(
 ```
 
 <a id="img_merkleization_attestationdata"></a>
-<div class="image" style="width:80%">
+<div class="image diagram" style="width:80%">
 
-![Diagram showing how to calculate the hash tree root of an AttestationData type](md/images/diagrams/merkleization_AttestationData.svg)
+![Diagram showing how to calculate the hash tree root of an AttestationData type](images/diagrams/merkleization-AttestationData.svg)
+
 Calculating the hash tree root of an `AttestationData` container. It contains in turn two `Checkpoint` containers, `source` and `target`.
 
 </div>
@@ -4194,9 +4252,10 @@ assert(a.signature.hash_tree_root() ==
 ```
 
 <a id="img_merkleization_signature"></a>
-<div class="image" style="width:60%">
+<div class="image diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a Signature type](md/images/diagrams/merkleization_Signature.svg)
+![Diagram showing how to calculate the hash tree root of a Signature type](images/diagrams/merkleization-Signature.svg)
+
 Calculating the hash tree root of a `Signature`, which is really a `Bytes96`, or `Vector[uint8, 96]` type.
 
 </div>
@@ -4208,9 +4267,10 @@ Assembling all these parts we can illustrate in both diagram form and code form 
 ##### The full picture
 
 <a id="img_merkleization_indexedattestation_all"></a>
-<div class="image" style="width:100%">
+<div class="image diagram" style="width:100%">
 
-![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation_all.svg)
+![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation_all.svg)
+
 Illustrating the steps required to calculate the hash tree root of an `IndexedAttestation`. The small digits are the number of leaves in each Merkleization operation.
 
 </div>
@@ -4689,10 +4749,11 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
-<a id="img_weights"></a>
-<div class="image" style="width:50%">
+<a id="img_incentives_weights"></a>
+<div class="image diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](md/images/diagrams/weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](images/diagrams/incentives-weights.svg)
+
 The proportion of the total reward derived from each of the micro-rewards.
 
 </div>
@@ -8091,9 +8152,10 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
 <a id="img_k_finality"></a>
-<div class="image" style="width: 80%">
+<div class="image diagram" style="width: 80%">
 
-![A diagram of the four k-finality scenarios](md/images/diagrams/k_finality.svg)
+![A diagram of the four k-finality scenarios](images/diagrams/k_finality.svg)
+
 The four k-finality scenarios. Checkpoint numbers are along the bottom.
 
 </div>
@@ -8137,10 +8199,11 @@ Since the Altair upgrade, each validator has an individual inactivity score in t
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
 
-<a id="img_inactivity_scores_flow"></a>
-<div class="image">
+<a id="img_incentives_inactivity_scores_flow"></a>
+<div class="image diagram">
 
-![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
+
 How each validator's inactivity score is updated. The happy flow is right through the middle.
 
 </div>

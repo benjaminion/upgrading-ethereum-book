@@ -39,6 +39,7 @@ export default function HTML(props) {
         <meta name="theme-color" content="#ffffff" />
         <link rel="stylesheet" type="text/css" href="https://eth2book.info/fonts/fonts.css" />
         {props.headComponents}
+        <script type="module" src="https://eth2book.info/inc/dark-mode-toggle.js" />
         <script src={withPrefix('local.js')} />
       </head>
       <body {...props.bodyAttributes}>

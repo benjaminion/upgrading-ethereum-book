@@ -1,3 +1,5 @@
+@import "custom.css";
+
 sup[id^='fnref-'] {
   position: relative;
   display: inline;
@@ -8,8 +10,8 @@ sup[id^='fnref-'] {
   font-family: 'Open Sans', sans-serif;
   font-size: 80%;
   position: absolute;
-  color: #000;
-  background: #ddd;
+  color: var(--fn-tt-foreground);
+  background: var(--fn-tt-background);;
   border-radius: 6px;
   padding: 5px 10px;
   width: calc(var(--main-width) / 4);

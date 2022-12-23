@@ -11,7 +11,8 @@ nav.sidebar {
   overflow-y: auto;
   border-right: 1px solid rgb(230, 236, 241);
   text-align: center;
-  background-color: rgb(243, 245, 246);
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
 }
 
 #index {

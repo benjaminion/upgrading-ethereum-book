@@ -1,3 +1,5 @@
+@import "custom.css";
+
 #page-navi {
   box-sizing: border-box;
   flex-grow: 1;
@@ -5,17 +7,16 @@
   padding: 0 1em 0 2em;
   margin: 0px;
   overflow-y: auto;
-  color: #999999;
   font-size: 80%;
 }
 
 #page-navi a {
-  color: #777;
+  color: var(--pagenavi-link);
 }
 
 #page-navi a:hover {
   text-decoration: none;
-  color: #444;
+  color: var(--pagenavi-link-hover);
 }
 
 #page-navi ul {

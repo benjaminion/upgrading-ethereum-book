@@ -6,7 +6,7 @@ module.exports = ({ markdownAST }, pluginOptions) => {
     const data = fs.readFileSync(pluginOptions.file, 'utf8')
     const map = JSON.parse(data)
 
-    visit(markdownAST, "inlineCode", (node, index, parent) => {
+    visit(markdownAST, "inlineCode", (node, parent) => {
       // HTML in headings causes problems for the page index, so skip these
       if (parent.type !== "heading") {
         const text = node.value

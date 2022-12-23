@@ -115,7 +115,7 @@
                          });
 
     // Top and tail for file format
-    source = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">' + source + '</svg>';
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
 
     // Convert to URI data scheme.
     const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);

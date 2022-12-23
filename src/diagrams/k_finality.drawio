@@ -1,0 +1,156 @@
+<mxfile host="app.diagrams.net" modified="2022-12-21T12:31:56.262Z" agent="5.0 (X11)" etag="7Jd0L_ydFjyHQhWJZouo" version="20.7.4" type="github">
+  <diagram id="Vr3CmBz5nJQ4S50wZGGv" name="k_finality">
+    <mxGraphModel dx="2074" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-0" />
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-1" parent="NgqIVEivUGpVFQbDR0Pq-0" />
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-2" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="100" y="120" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-3" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="280" y="120" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-4" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="460" y="120" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-5" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="640" y="120" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-6" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=auto;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="100" y="240" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-7" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="280" y="240" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-8" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="460" y="240" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-9" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillColor=none;strokeColor=default;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="640" y="240" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-10" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="100" y="360" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-11" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="280" y="360" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-12" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="460" y="360" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-13" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillColor=#000000;fillStyle=hachure;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="640" y="360" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-14" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="100" y="480" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-15" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=auto;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="280" y="480" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-16" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="460" y="480" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-17" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="640" y="480" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-18" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Times New Roman;fontSize=24;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="NgqIVEivUGpVFQbDR0Pq-1" source="NgqIVEivUGpVFQbDR0Pq-2" target="NgqIVEivUGpVFQbDR0Pq-4" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="400" as="sourcePoint" />
+            <mxPoint x="440" y="350" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="240" y="210" />
+              <mxPoint x="400" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-19" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Times New Roman;fontSize=24;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="NgqIVEivUGpVFQbDR0Pq-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="360" y="420" as="sourcePoint" />
+            <mxPoint x="640" y="420" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="450" />
+              <mxPoint x="580" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-20" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Times New Roman;fontSize=24;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="NgqIVEivUGpVFQbDR0Pq-1" target="NgqIVEivUGpVFQbDR0Pq-8" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="360" y="300" as="sourcePoint" />
+            <mxPoint x="640" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="370" y="330" />
+              <mxPoint x="450" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-21" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Times New Roman;fontSize=24;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="NgqIVEivUGpVFQbDR0Pq-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="540" y="540" as="sourcePoint" />
+            <mxPoint x="640" y="540" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="570" />
+              <mxPoint x="630" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-22" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;1.&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="20" y="135" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-23" value="&lt;font style=&quot;font-size: 20px&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;2.&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="20" y="255" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-24" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;3.&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="20" y="375" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-25" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;4.&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="20" y="495" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-26" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="160" y="630" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-27" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=hachure;fillColor=#000000;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="306" y="630" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-28" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fillStyle=cross-hatch;fillColor=none;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="440" y="630" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-29" value="" style="curved=1;endArrow=classic;html=1;rounded=0;sketch=1;fontFamily=Times New Roman;fontSize=24;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="NgqIVEivUGpVFQbDR0Pq-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="559" y="635" as="sourcePoint" />
+            <mxPoint x="659" y="635" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="569" y="665" />
+              <mxPoint x="649" y="665" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-30" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Key:&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="67" y="635" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-31" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Can be finalised&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="150" y="688" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-32" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Justified&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="296" y="688" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-33" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 20px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Any status&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="430" y="688" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-34" value="&lt;font style=&quot;font-size: 20px&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;Supermajority link&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fillStyle=hachure;fontFamily=Times New Roman;fontSize=24;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="579" y="688" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-35" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;i&gt;&lt;font style=&quot;font-size: 24px&quot;&gt;C&lt;sub&gt;n-3&lt;/sub&gt;&lt;/font&gt;&lt;/i&gt;&lt;/font&gt;&lt;div&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="109" y="569.5" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-36" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;i&gt;&lt;font style=&quot;font-size: 24px&quot;&gt;C&lt;sub&gt;n-2&lt;/sub&gt;&lt;/font&gt;&lt;/i&gt;&lt;/font&gt;&lt;div&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="290" y="569.5" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-37" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;i&gt;&lt;font style=&quot;font-size: 24px&quot;&gt;C&lt;sub&gt;n-1&lt;/sub&gt;&lt;/font&gt;&lt;/i&gt;&lt;/font&gt;&lt;div&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="470" y="569.5" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgqIVEivUGpVFQbDR0Pq-38" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;i&gt;&lt;font style=&quot;font-size: 24px&quot;&gt;C&lt;sub&gt;n&lt;/sub&gt;&lt;/font&gt;&lt;/i&gt;&lt;/font&gt;&lt;div&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;" parent="NgqIVEivUGpVFQbDR0Pq-1" vertex="1">
+          <mxGeometry x="650" y="569.5" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

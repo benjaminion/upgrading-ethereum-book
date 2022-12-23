@@ -110,12 +110,7 @@ while (<>)  {
 
         die "Error: first line of input must be a new page marker" if not defined $ofh;
 
-        # Rewrite any markdown image paths to reflect the directory hierarchy
-        (my $prefix = substr $thisPath, 2) =~ s|[^/]+|..|g;
-        s/\(md/($prefix/;
-
         print $ofh $_;
-
     }
 }
 

@@ -46,6 +46,13 @@ module.exports = {
             }
           },
           {
+            resolve: 'my-svg-embed',
+            options: {
+              directory: `${__dirname}/src/`,
+            }
+          },
+          'my-strip-html-comments',
+          {
             resolve: 'gatsby-remark-external-links',
             options: {
               target: '_blank',
@@ -57,13 +64,6 @@ module.exports = {
             options: {
               noInlineHighlight: true,
               aliases: {code: 'text'},
-            },
-          },
-          {
-            resolve: 'gatsby-remark-copy-linked-files',
-            options: {
-              destinationDir: 'images',
-              ignoreFileExtensions: [],
             },
           },
         ],

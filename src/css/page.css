@@ -3,7 +3,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  color: black;
+  background-color: var(--background);
+  color: var(--foreground);
   text-rendering: optimizeLegibility;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 }
@@ -53,7 +54,7 @@ p {
 }
 
 a {
-  color: #0366d6;
+  color: var(--link-colour);
   text-decoration: none;
 }
 
@@ -131,22 +132,22 @@ div.image img {
 }
 
 table {
-  border: solid #999999 1px;
+  border: solid var(--table-border) 1px;
   border-collapse: collapse;
   margin: 3ex 0;
 }
 
 td, th {
-  border: solid #999999 1px;
+  border: solid var(--table-border) 1px;
   padding: 4px 8px;
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  color: white;
-  background-color: #999999;
-  border: solid #cccccc 1px;
+  color: var(--th-colour);
+  background-color: var(--th-background);
+  border: solid var(--th-border) 1px;
   border-top-style: inherit;
 }
 
@@ -191,7 +192,7 @@ div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
   margin: 1ex 0;
 }
 
-div.title-page img {
+div.title-page svg {
   margin: 1ex auto;
 }
 
@@ -268,7 +269,6 @@ pre[class^="language-"] code {
 }
 
 /*** Footnotes ***/
-
 div.footnotes hr {
   margin-top: 6ex;
   border: 0;
@@ -287,8 +287,77 @@ div.summary {
   border: double #999 3.5px;
 }
 
+/*** SVG stuff - needed for dark mode support, here be dragons ***/
+
+div.image svg path {
+  stroke: var(--foreground);
+  fill: none;
+}
+
+/* Axes and labels in charts */
+div.chart svg path[class$="Text"],
+div.chart svg g[class*="Axis"] g[class$="tick"] path {
+  fill: var(--foreground)!important;
+  stroke: none!important;
+}
+
+/* The order matters of these two. The first makes sure our dashed lines are not fat,
+   the second that other elements are not messed up */
+div.diagram svg path[d] {
+  stroke: none!important;
+  fill:var(--foreground)!important;
+}
+div.diagram svg path[stroke] {
+  stroke: var(--foreground)!important;
+  fill: none!important;
+}
+
+/* Fix up selected diagrams - some elements need a fill */
+div.diagram div#consensus-messages svg path[fill],
+div.diagram div#incentives-scalability_trilemma svg path[fill],
+div.diagram div[id^='randomness-'] svg path[fill],
+div.diagram div[id^='shuffling-'] svg path[fill],
+div.diagram div[id^='aggregators'] svg path[fill],
+div.diagram div[id^='ssz-'] svg path[fill],
+div.diagram div[id^='merkleization-'] svg path[fill] {
+  fill: var(--background)!important;
+}
+
+/* Make Firefox show text in diagrams */
+div.diagram svg use {
+  fill: var(--foreground);
+}
+
+/* Make Chrome correctly show text in diagrams
+   - it handles the shadow DOM differently from FF */
+div#consensus-messages svg defs path,
+div#incentives-scalability_trilemma svg defs path,
+div.diagram svg defs path {
+  fill: var(--foreground)!important;
+  stroke: none!important;
+}
+
+/* Remove boxes around selected elements */
+div#consensus-messages svg path[fill="#FFF"],
+div[id^='shuffling-'] svg path[fill="#FFF"],
+div[id^='merkleization-'] svg path[fill="#FFF"] {
+  stroke: none!important;
+}
+
+/* removes SVG border */
+g[clip-path] {
+  display: none;
+}
+
+/* Always display my avatar as positive */
+div.title-page svg g#layer101 path {
+  fill: #343434!important;
+}
+
 @media print {
   html, body, #page, #main-content {
+    --background: #fff;
+    --foreground: #000;
     display: block !important;
     overflow: visible !important;
     width: 100% !important;
@@ -296,6 +365,8 @@ div.summary {
     min-width: initial !important;
     margin: initial !important;
     padding: initial !important;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   #main-content {
     font-size: 12pt !important;
