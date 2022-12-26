@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('https://eth2book.info/fonts/cmuserif/cmunrm-webfont.woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('https://eth2book.info/fonts/cmuserif/cmunbx-webfont.woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('https://eth2book.info/fonts/cmuserif/cmunti-webfont.woff');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('https://eth2book.info/fonts/cmuserif/cmunbi-webfont.woff');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('https://eth2book.info/fonts/cmutype/cmuntt-webfont.woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('https://eth2book.info/fonts/cmutype/cmuntb-webfont.woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('https://eth2book.info/fonts/cmutype/cmunit-webfont.woff');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('https://eth2book.info/fonts/cmutype/cmuntx-webfont.woff');
+  font-weight: bold;
+  font-style: italic;
+}
