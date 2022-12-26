@@ -113,22 +113,18 @@ h6 {
 
 h4 code, h5 code, h6 code {font-size: inherit; }
 
-div.image {
+figure {
   text-align: center;
   padding: 0;
   margin: 3ex auto;
   font-style: italic;
 }
 
-div.caption {
+figcaption {
   text-align: center;
   padding: 0;
-  margin: -3ex auto 3ex auto;
+  margin: 0 auto 3ex auto;
   font-style: italic;
-}
-
-div.image img {
-  width: 100%;
 }
 
 table {
@@ -289,42 +285,42 @@ div.summary {
 
 /*** SVG stuff - needed for dark mode support, here be dragons ***/
 
-div.image svg path {
+figure svg path {
   stroke: var(--foreground);
   fill: none;
 }
 
 /* Axes and labels in charts */
-div.chart svg path[class$="Text"],
-div.chart svg g[class*="Axis"] g[class$="tick"] path {
+figure.chart svg path[class$="Text"],
+figure.chart svg g[class*="Axis"] g[class$="tick"] path {
   fill: var(--foreground)!important;
   stroke: none!important;
 }
 
 /* The order matters of these two. The first makes sure our dashed lines are not fat,
    the second that other elements are not messed up */
-div.diagram svg path[d] {
+figure.diagram svg path[d] {
   stroke: none!important;
   fill:var(--foreground)!important;
 }
-div.diagram svg path[stroke] {
+figure.diagram svg path[stroke] {
   stroke: var(--foreground)!important;
   fill: none!important;
 }
 
 /* Fix up selected diagrams - some elements need a fill */
-div.diagram div#consensus-messages svg path[fill],
-div.diagram div#incentives-scalability_trilemma svg path[fill],
-div.diagram div[id^='randomness-'] svg path[fill],
-div.diagram div[id^='shuffling-'] svg path[fill],
-div.diagram div[id^='aggregators'] svg path[fill],
-div.diagram div[id^='ssz-'] svg path[fill],
-div.diagram div[id^='merkleization-'] svg path[fill] {
+figure.diagram div#consensus-messages svg path[fill],
+figure.diagram div#incentives-scalability_trilemma svg path[fill],
+figure.diagram div[id^='randomness-'] svg path[fill],
+figure.diagram div[id^='shuffling-'] svg path[fill],
+figure.diagram div[id^='aggregators'] svg path[fill],
+figure.diagram div[id^='ssz-'] svg path[fill],
+figure.diagram div[id^='merkleization-'] svg path[fill] {
   fill: var(--background)!important;
 }
 
 /* Make Firefox show text in diagrams */
-div.diagram svg use {
+figure.diagram svg use {
   fill: var(--foreground);
 }
 
@@ -332,7 +328,7 @@ div.diagram svg use {
    - it handles the shadow DOM differently from FF */
 div#consensus-messages svg defs path,
 div#incentives-scalability_trilemma svg defs path,
-div.diagram svg defs path {
+figure.diagram svg defs path {
   fill: var(--foreground)!important;
   stroke: none!important;
 }
