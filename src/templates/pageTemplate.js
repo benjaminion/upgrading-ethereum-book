@@ -9,6 +9,7 @@ import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
 import FootnoteTooltips from "../components/footnote-tooltips"
 import DarkModeToggle from "../components/dark-mode-toggle"
+import PrintScripts from "../components/print-scripts"
 
 import "katex/dist/katex.min.css"
 import "../css/page.css"
@@ -67,6 +68,7 @@ export default function Template({ data }) {
           <FootnoteTooltips />
         </div>
         <DarkModeToggle />
+        <PrintScripts />
       </>
   )
 }
