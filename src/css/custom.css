@@ -19,8 +19,8 @@ body {
   --th-colour: #fff;
   --sidebar-background: #f3f5f6;
   --sidebar-foreground: #000;
-  --pagenavi-link: #777;
-  --pagenavi-link-hover: #444;
+  --pagenavi-link: #666;
+  --pagenavi-link-hover: #333;
 }
 
 body.dark {
