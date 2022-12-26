@@ -22,7 +22,7 @@ dark-mode-toggle {
   aside#dark-mode-toggle {
     padding: 0;
     position: relative;
-    top: -8px;
+    top: -14px;
     text-align: right;
     height: 20px;
   }
