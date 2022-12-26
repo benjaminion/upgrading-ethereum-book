@@ -17,8 +17,13 @@ dark-mode-toggle {
   }
 }
 
+/* On mobile, move the toggle and scroll it with the page */
 @media screen and (max-width: 1200px) {
   aside#dark-mode-toggle {
     padding: 0;
+    position: relative;
+    top: -8px;
+    text-align: right;
+    height: 20px;
   }
 }

@@ -52,6 +52,7 @@ export default function Template({ data }) {
           <Sidebar index={frontmatter.index} />
           <div id="main-content">
             <PrevNext seq={frontmatter.sequence} />
+            <DarkModeToggle />
             <main>
               <div className="section">
                 <div
@@ -66,8 +67,7 @@ export default function Template({ data }) {
           </div>
           <PageNavi path={frontmatter.path} />
           <FootnoteTooltips />
-        </div>
-        <DarkModeToggle />
+          </div>
         <PrintScripts />
       </>
   )
