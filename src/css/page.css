@@ -410,6 +410,7 @@ div.title-page svg g#layer101 path {
   }
 }
 
+/* For mobile */
 @media screen and (max-width: 1200px) {
   #main-content {
     margin: 0 auto;
@@ -419,5 +420,12 @@ div.title-page svg g#layer101 path {
   }
   div.title-page {
     margin: 0;
+  }
+}
+
+/* For very narrow screens, also make figures full width */
+@media screen and (max-width: 600px) {
+  figure {
+    width: 100%!important;
   }
 }
