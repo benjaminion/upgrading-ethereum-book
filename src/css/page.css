@@ -291,7 +291,7 @@ figure svg path {
   fill: none;
 }
 
-/* Axes and labels in charts */
+/* Correct weight for axes and labels in charts */
 figure.chart svg path[class$="Text"],
 figure.chart svg g[class*="Axis"] g[class$="tick"] path {
   fill: var(--foreground)!important;
@@ -323,27 +323,6 @@ figure.diagram svg path[fill=none] {
 /* Make Firefox show text in diagrams */
 figure.diagram svg use {
   fill: var(--foreground);
-}
-
-/* Make Chrome correctly show text in diagrams
-   - it handles the shadow DOM differently from FF */
-div#consensus-messages svg defs path,
-div#incentives-scalability_trilemma svg defs path,
-figure.diagram svg defs path {
-  fill: var(--foreground)!important;
-  stroke: none!important;
-}
-
-/* Remove boxes around selected elements */
-div#consensus-messages svg path[fill="#FFF"],
-div[id^='shuffling-'] svg path[fill="#FFF"],
-div[id^='merkleization-'] svg path[fill="#FFF"] {
-  stroke: none!important;
-}
-
-/* removes SVG border */
-g[clip-path] {
-  display: none;
 }
 
 /* Always display my avatar as positive */
