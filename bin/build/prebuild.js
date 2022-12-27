@@ -4,6 +4,7 @@ const glob = require('glob')
 
 // Performs the following prebuild tasks:
 //  - Checks that internal document links look ok
+//  - Checks that HTML tags are properly balanced
 //  - Spellcheck
 //  - Repeated words check
 //  - Lints the source markdown (see lintSourceMarkdown in this file)
@@ -11,12 +12,14 @@ const glob = require('glob')
 //  - Lints the split markdown (see lintSplitMarkdown in this file)
 
 const doInternalLinks = true
+const doHtmlCheck = true
 const doSpellCheck = true
 const doRepeatCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
 const linkChecker = 'bin/build/links.pl'
+const htmlChecker = 'bin/build/html.pl'
 const spellChecker = 'bin/build/spellcheck.sh'
 const repeatChecker = 'bin/build/repeatcheck.sh'
 const mdSplitter = 'bin/build/update.sh'
@@ -52,6 +55,22 @@ module.exports.runChecks = (reporter) => {
     }
   } else {
     reporter.warn('Skipping internal link check')
+  }
+
+  if (doHtmlCheck) {
+    reporter.info('Checking HTML tags...')
+    try {
+      const out = execSync(`${htmlChecker} ${sourceMarkdown}`, {encoding: 'utf8'})
+      if (out !== '') {
+        reporter.warn('Found unbalanced HTML tags:')
+        printLines(out, reporter.warn)
+      }
+    } catch (err) {
+      reporter.warn('Unable to check HTML tags:')
+      printLines(err.toString(), reporter.warn)
+    }
+  } else {
+    reporter.warn('Skipping HTML check')
   }
 
   if (doSpellCheck) {

@@ -98,7 +98,7 @@ while(<$fh>) {
 
     while (/(!{0,1})\[.+?\]\((.*?)\)/g) {
 
-        my $isImg = $1 eq '!' ? 1 : 0;
+        my $isImg = $1 eq '!';
         my $link = $2;
 
         if ($isImg) {
