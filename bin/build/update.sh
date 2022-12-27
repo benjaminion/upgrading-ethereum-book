@@ -7,8 +7,8 @@ cd "$(dirname "$0")/../../src"
 
 # Build the markdown pages
 rm -rf md/pages/
-../bin/build/split.pl book.md
+../bin/build/split.pl ../$1
 
 # Build the one page annotated spec
 rm -f md/annotated.md
-../bin/build/annotated.pl book.md > md/annotated.md
+../bin/build/annotated.pl ../$1 > md/annotated.md

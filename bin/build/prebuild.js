@@ -125,7 +125,7 @@ module.exports.runChecks = (reporter) => {
 
   reporter.info('Unpacking book source...')
   try {
-    execSync(mdSplitter)
+    execSync(`${mdSplitter} ${sourceMarkdown}`)
   } catch (err) {
     reporter.error('Failed to unpack book source.')
     throw err
