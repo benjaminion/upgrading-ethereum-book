@@ -74,60 +74,54 @@ var addAttributes = {
     params: undefined,
 }
 
-module.exports = ({ markdownAST, cache, context }, pluginOptions) => {
+module.exports = ({ markdownAST, cache }, pluginOptions) => {
 
-  // This is a hack to avoid doing the same work twice.
-  // gatsby-transformer-remark/extend-node-type ends up calling all plugins
-  // twice via parseString(): once due to getHeadings() and once due to getHTMLAst().
-  // The context distinguishes these.
-  if (context['path'].startsWith('/')) {
-    try {
-      visit(markdownAST, "paragraph", async node => {
-        if (node.children[0].type == 'image') {
-          const image = node.children[0]
+  try {
+    visit(markdownAST, "paragraph", async node => {
+      if (node.children[0].type == 'image') {
+        const image = node.children[0]
 
-          if (image.url.endsWith('.svg')) {
-            const basename = path.basename(image.url, '.svg')
+        if (image.url.endsWith('.svg')) {
+          const basename = path.basename(image.url, '.svg')
 
-            var svgString
-            cache.get(basename).then(ret => {
-              if (ret) {
-                svgString = ret
-              } else {
-                const originalSvg = fs.readFileSync(pluginOptions.directory + image.url, 'utf8')
+          var svgString
+          cache.get(basename).then(ret => {
+            if (ret) {
+              svgString = ret
+            } else {
+              const originalSvg = fs.readFileSync(pluginOptions.directory + image.url, 'utf8')
 
-                // We need to distinguish multiple SVGs on the same page by using "prefixIds"
-                const digest = getHashDigest(basename, 'md5', 'base52').substring(0,4)
+              // We need to distinguish multiple SVGs on the same page by using "prefixIds"
+              const digest = getHashDigest(basename, 'md5', 'base52').substring(0,4)
 
-                // Configure SVGO plugin to add ID to SVG element
-                addAttributes['params'] = {attribute: {id: basename}}
+              // Configure SVGO plugin to add ID to SVG element
+              addAttributes['params'] = {attribute: {id: basename}}
 
-                // Configure our custom plugin for SVGO that adds title element
-                addTitleSettings['params'] = {titleText: image.alt}
+              // Configure our custom plugin for SVGO that adds title element
+              addTitleSettings['params'] = {titleText: image.alt}
 
-                const svg = svgo.optimize(
-                  originalSvg,
-                  {
-                    path: digest,
-                    plugins: plugins.concat([addTitleSettings, addAttributes])
-                  }
-                )
+              const svg = svgo.optimize(
+                originalSvg,
+                {
+                  path: digest,
+                  plugins: plugins.concat([addTitleSettings, addAttributes])
+                }
+              )
 
-                svgString = svg.data
-                cache.set(basename, svgString)
-              }
+              svgString = svg.data
+              cache.set(basename, svgString)
+            }
 
-              // Modify the current node in-place
-              node.type = 'html'
-              node.value = svgString
-              node.children = []
-            })
-          }
+            // Modify the current node in-place
+            node.type = 'html'
+            node.value = svgString
+            node.children = []
+          })
         }
-      })
-    } catch (err) {
-      console.error(err)
-    }
+      }
+    })
+  } catch (err) {
+    console.error(err)
   }
 
   return markdownAST
