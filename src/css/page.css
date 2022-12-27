@@ -286,6 +286,11 @@ div.summary {
 
 /*** SVG stuff - needed for dark mode support. Here be dragons. ***/
 
+a.anchor svg path {
+  stroke: var(--foreground);
+  fill:  var(--foreground);
+}
+
 figure svg path {
   stroke: var(--foreground);
   fill: none;
