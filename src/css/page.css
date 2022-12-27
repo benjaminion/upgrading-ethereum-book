@@ -284,7 +284,7 @@ div.summary {
   border: double #999 3.5px;
 }
 
-/*** SVG stuff - needed for dark mode support, here be dragons ***/
+/*** SVG stuff - needed for dark mode support. Here be dragons. ***/
 
 figure svg path {
   stroke: var(--foreground);
@@ -298,26 +298,26 @@ figure.chart svg g[class*="Axis"] g[class$="tick"] path {
   stroke: none!important;
 }
 
-/* The order matters of these two. The first makes sure our dashed lines are not fat,
+/* The order of these two matters. The first makes sure our dashed lines are not fat,
    the second that other elements are not messed up */
 figure.diagram svg path[d] {
   stroke: none!important;
   fill:var(--foreground)!important;
 }
+
 figure.diagram svg path[stroke] {
   stroke: var(--foreground)!important;
   fill: none!important;
 }
 
-/* Fix up selected diagrams - some elements need a fill */
-figure.diagram div#consensus-messages svg path[fill],
-figure.diagram div#incentives-scalability_trilemma svg path[fill],
-figure.diagram div[id^='randomness-'] svg path[fill],
-figure.diagram div[id^='shuffling-'] svg path[fill],
-figure.diagram div[id^='aggregators'] svg path[fill],
-figure.diagram div[id^='ssz-'] svg path[fill],
-figure.diagram div[id^='merkleization-'] svg path[fill] {
+/* Some elements need a fill... */
+figure.diagram svg path[fill] {
   fill: var(--background)!important;
+}
+
+/* ...and some don't. */
+figure.diagram svg path[fill=none] {
+  fill: none!important;
 }
 
 /* Make Firefox show text in diagrams */
