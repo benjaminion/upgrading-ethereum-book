@@ -5,6 +5,10 @@
   --main-width: 50vw;
   --main-max-width: 1200px;
   --main-min-width: 800px;
+
+  /* Dark mode transition */
+  --duration: 0.4s;
+  --timing: ease;
 }
 
 body {

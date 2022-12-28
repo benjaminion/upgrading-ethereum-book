@@ -8,6 +8,8 @@ html, body {
   color: var(--foreground);
   text-rendering: optimizeLegibility;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  transition: color var(--duration) var(--timing),
+              background-color var(--duration) var(--timing);
 }
 
 body {
@@ -57,6 +59,7 @@ p {
 a {
   color: var(--link-colour);
   text-decoration: none;
+  transition: color var(--duration) var(--timing)
 }
 
 a:hover {
@@ -285,6 +288,11 @@ div.summary {
 }
 
 /*** SVG stuff - needed for dark mode support. Here be dragons. ***/
+
+svg path, svg g, svg use {
+  transition: stroke var(--duration) var(--timing),
+              fill var(--duration) var(--timing)
+}
 
 a.anchor svg path {
   stroke: var(--foreground);
