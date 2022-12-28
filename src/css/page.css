@@ -407,9 +407,24 @@ div.title-page svg g#layer101 path {
   }
 }
 
-/* For very narrow screens, also make figures full width */
+/* Further changes for very narrow screens */
 @media screen and (max-width: 600px) {
+  #main-content {
+    padding: 0.75rem 0.75rem 5rem 0.75rem;
+  }
   figure {
     width: 100%!important;
+  }
+  footer {
+    margin-top: 3rem;
+  }
+  blockquote {
+    padding-left: 1rem;
+  }
+  ul {
+    padding-left: 1.2rem;
+  }
+  ol {
+    padding-left: 1.5rem;
   }
 }
