@@ -2,7 +2,7 @@ const visit = require('unist-util-visit')
 const svgo = require('svgo')
 const fs = require('fs')
 const path = require('path')
-const getHashDigest = require('loader-utils/lib/getHashDigest')
+const { getHashDigest } = require('loader-utils')
 
 // Inline SVG files into the Markdown AST
 
@@ -92,12 +92,12 @@ module.exports = ({ markdownAST, cache }, pluginOptions) => {
               const originalSvg = fs.readFileSync(pluginOptions.directory + image.url, 'utf8')
 
               // We need to distinguish multiple SVGs on the same page by using "prefixIds"
-              const digest = getHashDigest(basename, 'md5', 'base52').substring(0,4)
+              const digest = getHashDigest(basename, 'md5', 'base52', 4)
 
-              // Configure SVGO plugin to add ID to SVG element
+              // Configure the SVGO addAttributes plugin to add an ID to SVG element
               addAttributes['params'] = {attribute: {id: basename}}
 
-              // Configure our custom plugin for SVGO that adds title element
+              // Configure our custom plugin that adds a title element
               addTitleSettings['params'] = {titleText: image.alt}
 
               const svg = svgo.optimize(

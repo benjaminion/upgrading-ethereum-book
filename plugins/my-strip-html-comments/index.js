@@ -2,7 +2,7 @@ const visit = require('unist-util-visit')
 
 // Remove HTML comments from the Markdown AST
 
-module.exports = ({ markdownAST, context }) => {
+module.exports = ({ markdownAST }) => {
 
   try {
     visit(markdownAST, 'html', (node, index, parent) => {

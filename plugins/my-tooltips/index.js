@@ -1,7 +1,7 @@
 const visit = require("unist-util-visit")
 const fs    = require("fs")
 
-module.exports = ({ markdownAST, context }, pluginOptions) => {
+module.exports = ({ markdownAST }, pluginOptions) => {
 
   try {
     const data = fs.readFileSync(pluginOptions.file, 'utf8')
