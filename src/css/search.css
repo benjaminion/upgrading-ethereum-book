@@ -8,6 +8,7 @@
   background-color: var(--background);
   color: var(--foreground);
   padding: 6px;
+  margin-right: 12px;
   border: 1px solid #ccc;
   font-size: 1rem;
   width: 50%;
@@ -18,7 +19,7 @@
 }
 
 #search-parameters span#checkbox {
-  margin: 12px;
+  display: inline-block;
 }
 
 #search-parameters span#checkbox label {
