@@ -2,6 +2,10 @@
 
 version=bellatrix
 
+echo
+echo "*** Publishing to path $version ***"
+echo
+
 # Set the host variable
 source $(dirname "$0")/../priv/server.sh
 
