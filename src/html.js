@@ -37,8 +37,13 @@ export default function HTML(props) {
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-TileImage" content="https://eth2book.info/f/ms-icon-144x144.png" />
         <meta name="theme-color" content="#ffffff" />
-        {props.headComponents}
+
+        {/* Dark mode stuff */}
+        <link rel="stylesheet" href={withPrefix('/dark_230103.css')} media="(prefers-color-scheme: dark)" />
+        <link rel="stylesheet" href={withPrefix('/light_230103.css')} media="(prefers-color-scheme: light)" />
         <script type="module" src="https://eth2book.info/inc/dark-mode-toggle.js" />
+
+        {props.headComponents}
       </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}

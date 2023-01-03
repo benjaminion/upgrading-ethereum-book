@@ -1,0 +1,15 @@
+:root {
+  --background: #fff;
+  --foreground: #000;
+  --link-colour: #0366d6;
+  --fn-tt-foreground: #000;
+  --fn-tt-background: #ddd;
+  --table-border: #999;
+  --th-background: #999;
+  --th-border: #ccc;
+  --th-colour: #fff;
+  --sidebar-background: #f3f5f6;
+  --sidebar-foreground: #000;
+  --pagenavi-link: #666;
+  --pagenavi-link-hover: #333;
+}
