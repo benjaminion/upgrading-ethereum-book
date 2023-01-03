@@ -51,15 +51,10 @@ export default function Template({ data }) {
           <div id="main-content">
             <PrevNext seq={frontmatter.sequence} />
             <DarkModeToggle />
-            <main>
-              <div className="section">
-                <div
-                  className="section-content"
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-                {pageExtras}
-              </div>
-            </main>
+            <main
+               dangerouslySetInnerHTML={{ __html: html }}
+            />
+            {pageExtras}
             <Footer />
             <PrevNext seq={frontmatter.sequence} />
           </div>

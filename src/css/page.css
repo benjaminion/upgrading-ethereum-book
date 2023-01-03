@@ -10,11 +10,7 @@ html, body {
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   transition: color var(--duration) var(--timing),
               background-color var(--duration) var(--timing);
-}
-
-body {
-  overflow-y: hidden;
-  overflow-x: auto;
+  height: 100vh;
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
@@ -29,12 +25,13 @@ body {
   height: 100vh;
   margin: 0px;
   padding: 0px;
-  overflow-y: hidden;
-  overflow-x: auto;
+  overflow-y: auto;
 }
 
 #main-content {
+  display: inline-block;
   box-sizing: border-box;
+  height: 100vh;
   margin: 0px;
   margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
   width: var(--main-width);
@@ -42,6 +39,7 @@ body {
   min-width: var(--main-min-width);
   padding: 0px 64px 0 96px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   font-family: "Computer Modern Serif", serif;
   font-size: 20px;
 }
@@ -163,7 +161,7 @@ th:empty {
   display: none;
 }
 
-div.section li {
+main li {
   line-height: 1.4128;
   padding-bottom: 3px;
 }
