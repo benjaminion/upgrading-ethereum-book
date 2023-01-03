@@ -10,6 +10,7 @@ import PageNavi from "../components/pagenavi"
 import FootnoteTooltips from "../components/footnote-tooltips"
 import DarkModeToggle from "../components/dark-mode-toggle"
 import PrintScripts from "../components/print-scripts"
+import Search from "../components/search"
 
 import "katex/dist/katex.min.css"
 import "../css/page.css"
@@ -19,9 +20,7 @@ export function Head({ data }) {
   const { markdownRemark, site } = data
   const { frontmatter } = markdownRemark
 
-  const indexArray = frontmatter.path !== "/contents"
-        ? frontmatter.index
-        : []
+  const indexArray = frontmatter.index
 
   var pageTitle = site.siteMetadata.title
   if (frontmatter.titles !== null) {
@@ -38,12 +37,11 @@ export function Head({ data }) {
 export default function Template({ data }) {
 
   const { html, frontmatter } = data.markdownRemark
+  const indexArray = frontmatter.index
 
-  //console.log(JSON.stringify(markdownRemark, undefined, 2))
-
-  const indexArray = frontmatter.path !== "/contents"
-        ? frontmatter.index
-        : []
+  const pageExtras = frontmatter.path.startsWith('/search')
+        ? <Search />
+        : <Subsections indexArray={indexArray} />
 
   return (
       <>
@@ -59,7 +57,7 @@ export default function Template({ data }) {
                   className="section-content"
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
-                <Subsections indexArray={indexArray} />
+                {pageExtras}
               </div>
             </main>
             <Footer />

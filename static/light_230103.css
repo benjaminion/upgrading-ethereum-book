@@ -12,4 +12,6 @@
   --sidebar-foreground: #000;
   --pagenavi-link: #666;
   --pagenavi-link-hover: #333;
+  --search-chunk-background: #eee;
+  --search-text-highlight: #d8d8d8;
 }

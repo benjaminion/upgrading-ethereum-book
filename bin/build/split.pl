@@ -24,7 +24,7 @@ $, = "\n"; # set output field separator
 $\ = "\n"; # set output record separator
 
 my $outFilePrefix = 'md/pages';
-my $sequence = 0;
+my $sequence = 0; # Search is -2, Contents is -1
 my $thisPart = '';
 my $thisChapter = '';
 my $thisSection = '';

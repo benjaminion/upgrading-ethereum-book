@@ -87,5 +87,39 @@ module.exports = {
         disableCookies: true,
       },
     },
+    {
+      resolve: 'my-search-index',
+      options: {
+        enabled: true,
+        chunkTypes: {
+          p: 'Paragraph',
+          li: 'List item',
+          pre: 'Code',
+          table: 'Table',
+          h3: 'Heading',
+          h4: 'Heading',
+          h5: 'Heading',
+          h6: 'Heading',
+        },
+        // Note, only pages under src/md/pages have a "hide" property
+        pageFilter: '{frontmatter: {hide: {eq: false}}}',
+        exclude: {
+          // Speed up the build (these are excluded from the index by pageFilter, anyway)
+          pages: ['/404.html', '/annotated-spec/', '/contact/', '/contents/', '/search/', '/'],
+          tags: ['nav', 'footer', 'aside', 'svg', 'details', 'mtable', 'mrow'],
+          attributes: [
+            {name: 'id', value: 'page-navi'},
+            {name: 'class', value: 'prevnext'},
+            {name: 'aria-hidden', value: 'true'},
+            {name: 'id', value: 'gatsby-announcer'},
+            {name: 'class', value: 'fn-span'},
+            {name: 'class', value: 'footnote-ref'},
+          ],
+        }
+      },
+    }
   ],
+  flags: {
+    DEV_SSR: true,
+  },
 };
