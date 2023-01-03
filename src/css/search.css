@@ -56,9 +56,12 @@
 }
 
 #search-results span.chunk-text.pre {
+  display: block;
   white-space: pre;
   font-family: monospace;
-  font-size: 80%;
+  font-size: 0.9rem;
+  line-height: 1.1rem;
+  overflow-x: auto;
 }
 
 #search-results > ul li {
