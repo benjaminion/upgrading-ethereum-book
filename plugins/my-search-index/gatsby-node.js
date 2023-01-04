@@ -79,8 +79,10 @@ exports.createPages = async (
         allMarkdownRemark(filter: ${pageFilter}) {
           edges {
             node {
+              html
               frontmatter {
                 path
+                titles
               }
             }
           }
@@ -92,24 +94,12 @@ exports.createPages = async (
 
     await Promise.all(pages.map(async (page) => {
 
-      const path = page.node.frontmatter.path
-      if (exclude.pages.indexOf(path) == -1) {
+      const frontmatter = page.node.frontmatter
+      if (frontmatter !== undefined && exclude.pages.indexOf(frontmatter.path) == -1) {
 
         // Get the raw HTML. We could get the htmlAst directly from the node,
         // but the parse5 format is easier to deal with.
-        const htmlData = await graphql(`
-        {
-          markdownRemark(frontmatter: {path: {eq: "${path}"}}) {
-            html
-            frontmatter {
-              titles
-            }
-          }
-        }
-      `)
-
-        const htmlAst = parse5.parse(htmlData.data.markdownRemark.html)
-        const frontmatter = htmlData.data.markdownRemark.frontmatter
+        const htmlAst = parse5.parse(page.node.html)
 
         // Changes to the HTML AST made here will not persist, but we need to do
         // exactly the same as in gatsby-ssr so that our ids end up consistent.
@@ -120,7 +110,7 @@ exports.createPages = async (
         const chunks = getChunks(htmlAst, chunkTypes, exclude)
 
         mySearchData.push({
-          path: path,
+          path: frontmatter.path,
           title: frontmatter.titles.filter(x => x !== "").join(" | "),
           chunks: chunks,
         })
