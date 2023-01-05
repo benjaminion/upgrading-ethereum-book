@@ -11,13 +11,11 @@ const findBody = (node) => {
   }
 
   for (let i = 0; i < node.childNodes?.length; i++) {
-    let maybeBody = findBody(node.childNodes[i])
-    if(maybeBody != null) {
-      return maybeBody
+    const body = findBody(node.childNodes[i])
+    if(body !== undefined) {
+      return body
     }
   }
-
-  return null
 }
 
 exports.replaceRenderer = ({ pathname, bodyComponent, replaceBodyHTMLString }, pluginOptions) => {

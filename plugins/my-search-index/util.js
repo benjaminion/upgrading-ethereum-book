@@ -36,7 +36,7 @@ const addIdToTags = (node, tag, exclude, totalDone = 0) => {
     return totalDone
   }
 
-  if (node.tagName === tag && getId(node) == undefined) {
+  if (node.tagName === tag && getId(node) === undefined) {
     node.attrs.push({name: 'id', value: tag + '_' + totalDone})
     totalDone++;
   }

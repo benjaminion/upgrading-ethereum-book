@@ -95,7 +95,7 @@ exports.createPages = async (
     await Promise.all(pages.map(async (page) => {
 
       const frontmatter = page.node.frontmatter
-      if (frontmatter !== undefined && exclude.pages.indexOf(frontmatter.path) == -1) {
+      if (frontmatter !== undefined && exclude.pages.indexOf(frontmatter.path) === -1) {
 
         // Get the raw HTML. We could get the htmlAst directly from the node,
         // but the parse5 format is easier to deal with.
@@ -111,7 +111,7 @@ exports.createPages = async (
 
         mySearchData.push({
           path: frontmatter.path,
-          title: frontmatter.titles.filter(x => x !== "").join(" | "),
+          title: frontmatter.titles.filter(x => x !== '').join(' | '),
           chunks: chunks,
         })
       }

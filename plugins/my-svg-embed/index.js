@@ -9,16 +9,16 @@ const { getHashDigest } = require('loader-utils')
 // SVGO doesn't really support adding elements, and the API changes.
 // The below is based on code from the "reusePaths" plugin.
 const addTitle = {
-  name: "addTitle",
-  type: "visitor",
+  name: 'addTitle',
+  type: 'visitor',
   active: true,
   fn: (ast, params) => {
     return {
       element: {
         exit: (node, parentNode) => {
-          if (node.name === "svg" && parentNode.type === "root") {
+          if (node.name === 'svg' && parentNode.type === 'root') {
             const hasTitle = node.children.some(
-              (child) => child.type === "element" && child.name === "title"
+              (child) => child.type === 'element' && child.name === 'title'
             )
             if (!hasTitle) {
               const titleElement = {
@@ -32,7 +32,7 @@ const addTitle = {
                 value: node,
               });
               const titleContents = {
-                type: "text",
+                type: 'text',
                 value: params.titleText,
               }
               Object.defineProperty(titleContents, 'parentNode', {
@@ -77,7 +77,7 @@ var addAttributes = {
 module.exports = ({ markdownAST, cache }, pluginOptions) => {
 
   try {
-    visit(markdownAST, "paragraph", async node => {
+    visit(markdownAST, 'paragraph', async node => {
       if (node.children[0].type == 'image') {
         const image = node.children[0]
 
