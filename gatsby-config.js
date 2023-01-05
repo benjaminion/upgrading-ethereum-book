@@ -91,16 +91,14 @@ module.exports = {
       resolve: 'my-search-index',
       options: {
         enabled: true,
-        chunkTypes: {
-          p: 'Paragraph',
-          li: 'List item',
-          pre: 'Code',
-          table: 'Table',
-          h3: 'Heading',
-          h4: 'Heading',
-          h5: 'Heading',
-          h6: 'Heading',
-        },
+        chunkTypes: [
+          {idMatch: '^fn-.*$', label: 'Footnote'},
+          {tagMatch: '^p$', label: 'Paragraph'},
+          {tagMatch: '^li$', label: 'List item'},
+          {tagMatch: '^pre$', label: 'Code'},
+          {tagMatch: '^table$', label: 'Table'},
+          {tagMatch: '^h[3456]$', label: 'Heading'},
+        ],
         // Note, only pages under src/md/pages have a "hide" property
         pageFilter: '{frontmatter: {hide: {eq: false}}}',
         exclude: {

@@ -30,22 +30,38 @@ const getId = (node) => {
   }
 }
 
-const addIdToTags = (node, tag, exclude, totalDone = 0) => {
+const addIdToTags = (node, tagMatch, exclude, totalDone = 0) => {
 
   if (isExcluded(node, exclude)) {
     return totalDone
   }
 
-  if (node.tagName === tag && getId(node) === undefined) {
-    node.attrs.push({name: 'id', value: tag + '_' + totalDone})
+  if (node.tagName !== undefined
+      && node.tagName.search(tagMatch) !== -1
+      && getId(node) === undefined) {
+    node.attrs.push({name: 'id', value: node.tagName + '_' + totalDone})
     totalDone++;
   }
 
   for (let i = 0; i < node.childNodes?.length; i++) {
-    totalDone = addIdToTags(node.childNodes[i], tag, exclude, totalDone)
+    totalDone = addIdToTags(node.childNodes[i], tagMatch, exclude, totalDone)
   }
 
   return totalDone
 }
 
-module.exports = { isExcluded, getId, addIdToTags }
+const findBody = (node) => {
+
+  if (node.tagName === 'body') {
+    return node
+  }
+
+  for (let i = 0; i < node.childNodes?.length; i++) {
+    const body = findBody(node.childNodes[i])
+    if(body !== undefined) {
+      return body
+    }
+  }
+}
+
+module.exports = { isExcluded, getId, addIdToTags, findBody }
