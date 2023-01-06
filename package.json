@@ -18,6 +18,7 @@
     "gramm": "bin/util/check_grammar.sh src/book.md"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "gatsby": "^5.3.3",
     "gatsby-plugin-catch-links": "^5.3.0",
     "gatsby-plugin-htaccess": "^1.4.0",

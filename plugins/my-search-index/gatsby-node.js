@@ -1,74 +1,59 @@
-const parse5 = require('parse5')
-const { isExcluded, getId, addIdToTags, findBody } = require('./util.js')
+const cheerio = require('cheerio')
 
-// Creates a GraphQL node containing data for the local search
+/*
+ * Creates a GraphQL node containing data for the local search
+ */
 
-// Concatenate all text in child nodes.
-const getText = (node, exclude) => {
+// Concatenate all text in child nodes while respecting exclusions
+const getText = ($, node, exclude) => {
 
   let text = ''
 
-  if (isExcluded(node, exclude)) {
+  if ($(node).is(exclude.ignore)) {
     return text
   }
 
-  if (node.nodeName === '#text') {
-    text += node.value
+  if (node.type === 'text') {
+    text += node.data
   }
 
-  for (let i = 0; i < node.childNodes?.length; i++) {
-    text += getText(node.childNodes[i], exclude)
-  }
+  $(node).contents().each(function (i, e) {
+    text += getText($, e, exclude)
+  })
 
   return text
 }
 
-const matchChunk = (node, chunkTypes) => {
-
-  for (let i = 0; i < chunkTypes.length; i++) {
-
-    const tagMatch = chunkTypes[i].tagMatch
-    const idMatch = chunkTypes[i].idMatch
-    const tag = node.nodeName
-    const id = getId(node)
-
-    const tagMatches = (tagMatch === undefined || tag.search(tagMatch) !== -1)
-    const idMatches = (idMatch === undefined
-                       || (id !== undefined && id.search(idMatch) !== -1))
-
-    if (tagMatches && idMatches) {
-      return i;
-    }
-  }
-}
-
 // Recurse until we find an element we want to treat as a chunk, then get all its text content.
-const getChunks = (node, chunkTypes, exclude) => {
+const getChunks = ($, node, chunkTypes, exclude) => {
 
   const chunks = []
 
-  if (isExcluded(node, exclude)) {
+  if ($(node).is(exclude.ignore) || $(node).is(exclude.dedup)) {
     return chunks
   }
 
-  const matchIndex = matchChunk(node, chunkTypes)
-  if (matchIndex !== undefined) {
-    const text = getText(node, exclude)
-    if (text !== '') {
-      chunks.push(
-        {
-          type: node.nodeName,
-          label: chunkTypes[matchIndex].label,
-          id: getId(node), // We previously added an id, so it should be there.
-          text: text,
-        }
-      )
+  chunkTypes.every( (type) => {
+    if ($(node).is(type.query)) {
+      const text = getText($, node, exclude)
+      if (text !== '') {
+        chunks.push(
+          {
+            type: $(node).get(0).tagName,
+            label: type.label,
+            id: $(node).attr('id'),
+            text: text,
+          })
+      }
+      // Add a node only once
+      return false
     }
-  }
+    return true
+  })
 
-  for (let i = 0; i < node.childNodes?.length; i++) {
-    chunks.push(getChunks(node.childNodes[i], chunkTypes, exclude))
-  }
+  $(node).children().each(function (i, e) {
+    chunks.push(getChunks($, e, chunkTypes, exclude))
+  })
 
   return chunks.flat()
 }
@@ -85,9 +70,10 @@ exports.createPages = async (
 
   const {
     enabled = true,
+    root = '',
     chunkTypes = [],
     pageFilter = '{}',
-    exclude = {pages: [], tags: [], attributes: []},
+    exclude = {pages: [], ignore: '', dedup: ''},
   } = pluginOptions
 
   const mySearchData = []
@@ -117,19 +103,19 @@ exports.createPages = async (
       const frontmatter = page.node.frontmatter
       if (frontmatter !== undefined && exclude.pages.indexOf(frontmatter.path) === -1) {
 
-        // Get the raw HTML. We could get the htmlAst directly from the node,
-        // but the parse5 format is easier to deal with.
-        const body = findBody(parse5.parse(page.node.html))
+        // Get the HTML. This is the contents of `dangerouslySetInnerHTML={{ __html: html }}`
+        // in the page template.
+        const $ = cheerio.load(page.node.html, null, false)
 
         // Changes to the HTML AST made here will not persist, but we need to do
         // exactly the same as in gatsby-ssr so that our ids end up consistent.
-        chunkTypes.forEach(type => {
-          if (type.tagMatch !== undefined && type.idMatch === undefined) {
-            addIdToTags(body, type.tagMatch, exclude)
-          }
+        chunkTypes.forEach( (type) => {
+          $(type.query).not(exclude.ignore).not(exclude.dedup).not('[id]').each( function (i, e) {
+            $(this).attr('id', $(this).get(0).tagName + '_' + i)
+          })
         })
 
-        const chunks = getChunks(body, chunkTypes, exclude)
+        const chunks = getChunks($, $.root(), chunkTypes, exclude)
 
         mySearchData.push({
           path: frontmatter.path,

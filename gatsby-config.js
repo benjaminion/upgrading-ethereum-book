@@ -91,28 +91,27 @@ module.exports = {
       resolve: 'my-search-index',
       options: {
         enabled: true,
+        // Query that matches the element via which the HTML is included in the page template.
+        root: 'main',
+        // Matching elements have their text added to the index. First match wins.
         chunkTypes: [
-          {idMatch: '^fn-.*$', label: 'Footnote'},
-          {tagMatch: '^p$', label: 'Paragraph'},
-          {tagMatch: '^li$', label: 'List item'},
-          {tagMatch: '^pre$', label: 'Code'},
-          {tagMatch: '^table$', label: 'Table'},
-          {tagMatch: '^h[3456]$', label: 'Heading'},
+          {query: 'figcaption', label: 'Figure caption'},
+          {query: '[id^="fn-"]', label: 'Footnote'},
+          {query: 'li', label: 'List item'},
+          {query: 'pre', label: 'Code'},
+          {query: 'table', label: 'Table'},
+          {query: 'h3, h4, h5, h6', label: 'Heading'},
+          {query: 'p', label: 'Paragraph'},
         ],
-        // Note, only pages under src/md/pages have a "hide" property
+        // Note, only pages under src/md/pages have a "hide" property.
         pageFilter: '{frontmatter: {hide: {eq: false}}}',
         exclude: {
-          // Speed up the build (these are excluded from the index by pageFilter, anyway)
+          // Speed up the build (these are excluded from the index by pageFilter, anyway).
           pages: ['/404.html', '/annotated-spec/', '/contact/', '/contents/', '/search/', '/'],
-          tags: ['nav', 'footer', 'aside', 'svg', 'details', 'mtable', 'mrow'],
-          attributes: [
-            {name: 'id', value: 'page-navi'},
-            {name: 'class', value: 'prevnext'},
-            {name: 'aria-hidden', value: 'true'},
-            {name: 'id', value: 'gatsby-announcer'},
-            {name: 'class', value: 'fn-span'},
-            {name: 'class', value: 'footnote-ref'},
-          ],
+          // Elements matching this query are ignored completely, including their text.
+          ignore: 'svg *, details *, mtable *, mrow *, [aria-hidden="true"] *, .footnote-ref',
+          // Chunks matching this query are excluded as duplicates (to handle nested matches).
+          dedup: '[id^="fn-"] *, figcaption *, li *',
         }
       },
     }
