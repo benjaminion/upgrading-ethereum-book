@@ -14,7 +14,7 @@ const getSearchResults = (query, data) => {
   }
 
   // Match the starts of words only. The "d" flag gives us the matching indices.
-  const regex = RegExp('(^|\\s|_|\\()' + escapeRegExp(query.searchText), 'gd' + (query.isCaseSensitive ? '' : 'i'))
+  const regex = RegExp('(^|\\W|_)' + escapeRegExp(query.searchText), 'gd' + (query.isCaseSensitive ? '' : 'i'))
 
   const result = data.map( (page) => {
 
