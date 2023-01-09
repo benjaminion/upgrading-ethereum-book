@@ -1,5 +1,5 @@
 import React from 'react'
-import { graphql, useStaticQuery, Link, withPrefix } from 'gatsby'
+import { graphql, useStaticQuery, withPrefix } from 'gatsby'
 
 import "../css/search.css"
 
@@ -99,7 +99,7 @@ const Search = () => {
       const matches = match.indices.map((indices, i) => {
         return [
           match.text.substring((i === 0) ? 0 : match.indices[i-1][1], indices[0]),
-          <span className='match-text'>
+          <span className='match-text' key={indices[0]}>
             {match.text.substring(indices[0], indices[1])}
           </span>,
           (i === match.indices.length - 1) ? match.text.substring(indices[1]) : '',
@@ -107,13 +107,14 @@ const Search = () => {
       })
       return (
           <li key={result.url + match.id}>
-            <Link
+            <a
               href={withPrefix(result.url + '#' + match.id)}
               className="label"
               target="_blank"
+              rel="noreferrer"
             >
               {match.label}
-            </Link>
+            </a>
             <span className={'chunk-text ' + match.type}>
               {matches}
             </span>
@@ -122,7 +123,13 @@ const Search = () => {
     })
     return (
         <li key={result.url}>
-          <Link href={withPrefix(result.url)} target="_blank">{result.title}</Link>
+          <a
+            href={withPrefix(result.url)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {result.title}
+          </a>
           <ul>
             {chunks}
           </ul>
