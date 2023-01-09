@@ -91,8 +91,6 @@ module.exports = {
       resolve: 'my-search-index',
       options: {
         enabled: true,
-        // Query that matches the element via which the HTML is included in the page template.
-        root: 'main',
         // Matching elements have their text added to the index. First match wins.
         chunkTypes: [
           {query: 'figcaption', label: 'Figure caption'},
@@ -103,14 +101,14 @@ module.exports = {
           {query: 'h3, h4, h5, h6', label: 'Heading'},
           {query: 'p', label: 'Paragraph'},
         ],
-        // Note, only pages under src/md/pages have a "hide" property.
-        pageFilter: '{frontmatter: {hide: {eq: false}}}',
         exclude: {
-          // Speed up the build (these are excluded from the index by pageFilter, anyway).
-          pages: ['/404.html', '/annotated-spec/', '/contact/', '/contents/', '/search/', '/'],
-          // Elements matching this query are ignored completely, including their text.
+          // Note, only pages under src/md/pages have a "hide" property.
+          frontmatter: [{hide: true}, {hide: null}],
+          // The frontmatter filter takes care of excluding a good set of pages for now.
+          pages: [],
+          // Elements matching this query are ignored completely, including their text:
           ignore: 'svg *, details *, mtable *, mrow *, [aria-hidden="true"] *, .footnote-ref',
-          // Chunks matching this query are excluded as duplicates (to handle nested matches).
+          // Chunks matching this query are excluded as duplicates (to handle nested matches):
           dedup: '[id^="fn-"] *, figcaption *, li *',
         }
       },

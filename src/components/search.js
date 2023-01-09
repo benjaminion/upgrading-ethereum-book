@@ -14,15 +14,16 @@ const getSearchResults = (query, data) => {
   }
 
   // Match the starts of words only. The "d" flag gives us the matching indices.
-  const regex = RegExp('(^|\\W|_)' + escapeRegExp(query.searchText), 'gd' + (query.isCaseSensitive ? '' : 'i'))
+  const regex = RegExp('(^|\\W|_)' + escapeRegExp(query.searchText),
+                       'gd' + (query.isCaseSensitive ? '' : 'i'))
 
-  const result = data.map( (page) => {
+  const result = data.map( ({ node }) => {
 
     let score = 0
     const matches = []
-    for (let i = 0; i < page.chunks?.length; i++) {
+    for (let i = 0; i < node.chunks?.length; i++) {
 
-      let chunk = page.chunks[i]
+      let chunk = node.chunks[i]
       let match
       const indices = []
       while ((match = regex.exec(chunk.text)) !== null) {
@@ -44,27 +45,35 @@ const getSearchResults = (query, data) => {
     }
 
     return matches.length === 0 ? null : {
-      url: page.path,
-      title: page.title,
+      url: node.frontmatter.path,
+      title: node.frontmatter.titles.filter(x => x).join(' | '),
       matches: matches,
       score: score,
     }
   })
 
-  return result.filter(x => x !== null).sort((a, b) => (b.score - a.score))
+  return result.filter(x => x).sort((a, b) => (b.score - a.score))
 }
 
 const Search = () => {
 
   const queryData = useStaticQuery(graphql`
     query {
-      mySearchData {
-        data
+      allMySearchData {
+        edges {
+          node {
+            frontmatter {
+              path
+              titles
+            }
+            chunks
+          }
+        }
       }
     }
   `)
 
-  const searchData = queryData.mySearchData.data
+  const searchData = queryData.allMySearchData.edges
 
   const [searchQuery, setQuery] = React.useState({
     searchText: '',
@@ -82,7 +91,7 @@ const Search = () => {
       return { ...previousState, isCaseSensitive: !previousState.isCaseSensitive }
     });
   }
-  
+
   const results = getSearchResults(searchQuery, searchData)
 
   const pages = results.map((result) => {
@@ -93,7 +102,7 @@ const Search = () => {
           <span className='match-text'>
             {match.text.substring(indices[0], indices[1])}
           </span>,
-          (i === match.indices.length -1) ? match.text.substring(indices[1]) : '',
+          (i === match.indices.length - 1) ? match.text.substring(indices[1]) : '',
         ]
       })
       return (
@@ -141,7 +150,7 @@ const Search = () => {
           <label htmlFor="is-case-sensitive">Case sensitive</label>
         </span>
       </div>
-      <div id="search-results">  
+      <div id="search-results">
         {results.length > 0 ? (
           <ul>
             {pages}

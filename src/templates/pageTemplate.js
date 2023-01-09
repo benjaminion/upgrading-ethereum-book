@@ -17,14 +17,14 @@ import "../css/page.css"
 
 export function Head({ data }) {
 
-  const { markdownRemark, site } = data
-  const { frontmatter } = markdownRemark
+  const { mySearchData, site } = data
+  const frontmatter = mySearchData.frontmatter
 
   const indexArray = frontmatter.index
 
   var pageTitle = site.siteMetadata.title
   if (frontmatter.titles !== null) {
-    const titles = frontmatter.titles.filter(x => x !== "")
+    const titles = frontmatter.titles.filter(x => x !== '')
     const number = (indexArray.length >= 2) ? indexArray.join('.') : ''
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
@@ -36,16 +36,17 @@ export function Head({ data }) {
 
 export default function Template({ data }) {
 
-  const { html, frontmatter } = data.markdownRemark
+  const { html, frontmatter } = data.mySearchData
   const indexArray = frontmatter.index
+  const path = frontmatter.path
 
-  const pageExtras = frontmatter.path.startsWith('/search')
+  const pageExtras = path.startsWith('/search')
         ? <Search />
         : <Subsections indexArray={indexArray} />
 
   return (
       <>
-        <Banner path={frontmatter.path} />
+        <Banner path={path} />
         <div id="page">
           <Sidebar index={frontmatter.index} />
           <div id="main-content">
@@ -58,7 +59,7 @@ export default function Template({ data }) {
             <Footer />
             <PrevNext seq={frontmatter.sequence} />
           </div>
-          <PageNavi path={frontmatter.path} />
+          <PageNavi path={path} />
           <FootnoteTooltips />
           </div>
         <PrintScripts />
@@ -68,7 +69,7 @@ export default function Template({ data }) {
 
 export const pageQuery = graphql`
   query($path: String!) {
-    markdownRemark(frontmatter: { path: { eq: $path } }) {
+    mySearchData(frontmatter: { path: { eq: $path } }) {
       frontmatter {
         index
         path
