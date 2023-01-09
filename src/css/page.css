@@ -1,7 +1,11 @@
 @import "custom.css";
 @import "fonts.css";
 
-html, body {
+html {
+  overflow: auto;
+}
+
+body {
   margin: 0;
   padding: 0;
   background-color: var(--background);
@@ -11,6 +15,7 @@ html, body {
   transition: color var(--duration) var(--timing),
               background-color var(--duration) var(--timing);
   height: 100vh;
+  overflow: hidden;
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
