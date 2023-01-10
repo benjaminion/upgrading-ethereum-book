@@ -145,7 +145,7 @@ const Search = () => {
           id="search-text"
           value={searchQuery.searchText}
           placeholder="Search"
-          autoFocus
+          autoFocus // eslint-disable-line jsx-a11y/no-autofocus
           onChange={(event) => setSearchText(event.target.value)}
         />
         <span id="checkbox">
