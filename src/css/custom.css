@@ -10,3 +10,9 @@
   --duration: 0.4s;
   --timing: ease;
 }
+
+.scrollable {
+  height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

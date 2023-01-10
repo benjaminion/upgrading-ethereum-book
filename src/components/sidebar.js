@@ -47,7 +47,7 @@ const Sidebar = (props) => {
   // console.log(JSON.stringify(filteredPages, undefined, 2))
   
   return (
-    <nav className="sidebar">
+    <nav className="sidebar scrollable">
       <div className="sidebar-title">
         <Link
           to="/"

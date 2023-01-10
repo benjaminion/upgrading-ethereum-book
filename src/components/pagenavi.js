@@ -42,7 +42,7 @@ const PageNavi = ({path}) => {
   })})
   
   return (
-    <div id="page-navi">
+    <div id="page-navi" className="scrollable">
       <NestedList items={items} level={2} idx={0} />
     </div>
   )

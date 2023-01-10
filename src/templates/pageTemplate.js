@@ -47,7 +47,7 @@ export default function Template({ data }) {
         <Banner path={path} />
         <div id="page">
           <Sidebar index={frontmatter.index} />
-          <div id="main-content">
+          <div id="main-content" className="scrollable">
             <PrevNext seq={frontmatter.sequence} />
             <main
                dangerouslySetInnerHTML={{ __html: html }}
@@ -57,8 +57,8 @@ export default function Template({ data }) {
             <PrevNext seq={frontmatter.sequence} />
           </div>
           <PageNavi path={path} />
-          <FootnoteTooltips />
         </div>
+        <FootnoteTooltips />
       </React.StrictMode>
   )
 }
