@@ -1,5 +1,34 @@
 require("prismjs/themes/prism-tomorrow.css")
 
+exports.onClientEntry = () => {
+
+  // --- Handle opening of <details> elements when printing ---
+
+  // Open closed details elements for printing
+  window.addEventListener('beforeprint', () => {
+    const allDetails = document.body.querySelectorAll('details')
+    for (let i = 0; i < allDetails.length; i++) {
+      if (allDetails[i].open) {
+        allDetails[i].dataset.open = '1'
+      } else {
+        allDetails[i].setAttribute('open', '')
+      }
+    }
+  })
+
+  // After printing close details elements not opened before
+  window.addEventListener('afterprint', () => {
+    const allDetails = document.body.querySelectorAll('details')
+    for (let i = 0; i < allDetails.length; i++) {
+      if (allDetails[i].dataset.open) {
+        allDetails[i].dataset.open = ''
+      } else {
+        allDetails[i].removeAttribute('open')
+      }
+    }
+  })
+}
+
 /*
   Awful hack to (partially) work around a pathological issue in Chrome whereby a link to an
   anchor near the bottom of the page (such as a footnote) results in most of the viewport

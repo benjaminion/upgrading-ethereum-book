@@ -8,8 +8,6 @@ import PrevNext from "../components/prevnext"
 import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
 import FootnoteTooltips from "../components/footnote-tooltips"
-import DarkModeToggle from "../components/dark-mode-toggle"
-import PrintScripts from "../components/print-scripts"
 import Search from "../components/search"
 
 import "katex/dist/katex.min.css"
@@ -45,13 +43,12 @@ export default function Template({ data }) {
         : <Subsections indexArray={indexArray} />
 
   return (
-      <>
+      <React.StrictMode>
         <Banner path={path} />
         <div id="page">
           <Sidebar index={frontmatter.index} />
           <div id="main-content">
             <PrevNext seq={frontmatter.sequence} />
-            <DarkModeToggle />
             <main
                dangerouslySetInnerHTML={{ __html: html }}
             />
@@ -61,9 +58,8 @@ export default function Template({ data }) {
           </div>
           <PageNavi path={path} />
           <FootnoteTooltips />
-          </div>
-        <PrintScripts />
-      </>
+        </div>
+      </React.StrictMode>
   )
 }
 

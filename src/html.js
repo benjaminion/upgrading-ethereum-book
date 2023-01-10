@@ -53,6 +53,9 @@ export default function HTML(props) {
           dangerouslySetInnerHTML={{ __html: props.body }}
         />
         {props.postBodyComponents}
+        <aside id="dark-mode-toggle">
+          <dark-mode-toggle permanent="true"></dark-mode-toggle>
+        </aside>
       </body>
     </html>
   )

@@ -1,5 +1,6 @@
 @import "custom.css";
 @import "fonts.css";
+@import "dark-mode-toggle.css";
 
 html {
   overflow: auto;
