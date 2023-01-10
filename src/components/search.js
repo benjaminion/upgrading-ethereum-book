@@ -19,7 +19,7 @@ const getSearchResults = (query, data) => {
 
   const result = data.map( ({ node }) => {
 
-    let score = 0
+    let pageScore = 0
     const matches = []
     for (let i = 0; i < node.chunks?.length; i++) {
 
@@ -40,7 +40,7 @@ const getSearchResults = (query, data) => {
             indices: indices,
           }
         )
-        score += indices.length
+        pageScore += chunk.weight * indices.length
       }
     }
 
@@ -48,7 +48,7 @@ const getSearchResults = (query, data) => {
       url: node.frontmatter.path,
       title: node.frontmatter.titles.filter(x => x).join(' | '),
       matches: matches,
-      score: score,
+      score: pageScore,
     }
   })
 

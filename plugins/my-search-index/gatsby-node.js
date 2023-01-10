@@ -50,6 +50,7 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
             label: type.label,
             id: id,
             text: text,
+            weight: type.weight === undefined ? 1 : type.weight,
           })
       }
       break

@@ -98,7 +98,7 @@ module.exports = {
           {query: 'li', label: 'List item'},
           {query: 'pre', label: 'Code'},
           {query: 'table', label: 'Table'},
-          {query: 'h3, h4, h5, h6', label: 'Heading'},
+          {query: 'h3, h4, h5, h6', label: 'Heading', weight: 5},
           {query: 'p', label: 'Paragraph'},
         ],
         exclude: {
