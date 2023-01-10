@@ -144,7 +144,8 @@ const Search = () => {
           name="searchText"
           id="search-text"
           value={searchQuery.searchText}
-          placeholder='Search'
+          placeholder="Search"
+          autoFocus
           onChange={(event) => setSearchText(event.target.value)}
         />
         <span id="checkbox">
