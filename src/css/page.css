@@ -296,6 +296,7 @@ div.summary {
 /*** Thin scrollbars on Chrome ***/
 ::-webkit-scrollbar {
   width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
