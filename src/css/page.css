@@ -4,7 +4,7 @@
 
 html {
   height: 100vh;
-  overflow-y: auto; /* Want to use "clip", really, but see gatsby-browser.js */
+  overflow-y: clip;
 }
 
 body {
@@ -16,20 +16,23 @@ body {
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   transition: color var(--duration) var(--timing),
               background-color var(--duration) var(--timing);
-  overflow: clip;
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
-#gatsby-focus-wrapper {
-  display: contents;
+@media screen {
+  #gatsby-focus-wrapper {
+    display: contents;
+  }
 }
 
 #page {
   display: flex;
   flex-direction: row;
   width: 100vw;
+  height: 100vh;
   margin: 0px;
   padding: 0px;
+  overflow: clip;
 }
 
 #main-content {
