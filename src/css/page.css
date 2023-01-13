@@ -289,20 +289,6 @@ div.summary {
   border: double #999 3.5px;
 }
 
-/*** Thin scrollbars on Chrome ***/
-::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(155, 155, 155, 0.5);
-  border-radius: 20px;
-  border: transparent;
-}
-
 /*** SVG stuff - needed for dark mode support. Here be dragons. ***/
 
 svg path, svg g, svg use {

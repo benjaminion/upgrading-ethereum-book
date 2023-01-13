@@ -15,4 +15,20 @@
   height: 100vh;
   overflow-y: auto;
   overscroll-behavior: none;
+  /* Thin scrollbars on FireFox (seems to be default on Linux, but not Windows) */
+  scrollbar-width: thin;
+}
+
+/*** Thin scrollbars on Chrome ***/
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: transparent;
 }
