@@ -1468,11 +1468,11 @@ The value was decreased by one quarter in the Altair upgrade from `2**26` (`INAC
 
 During Phase&nbsp;0, the inactivity penalty was an increasing global amount applied to all validators that did not participate in an epoch, regardless of their individual track records of participation. So a validator that was able to participate for a significant fraction of the time could still be quite severely penalised due to the growth of the inactivity penalty. Vitalik gives a simplified [example](https://github.com/ethereum/consensus-specs/issues/2125#issue-737768917): "if fully [off]line validators get leaked and lose 40% of their balance, someone who has been trying hard to stay online and succeeds at 90% of their duties would still lose 4% of their balance. Arguably this is unfair." We found during the [Medalla testnet incident](https://hackmd.io/@benjaminion/wnie2_200822#Medalla-Meltdown-redux) that keeping a validator online when all around you is chaos is not easy. We don't want to punish stakers who are honestly doing their best.
 
-To improve this, the Altair upgrade introduced individual validator inactivity scores that are stored in the state. The scores are updated each epoch as follows.
+To improve this, the Altair upgrade introduced individual validator inactivity scores that are stored in the state. Validators' scores are updated each epoch as follows.
 
-  - Every epoch, irrespective of the inactivity leak,
-    - decrease the score by one when the validator makes a correct timely target vote, and
-    - increase the score by `INACTIVITY_SCORE_BIAS` (four) otherwise.
+  - At the end of epoch $N$, irrespective of the inactivity leak,
+    - decrease a validator's score by one when it made a correct and timely target vote in epoch $N-1$, and
+    - increase the validator's score by `INACTIVITY_SCORE_BIAS` (four) otherwise.
   - When _not_ in an inactivity leak,
     - decrease every validator's score by `INACTIVITY_SCORE_RECOVERY_RATE` (sixteen).
 
@@ -1485,7 +1485,7 @@ Graphically, the flow-chart looks like this.
 
 <figcaption>
 
-How each validator's inactivity score is updated. The happy flow is right through the middle.
+How each validator's inactivity score is updated. The happy flow is right through the middle. "Active", when updating the scores at the end of epoch $N$, means having made a correct and timely target vote in epoch $N-1$.
 
 </figcaption>
 </figure>
@@ -8379,8 +8379,8 @@ def process_inactivity_updates(state: BeaconState) -> None:
 
 Since the Altair upgrade, each validator has an individual inactivity score in the beacon state which is updated as follows.
 
-  - Every epoch, irrespective of the inactivity leak,
-    - decrease the score by one when the validator makes a correct [timely target vote](/part3/config/constants#participation-flag-indices), and
+  - At the end of epoch $N$, irrespective of the inactivity leak,
+    - decrease the score by one when the validator made a correct and [timely target vote](/part3/config/constants#participation-flag-indices) during epoch $N-1$, and
     - increase the score by [`INACTIVITY_SCORE_BIAS`](/part3/config/configuration#inactivity_score_bias) otherwise. Note that [`get_eligible_validator_indices()`](#def_get_eligible_validator_indices) includes slashed but not yet withdrawable validators: slashed validators are treated as not participating, whatever they actually do.
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration#inactivity_score_recovery_rate).
@@ -8392,7 +8392,7 @@ Since the Altair upgrade, each validator has an individual inactivity score in t
 
 <figcaption>
 
-How each validator's inactivity score is updated. The happy flow is right through the middle.
+How each validator's inactivity score is updated. The happy flow is right through the middle. "Active", when updating the scores at the end of epoch $N$, means having made a correct and timely target vote in epoch $N-1$.
 
 </figcaption>
 </figure>
