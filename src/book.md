@@ -3827,7 +3827,7 @@ Finally, each type has a default value. Once again directly from [the SSZ spec](
 
 #### Worked example
 
-Let's explore a worked example to gather all of this together. I'd rather use a real example than make up a synthetic object, so we are going to look at the aggregate `IndexedAttestation` that was included in the beacon chain block [at slot 3080831](https://beaconcha.in/block/3080831#attestations), at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation).)
+Let's explore a worked example to gather all of this together. I'd rather use a real example than make up a synthetic object, so we are going to look at the aggregate `IndexedAttestation` that was included in the beacon chain block [at slot 3080831](https://beaconcha.in/slot/3080831#attestations), at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation).)
 
 ##### The data structures
 
