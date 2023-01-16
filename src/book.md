@@ -3549,7 +3549,7 @@ The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.2
 
 The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
-The formal properties that we require for SSZ to be useful for both consensus and communications areas defined in the [SSZ formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
+The formal properties that we require for SSZ to be useful for both consensus and communications are defined in the [SSZ formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
 
   1. involutive: $\texttt{deserialise}\langle T \rangle(\texttt{serialise}\langle T \rangle(O_1)) = O_1$  (required for communications), and
   2. injective: $\texttt{serialise}\langle T \rangle(O_1) = \texttt{serialise}\langle T \rangle(O_2)$ implies that $O_1 = O_2$ (required for consensus).
