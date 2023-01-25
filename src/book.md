@@ -3495,7 +3495,9 @@ Ethereum&nbsp;2.0 uses a bespoke serialisation scheme called Simple Serialize, o
 
 It seems like we spent months over the end of 2018 and the start of 2019 talking about serialisation, and the story below is highly simplified. But I think it's worth recording some of the considerations and design decisions.
 
-Ethereum&nbsp;1 has always used a serialisation format called [RLP](https://eth.wiki/fundamentals/rlp) (recursive length prefix). This was deemed unsuitable for Ethereum&nbsp;2, largely because it is regarded as [overly complex](https://eth.wiki/en/concepts/wishlist#rlp).[^fn-rlp-complexity]
+Ethereum&nbsp;1 has always used a serialisation format called [RLP](https://eth.wiki/fundamentals/rlp) (recursive length prefix). This was deemed unsuitable for Ethereum&nbsp;2, largely because it is regarded as [overly complex](https://ethereum.org/en/developers/docs/networking-layer/#ssz-vs-rlp).[^fn-rlp-complexity]
+
+[TODO - https://web.archive.org/web/20220528042454/https://eth.wiki/en/concepts/wishlist#rlp is a better link, but archive.org seems very slow right now. Need to revisit this.]::
 
 [^fn-rlp-complexity]: [Vitalik](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205), "As the inventor of RLP, I'm inclined to prefer SSZ", and [again](https://ethresear.ch/t/replacing-ssz-with-rlp-zip-and-sha256/5706/12?u=benjaminion), "RLP honestly sucks" (with some explanation as to why!).
 
@@ -3523,7 +3525,7 @@ Discussion around this was extensive (see the references [below](#see-also)), bu
 
 The factors that tipped the balance in favour of SSZ for communications were (1) a desire to maintain only one serialisation library, and (2) some possible performance benefit.
 
-On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205) "simplicity over efficiency". Maintaining two serialisation libraries is arguably more overhead than any potential gain from using different ones. Having said that, RLP is [still used](https://github.com/ethresearch/p2p/issues/15) in Eth2's discovery layer (since it is shared Eth1), so this argument loses some of its force.
+On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://github.com/ethereum/consensus-specs/issues/692#issuecomment-467684205) "simplicity over efficiency". Maintaining two serialisation libraries is arguably more overhead than any potential gain from using different ones. Having said that, RLP is [still used](https://github.com/ethresearch/p2p/issues/15) in Eth2's discovery layer (since it is shared with Eth1), so this argument loses some of its force.
 
 On the second, when we receive an object over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a deserialise/reserialise round trip.
 
@@ -3537,7 +3539,7 @@ The initial, more developed, spec for SSZ was merged into the beacon chain repos
 
 A big step forward in the utility of SSZ, and what established it as the serialisation protocol of choice for consensus, was the development of [Merkleization](/part2/building_blocks/merkleization) (also known as tree hashing), first discussed in [October 2018](https://github.com/ethereum/consensus-specs/issues/54) and adopted into the spec in [November](https://github.com/ethereum/consensus-specs/pull/120).
 
-Also in [November 2018](https://github.com/ethereum/consensus-specs/pull/139) we agreed to switch the byte ordering for integer types from big-endian to little-endian at the request of the Nimbus team. This means that the 32-bit number representing 66 decimal would is now serialised as `0x42000000` rather than `0x00000042`. The main motivation for the change was to map better to byte-ordering in typical microprocessors.
+Also in [November 2018](https://github.com/ethereum/consensus-specs/pull/139) we agreed to switch the byte ordering for integer types from big-endian to little-endian at the request of the Nimbus team. This means that the 32-bit number representing 66 decimal is now serialised as `0x42000000` rather than `0x00000042`. The main motivation for the change was to map better to byte-ordering in typical microprocessors.
 
 [April 2019](https://github.com/ethereum/consensus-specs/pull/787) saw a major change to SSZ with the adoption of offsets. This came from a scheme, [Simple Offset Serialisation](https://gist.github.com/karalabe/3a25832b1413ee98daad9f0c47be3632), previously proposed by Péter Szilágyi. The idea is to split the objects we are serialising according to whether they are fixed length or variable length. The serialisation then has two sections. The first section contains both actual serialisations of any fixed length objects, and pointers (offsets) to the serialisations of any variable length objects. The second section contains the serialisations of the variable length objects. The motivation for this is to allow fast access to arbitrary parts of the serialised data without having to deserialise the whole structure.
 
@@ -3549,7 +3551,7 @@ The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.2
 
 The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
-The formal properties that we require for SSZ to be useful for both consensus and communications areas defined in the [SSZ formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
+The formal properties that we require for SSZ to be useful for both consensus and communications are as defined in the [SSZ formal verification](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md#expected-properties-of-serialisedeserialise) exercise. Given objects $O_1$ and $O_2$, both of type $T$, we require that SSZ be
 
   1. involutive: $\texttt{deserialise}\langle T \rangle(\texttt{serialise}\langle T \rangle(O_1)) = O_1$  (required for communications), and
   2. injective: $\texttt{serialise}\langle T \rangle(O_1) = \texttt{serialise}\langle T \rangle(O_2)$ implies that $O_1 = O_2$ (required for consensus).
@@ -3827,7 +3829,7 @@ Finally, each type has a default value. Once again directly from [the SSZ spec](
 
 #### Worked example
 
-Let's explore a worked example to gather all of this together. I'd rather use a real example than make up a synthetic object, so we are going to look at the aggregate `IndexedAttestation` that was included in the beacon chain block [at slot 3080831](https://beaconcha.in/block/3080831#attestations), at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation).)
+Let's explore a worked example to gather all of this together. I'd rather use a real example than make up a synthetic object, so we are going to look at the aggregate `IndexedAttestation` that was included in the beacon chain block [at slot 3080831](https://beaconcha.in/slot/3080831#attestations), at position 87 within the block. (It would actually have been an [`Attestation`](/part3/containers/operations#attestation) object in the block, but those bitlists are fiddly, so we'll look at the equivalent [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation).)
 
 ##### The data structures
 
@@ -9091,7 +9093,7 @@ The proof is simple: the two proposals come from the same slot, have the same pr
 
 As ever, the `assert` statements ensure that the containing block is invalid if it contains any invalid slashing claims.
 
-Fun fact: the [first slashing](https://beaconcha.in/block/138731#proposer-slashings) to occur on the beacon chain was a proposer slashing. Two clients running side-by-side with the same keys will often produce the same attestations since the protocol is designed to encourage that. Independently producing the same block is very unlikely as blocks contain much more data.
+Fun fact: the [first slashing](https://beaconcha.in/slot/138731#proposer-slashings) to occur on the beacon chain was a proposer slashing. Two clients running side-by-side with the same keys will often produce the same attestations since the protocol is designed to encourage that. Independently producing the same block is very unlikely as blocks contain much more data.
 
 |||
 |-|-|
@@ -9126,7 +9128,7 @@ The validity checking is done by [`is_slashable_attestation_data()`](/part3/help
 
 Any validators that appear in both attestations are slashed. If no validator is slashed, then the attester slashing claim was not valid after all, and therefore its containing block is invalid.
 
-Examples: a [double vote](https://beaconcha.in/block/43920#attester-slashings) attester slashing; [surround vote](https://beaconcha.in/block/17184#attester-slashings) attester slashings.
+Examples: a [double vote](https://beaconcha.in/slot/43920#attester-slashings) attester slashing; [surround vote](https://beaconcha.in/slot/17184#attester-slashings) attester slashings.
 
 |||
 |-|-|
