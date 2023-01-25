@@ -430,10 +430,10 @@ div.title-page svg g#layer101 path {
     width: 100%;
     padding: 0.75rem 1.5rem;
     min-width: auto;
-    overflow-y: visible;
+    overflow: visible;
   }
   #page {
-    overflow-y: visible;
+    overflow: visible;
   }
   div.title-page {
     margin: 0;
