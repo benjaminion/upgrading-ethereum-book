@@ -424,11 +424,20 @@ div.title-page svg g#layer101 path {
 
 /* For mobile */
 @media screen and (max-width: 1200px) {
+  #all-content {
+    height: 100vh;
+    overflow-y: auto;
+    overscroll-behavior: none;
+  }
   #main-content {
     margin: 0 auto;
     width: 100%;
     padding: 0.75rem 1.5rem;
     min-width: auto;
+    overflow-y: visible;
+  }
+  #page {
+    overflow-y: visible;
   }
   div.title-page {
     margin: 0;

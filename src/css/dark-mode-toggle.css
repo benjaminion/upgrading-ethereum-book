@@ -20,10 +20,12 @@ dark-mode-toggle {
 /* On mobile, move the toggle and scroll it with the page */
 @media screen and (max-width: 1200px) {
   aside#dark-mode-toggle {
+    position: static;
+    display: block;
+    width: 100vw;
     padding: 0;
-    position: relative;
-    top: -14px;
-    text-align: right;
     height: 20px;
+    overflow-y: visible;
+    text-align: right;
   }
 }

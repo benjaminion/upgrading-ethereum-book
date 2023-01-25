@@ -47,15 +47,17 @@ export default function HTML(props) {
       </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}
-        <div
-          key={`body`}
-          id="___gatsby"
-          dangerouslySetInnerHTML={{ __html: props.body }}
-        />
+        <div id="all-content">
+          <aside id="dark-mode-toggle">
+            <dark-mode-toggle permanent="true"></dark-mode-toggle>
+          </aside>
+          <div
+            key={`body`}
+            id="___gatsby"
+            dangerouslySetInnerHTML={{ __html: props.body }}
+          />
+        </div>
         {props.postBodyComponents}
-        <aside id="dark-mode-toggle">
-          <dark-mode-toggle permanent="true"></dark-mode-toggle>
-        </aside>
       </body>
     </html>
   )
