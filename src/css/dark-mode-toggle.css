@@ -26,6 +26,6 @@ dark-mode-toggle {
     padding: 0;
     height: 20px;
     overflow-y: visible;
-    text-align: right;
+    text-align: left;
   }
 }

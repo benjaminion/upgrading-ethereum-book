@@ -435,6 +435,9 @@ div.title-page svg g#layer101 path {
   #page {
     overflow: visible;
   }
+  footer {
+    padding-bottom: 3rem;
+  }
   div.title-page {
     margin: 0;
   }
