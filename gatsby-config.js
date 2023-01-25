@@ -36,7 +36,7 @@ module.exports = {
       options: {
         gfm: true,
         plugins: [
-          'my-gatsby-remark-autolink-headers',
+          'gatsby-remark-autolink-headers',
           'gatsby-remark-numbered-footnotes',
           'gatsby-remark-katex',
           {

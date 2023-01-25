@@ -15,7 +15,8 @@
     "links": "bin/util/check_urls.sh src/book.md",
     "spell": "bin/util/check_spellings_list.sh",
     "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'",
-    "gramm": "bin/util/check_grammar.sh src/book.md"
+    "gramm": "bin/util/check_grammar.sh src/book.md",
+    "post-install": "patch-package"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
@@ -23,6 +24,7 @@
     "gatsby-plugin-catch-links": "^5.4.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.14.0",
+    "gatsby-remark-autolink-headers": "^6.5.0",
     "gatsby-remark-external-links": "^0.0.4",
     "gatsby-remark-katex": "^7.4.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
@@ -30,6 +32,7 @@
     "gatsby-source-filesystem": "^5.4.0",
     "gatsby-transformer-remark": "^6.4.0",
     "markdownlint": "^0.27.0",
+    "patch-package": "^6.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^3.0.2",
