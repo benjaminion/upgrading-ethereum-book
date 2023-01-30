@@ -14,7 +14,7 @@ This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 Inter
 
 I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_.
 
-Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
+Feel free to raise issues for typos, inaccuracies, omissions, and suggestions, but please don't make PRs for these. I'll happily consider PRs for improvements to the CSS or JavaScript.
 
 Kindly note that [British spelling](https://www.oxfordinternationalenglish.com/differences-in-british-and-american-spelling/) is not a typo.
 
@@ -26,11 +26,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v18.12.1
+v18.13.0
 > npm --version
-9.1.2
+9.4.0
 > gatsby --version
-Gatsby CLI version: 5.3.1
+Gatsby CLI version: 5.5.0
 ```
 
 `gatsby-cli` can be installed with,
@@ -133,3 +133,5 @@ Kind souls sometimes ask for a way to send me a cup of coffee or make a donation
   - Also at `benjaminion.eth`
 
 Any whales or large treasuries out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
+
+Finally, all [feedback](https://eth2book.info/latest/contact/) is very welcome, and is handy for helping me to justify to my employer why I'm spending so much time on this thing.
