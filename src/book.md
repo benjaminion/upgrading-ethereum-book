@@ -9526,12 +9526,15 @@ A summary of upgrades to date follows, with more detailed descriptions in the ne
 | [Altair](/part4/history/altair)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |
 | [Bellatrix](/part4/history/bellatrix) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) |
 | [Capella](/part4/history/capella)     | TBD    | TBD                 | The next planned upgrade | TBD  |
+| [Deneb](/part4/history/deneb)         | TBD    | TBD                 | The next-but-one upgrade | TBD  |
 
-The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention.
+The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention, simultaneously with the execution layer's [Paris upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md).
 
 [TODO: link to Merge section when done]::
 
-The specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.2.0). The specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/das) (data-availability sampling), [eip4844](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/eip4844), [custody_game](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/sharding). These reflect different research directions and are in varying states of currency.
+The consensus layer specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.2.0).
+
+The consensus specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/das) (data-availability sampling), [eip4844](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/eip4844), [custody_game](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/sharding). These reflect different research directions and are in varying states of currency.
 
 ### Phase 0 <!-- /part4/history/phase0 -->
 
@@ -9612,7 +9615,7 @@ The full description of the changes between Altair and Bellatrix is in the [Bell
 
 ### Capella <!-- /part4/history/capella -->
 
-Capella is the next anticipated upgrade to the beacon chain after Bellatrix.
+Capella is the next planned upgrade to the beacon chain after Bellatrix.
 
 At the time of writing, the only feature to be included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
 
@@ -9626,6 +9629,12 @@ The above operations are possible only for validators that have `0x01` type [cre
 The Engine API will be [modified](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/validator.md) to allow withdrawal data to be passed from the consensus client to the execution client. The execution client will credit users' accounts accordingly.
 
 A working draft of changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/dev/specs/capella).
+
+The consensus layer's Capella upgrade will happen simultaneously with the execution layer's [Shanghai upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md).
+
+### Deneb <!-- /part4/history/deneb -->
+
+The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://github.com/ethereum/consensus-specs/tree/dev/specs/eip4844) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
 
 ## The Merge <!-- /part4/merge* -->
 
