@@ -6,17 +6,10 @@ const cheerio = require('cheerio')
 
 // Concatenate all text in child nodes while respecting exclusions
 const getText = ($, node, exclude) => {
-
   let text = ''
-
-  if (node.type === 'text') {
-    text += node.data
-  }
-
   $(node).contents().not(exclude.ignore).each(function (i, e) {
-    text += getText($, e, exclude)
+    text += (e.type === 'text') ? e.data : getText($, e, exclude)
   })
-
   return text
 }
 
