@@ -4923,7 +4923,7 @@ The mechanism for rewarding timely inclusion of attestations (thus penalising la
 | `PROPOSER_WEIGHT` | `uint64(8)` |
 | `WEIGHT_DENOMINATOR` | `uint64(64)` |
 
-These weights are used to calculate the reward earned by a validator for performing its duties. There are five duties in total. Three relate to making attestations: attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for proposing blocks, and for participating in sync committees. Note that the sum of five the weights is equal to `WEIGHT_DENOMINATOR`.
+These weights are used to calculate the reward earned by a validator for performing its duties. There are five duties in total. Three relate to making attestations: attesting to the source epoch, attesting to the target epoch, and attesting to the head block. There are also rewards for proposing blocks, and for participating in sync committees. Note that the sum of the five weights is equal to `WEIGHT_DENOMINATOR`.
 
 On a long-term average, a validator can expect to earn a total amount of [`get_base_reward()`](/part3/transition/epoch#def_get_base_reward) per epoch, with these weights being the relative portions for each of the duties comprising that total. Proposing blocks and participating in sync committees do not happen in every epoch, but are randomly assigned, so over small periods of time validator earnings may differ from `get_base_reward()`.
 
