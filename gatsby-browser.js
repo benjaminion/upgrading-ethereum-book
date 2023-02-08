@@ -44,8 +44,8 @@ exports.onClientEntry = () => {
     http://eth2book.info/latest/part2/incentives/rewards/#fn-2
 
   I've also brutalised gatsby-remark-autolink-headers (see
-  my-gatsby-remark-autolink-headers) to remove its scrolling functionality as
-  that just makes things worse.
+  `patches/gatsby-remark-autolink-headers+*`) to remove its scrolling
+  functionality as that just makes things worse.
 
   The issue does not occur on FireFox. If anyone knows how to fix it, please
   save my sanity by letting me know. I suspect it's down to something very

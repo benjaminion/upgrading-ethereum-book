@@ -39,7 +39,7 @@ index 2f80613..0000000
 -};
 \ No newline at end of file
 diff --git a/node_modules/gatsby-remark-autolink-headers/gatsby-ssr.js b/node_modules/gatsby-remark-autolink-headers/gatsby-ssr.js
-index df19ec0..8a29f0c 100644
+index df19ec0..e198855 100644
 --- a/node_modules/gatsby-remark-autolink-headers/gatsby-ssr.js
 +++ b/node_modules/gatsby-remark-autolink-headers/gatsby-ssr.js
 @@ -15,15 +15,9 @@ exports.onRenderBody = function (_ref, pluginOptions) {
