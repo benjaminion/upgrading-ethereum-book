@@ -84,6 +84,7 @@ Hauner
 Hoang
 Hsiao
 IETF
+IRTF
 Incentivisation
 Incentivization
 IndexedAttestation

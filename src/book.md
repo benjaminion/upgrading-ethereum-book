@@ -1928,7 +1928,7 @@ A key pair is a secret key along with its public key. Together these irrefutably
 
 Every validator on the beacon chain has at least one key pair, the "signing key" that is used in daily operations (making attestations, producing blocks, etc.). Depending on which version of [withdrawal credentials](/part3/config/constants#withdrawal-prefixes) the validator is using, it may also have a second BLS key pair, the "withdrawal key", that is kept offline.
 
-The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IETF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill-advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
+The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IRTF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill-advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
 
 The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/@benjaminion/bls12-381#Point-compression) serialised form as a string of 48 bytes.
 
@@ -2285,7 +2285,10 @@ In case someone overnight unveils a sufficiently capable quantum computer, [EIP-
 
 #### BLS library functions
 
-As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the draft [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)[^fn-ietf-irtf-0]. Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+
+[^fn-ietf-irtf-0]: This document does not have the full force of an IETF standard. For one thing, it remains a draft (that is now expired), for another it is an IRTF document, meaning that it is from a research group rather than being on the IETF standards track. [Some context](https://mailarchive.ietf.org/arch/msg/ietf/A8MaBwNpbWf_DJoWj0sRROIml3Y/) from Brian Carpenter, former IETF chair,
+    > I gather that you are referring to an issue in draft-irtf-cfrg-bls-signature-04. That is not even an IETF draft; it's an IRTF draft, apparently being discussed in an IRTF Research Group. So it is not even remotely under consideration to become an IETF standard...
 
   - `def` [`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
     - Sign a message with the validator's secret (private) key.
@@ -2304,7 +2307,7 @@ The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pub
 
 #### See also
 
-The main standards that we strive to follow are the following IETF drafts:
+The main standards that we strive to follow are the following IRTF drafts:
 
   - [BLS Signatures](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)
   - [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09)
@@ -6522,7 +6525,10 @@ See the main write-up on [BLS Signatures](/part2/building_blocks/signatures) for
 >
 > The above functions are accessed through the `bls` module, e.g. `bls.Verify`.
 
-The detailed specification of the cryptographic functions underlying Ethereum&nbsp;2.0's BLS signing scheme is delegated to the draft IETF standard as described in the spec. This includes specifying the elliptic curve BLS12-381 as our domain of choice.
+The detailed specification of the cryptographic functions underlying Ethereum&nbsp;2.0's BLS signing scheme is delegated to the draft IRTF standard[^fn-ietf-irtf-1] as described in the spec. This includes specifying the elliptic curve BLS12-381 as our domain of choice.
+
+[^fn-ietf-irtf-1]: This document does not have the full force of an IETF standard. For one thing, it remains a draft (that is now expired), for another it is an IRTF document, meaning that it is from a research group rather than being on the IETF standards track. [Some context](https://mailarchive.ietf.org/arch/msg/ietf/A8MaBwNpbWf_DJoWj0sRROIml3Y/) from Brian Carpenter, former IETF chair,
+    > I gather that you are referring to an issue in draft-irtf-cfrg-bls-signature-04. That is not even an IETF draft; it's an IRTF draft, apparently being discussed in an IRTF Research Group. So it is not even remotely under consideration to become an IETF standard...
 
 Our intention in conforming to the in-progress standard is to provide for maximal interoperability with other chains, applications, and cryptographic libraries. Ethereum Foundation researchers and Eth2 developers had input to the [development](https://github.com/cfrg/draft-irtf-cfrg-bls-signature) of the standard. Nevertheless, there were some challenges involved in trying to keep up as the standard evolved. For example, the [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09) standard was still changing [rather late](https://hackmd.io/@benjaminion/BkdbG45II#Multiclient-testnet-discussion) in the beacon chain testing phase. In the end, everything worked out fine.
 
