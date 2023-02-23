@@ -4,7 +4,7 @@ import { graphql, useStaticQuery, withPrefix } from 'gatsby'
 import "../css/search.css"
 
 const escapeRegExp = (string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 const getSearchResults = (query, data) => {
@@ -14,7 +14,7 @@ const getSearchResults = (query, data) => {
   }
 
   // Match the starts of words only. The "d" flag gives us the matching indices.
-  const regex = RegExp('(^|\\W|_)' + escapeRegExp(query.searchText),
+  const regex = RegExp('(^|\\W|_)(' + escapeRegExp(query.searchText) + ')',
                        'gd' + (query.isCaseSensitive ? '' : 'i'))
 
   const result = data.map( ({ node }) => {
@@ -27,8 +27,7 @@ const getSearchResults = (query, data) => {
       let match
       const indices = []
       while ((match = regex.exec(chunk.text)) !== null) {
-        // Remove whitespace from start of match, except at the very beginning of the string.
-        indices.push([match.indices[0][0] === 0 ? 0 : match.indices[0][0] + 1, match.indices[0][1]])
+        indices.push([match.indices[2][0], match.indices[2][1]])
       }
       if (indices.length > 0) {
         matches.push(
