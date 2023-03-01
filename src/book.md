@@ -9742,6 +9742,11 @@ TODO
 
 TODO
 
+References:
+
+  - [Paths toward single-slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality)
+  - [A simple Single Slot Finality protocol](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion)
+
 ### Verkle trees <!-- /part5/research/verkle_trees* -->
 
 TODO
