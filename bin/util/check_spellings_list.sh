@@ -2,6 +2,8 @@
 
 # Sanitise the spellings list by finding any unused entries
 
+export LC_ALL=C.UTF-8
+
 here=$(dirname "$0")
 check=$here/../build/spellcheck.sh
 source=$here/../../src/book.md
@@ -18,7 +20,7 @@ output=$($check $source $wordlist)
 # Now spell check against an empty list and compare (no extra words)
 missing=$(mktemp)
 
-$check $source /dev/null | awk '{print $3}' | sort -u > $missing
+$check $source /dev/null | awk '{print $3}' | sed "s/'s$//" | sort -u > $missing
 
 diff $missing $wordlist
 

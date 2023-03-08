@@ -5,6 +5,8 @@
 # Aspell has input filters for markdown etc, but it's honestly easier just to preprocess stuff
 # with the spellcheck_prep.pl script.
 
+export LANG=en_GB.UTF-8
+
 $(dirname "$0")/spellcheck_prep.pl $1 \
     | aspell --dont-suggest pipe -d en_GB-ise-w_accents \
     | tail -n +2 \
