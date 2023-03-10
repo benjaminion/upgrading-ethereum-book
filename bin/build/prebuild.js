@@ -7,6 +7,7 @@ const glob = require('glob')
 //  - Checks that HTML tags are properly balanced
 //  - Spellcheck
 //  - Repeated words check
+//  - Trailing whitespace check
 //  - Lints the source markdown (see lintSourceMarkdown in this file)
 //  - Splits the source markdown into individual pages
 //  - Lints the split markdown (see lintSplitMarkdown in this file)
@@ -15,6 +16,7 @@ const doInternalLinks = true
 const doHtmlCheck = true
 const doSpellCheck = true
 const doRepeatCheck = true
+const doWhitespaceCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
@@ -22,6 +24,7 @@ const linkChecker = 'bin/build/links.pl'
 const htmlChecker = 'bin/build/html.pl'
 const spellChecker = 'bin/build/spellcheck.sh'
 const repeatChecker = 'bin/build/repeatcheck.sh'
+const whitespaceChecker = 'bin/build/whitespacecheck.sh'
 const mdSplitter = 'bin/build/update.sh'
 
 const sourceMarkdown = 'src/book.md'
@@ -103,6 +106,22 @@ module.exports.runChecks = (reporter) => {
     }
   } else {
     reporter.warn('Skipping repeat check')
+  }
+
+  if (doWhitespaceCheck) {
+    reporter.info('Performing trailing whitespace check...')
+    try {
+      const out = execSync(`${whitespaceChecker} ${sourceMarkdown}`, {encoding: 'utf8', stdio: 'pipe'})
+      if (out !== '') {
+        reporter.warn('Found trailing whitespace:')
+        printLines(out, reporter.warn)
+      }
+    } catch (err) {
+      reporter.warn('Unable to perform whitespace check:')
+      printLines(err.toString(), reporter.warn)
+    }
+  } else {
+    reporter.warn('Skipping whitespace check')
   }
 
   if (doSourceLint) {
