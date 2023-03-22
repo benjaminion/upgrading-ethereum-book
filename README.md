@@ -26,11 +26,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v18.13.0
+v18.14.2
 > npm --version
-9.4.0
+9.5.0
 > gatsby --version
-Gatsby CLI version: 5.5.0
+Gatsby CLI version: 5.8.0
 ```
 
 `gatsby-cli` can be installed with,
@@ -47,6 +47,7 @@ Clone this repo. `cd` into it, then:
 
 ```
 npm install
+npm run patch
 gatsby build
 ```
 
