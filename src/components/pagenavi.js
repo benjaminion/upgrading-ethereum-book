@@ -2,7 +2,7 @@ import React from "react"
 import { useStaticQuery, graphql } from "gatsby"
 import NestedList from "./nestedlist"
 
-import "./pagenavi.css"
+import "../css/pagenavi.css"
 
 const PageNavi = ({path}) => {
   const data = useStaticQuery(graphql`
