@@ -5,11 +5,15 @@
 }
 
 #banner {
+  position: sticky;
+  top: 0;
+  right: 0;
   margin: 0;
-  padding: 1ex 0;;
+  padding: 0.5ex 0;
   width: 100%;
-  background: #666;
+  background: #505;
   text-align: center;
+  z-index: 999;
 }
 
 #banner p {

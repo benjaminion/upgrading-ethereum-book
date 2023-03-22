@@ -31,15 +31,20 @@ body {
 
 #main-content {
   box-sizing: border-box;
-  margin: 0px;
-  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
+  margin: 0;
+  padding: 0;
   width: var(--main-width);
   max-width: var(--main-max-width);
   min-width: var(--main-min-width);
-  padding: 0px 64px 0 96px;
+  overflow-x: hidden;
   overflow-y: auto;
   font-family: "Computer Modern Serif", serif;
   font-size: 20px;
+}
+
+#padded-content {
+  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
+  padding: 0px 64px 0 96px;
 }
 
 code, pre, tt {
@@ -299,6 +304,9 @@ div.summary {
   }
   #main-content {
     font-size: 12pt !important;
+  }
+  #padded-content {
+    margin: 0 !important;
     padding: 0 12mm !important;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -344,10 +352,12 @@ div.summary {
 
 @media screen and (max-width: 1200px) {
   #main-content {
-    margin: 0 auto;
     width: 100%;
-    padding: 0.75rem 1.5rem;
     min-width: auto;
+  }
+  #padded-content {
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
   }
   div.title-page {
     margin: 0;

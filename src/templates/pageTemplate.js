@@ -45,22 +45,24 @@ export default function Template({ data }) {
 
   return (
       <>
-        <Banner path={frontmatter.path} />
         <div id="page">
           <Sidebar index={frontmatter.index} />
           <div id="main-content">
-            <PrevNext seq={frontmatter.sequence} />
-            <main>
-              <div className="section">
-                <div
-                  className="section-content"
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-                <Subsections indexArray={indexArray} />
+            <Banner path={frontmatter.path} />
+            <div id="padded-content">
+              <PrevNext seq={frontmatter.sequence} />
+              <main>
+                <div className="section">
+                  <div
+                    className="section-content"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                  <Subsections indexArray={indexArray} />
+                </div>
+              </main>
+              <Footer />
+              <PrevNext seq={frontmatter.sequence} />
               </div>
-            </main>
-            <Footer />
-            <PrevNext seq={frontmatter.sequence} />
           </div>
           <PageNavi path={frontmatter.path} />
           <FootnoteTooltips />
