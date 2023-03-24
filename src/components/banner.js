@@ -4,11 +4,9 @@ import "../css/banner.css"
 
 const Banner = ({path}) => {
 
-  if (false) {
+  const addBanner = true
 
-    return null
-
-  } else {
+  if (addBanner) {
 
     const newPage = "/latest" + path
 
@@ -17,6 +15,10 @@ const Banner = ({path}) => {
         <p>This version is old (Altair). The latest book is <a href="/latest">here</a>, and the updated page may be <a href={newPage}>here</a>.</p>
       </div>  
     )
+
+  } else {
+
+    return null
 
   }
 }
