@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=bellatrix
+version=test
 
 echo
 echo "*** Publishing to path $version ***"

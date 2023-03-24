@@ -5,7 +5,7 @@ const prebuild = require('./bin/build/prebuild')
 // checking and linting operations prior to building.
 exports.onPreInit = ({ reporter }) => {
   try {
-    prebuild.runChecks(reporter)
+    prebuild.runChecks(reporter, false)
   } catch (err) {
     reporter.panicOnBuild('Could not run pre-build tasks,', err)
   }
