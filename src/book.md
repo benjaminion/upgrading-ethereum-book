@@ -9542,6 +9542,14 @@ The consensus layer specifications are written incrementally. Thus, each version
 
 The consensus specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/das) (data-availability sampling), [eip4844](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/eip4844), [custody_game](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/sharding). These reflect different research directions and are in varying states of currency.
 
+#### Upgrade timing
+
+Under proof of work, upgrades (with the exception of the Merge) were performed at block heights that had been chosen several weeks in advance. Due to changes in hash power, predicting their timing was difficult - they could occur several hours, or even a day or two, adrift from their target time.
+
+Under proof of stake, we have the luxury of being able to time network upgrades to the second. Nevertheless, we aim to do upgrades on 256-epoch boundaries. These boundaries correspond both to the [batching interval](/part3/transition/epoch#historical-roots-updates) of state roots ([`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots), and the sync committee period ([`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#sync-committee)). Having the protocol not change in the middle of these periods will make it easier to verify proofs using their data later.
+
+A period of 256 epochs is around 27 hours, so we get about one opportunity per day to perform an upgrade.
+
 ### Phase 0 <!-- /part4/history/phase0 -->
 
 For historical reasons, the initial configuration of the beacon chain at its genesis was called Phase&nbsp;0.
