@@ -18,7 +18,7 @@ class FootnoteTooltips extends Component {
 
     document.body.querySelectorAll('.footnote-ref').forEach( (fn) => {
 
-      if (fn.querySelector('span.fn-span') === null) {
+      if (fn.parentElement.querySelector('span.fn-span') === null) {
 
         // Find and clone the footnote
         const toolTip = document.body.querySelector(fn.attributes.href.textContent).cloneNode(true)
