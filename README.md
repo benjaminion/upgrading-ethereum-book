@@ -1,7 +1,5 @@
 # Upgrading Ethereum
 
-**You are viewing the Altair branch, which is outdated and unmaintained.**
-
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
 You can read it at [eth2book.info](https://eth2book.info/latest) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/latest)).
@@ -16,7 +14,7 @@ This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 Inter
 
 I am not looking for contributions at this time. That may change in future, but for now I will not be accepting any PRs to _src/book.md_.
 
-Please feel free, however, to raise issues for typos, inaccuracies, omissions, and suggestions. And I'll happily consider PRs for improvements to the CSS or JavaScript.
+Feel free to raise issues for typos, inaccuracies, omissions, and suggestions, but please don't make PRs for these. I'll happily consider PRs for improvements to the CSS or JavaScript.
 
 Kindly note that [British spelling](https://www.oxfordinternationalenglish.com/differences-in-british-and-american-spelling/) is not a typo.
 
@@ -28,11 +26,11 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v16.17.1
+v18.14.2
 > npm --version
-8.19.2
+9.5.0
 > gatsby --version
-Gatsby CLI version: 4.24.0
+Gatsby CLI version: 5.8.0
 ```
 
 `gatsby-cli` can be installed with,
@@ -49,6 +47,7 @@ Clone this repo. `cd` into it, then:
 
 ```
 npm install
+npm run patch
 gatsby build
 ```
 
@@ -68,7 +67,7 @@ Instead of building and serving, you can run `gatsby develop` and point your bro
 
 The entire text for the book is in the _src/book.md_ file. Everything under _src/md/pages_ is auto-generated and any changes there will be lost.
 
-There are various npm script commands to help with building:
+There are various npm script commands to help with building and testing:
 
   - `npm run clean` runs `gatsby clean`.
     - Do this after adding new graphics or if anything weird happens.
@@ -81,6 +80,8 @@ There are various npm script commands to help with building:
     - Visit http://localhost:9000/altair/ to see the result.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
+  - `npm run spell` can be used to maintain the list of spellings.
+  - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
 
 ## How to
 
@@ -124,3 +125,14 @@ Pre-requisites:
   - _roughviz.min.js_ needs to be [downloaded](https://raw.githubusercontent.com/benjaminion/roughViz/master/dist/roughviz.min.js) from my repo and put in the _charts_ directory.
   - _svg-text-to-path.js_ needs to be [downloaded](https://raw.githubusercontent.com/paulzi/svg-text-to-path/master/dist/svg-text-to-path.js), also to the _charts_ directory.
   - The _Gaegu-Light.ttf_ file needs to be extracted from the [Gaegu](https://fonts.google.com/specimen/Gaegu) Google font and put in the _charts/font_ directory.
+
+## Coffee
+
+Kind souls sometimes ask for a way to send me a cup of coffee or make a donation. My account info is below - donations are absolutely not expected or necessary, but are always very encouraging and gratefully received.
+
+  - `0xd262d146e869915444d0f34ecdaabab5ab43007e` on Ethereum, ZkSync, Polygon, Optimism, Arbitrum.
+  - Also at `benjaminion.eth`
+
+Any whales or large treasuries out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
+
+Finally, all [feedback](https://eth2book.info/latest/contact/) is very welcome, and is handy for helping me to justify to my employer why I'm spending so much time on this thing.

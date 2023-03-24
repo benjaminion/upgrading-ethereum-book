@@ -1,17 +1,17 @@
 @import "custom.css";
 
 nav.sidebar {
+  display: inline-block;
   box-sizing: border-box;
   width: var(--sidebar-width);
-  max-width: var(--sidebar-max-width);
-  min-width: var(--sidebar-min-width);
-  height: 100%;
   padding: 0 1em 0 2em;
   margin: 0px;
-  overflow-y: auto;
   border-right: 1px solid rgb(230, 236, 241);
   text-align: center;
-  background-color: rgb(243, 245, 246);
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
+  transition: color var(--duration) var(--timing),
+              background-color var(--duration) var(--timing);
 }
 
 #index {
@@ -61,6 +61,12 @@ nav.sidebar div.sidebar-title a:hover {
 @media print {
   nav.sidebar {
     display: none;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  nav.sidebar {
+    width: calc( var(--max-page-width) / 5 );
   }
 }
 

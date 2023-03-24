@@ -24,7 +24,7 @@ $, = "\n"; # set output field separator
 $\ = "\n"; # set output record separator
 
 my $outFilePrefix = 'md/pages';
-my $sequence = 0;
+my $sequence = 0; # Search is -2, Contents is -1
 my $thisPart = '';
 my $thisChapter = '';
 my $thisSection = '';
@@ -83,7 +83,7 @@ while (<>)  {
         print $ofh
             "---",
             "hide: $hide",
-            "path: $path",
+            "path: $path/",
             "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]",
             "index: [$idx]",
             "sequence: $sequence",
@@ -110,12 +110,7 @@ while (<>)  {
 
         die "Error: first line of input must be a new page marker" if not defined $ofh;
 
-        # Rewrite any markdown image paths to reflect the directory hierarchy
-        (my $prefix = substr $thisPath, 2) =~ s|[^/]+|..|g;
-        s/\(md/($prefix/;
-
         print $ofh $_;
-
     }
 }
 

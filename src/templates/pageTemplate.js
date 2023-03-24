@@ -8,22 +8,21 @@ import PrevNext from "../components/prevnext"
 import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
 import FootnoteTooltips from "../components/footnote-tooltips"
+import Search from "../components/search"
 
 import "katex/dist/katex.min.css"
 import "../css/page.css"
 
 export function Head({ data }) {
 
-  const { markdownRemark, site } = data
-  const { frontmatter } = markdownRemark
+  const { mySearchData, site } = data
+  const frontmatter = mySearchData.frontmatter
 
-  const indexArray = frontmatter.path !== "/contents"
-        ? frontmatter.index
-        : []
+  const indexArray = frontmatter.index
 
   var pageTitle = site.siteMetadata.title
   if (frontmatter.titles !== null) {
-    const titles = frontmatter.titles.filter(x => x !== "")
+    const titles = frontmatter.titles.filter(x => x !== '')
     const number = (indexArray.length >= 2) ? indexArray.join('.') : ''
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
@@ -35,45 +34,40 @@ export function Head({ data }) {
 
 export default function Template({ data }) {
 
-  const { html, frontmatter } = data.markdownRemark
+  const { html, frontmatter } = data.mySearchData
+  const indexArray = frontmatter.index
+  const path = frontmatter.path
 
-  //console.log(JSON.stringify(markdownRemark, undefined, 2))
-
-  const indexArray = frontmatter.path !== "/contents"
-        ? frontmatter.index
-        : []
+  const pageExtras = path.startsWith('/search')
+        ? <Search />
+        : <Subsections indexArray={indexArray} />
 
   return (
-      <>
+      <React.StrictMode>
         <div id="page">
           <Sidebar index={frontmatter.index} />
-          <div id="main-content">
-            <Banner path={frontmatter.path} />
+          <div id="main-content" className="scrollable">
+            <Banner path={path} />
             <div id="padded-content">
               <PrevNext seq={frontmatter.sequence} />
-              <main>
-                <div className="section">
-                  <div
-                    className="section-content"
-                    dangerouslySetInnerHTML={{ __html: html }}
-                  />
-                  <Subsections indexArray={indexArray} />
-                </div>
-              </main>
+              <main
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+              {pageExtras}
               <Footer />
               <PrevNext seq={frontmatter.sequence} />
-              </div>
+            </div>
           </div>
-          <PageNavi path={frontmatter.path} />
-          <FootnoteTooltips />
+          <PageNavi path={path} />
         </div>
-      </>
+        <FootnoteTooltips />
+      </React.StrictMode>
   )
 }
 
 export const pageQuery = graphql`
   query($path: String!) {
-    markdownRemark(frontmatter: { path: { eq: $path } }) {
+    mySearchData(frontmatter: { path: { eq: $path } }) {
       frontmatter {
         index
         path

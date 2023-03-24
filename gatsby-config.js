@@ -1,6 +1,7 @@
 const execSync = require('child_process').execSync;
 
-var date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
+const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
+const version = 'altair';
 
 function getGitHash() {
   try {
@@ -21,7 +22,7 @@ module.exports = {
     licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
     licence: 'CC BY-SA 4.0',
   },
-  pathPrefix: '/altair',
+  pathPrefix: '/' + version,
   plugins: [
     {
       resolve: 'gatsby-source-filesystem',
@@ -45,6 +46,13 @@ module.exports = {
             }
           },
           {
+            resolve: 'my-svg-embed',
+            options: {
+              directory: `${__dirname}/src/`,
+            }
+          },
+          'my-strip-html-comments',
+          {
             resolve: 'gatsby-remark-external-links',
             options: {
               target: '_blank',
@@ -58,13 +66,6 @@ module.exports = {
               aliases: {code: 'text'},
             },
           },
-          {
-            resolve: 'gatsby-remark-copy-linked-files',
-            options: {
-              destinationDir: 'images',
-              ignoreFileExtensions: [],
-            },
-          },
         ],
       },
     },
@@ -72,7 +73,7 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-htaccess',
       options: {
-        ErrorDocument: 'ErrorDocument 404 /altair/404.html',
+        ErrorDocument: 'ErrorDocument 404 /' + version + '/404.html',
       },
     },
     {
@@ -80,11 +81,38 @@ module.exports = {
       options: {
         siteId: '1',
         matomoUrl: 'https://eth2book.info/matomo',
-        siteUrl: 'https://eth2book.info/altair',
+        siteUrl: 'https://eth2book.info/' + version,
         matomoPhpScript: 'matomo.php',
         matomoJsScript: 'matomo.js',
         disableCookies: true,
       },
     },
+    {
+      resolve: 'my-search-index',
+      options: {
+        enabled: true,
+        // Matching elements have their text added to the index. First match wins.
+        chunkTypes: [
+          {query: 'figcaption', label: 'Figure caption'},
+          {query: '[id^="fn-"]', label: 'Footnote'},
+          {query: 'li', label: 'List item'},
+          {query: 'pre', label: 'Code'},
+          {query: 'table', label: 'Table'},
+          {query: 'h3, h4, h5, h6', label: 'Heading', weight: 5},
+          {query: 'p', label: 'Paragraph'},
+        ],
+        exclude: {
+          // Note, only pages under src/md/pages have a "hide" property.
+          frontmatter: [{hide: true}, {hide: null}],
+          // The frontmatter filter takes care of excluding a good set of pages for now.
+          pages: [],
+          // Elements matching this query are ignored completely, including their text:
+          ignore: 'svg *, details *, mtable *, mrow *, [aria-hidden="true"] *, .footnote-ref',
+          // Chunks matching this query are excluded as duplicates (to handle nested matches):
+          dedup: '[id^="fn-"] *, figcaption *, li *',
+        }
+      },
+    }
   ],
+  flags: {},
 };

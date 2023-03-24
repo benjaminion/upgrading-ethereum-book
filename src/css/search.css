@@ -1,0 +1,81 @@
+@import "custom.css";
+
+#search-parameters {
+  margin-bottom: 2rem;
+}
+
+#search-parameters input#search-text {
+  background-color: var(--background);
+  color: var(--foreground);
+  padding: 6px;
+  margin-right: 12px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 50%;
+  transition: color var(--duration) var(--timing),
+              background-color var(--duration) var(--timing);
+}
+
+#search-parameters input#search-text:focus {
+  outline: none;
+}
+
+#search-parameters span#checkbox {
+  display: inline-block;
+}
+
+#search-parameters span#checkbox label {
+  padding-left: 0.2rem;
+  font-family: sans-serif;
+  font-size: 1rem;
+}
+
+#search-parameters input#is-case-sensitive {
+  width:1rem;
+  height:1rem;
+}
+
+#search-results ul {
+  padding-left: 0;
+  margin-left: 0;
+  list-style-type: none;
+}
+
+#search-results ul li ul{
+  padding-left: 0.5rem;
+}
+
+#search-results ul li ul li{
+  margin: 0.8rem 0;
+  padding: 0.5rem;
+  background: var(--search-chunk-background);
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
+}
+
+#search-results a.label {
+  display: block;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+}
+
+#search-results span.chunk-text.pre {
+  display: block;
+  white-space: pre;
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.1rem;
+  overflow-x: auto;
+}
+
+#search-results > ul li {
+  padding-bottom: 1ex;
+}
+
+#search-results > ul li:last-child {
+  margin-bottom: 1ex;
+}
+
+#search-results span.match-text {
+  background-color: var(--search-text-highlight);
+}

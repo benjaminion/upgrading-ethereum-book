@@ -1,0 +1,62 @@
+{
+  "language": "en-GB",
+  "disabledRules": {
+    "en-GB": [
+      "ARROWS",
+      "COMMA_PARENTHESIS_WHITESPACE",
+      "ENGLISH_WORD_REPEAT_BEGINNING_RULE",
+      "EN_WORD_COHERENCY",
+      "IN_A_X_MANNER",
+      "LARGE_NUMBER_OF",
+      "MORFOLOGIK_RULE_EN_GB",
+      "OXFORD_SPELLING_Z_NOT_S",
+      "SMALL_NUMBER_OF",
+      "SOME_OF_THE",
+      "UPPERCASE_SENTENCE_START",
+      "WANNA",
+      "WHITESPACE_RULE"
+    ]
+  },
+  "hiddenFalsePositives": {
+    "en-GB": [
+      "{\"rule\": \"ADMIT_ENJOY_VB\", \"sentence\": \"i is used\"}",
+      "{\"rule\": \"ADVERB_VERB_ADVERB_REPETITION\", \"sentence\": \"per slot per shard\"}",
+      "{\"rule\": \"ADVERB_WORD_ORDER\", \"sentence\": \"happen rarely\"}",
+      "{\"rule\": \"AGREEMENT_SENT_START\", \"sentence\": \"Slashings balances updates\"}",
+      "{\"rule\": \"CD_NN\", \"sentence\": \"ETH\"}",
+      "{\"rule\": \"COMMA_COMPOUND_SENTENCE\", \"sentence\": \"(recovered and we are no longer)\"}",
+      "{\"rule\": \"COMMA_COMPOUND_SENTENCE_2\", \"sentence\": \"(components are showing and the wires)|(will fail and the block)\"}",
+      "{\"rule\": \"DID_FOUND_AMBIGUOUS\", \"sentence\": \"bound the score\"}",
+      "{\"rule\": \"DT_JJ_NO_NOUN\", \"sentence\": \"a boolean is either True or False\"}",
+      "{\"rule\": \"EN_A_VS_AN\", \"sentence\": \"(an xor)|(a uint)|(the list a)\"}",
+      "{\"rule\": \"EN_COMPOUNDS\", \"sentence\": \"([Bb]lock chain)|(space saving)|(anti-pattern)\"}",
+      "{\"rule\": \"EN_SPECIFIC_CASE\", \"sentence\": \"SLOTS_PER_EPOCH times\"}",
+      "{\"rule\": \"EVERY_EACH_SINGULAR\", \"sentence\": \"[Ee]very (SLOTS_PER|EPOCHS_PER)\"}",
+      "{\"rule\": \"FINAL_ADVERB_COMMA\", \"sentence\": \"acting honestly\"}",
+      "{\"rule\": \"HAVE_PART_AGREEMENT\", \"sentence\": \"TARGET_AGGREGATORS\"}",
+      "{\"rule\": \"I_LOWERCASE\", \"sentence\": \"(counter i)|(index i)|(bits of i)|(i is incremented)|(i is used)\"}",
+      "{\"rule\": \"LC_AFTER_PERIOD\", \"sentence\": \"(state.slashings)|(validator.slashed)\"}",
+      "{\"rule\": \"MASS_AGREEMENT\", \"sentence\": \"decrease the score\"}",
+      "{\"rule\": \"MISSING_GENITIVE\", \"sentence\": \"(Nakamoto consensus)|(Ethereum transaction)|(Merkle roots)\"}",
+      "{\"rule\": \"PEOPLE_VBZ\", \"sentence\": \"people is a joy\"}",
+      "{\"rule\": \"PHRASE_REPETITION\", \"sentence\": \"a committee a committee\"}",
+      "{\"rule\": \"POSSESSIVE_APOSTROPHE\", \"sentence\": \"(specs repo)|(Withdrawals section)|(rewards calculation)|(roots accumulator)\"}",
+      "{\"rule\": \"QUESTION_MARK\", \"sentence\": \"Were we to\"}",
+      "{\"rule\": \"SENTENCE_WHITESPACE\", \"sentence\": \"(KeyValidate)|(FastAggregateVerify)|(Verify)\"}",
+      "{\"rule\": \"SUBSEQUENT_TO\", \"sentence\": \"subsequent to that genesis event\"}",
+      "{\"rule\": \"THERE_S_MANY\", \"sentence\": \"The only curiosity here is the lines\"}",
+      "{\"rule\": \"THE_PUNCT\", \"sentence\": \"call it a, rather than attestation\"}",
+      "{\"rule\": \"THE_SENT_END\", \"sentence\": \"IndexedAttestation, a\"}",
+      "{\"rule\": \"THE_SUPERLATIVE\", \"sentence\": \"Latest Message Driven\"}",
+      "{\"rule\": \"THE_WORSE_OF\", \"sentence\": \"the higher of\"}",
+      "{\"rule\": \"TO_DO_HYPHEN\", \"sentence\": \"to DoS\"}",
+      "{\"rule\": \"WHETHER\", \"sentence\": \"whether or not\"}"
+    ]
+  },
+  "markdown": {
+    "nodes": {
+      "BlockQuote": "ignore",
+      "Code": "default"
+    }
+  }
+}

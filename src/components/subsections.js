@@ -10,7 +10,7 @@ const Subsections = ({indexArray}) => {
   const data = useStaticQuery(graphql`
     {
       allMarkdownRemark(
-        sort: {fields: [frontmatter___sequence]}
+        sort: {frontmatter: {sequence: ASC}}
         filter: {frontmatter: {index: {ne: null}}}
     ) {
         edges {
@@ -30,7 +30,12 @@ const Subsections = ({indexArray}) => {
 
   // Only add the auto index for Parts, not any deeper structure
   if (indexArray === null || indexArray.length > 1) return null
-  
+
+  // Special hacky handling for the the /contents page
+  if (indexArray[0] === -1) {
+    indexArray = []
+  }
+
   // Find pages that are subsections of the page we are on
   const pages = data.allMarkdownRemark.edges
   const indexFilterString = indexArray.length === 0 ? "" : indexArray.join() + ","

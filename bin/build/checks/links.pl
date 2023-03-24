@@ -87,18 +87,18 @@ while(<$fh>) {
     /$newPagePath/ and $pagePath = $2;
 
     # Footnote references
-    while (/^.+\[\^(.+?)\]/g) {
+    while (/.\[\^(.+?)\]/g) {
         my $fn = $1;
         if (exists($fns{$fn})) {
             delete $fns{$fn};
         } else {
-            print "Missing footnote: $fn , line $.";
+            print "Missing footnote: $fn, line $.";
         }
     }
 
     while (/(!{0,1})\[.+?\]\((.*?)\)/g) {
 
-        my $isImg = $1 eq '!' ? 1 : 0;
+        my $isImg = $1 eq '!';
         my $link = $2;
 
         if ($isImg) {

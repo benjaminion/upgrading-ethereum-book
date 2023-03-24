@@ -1,5 +1,5 @@
 ---
-path: /contact
+path: /contact/
 titles: ["Contact me","",""]
 index: [999]
 sequence: 999

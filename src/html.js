@@ -37,17 +37,26 @@ export default function HTML(props) {
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-TileImage" content="https://eth2book.info/f/ms-icon-144x144.png" />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="stylesheet" type="text/css" href="https://eth2book.info/fonts/fonts.css" />
+
+        {/* Dark mode stuff */}
+        <link rel="stylesheet" href={withPrefix('/dark_230103.css')} media="(prefers-color-scheme: dark)" />
+        <link rel="stylesheet" href={withPrefix('/light_230103.css')} media="(prefers-color-scheme: light)" />
+        <script type="module" src="https://eth2book.info/inc/dark-mode-toggle.js" />
+
         {props.headComponents}
-        <script src={withPrefix('local.js')} />
       </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}
-        <div
-          key={`body`}
-          id="___gatsby"
-          dangerouslySetInnerHTML={{ __html: props.body }}
-        />
+        <div id="all-content">
+          <aside id="dark-mode-toggle">
+            <dark-mode-toggle permanent="true"></dark-mode-toggle>
+          </aside>
+          <div
+            key={`body`}
+            id="___gatsby"
+            dangerouslySetInnerHTML={{ __html: props.body }}
+          />
+        </div>
         {props.postBodyComponents}
       </body>
     </html>

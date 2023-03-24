@@ -1,21 +1,22 @@
+@import "custom.css";
+
 #page-navi {
+  display: inline-block;
   box-sizing: border-box;
-  flex-grow: 1;
-  height: 100%;
+  width: var(--navi-width);
   padding: 0 1em 0 2em;
   margin: 0px;
-  overflow-y: auto;
-  color: #999999;
   font-size: 80%;
 }
 
 #page-navi a {
-  color: #777;
+  color: var(--pagenavi-link);
+  transition: color var(--duration) var(--timing)
 }
 
 #page-navi a:hover {
   text-decoration: none;
-  color: #444;
+  color: var(--pagenavi-link-hover);
 }
 
 #page-navi ul {
@@ -36,6 +37,12 @@
 @media print {
   #page-navi {
     display: none;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  #page-navi {
+    width: calc( var(--max-page-width) / 5 );
   }
 }
 

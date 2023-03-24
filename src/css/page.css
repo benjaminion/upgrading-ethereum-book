@@ -1,21 +1,28 @@
 @import "custom.css";
+@import "fonts.css";
+@import "dark-mode-toggle.css";
 
-html, body {
-  margin: 0;
-  padding: 0;
-  color: black;
-  text-rendering: optimizeLegibility;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+html {
+  height: 100vh;
+  overflow-y: hidden;
 }
 
 body {
-  overflow-y: hidden;
-  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  text-rendering: optimizeLegibility;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  transition: color var(--duration) var(--timing),
+              background-color var(--duration) var(--timing);
 }
 
 /* A fix for PgUp/PgDn not working to scroll */
-#gatsby-focus-wrapper {
-  display: contents;
+@media screen {
+  #gatsby-focus-wrapper {
+    display: contents;
+  }
 }
 
 #page {
@@ -25,26 +32,23 @@ body {
   height: 100vh;
   margin: 0px;
   padding: 0px;
-  overflow-y: hidden;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 #main-content {
+  display: inline-block;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  width: var(--main-width);
-  max-width: var(--main-max-width);
-  min-width: var(--main-min-width);
-  overflow-x: hidden;
-  overflow-y: auto;
   font-family: "Computer Modern Serif", serif;
   font-size: 20px;
+  overflow-x: hidden;
 }
 
 #padded-content {
-  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
-  padding: 0px 64px 0 96px;
+  width: var(--content-width);
+  margin: 0 calc( (100vw - var(--sidebar-width) - var(--content-width) - var(--navi-width)) / 2 );
+  padding: 0;
 }
 
 code, pre, tt {
@@ -58,8 +62,9 @@ p {
 }
 
 a {
-  color: #0366d6;
+  color: var(--link-colour);
   text-decoration: none;
+  transition: color var(--duration) var(--timing)
 }
 
 a:hover {
@@ -117,41 +122,37 @@ h6 {
 
 h4 code, h5 code, h6 code {font-size: inherit; }
 
-div.image {
+figure {
   text-align: center;
   padding: 0;
   margin: 3ex auto;
   font-style: italic;
 }
 
-div.caption {
+figcaption {
   text-align: center;
   padding: 0;
-  margin: -3ex auto 3ex auto;
+  margin: 0 auto 3ex auto;
   font-style: italic;
 }
 
-div.image img {
-  width: 100%;
-}
-
 table {
-  border: solid #999999 1px;
+  border: solid var(--table-border) 1px;
   border-collapse: collapse;
   margin: 3ex 0;
 }
 
 td, th {
-  border: solid #999999 1px;
+  border: solid var(--table-border) 1px;
   padding: 4px 8px;
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  color: white;
-  background-color: #999999;
-  border: solid #cccccc 1px;
+  color: var(--th-colour);
+  background-color: var(--th-background);
+  border: solid var(--th-border) 1px;
   border-top-style: inherit;
 }
 
@@ -167,7 +168,7 @@ th:empty {
   display: none;
 }
 
-div.section li {
+main li {
   line-height: 1.4128;
   padding-bottom: 3px;
 }
@@ -196,7 +197,7 @@ div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
   margin: 1ex 0;
 }
 
-div.title-page img {
+div.title-page svg {
   margin: 1ex auto;
 }
 
@@ -273,7 +274,6 @@ pre[class^="language-"] code {
 }
 
 /*** Footnotes ***/
-
 div.footnotes hr {
   margin-top: 6ex;
   border: 0;
@@ -292,8 +292,66 @@ div.summary {
   border: double #999 3.5px;
 }
 
+/*** SVG stuff - needed for dark mode support. Here be dragons. ***/
+
+svg path, svg g, svg use {
+  transition: stroke var(--duration) var(--timing),
+              fill var(--duration) var(--timing)
+}
+
+a.anchor svg path {
+  stroke: var(--foreground);
+  fill:  var(--foreground);
+}
+
+figure svg path {
+  stroke: var(--foreground);
+  fill: none;
+}
+
+/* Correct weight for axes and labels in charts */
+figure.chart svg path[class$="Text"],
+figure.chart svg g[class*="Axis"] g[class$="tick"] path {
+  fill: var(--foreground)!important;
+  stroke: none!important;
+}
+
+/* The order of these two matters. The first makes sure our dashed lines are not fat,
+   the second that other elements are not messed up */
+figure.diagram svg path[d] {
+  stroke: none!important;
+  fill:var(--foreground)!important;
+}
+
+figure.diagram svg path[stroke] {
+  stroke: var(--foreground)!important;
+  fill: none!important;
+}
+
+/* Some elements need a fill... */
+figure.diagram svg path[fill] {
+  fill: var(--background)!important;
+}
+
+/* ...and some don't. */
+figure.diagram svg path[fill=none] {
+  fill: none!important;
+}
+
+/* Make Firefox show text in diagrams */
+figure.diagram svg use {
+  fill: var(--foreground);
+}
+
+/* Always display my avatar as positive */
+div.title-page svg g#layer101 path {
+  fill: #343434!important;
+}
+
 @media print {
   html, body, #page, #main-content {
+    --background: #fff;
+    --foreground: #000;
     display: block !important;
     overflow: visible !important;
     width: 100% !important;
@@ -301,11 +359,14 @@ div.summary {
     min-width: initial !important;
     margin: initial !important;
     padding: initial !important;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   #main-content {
     font-size: 12pt !important;
   }
   #padded-content {
+    width: auto !important;
     margin: 0 !important;
     padding: 0 12mm !important;
   }
@@ -350,16 +411,56 @@ div.summary {
   }
 }
 
-@media screen and (max-width: 1200px) {
-  #main-content {
-    width: 100%;
-    min-width: auto;
+/* For wide displays */
+@media screen and (min-width: 1920px) {
+  body {
+    position: relative;
+    width: var(--max-page-width);
+    margin: 0 auto;
   }
   #padded-content {
+    width: calc( var(--max-page-width) / 2 );
+    margin: 0 calc( var(--max-page-width) / 20 );
+  }
+}
+
+/* For mobile */
+@media screen and (max-width: 1200px) {
+  #main-content {
+    width: auto;
+  }
+  #padded-content {
+    width: auto;
     margin: 0 auto;
-    padding: 0.75rem 1.5rem;
+    padding: 1.5rem;
+    min-width: auto;
+  }
+  footer {
+    padding-bottom: 3rem;
   }
   div.title-page {
     margin: 0;
+  }
+}
+
+/* Further changes for very narrow screens */
+@media screen and (max-width: 600px) {
+  #padded-content {
+    padding: 1.5rem 0.75rem 5rem 0.75rem;
+  }
+  figure {
+    width: 100%!important;
+  }
+  footer {
+    margin-top: 3rem;
+  }
+  blockquote {
+    padding-left: 1rem;
+  }
+  ul {
+    padding-left: 1.2rem;
+  }
+  ol {
+    padding-left: 1.5rem;
   }
 }

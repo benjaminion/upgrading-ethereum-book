@@ -14,7 +14,7 @@ my $inPart3 = 0;
 
 print
     "---",
-    "path: /annotated-spec",
+    "path: /annotated-spec/",
     "titles: [\"One Page Annotated Spec\",\"\",\"\"]",
     "index: [999]",
     "sequence: 990",
@@ -38,11 +38,6 @@ while(<>)  {
 
         # Remove page path comments from titles
         s/^(#.*) <!--.*-->$/$1/;
-
-        # Rewrite links to images
-        if ($_ =~ /!\[.*\]\(md.+\)/) {
-            s/md\///;
-        }
 
         # Rewrite urls that are internal to the chapter
         s/]\(\/part3\/[^#)]*/](/g;

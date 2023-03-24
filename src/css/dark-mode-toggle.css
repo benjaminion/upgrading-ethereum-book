@@ -1,0 +1,30 @@
+aside#dark-mode-toggle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0 0 0 0.5rem;
+}
+
+dark-mode-toggle {
+  --dark-mode-toggle-dark-icon: url("../images/sun.svg");
+  --dark-mode-toggle-light-icon: url("../images/moon.svg");
+  --dark-mode-toggle-icon-size: 20px;
+}
+
+@media print {
+  aside#dark-mode-toggle {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  aside#dark-mode-toggle {
+    position: absolute;
+    display: block;
+    width: 100vw;
+    padding: 0;
+    height: 20px;
+    overflow-y: visible;
+    text-align: right;
+  }
+}

@@ -1,6 +1,5 @@
 import React from "react"
-import { Link } from "gatsby"
-import { useStaticQuery, graphql } from "gatsby"
+import { useStaticQuery, graphql, Link } from "gatsby"
 
 import PageList from "./pagelist"
 import "../css/sidebar.css"
@@ -9,7 +8,7 @@ const Sidebar = (props) => {
   const data = useStaticQuery(graphql`
     {
       allMarkdownRemark(
-        sort: {fields: [frontmatter___sequence]}
+        sort: {frontmatter: {sequence: ASC}}
         filter: {frontmatter: {index: {ne: null}}}
     ) {
         edges {
@@ -48,7 +47,7 @@ const Sidebar = (props) => {
   // console.log(JSON.stringify(filteredPages, undefined, 2))
   
   return (
-    <nav className="sidebar">
+    <nav className="sidebar scrollable">
       <div className="sidebar-title">
         <Link
           to="/"

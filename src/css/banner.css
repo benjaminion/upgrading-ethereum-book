@@ -6,14 +6,15 @@
 
 #banner {
   position: sticky;
+  position: -webkit-sticky;
   top: 0;
-  right: 0;
+  left: 0;
   margin: 0;
   padding: 0.5ex 0;
   width: 100%;
   background: #505;
   text-align: center;
-  z-index: 999;
+  z-index: 2;
 }
 
 #banner p {
