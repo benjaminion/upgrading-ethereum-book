@@ -4672,7 +4672,7 @@ Other useful, but in places outdated references:
 
   - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
   - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN)
-  - [Phase 0 for Humans [v0.10.0]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB)
+  - [Phase 0 for Humans \[v0.10.0\]](https://notes.ethereum.org/@djrtwo/Bkn3zpwxB)
   - [Phase 0 design notes](https://notes.ethereum.org/@JustinDrake/rkPjB1_xr) (Justin Drake)
   - My own [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available for historical interest.
 
