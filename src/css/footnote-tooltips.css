@@ -14,7 +14,7 @@ sup[id^='fnref-'] {
   background: var(--fn-tt-background);;
   border-radius: 6px;
   padding: 5px 10px;
-  width: calc(var(--main-width) / 4);
+  width: calc(var(--content-width) / 5);
   white-space: normal;
   text-align: left;
   opacity: 0;
