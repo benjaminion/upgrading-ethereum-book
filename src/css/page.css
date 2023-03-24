@@ -42,7 +42,7 @@ body {
   padding: 0;
   font-family: "Computer Modern Serif", serif;
   font-size: 20px;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 #padded-content {
