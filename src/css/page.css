@@ -366,6 +366,7 @@ div.title-page svg g#layer101 path {
     font-size: 12pt !important;
   }
   #padded-content {
+    width: auto !important;
     margin: 0 !important;
     padding: 0 12mm !important;
   }
