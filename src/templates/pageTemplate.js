@@ -44,17 +44,19 @@ export default function Template({ data }) {
 
   return (
       <React.StrictMode>
-        <Banner path={path} />
         <div id="page">
           <Sidebar index={frontmatter.index} />
           <div id="main-content" className="scrollable">
-            <PrevNext seq={frontmatter.sequence} />
-            <main
-               dangerouslySetInnerHTML={{ __html: html }}
-            />
-            {pageExtras}
-            <Footer />
-            <PrevNext seq={frontmatter.sequence} />
+            <Banner path={path} />
+            <div id="padded-content">
+              <PrevNext seq={frontmatter.sequence} />
+              <main
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+              {pageExtras}
+              <Footer />
+              <PrevNext seq={frontmatter.sequence} />
+            </div>
           </div>
           <PageNavi path={path} />
         </div>

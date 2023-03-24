@@ -1,10 +1,8 @@
 :root {
   --sidebar-width: 20vw;
-  --sidebar-max-width: 400px;
-  --sidebar-min-width: 240px;
-  --main-width: 50vw;
-  --main-max-width: 1200px;
-  --main-min-width: 800px;
+  --content-width: 50vw;
+  --navi-width: 20vw;
+  --max-page-width: 1920px;
 
   /* Dark mode transition */
   --duration: 0.4s;

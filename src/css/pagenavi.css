@@ -3,7 +3,7 @@
 #page-navi {
   display: inline-block;
   box-sizing: border-box;
-  flex-grow: 1;
+  width: var(--navi-width);
   padding: 0 1em 0 2em;
   margin: 0px;
   font-size: 80%;
@@ -37,6 +37,12 @@
 @media print {
   #page-navi {
     display: none;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  #page-navi {
+    width: calc( var(--max-page-width) / 5 );
   }
 }
 

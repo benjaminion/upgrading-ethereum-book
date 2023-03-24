@@ -4,7 +4,7 @@
 
 html {
   height: 100vh;
-  overflow-y: clip;
+  overflow-y: hidden;
 }
 
 body {
@@ -32,20 +32,23 @@ body {
   height: 100vh;
   margin: 0px;
   padding: 0px;
-  overflow: clip;
+  overflow: hidden;
 }
 
 #main-content {
   display: inline-block;
   box-sizing: border-box;
-  margin: 0px;
-  margin-left: calc(50vw - min(var(--sidebar-width), var(--sidebar-max-width)) - min(var(--main-max-width), var(--main-width)) / 2);
-  width: var(--main-width);
-  max-width: var(--main-max-width);
-  min-width: var(--main-min-width);
-  padding: 0px 64px 0 96px;
+  margin: 0;
+  padding: 0;
   font-family: "Computer Modern Serif", serif;
   font-size: 20px;
+  overflow-x: hidden;
+}
+
+#padded-content {
+  width: var(--content-width);
+  margin: 0 calc( (100vw - var(--sidebar-width) - var(--content-width) - var(--navi-width)) / 2 );
+  padding: 0;
 }
 
 code, pre, tt {
@@ -361,6 +364,9 @@ div.title-page svg g#layer101 path {
   }
   #main-content {
     font-size: 12pt !important;
+  }
+  #padded-content {
+    margin: 0 !important;
     padding: 0 12mm !important;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -404,22 +410,29 @@ div.title-page svg g#layer101 path {
   }
 }
 
+/* For wide displays */
+@media screen and (min-width: 1920px) {
+  body {
+    position: relative;
+    width: var(--max-page-width);
+    margin: 0 auto;
+  }
+  #padded-content {
+    width: calc( var(--max-page-width) / 2 );
+    margin: 0 calc( var(--max-page-width) / 20 );
+  }
+}
+
 /* For mobile */
 @media screen and (max-width: 1200px) {
-  #all-content {
-    height: 100vh;
-    overflow-y: auto;
-    overscroll-behavior: none;
-  }
   #main-content {
-    margin: 0 auto;
-    width: 100%;
-    padding: 0.75rem 1.5rem;
-    min-width: auto;
-    overflow: visible;
+    width: auto;
   }
-  #page {
-    overflow: visible;
+  #padded-content {
+    width: auto;
+    margin: 0 auto;
+    padding: 1.5rem;
+    min-width: auto;
   }
   footer {
     padding-bottom: 3rem;
@@ -431,8 +444,8 @@ div.title-page svg g#layer101 path {
 
 /* Further changes for very narrow screens */
 @media screen and (max-width: 600px) {
-  #main-content {
-    padding: 0.75rem 0.75rem 5rem 0.75rem;
+  #padded-content {
+    padding: 1.5rem 0.75rem 5rem 0.75rem;
   }
   figure {
     width: 100%!important;

@@ -14,7 +14,7 @@ const Banner = ({path}) => {
 
     return (
       <div id="banner">
-        <p>You are viewing an outdated version (Bellatrix). The latest version of this page may be <a href={newPage}>here</a>, and the book <a href="/latest">here</a>.</p>
+        <p>This version is old (Bellatrix). The latest book is <a href="/latest">here</a>, and the updated page may be <a href={newPage}>here</a>.</p>
       </div>  
     )
 

@@ -17,15 +17,14 @@ dark-mode-toggle {
   }
 }
 
-/* On mobile, move the toggle and scroll it with the page */
 @media screen and (max-width: 1200px) {
   aside#dark-mode-toggle {
-    position: static;
+    position: absolute;
     display: block;
     width: 100vw;
     padding: 0;
     height: 20px;
     overflow-y: visible;
-    text-align: left;
+    text-align: right;
   }
 }
