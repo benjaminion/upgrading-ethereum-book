@@ -10,11 +10,12 @@ sup[id^='fnref-'] {
   font-family: 'Open Sans', sans-serif;
   font-size: 80%;
   position: absolute;
+  top: 30px;
   color: var(--fn-tt-foreground);
   background: var(--fn-tt-background);;
   border-radius: 6px;
   padding: 5px 10px;
-  width: calc(var(--content-width) / 5);
+  width: calc(var(--content-width) / 3);
   white-space: normal;
   text-align: left;
   opacity: 0;
@@ -25,8 +26,6 @@ sup[id^='fnref-']:hover span.fn-span {
   visibility: visible;
   opacity: 1;
   z-index: 999;
-  top: 30px;
-  transform: translate(-50%, 0);
 }
 
 @media print {
