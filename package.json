@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "gatsby": "^5.8.0",
+    "gatsby": "^5.8.1",
     "gatsby-plugin-catch-links": "^5.8.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.15.0",
@@ -36,7 +36,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^3.0.2",
-    "webpack": "^5.76.3"
+    "webpack": "^5.77.0"
   },
   "overrides": {
     "babel-plugin-lodash": {
