@@ -229,7 +229,6 @@ dev
 devs
 discretisation
 disincentivise
-eip
 else
 endian
 endianness
