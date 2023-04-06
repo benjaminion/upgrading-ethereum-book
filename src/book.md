@@ -298,7 +298,7 @@ The existence of forking in a consensus protocol is a consequence of prioritisin
 
 #### Fork choice rules
 
-Ultimately, we want every correct node on the network to converge on an identical linear view of history and hence a common view of the state of the system. This convergence is brought about by means of the protocol's fork choice rule.
+As we've seen, for all sorts of reasons &ndash; network delays, network outages, messages received out of order, malicious behaviour by peers &ndash; nodes across the network end up with different views of the network's state. Eventually, we want every correct node on the network to agree on an identical linear view of history and hence a common view of the state of the system. The protocol's fork choice rule brings about this agreement.
 
 Given a block tree and some decision criteria based on a node's local view of the network, the fork choice rule is designed to select, from all the available branches, the one that is most likely to eventually end up in the final linear, canonical chain. That is, it will choose the branch least likely to be later pruned out of the block tree as nodes attempt to converge on a canonical view.
 
@@ -309,7 +309,7 @@ Given a block tree and some decision criteria based on a node's local view of th
 
 <figcaption>
 
-The fork choice rule selects a head block from among the candidates. This identifies a unique linear block chain running back to the Genesis block.
+The fork choice rule selects a head block from among the candidates. The head block identifies a unique linear block chain running back to the Genesis block.
 
 </figcaption>
 </figure>
@@ -326,7 +326,7 @@ Given that, there are many examples of different fork choice rules.
 
 We will properly unpack the second and third of these later in their respective sections.
 
-You can perhaps see that each of these fork choice rules is a way to assign a numeric score to a block. The winning block, the head block, has the highest score. The idea is that all correct nodes, when they eventually see a certain block, will unambiguously agree that it is the head and choose to follow its branch whatever else is going on in their own views of the network. Thus, all correct nodes will eventually converge on a common view of a single canonical chain going back to genesis.
+You can perhaps see that each of these fork choice rules is a way to assign a numeric score to a block. The winning block, the head block, has the highest score. The idea is that all correct nodes, when they eventually see a certain block, will unambiguously agree that it is the head and choose to follow its branch whatever else is going on in their own views of the network. Thus, all correct nodes will eventually agree on a common view of a single canonical chain going back to genesis.
 
 [^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [did not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it, and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It served us well.
 
@@ -6798,7 +6798,7 @@ def is_merge_transition_complete(state: BeaconState) -> bool:
     return state.latest_execution_payload_header != ExecutionPayloadHeader()
 ```
 
-A simple test for whether the given beacon state is pre- or post-Merge. If the `latest_execution_payload_header` in the state is a default `ExecutionPayloadHeader` then the chain is pre-Merge, otherwise it is post-Merge.
+A simple test for whether the given beacon state is pre- or post-Merge. If the `latest_execution_payload_header` in the state is the default `ExecutionPayloadHeader` then the chain is pre-Merge, otherwise it is post-Merge. Upgrades normally occur at a predetermined block height (or epoch number on the beacon chain), and that's the usual way to test for them. The block height of the Merge, however, was unknown ahead of time, so a different kind of test was required.
 
 Although the mainnet beacon chain is decidedly post-Merge now, this remains useful for syncing nodes from pre-Merge starting points.
 
@@ -7346,6 +7346,8 @@ def get_randao_mix(state: BeaconState, epoch: Epoch) -> Bytes32:
 ```
 
 RANDAO mixes are stored in a circular list of length [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector). They are used when calculating the [seed](#get_seed) for assigning beacon proposers and committees.
+
+The RANDAO mix for the current epoch is updated on a block-by-block basis as new RANDAO reveals come in. The mixes for previous epochs are the frozen RANDAO values at the end of the epoch.
 
 |||
 |-|-|
@@ -9506,6 +9508,1684 @@ Let `genesis_block = BeaconBlock(state_root=hash_tree_root(genesis_state))`.
 
 TODO
 
+## Fork Choice <!-- /part3/forkchoice -->
+
+### Introduction
+
+The beacon chain's fork choice is documented separately from the main state transition specification. Like the main specification, the fork choice spec is incremental, with later versions specifying only the changes since the previous version. When annotating the main spec I combined the incremental versions into a single up-to-date document. In the following, however, I will deal separately with the original [Phase 0 fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) and the incremental [Bellatrix fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) update as the latter mainly introduced one-off functionality specific to the Merge transition. There were no changes to fork choice in the Altair upgrade.
+
+#### What's a fork choice?
+
+As described in the [introduction to consensus](/part2/consensus/preliminaries#fork-choice-rules), a fork choice rule is the means by which a node decides, given the information available to it, which block is the "best" head of the chain. A good fork choice rule results in the network of nodes eventually converging on the same canonical chain: it is able to resolve forks consistently, even under a degree of faulty or adversarial behaviour.
+
+Ethereum's proof of stake consensus introduces a [`Store`](/part3/forkchoice/phase0#store) object that contains all the data necessary for determining a best head. A node's Store is the "source of truth" for its fork choice rule. In classical consensus terms it is a node's local view: all the relevant information that a node has about the network state. The fork choice rule can be characterised as a function, $\text{GetHead}(\text{Store}) \rightarrow \text{HeadBlock}$.
+
+During the Merge event, the beacon chain's fork choice was temporarily augmented to be able to consider blocks on the Eth1 chain, in order to agree which (of potentially multiple candidates) would become the terminal proof of work block.
+
+#### Overview
+
+Ethereum's fork choice comprises the LMD GHOST fork choice rule, modified by (constrained by) the Casper FFG fork choice rule. The Casper FFG rule modifies the LMD GHOST fork choice by only allowing blocks descended from the last finalised[^fn-last-finalised] checkpoint to be candidates for the chain head. All earlier branches are effectively pruned out of a node's local view of the network state.
+
+[^fn-last-finalised]: I'm simplifying here. LMD GHOST can only consider descendants of the last justified checkpoint at any one time. But the last justified checkpoint can change. LMD GHOST will never consider branches from before the last finalised checkpoint. More on this later.
+
+<a id="img_annotated-forkchoice-gasper"></a>
+<figure class="diagram" style="width: 90%">
+
+![Diagram of a block tree showing that Casper FFG finalises the early chain up to a checkpoint and LMD GHOST handles fork choice after that](images/diagrams/annotated-forkchoice-gasper.svg)
+
+<figcaption>
+
+Casper FFG's role is to finalise a checkpoint. History prior to the finalised checkpoint is a linear chain of blocks with all branches pruned away. LMD GHOST is used to select the best head block at any time. LMD GHOST is constrained by Casper FFG in that it operates on the block tree only after the finalised checkpoint.
+
+</figcaption>
+</figure>
+
+This combination has [come to be known](https://arxiv.org/abs/2003.03052) as "Gasper", and appears to be relatively simple [at first sight](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion). However, the emergence of various edge cases, and a relentless stream of potential attacks has led third party researchers [to declare](https://arxiv.org/pdf/2009.04987.pdf) that "The Gasper protocol is complex". And that was said before implementing many of the fixes that we'll be reviewing in the following sections. Vitalik himself [has written](https://notes.ethereum.org/@vbuterin/single_slot_finality#Bad-news-hybrid-consensus-mechanisms-actually-have-many-unavoidable-problems) that
+
+> The "interface" between Casper FFG finalization and LMD GHOST fork choice is a source of significant complexity, leading to a number of attacks that have required fairly complicated patches to fix, with more weaknesses being regularly discovered.
+
+Despite all this, we are happily running Ethereum on top of the Gasper protocol today. We continue to incrementally add defences against known attacks, and one day we may move on from Gasper entirely - perhaps to a [single slot finality](https://ethresear.ch/t/reorg-resilience-and-security-in-post-ssf-lmd-ghost/14164?u=benjaminion) protocol, or to [Casper CBC](https://medium.com/@jonchoi/ethereum-casper-101-7a851a4f1eb0#c979). Meanwhile, Gasper is proving to be "good enough" in practice.[^fn-gasper-weaknesses]
+
+[^fn-gasper-weaknesses]: Appendix C.1 of the Goldfish, "No More Attacks on Proof-of-Stake Ethereum?" [paper](https://arxiv.org/pdf/2209.03255.pdf) is a useful overview of known weaknesses of Gasper consensus.
+
+#### History
+
+[TODO: insert link to history of PoS]::
+
+Proof of Stake Ethereum has a long history that we shall review elsewhere. The following milestones are significant for the current Casper FFG plus LMD GHOST implementation.
+
+Vitalik published the original [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) for the beacon chain's proof of stake consensus on July 31st 2018, shortly after we had abandoned prior designs for moving Ethereum to PoS. The initial design used IMD GHOST (Immediate Message Driven GHOST) in which attestations have a limited lifetime in the fork choice[^fn-imd-ghost]. IMD GHOST [was changed](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) to LMD GHOST (Latest Message Driven GHOST) in November 2018 due to concerns about the convergence properties of IMD.
+
+[^fn-imd-ghost]: If I've understood correctly. Traces of IMD GHOST are difficult to find these days, and that's probably for the better.
+
+The [initial fork choice spec](https://github.com/ethereum/consensus-specs/blob/a103e79e676ca08cac0040f60c90fecf7e2ea3f2/specs/core/0_fork-choice.md) was published to GitHub in April 2019, numbering a mere 96 lines. The [current Phase 0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) has 488 lines.
+
+Various issues have caused the fork choice specification to balloon in complexity.
+
+In August 2019, a "decoy flip-flop attack" on LMD GHOST [was identified](https://ethresear.ch/t/decoy-flip-flop-attack-on-lmd-ghost/6001?u=benjaminion) that could be used by an adversary to delay finalisation (for a limited period of time). The defence against this is to [add a check](https://github.com/ethereum/consensus-specs/pull/1466/files) that newly considered attestations are from either the current or previous epoch only. We'll cover this under [`validate_on_attestation()`](/part3/forkchoice/phase0#attestation-timeliness).
+
+In September 2019 a "bouncing attack" on Casper FFG [was identified](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion) that could delay finalisation indefinitely. The [suggested fix](https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114?u=benjaminion) involves only allowing the fork choice's justified checkpoint to be updated during the early part of an epoch. This was implemented in the consensus specs in [November, 2019](https://github.com/ethereum/consensus-specs/pull/1465). We'll be devoting a whole section to [the bouncing attack](/part3/forkchoice/phase0#the-bouncing-attack).
+
+In July 2021, an edge case [was identified](https://notes.ethereum.org/@hww/fork-choice-store-inconsistency) in which (if 1/3 of validators were prepared to be slashed) the invariant that the store's justified checkpoint must be a descendant of the finalised checkpoint could become violated. [A fix](https://github.com/ethereum/consensus-specs/pull/2518) to the [`on_tick()`](/part3/forkchoice/phase0#on_tick) handler was implemented to maintain the invariant.
+
+In November 2021, some overly complicated logic [was identified](https://notes.ethereum.org/@djrtwo/S1ZGAXhwK) in the [`on_block()`](/part3/forkchoice/phase0#on_block) handler that could lead to the Store retaining inconsistent finalised and justified checkpoints, which would in turn cause [`filter_block_tree()`](/part3/forkchoice/phase0#filter_block_tree) to fail. Over one third of validators would have had to be slashed to trigger the fault, but the [resulting fix](https://github.com/ethereum/consensus-specs/pull/2727) turned out to be a nice simplification in any case.
+
+[Proposer boost](/part3/forkchoice/phase0#proposer-boost) was also [added](https://github.com/ethereum/consensus-specs/pull/2730) in November 2021. This is a defence against potential [balancing attacks](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion) on LMD GHOST that could prevent Casper FFG from finalising. We'll cover this in detail in the [proposer boost](/part3/forkchoice/phase0#proposer-boost) section.
+
+A [new type](https://ethresear.ch/t/balancing-attack-lmd-edition/11853?u=benjaminion) of balancing attack was published in January 2022 that relies on the attacker's validators making equivocating attestations (multiple different attestations at the same slot). To counter this, a [defence against equivocating indices](https://github.com/ethereum/consensus-specs/pull/2845) was added in March 2022. We'll discuss this when we get to the [`on_attester_slashing()`](/part3/forkchoice/phase0#equivocation_balancing_attack) handler.
+
+We will study each of these in more detail as we work through the fork choice specification in the following two sections.
+
+  - [Phase 0 fork choice](/part3/forkchoice/phase0) is the main fork choice specification.
+  - [Bellatrix fork choice](/part3/forkchoice/bellatrix) covers the changes to the fork choice around the Merge.
+
+Note that a [substantial rewrite](https://github.com/ethereum/consensus-specs/pull/3290) of the fork choice specification is in-flight. The rewrite removes the bouncing attack fix and introduces the "pulled tips" defence against a new attack, among other things. I will update the following sections when the changes have been released as part of the Capella upgrade.
+
+### Phase 0 Fork Choice <!-- /part3/forkchoice/phase0 -->
+
+This section covers the [Phase 0 Fork Choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) document. It is based on the Bellatrix, [1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0), spec release version. A [major rewrite](https://github.com/ethereum/consensus-specs/pull/3290) of the fork choice rule is due to be released with the Capella upgrade that I will document in a future version of this annotated specification.
+
+For an alternative take, I recommend [Vitalik's annotated fork choice](https://github.com/ethereum/annotated-spec/blob/master/phase0/fork-choice.md) document. I deliberately didn't consult that while preparing this, so that we gain the value of two independent expositions.
+
+Block-quoted content below (with a sidebar) has been copied over verbatim from the specs repo, as well as all the function code.
+
+> The head block root associated with a `store` is defined as `get_head(store)`. At genesis, let `store = get_forkchoice_store(genesis_state, genesis_block)` and update `store` by running:
+>
+>   - `on_tick(store, time)` whenever `time > store.time` where `time` is the current Unix time
+>   - `on_block(store, block)` whenever a block `block: SignedBeaconBlock` is received
+>   - `on_attestation(store, attestation)` whenever an attestation `attestation` is received
+>   - `on_attester_slashing(store, attester_slashing)` whenever an attester slashing `attester_slashing` is received
+>
+> Any of the above handlers that trigger an unhandled exception (e.g. a failed assert or an out-of-range list access) are considered invalid. Invalid calls to handlers must not modify `store`.
+
+Updates to the Store arise only through the four handler functions: [`on_tick()`](#on_tick), [`on_block()`](#on_block), [`on_attestation()`](#on_attestation), and [`on_attester_slashing()`](#on_attester_slashing). These are the four senses through which the fork choice gains its knowledge of the world.
+
+> _Notes_:
+><!-- markdownlint-disable ol-prefix -->
+> 1) **Leap seconds**: Slots will last `SECONDS_PER_SLOT` `+ 1` or `SECONDS_PER_SLOT` `- 1` seconds around leap seconds. This is automatically handled by [UNIX time](https://en.wikipedia.org/wiki/Unix_time).
+
+Leap seconds will no longer occur [after 2035](https://www.timeanddate.com/news/astronomy/end-of-leap-seconds-2022). We can remove this note after that.
+
+> 2) **Honest clocks**: Honest nodes are assumed to have clocks synchronized within `SECONDS_PER_SLOT` seconds of each other.
+
+In practice, the synchrony assumptions are stronger than this. Any node whose clock is more than `SECONDS_PER_SLOT` `/` `INTERVALS_PER_SLOT` (four seconds) adrift will suffer degraded performance and can be considered Byzantine (faulty), at least for the LMD GHOST fork choice.
+
+> 3) **Eth1 data**: The large `ETH1_FOLLOW_DISTANCE` specified in the [honest validator document](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md) should ensure that `state.latest_eth1_data` of the canonical beacon chain remains consistent with the canonical Ethereum proof-of-work chain. If not, emergency manual intervention will be required.
+
+Post-Merge, consistency between the execution and consensus layers is no longer an issue, although we retain the [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) for now.
+
+> 4) **Manual forks**: Manual forks may arbitrarily change the fork choice rule but are expected to be enacted at epoch transitions, with the fork details reflected in `state.fork`.
+
+Manual forks are sometimes called hard forks or upgrades, and are planned in advance and coordinated. They are different from the inadvertent forks that the fork choice rule is designed to resolve.
+
+> 5) **Implementation**: The implementation found in this specification is constructed for ease of understanding rather than for optimization in computation, space, or any other resource. A number of optimized alternatives can be found [here](https://github.com/protolambda/lmd-ghost).
+<!-- markdownlint-enable ol-prefix -->
+
+After reading the spec you may be puzzled by the "ease of understanding" claim. However, it is certainly true that several of the algorithms are far from efficient, and a great deal of optimisation is needed for practical implementations.
+
+### Constant
+
+<a id="intervals_per_slot"></a>
+
+| Name                 | Value       |
+| -------------------- | ----------- |
+| `INTERVALS_PER_SLOT` | `uint64(3)` |
+
+Only blocks that arrive during the first `1 /` `INTERVALS_PER_SLOT` of a slot's duration are eligible to have the [proposer score boost](#proposer-boost) added. This moment is the point in the slot at which validators are expected to [publish attestations](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/validator.md#attesting) declaring their view of the head of the chain.
+
+In the Ethereum consensus specification `INTERVALS_PER_SLOT` neatly divides `SECONDS_PER_SLOT`, and all time quantities are strictly `uint64` numbers of seconds. However, other chains that run the same basic protocol as Ethereum might not have this property. For example, the [Gnosis Beacon Chain](https://docs.gnosischain.com/specs) has five-second slots. We [changed](https://github.com/ConsenSys/teku/pull/5321) Teku's internal clock from seconds to milliseconds to support this, which is technically off-spec, but nothing broke.
+
+### Preset
+
+<a id="safe_slots_to_update_justified"></a>
+
+| Name                             | Value        | Unit  |  Duration  |
+| -------------------------------- | ------------ | :---: | :--------: |
+| `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` | `2**3` (= 8) | slots | 96 seconds |
+
+This is used in [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint) to constrain when we may update the Store's justified checkpoint. The Store will only consent to switch to a conflicting justified checkpoint (one not descended from the current justified checkpoint) during the first `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` slots of an epoch. The intention is to address a [bouncing attack](#the-bouncing-attack) that was identified fairly early the beacon chain's design and that could delay finality.
+
+The [recommended value](https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114?u=benjaminion) of `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than `SLOTS_PER_EPOCH` `/ 3` slots. There seems to be no surviving rationale for why it was set to 8 rather than 10. I assume it's to do with the our [obsession with powers of two](/part3/config/preset#preset).
+
+Note that this mechanism was removed in [a more recent update](https://github.com/ethereum/consensus-specs/pull/3290) to the fork choice due to it having [limited effectiveness](https://notes.ethereum.org/@fradamt/Sy6PzcRdt) and simplicity being preferred.
+
+### Configuration
+
+<a id="proposer_score_boost"></a>
+
+| Name                   | Value        |
+| ---------------------- | ------------ |
+| `PROPOSER_SCORE_BOOST` | `uint64(40)` |
+
+>   - The proposer score boost is worth `PROPOSER_SCORE_BOOST` percentage of the committee's weight, i.e., for slot with committee weight `committee_weight` the boost weight is equal to `(committee_weight * PROPOSER_SCORE_BOOST) // 100`.
+
+[Proposer boost](#proposer-boost) is a modification to the fork choice rule that defends against a so-called [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion). When a timely block proposal is received, proposer boost temporarily adds a huge weight to that block's branch in the fork choice calculation, namely `PROPOSER_SCORE_BOOST` percent of the total effective balances of all the validators assigned to attest in that slot.
+
+The value of `PROPOSER_SCORE_BOOST` has changed over time as the balancing attack has been analysed more thoroughly.
+
+  - Vitalik's original [proposed mitigation](https://notes.ethereum.org/@vbuterin/lmd_ghost_mitigation) discussed using a value of 25%.
+  - The initial implementation on November 23, 2021, [changed it to 70%](https://github.com/ethereum/consensus-specs/pull/2730/files) (without any recorded rationale for that number).
+  - On May 9, 2022, it was [changed to 33%](https://github.com/ethereum/consensus-specs/pull/2888/files) as the result of much more [detailed analysis](https://notes.ethereum.org/@casparschwa/H1T0k7b85).
+  - On May 20, 2022, it was [changed to 40%](https://github.com/ethereum/consensus-specs/pull/2895/files), due to an off-by-one calculation in the above analysis.
+
+The basic trade-off in choosing a value for `PROPOSER_SCORE_BOOST` is between allowing an adversary to perform "ex-ante" or "ex-post" reorgs. Setting `PROPOSER_SCORE_BOOST` too high makes it easier for an adversarial proposer to perform ex-post reorgs - it gives the proposer disproportionate power compared with the votes of validators. Setting `PROPOSER_SCORE_BOOST` too low makes it easier for an adversary to perform ex-ante reorgs. Caspar Schwarz-Schilling covers these trade-offs nicely in his Liscon talk, [The game of reorgs in PoS Ethereum](https://vimeo.com/637529564).[^fn-ex-ante-ex-post]
+
+[^fn-ex-ante-ex-post]: "Ex-post" reorgs occur when a proposer orphans the block in the previous slot by building on an ancestor. "Ex-ante" reorgs occur when a proposer arranges to orphan the next block by submitting its own proposal late. Caspar Schwarz-Schilling made a nice [Twitter thread](https://twitter.com/casparschwa/status/1454511850821931017) explainer.
+
+### Helpers
+
+#### `LatestMessage`
+
+```python
+class LatestMessage(object):
+    epoch: Epoch
+    root: Root
+```
+
+This is just a convenience class for tracking the most recent head vote from each validator - the "LM" (latest message) in LMD&nbsp;GHOST. [`Epoch`](/part3/config/types#epoch) is a `uint64` type, and [`Root`](/part3/config/types#root) is a `Bytes32` type. The Store holds a mapping of validator indices to their latest messages.
+
+As a side note on terminology, in what follows I will generally distinguish between [attestations](/part3/containers/dependencies#attestationdata) and votes. An attestation is a bundle of three votes: the Casper FFG source and target votes, and the LMD GHOST head vote.
+
+#### `Store`
+
+```python
+class Store(object):
+    time: uint64
+    genesis_time: uint64
+    justified_checkpoint: Checkpoint
+    finalized_checkpoint: Checkpoint
+    best_justified_checkpoint: Checkpoint
+    proposer_boost_root: Root
+    equivocating_indices: Set[ValidatorIndex]
+    blocks: Dict[Root, BeaconBlock] = field(default_factory=dict)
+    block_states: Dict[Root, BeaconState] = field(default_factory=dict)
+    checkpoint_states: Dict[Checkpoint, BeaconState] = field(default_factory=dict)
+    latest_messages: Dict[ValidatorIndex, LatestMessage] = field(default_factory=dict)
+```
+
+A node's Store records all the fork choice related information that it has about the outside world. It is the node's view of the network, in more classical terms. The Store is updated only by the [four handler functions](#handlers).
+
+The basic fields are as follows.
+
+  - `time`: The wall-clock time (Unix time) of the last call to the [`on_tick()`](#on_tick) handler. In theory this is update continuously; in practice only at least two or three times per slot.
+  - `justified_checkpoint`: Our node's view of the currently justified checkpoint.
+  - `finalized_checkpoint`: Our node's view of the currently finalised checkpoint.
+  - `blocks`: All the blocks that we know about that are descended from the `finalized_checkpoint`. The fork choice spec does not describe how to prune the Store, so we would end up with all blocks since genesis if we were to follow it precisely. However, only blocks descended from the last finalised checkpoint are ever considered in the fork choice, and the finalised checkpoint only increases in height. So it is safe for client implementations to remove from the Store all blocks (and their associated states) belonging to branches not descending from the last finalised checkpoint.
+  - `block_states`: For every block in the Store, we also keep its corresponding (post-)state. These states are mostly used for information about justification and finalisation.
+  - `checkpoint_states`: If there are empty slots immediately before a checkpoint then the checkpoint state will not correspond to a block state, so we store checkpoint states as well, indexed by [`Checkpoint`](/part3/containers/dependencies#checkpoint) rather than block root. The state at the last justified checkpoint is used for validator balances, and for validating attestations in the [`on_attester_slashing()`](#on_attester_slashing) handler.
+  - `latest_messages`: The set of latest head votes from validators. When the [`on_attestation()`](#on_attestation) handler processes a new head vote for a validator, it gets added to this set and the old vote is discarded.
+
+The following fields were added at various times as new attacks and defences were found.
+
+  - `best_justified_checkpoint` was [added](https://github.com/ethereum/consensus-specs/pull/1465) to the Store to defend against the [FFG bouncing attack](#the-bouncing-attack).
+  - `proposer_boost_root` was [added](https://github.com/ethereum/consensus-specs/pull/2730) when proposer boost was implemented as a defence against the [LMD balancing attack](#proposer-boost). It is set to the root of the current block for the duration of a slot, as long as that block arrived within the first third of a slot.
+  - The `equivocating_indices` set was [added](https://github.com/ethereum/consensus-specs/pull/2845) to defend against the [equivocation balancing attack](#equivocation_balancing_attack). It contains the indices of any validators reported as having committed an attester slashing violation. These validators must be removed from consideration in the fork choice rule until the last justified checkpoint state catches up with the fact that the validators have been slashed.
+
+For non-Pythonistas, [`Set`](https://docs.python.org/3/library/typing.html#typing.Set) and [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict) are Python generic types. A `Set` is an unordered collection of objects; a `Dict` provides key&ndash;value look-up.
+
+#### `get_forkchoice_store`
+
+> The provided anchor-state will be regarded as a trusted state, to not roll back beyond. This should be the genesis state for a full client.
+>
+> _Note_ With regards to fork choice, block headers are interchangeable with blocks. The spec is likely to move to headers for reduced overhead in test vectors and better encapsulation. Full implementations store blocks as part of their database and will often use full blocks when dealing with production fork choice.
+
+```python
+def get_forkchoice_store(anchor_state: BeaconState, anchor_block: BeaconBlock) -> Store:
+    assert anchor_block.state_root == hash_tree_root(anchor_state)
+    anchor_root = hash_tree_root(anchor_block)
+    anchor_epoch = get_current_epoch(anchor_state)
+    justified_checkpoint = Checkpoint(epoch=anchor_epoch, root=anchor_root)
+    finalized_checkpoint = Checkpoint(epoch=anchor_epoch, root=anchor_root)
+    proposer_boost_root = Root()
+    return Store(
+        time=uint64(anchor_state.genesis_time + SECONDS_PER_SLOT * anchor_state.slot),
+        genesis_time=anchor_state.genesis_time,
+        justified_checkpoint=justified_checkpoint,
+        finalized_checkpoint=finalized_checkpoint,
+        best_justified_checkpoint=justified_checkpoint,
+        proposer_boost_root=proposer_boost_root,
+        equivocating_indices=set(),
+        blocks={anchor_root: copy(anchor_block)},
+        block_states={anchor_root: copy(anchor_state)},
+        checkpoint_states={justified_checkpoint: copy(anchor_state)},
+    )
+```
+
+`get_forkchoice_store()` initialises the fork choice Store object from an anchor state and its corresponding block (header). As noted, the anchor state could be the genesis state. Equally, when using a [checkpoint sync](https://docs.teku.consensys.net/en/stable/Concepts/Weak-Subjectivity/#safely-sync-your-node), the anchor state will be the finalised checkpoint state provided by the node operator, which will be [treated as if](https://github.com/ethereum/consensus-specs/issues/2566) it is a genesis state. In either case, the `latest_messages` store will be empty to begin with.
+
+#### `get_slots_since_genesis`
+
+```python
+def get_slots_since_genesis(store: Store) -> int:
+    return (store.time - store.genesis_time) // SECONDS_PER_SLOT
+```
+
+Self explanatory. This one of only two places that `store.time` is used, the other being in the proposer boost logic in the [`on_block()`](#on_block) handler.
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_current_slot()`](#get_current_slot) |
+
+#### `get_current_slot`
+
+```python
+def get_current_slot(store: Store) -> Slot:
+    return Slot(GENESIS_SLOT + get_slots_since_genesis(store))
+```
+
+Self explanatory. [`GENESIS_SLOT`](/part3/config/constants#genesis_slot) is usually zero.
+
+|||
+|-|-|
+| Used&nbsp;by | [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`validate_target_epoch_against_current_time()`](#validate_target_epoch_against_current_time), [`validate_on_attestation()`](#validate_on_attestation), [`on_tick()`](#on_tick), [`on_block()`](#on_block) |
+| Uses | [`get_slots_since_genesis()`](#get_slots_since_genesis) |
+
+#### `compute_slots_since_epoch_start`
+
+```python
+def compute_slots_since_epoch_start(slot: Slot) -> int:
+    return slot - compute_start_slot_at_epoch(compute_epoch_at_slot(slot))
+```
+
+Self explanatory. Used only for the [bouncing attack](#the-bouncing-attack) defence.
+
+|||
+|-|-|
+| Used&nbsp;by | [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`on_tick()`](#on_tick) |
+| Uses | [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch) |
+
+#### `get_ancestor`
+
+```python
+def get_ancestor(store: Store, root: Root, slot: Slot) -> Root:
+    block = store.blocks[root]
+    if block.slot > slot:
+        return get_ancestor(store, block.parent_root, slot)
+    elif block.slot == slot:
+        return root
+    else:
+        # root is older than queried slot, thus a skip slot. Return most recent root prior to slot
+        return root
+```
+
+`get_ancestor()` recursively walks backwards through the chain. It starts with a given block with root hash `root`, and finds its ancestor block at slot `slot`, returning the ancestor's root hash. If the desired `slot` is empty (on this branch) then it returns the most recent root prior to `slot` on this branch. (When the block at slot `slot` has root `root`, then that block root is returned, so it should probably be called `get_ancestor_or_self()` or something.)
+
+This function is sometimes used just to confirm that the block with root `root` is descended from a particular block at slot `slot`, and sometimes used actually to retrieve that ancestor block's root.
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_latest_attesting_balance()`](#get_latest_attesting_balance), [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`validate_on_attestation()`](#validate_on_attestation), [`on_tick()`](#on_tick), [`on_block()`](#on_block) |
+
+#### `get_latest_attesting_balance`
+
+This function is arguably misnamed, and in the latest spec versions [has been renamed](https://github.com/ethereum/consensus-specs/pull/3250) to `get_weight()`.
+
+```python
+def get_latest_attesting_balance(store: Store, root: Root) -> Gwei:
+    state = store.checkpoint_states[store.justified_checkpoint]
+    active_indices = get_active_validator_indices(state, get_current_epoch(state))
+    attestation_score = Gwei(sum(
+        state.validators[i].effective_balance for i in active_indices
+        if (i in store.latest_messages
+            and i not in store.equivocating_indices
+            and get_ancestor(store, store.latest_messages[i].root, store.blocks[root].slot) == root)
+    ))
+    if store.proposer_boost_root == Root():
+        # Return only attestation score if ``proposer_boost_root`` is not set
+        return attestation_score
+
+    # Calculate proposer score if ``proposer_boost_root`` is set
+    proposer_score = Gwei(0)
+    # Boost is applied if ``root`` is an ancestor of ``proposer_boost_root``
+    if get_ancestor(store, store.proposer_boost_root, store.blocks[root].slot) == root:
+        num_validators = len(get_active_validator_indices(state, get_current_epoch(state)))
+        avg_balance = get_total_active_balance(state) // num_validators
+        committee_size = num_validators // SLOTS_PER_EPOCH
+        committee_weight = committee_size * avg_balance
+        proposer_score = (committee_weight * PROPOSER_SCORE_BOOST) // 100
+    return attestation_score + proposer_score
+```
+
+Here we find the essence of the GHOST[^fn-ghost-acronym] protocol: the weight of a block is the sum of the votes for that block, _plus_ the votes for all of its descendant blocks. We include votes for descendants when calculating a block's weight because a vote for a block is an implicit vote for all of that block's ancestors as well - if a particular block gets included on chain, all its ancestors must also be included. To put it another way, we treat validators as voting for entire branches rather than just their leaves.
+
+[^fn-ghost-acronym]: "Greedy Heaviest-Observed Sub-Tree", named by [Sompolinsky and Zohar](https://eprint.iacr.org/2013/881.pdf).
+
+Ignoring the proposer boost part for the time being, the main calculation being performed is as follows.
+
+```none
+    state = store.checkpoint_states[store.justified_checkpoint]
+    active_indices = get_active_validator_indices(state, get_current_epoch(state))
+    attestation_score = Gwei(sum(
+        state.validators[i].effective_balance for i in active_indices
+        if (i in store.latest_messages
+            and i not in store.equivocating_indices
+            and get_ancestor(store, store.latest_messages[i].root, store.blocks[root].slot) == root)
+    ))
+```
+
+Given a block root, `root`, this adds up all the votes for blocks that are descended from that block. More precisely, it calculates the sum of the effective balances of all validators whose latest head vote was for a descendant of `root` or for `root` itself. It's the fact that we're basing our weight calculations only on each validator's _latest_ vote that makes this "LMD" (latest message drive) GHOST.
+
+<a id="img_annotated-forkchoice-get-weight-0"></a>
+<figure class="diagram" style="width: 90%">
+
+![Diagram of a block tree with weights and latest attesting balances shown for each block](images/diagrams/annotated-forkchoice-get-weight-0.svg)
+
+<figcaption>
+
+$B_N$ is the sum of the effective balances of the validators whose most recent head vote was for block $N$, and $W_N$ is the weight of the branch starting at block $N$.
+
+</figcaption>
+</figure>
+
+Some obvious relationships apply between the weights, $W_x$, of blocks, and $B_x$, the latest attesting balances of blocks.
+
+  - For a leaf block $N$ (a block with no children), $W_N = B_N$.
+  - The weight of a block is its own latest attesting balance plus the sum of the weights of its direct children. So, in the diagram, $W_1 = B_1 + W_2 + W_3$.
+
+These relationships can be used to avoid repeating lots of work by memoising the results.
+
+##### Proposer boost
+
+In September 2020, shortly before mainnet genesis, a theoretical "[balancing attack](https://arxiv.org/abs/2009.04987)" on the LMD GHOST consensus mechanism was published, with an accompanying [Ethresear.ch post](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion).
+
+The balancing attack allows a very small number of validators controlled by an adversary to perpetually maintain a forked network, with half of all validators following one fork and half the other. This would delay finalisation indefinitely, which is a kind of liveness failure. Since the attack relies on some unrealistic assumptions about the power an adversary has over the network &ndash; namely, fine-grained control over who can see what and when &ndash; we felt that the potential attack was not a significant threat to the launch of the beacon chain. [Later refinements](https://arxiv.org/abs/2110.10086) to the attack appear to have made it more practical to execute, however.
+
+A modification to the fork choice to mitigate the balancing attack was first [suggested by Vitalik](https://notes.ethereum.org/@vbuterin/lmd_ghost_mitigation). This became known as proposer boost, and a version of it [was adopted](https://github.com/ethereum/consensus-specs/pull/2730) into the consensus layer specification in late 2021 with the various client teams releasing versions with mainnet support for proposer boost in April and May 2022.
+
+Changes to the fork choice can be made outside major protocol upgrades; it is not strictly necessary for all client implementations to make the change simultaneously, as they must for hard-fork upgrades. Given this, mainnet client releases supporting proposer boost were made at [various times](https://kyrianalex.substack.com/p/ethereums-7-block-reorg) in April and May 2022, and users were not forced to upgrade on a fixed schedule. Unfortunately, having a mix of nodes on the network, around half applying proposer boost and half not, led to a [seven block reorganisation](https://barnabe.substack.com/p/pos-ethereum-reorg) of the beacon chain on May 25, 2022. As a result, subsequent updates to the fork choice have tended to be more tightly coordinated between client teams.
+
+##### Proposer boost details
+
+Proposer boost modifies our nice, intuitive calculation of a branch's weight, based only on latest votes, by adding additional weight to a block that was received on time in the current slot. In this way, it introduces a kind of synchrony weighting. Vitalik [calls this](https://notes.ethereum.org/@vbuterin/lmd_ghost_mitigation#Proposed-solution) "an explicit 'synchronization bottleneck' gadget". In short, it treats a timely block as being a vote with a massive weight that is temporarily added to the branch that it is extending.
+
+The simple intuition behind proposer boost [is summarised](https://barnabe.substack.com/p/pos-ethereum-reorg) by Barnabé Monnot as, "a block that is timely shouldn’t expect to be re-orged". In respect of the balancing attack, proposer boost is designed to overwhelm the votes from validators controlled by the adversary and instead allow the proposer of the timely block to choose the fork that will win. Quoting [Francesco D'Amato](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion#high-level-mitigation-idea-3), "the general strategy is to empower honest proposers to impose their view of the fork-choice, but without giving them too much power and making committees irrelevant".
+
+Note that the proposer boost calculation in this spec version is over-complicated, possibly due to concerns about integer overflows. The calculation has [been simplified](https://github.com/ethereum/consensus-specs/pull/3246/files) to the following in more recent spec versions.
+
+```none
+    if store.proposer_boost_root == Root():
+        # Return only attestation score if ``proposer_boost_root`` is not set
+        return attestation_score
+    # Boost is applied if ``root`` is an ancestor of ``proposer_boost_root``
+    if get_ancestor(store, store.proposer_boost_root, store.blocks[root].slot) == root:
+        committee_weight = get_total_active_balance(state) // SLOTS_PER_EPOCH
+        proposer_score = (committee_weight * PROPOSER_SCORE_BOOST) // 100
+    return attestation_score + proposer_score
+```
+
+The default setting for `store.proposer_boost_root` is `Root()`. That is, the "empty" or "null" [default SSZ](/part2/building_blocks/ssz#default-values) root value, with all bytes set to zero. Whenever a block is received during the first `1 /` `INTERVALS_PER_SLOT` portion of a slot &ndash; that is, when the block is timely &ndash; `store.proposer_boost_root` is set to the hash tree root of that block by the [`on_block()`](/part3/forkchoice/phase0#on_block) handler. At the end of each slot it is reset to `Root()` by the [`on_tick()`](/part3/forkchoice/phase0#on_block) handler. Thus, proposer boost has an effect on the fork choice calculation from the point at which a timely block is received until the end of that slot, where "timely" on Ethereum's beacon chain means "within the first four seconds".
+
+Proposer boost causes entire branches to be favoured when the block at their tip is timely. When proposer boost is in effect, and the timely block in the current slot (which has root, `store.proposer_boost_root`) is descended from the block we are calculating the weight for, then that block's weight is also increased, since the calculation includes the weights of all its descendants. In this way, proposer boost weighting [propagates to the boosted block's ancestors](https://github.com/ethereum/consensus-specs/pull/2760) in the same way as vote weights do.
+
+The weight that proposer boost adds to the block's branch is a percentage `PROPOSER_SCORE_BOOST` of the total effective balance of all validators due to attest at that slot. Rather, it is an approximation to the total effective balance for that slot, derived by dividing the total effective balance of all validators by the number of slots per epoch.
+
+The value of `PROPOSER_SCORE_BOOST` has changed over time before settling at its current 40%. See [the description there](#proposer_score_boost) for the history, and links to how the current value was calculated.
+
+##### Proposer boost and late blocks
+
+A side-effect of proposer boost is that it enables clients to reliably re-org out (orphan) blocks that were published late. Instead of building on a late block, the proposer can choose to build on the late block's parent.
+
+A block proposer is supposed to publish its block at the start of the slot, so that it has time to be received and attested to by the whole committee within the first four seconds. However, post-merge, it can be profitable to delay block proposals by several seconds in order to collect more transaction income and better extractable value opportunities. Although blocks published five or six seconds into a slot will not gain many votes, they are still [likely to remain canonical](https://notes.ethereum.org/@casparschwa/ByHu1XZUq) under the basic consensus spec. As long as the next block proposer receives the late block by the end of the slot, it will usually build on it as the best available head.[^fn-legend-late-blocks] This is undesirable as it punishes the vast majority of honest validators, that (correctly) voted for an empty slot, by depriving them of their reward for correct head votes, and possibly even penalising them for incorrect target votes at the start of an epoch.
+
+[^fn-legend-late-blocks]: For example, blocks in [slot 4939809](https://beaconcha.in/slot/4939809#votes) and [slot 4939815](https://beaconcha.in/slot/4939815#votes) had almost no votes and yet became canonical. They were almost certainly published late &ndash; apparently by the same operator, [Legend](https://beaconcha.in/slots?q=Legend) &ndash; but in time for the next proposer to build on them. The late publishing may have been due to a simple clock misconfiguration, or it may have been a deliberate strategy to gain more transaction income post-merge. In either case, it is undesirable.
+
+Without proposer boost, it is a losing strategy for the next proposer not to build on a block that it received late. Although the late block may have few votes, it has more votes than your block initially, so validators will still attest to the late block as the head of the chain, keeping it canonical and orphaning the alternative block that you built on its parent.
+
+With proposer boost, as long as the late block has fewer votes than the proposer boost percentage, the honest proposer can be confident that its alternative block will win the fork choice for long enough that the next proposer will build on that rather than on the late block it skipped.
+
+<a id="img_annotated-forkchoice-late-block-0"></a>
+<figure class="diagram" style="width: 90%">
+<div style="width: 80%">
+
+![Diagram showing a proposer choosing whether to build on a late block or its parent](images/diagrams/annotated-forkchoice-late-block-0.svg)
+
+</div>
+<figcaption>
+
+Block $B$ was published late, well after the 4 second attestation cut-off time. However, it still managed to acquire a few attestations (say, 10% of the committee) due to dishonest or misconfigured validators. Should the next proposer build $C_1$ on top of the late block, or $C_2$ on top of its parent?
+
+</figcaption>
+</figure>
+
+<a id="img_annotated-forkchoice-late-block-1"></a>
+<figure class="diagram" style="width: 90%">
+<div style="width: 80%">
+
+![Diagram showing that without proposer score boosting a proposer should build on the late block](images/diagrams/annotated-forkchoice-late-block-1.svg)
+
+</div>
+<figcaption>
+
+Without proposer boost, it only makes sense to build $C_1$, on top of the late block $B$. Since $B$ has some weight, albeit small, the top branch will win the fork choice (if the network is behaving synchronously at the time). Block $C_2$ would be orphaned.
+
+</figcaption>
+</figure>
+
+<a id="img_annotated-forkchoice-late-block-2"></a>
+<figure class="diagram" style="width: 90%">
+<div style="width: 80%">
+
+![Diagram showing that with proposer score boosting a proposer may build on the late block's parent](images/diagrams/annotated-forkchoice-late-block-2.svg)
+
+</div>
+<figcaption>
+
+With proposer boost, the proposer of $C$ can safely publish either $C_1$ or $C_2$. Due to the proposer score boost of 40%, it is safe to publish block $C_2$ that orphans $B$ since the lower branch will have greater weight during the slot.
+
+</figcaption>
+</figure>
+
+An [implementation](https://github.com/sigp/lighthouse/pull/2860) of this strategy in the Lighthouse client seems to have been effective in reducing the number of late blocks on the network. Publishing of late blocks is strongly disincentivised when they are likely to be orphaned. It may be [adopted](https://github.com/ethereum/consensus-specs/pull/3034) as standard behaviour in the consensus specs at some point, but remains optional for the time-being. Several safe-guards are present in order to avoid liveness failures.
+
+Note that Proposer boost does not in general allow validators to re-org out timely blocks (that is, an ex-post reorg). A timely block ought to gain enough votes from the committees that it will always remain canonical.
+
+##### Alternatives to proposer boost
+
+Proposer boost is not a perfect solution to balancing attacks or ex-ante reorgs. It makes ex-post reorgs easier to accomplish; it does not scale with participation, meaning that if only 40% of validators are online, then proposers can reorg at will; it can fail when an attacker controls several consecutive slots over which to store up votes.
+
+Some changes to, or replacements for, LMD GHOST have been suggested that do not require proposer score boosting.
+
+[View-merge](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion)[^fn-view-merge-first] is a mechanism in which attesters freeze their fork choice some time $\Delta$ before the end of a slot. The next proposer does not freeze its fork choice, however. The assumed maximum network delay is $\Delta$, so the proposer will see all votes in time, and it will circulate a summary of them to all validators, contained within its block. This allows the whole network to synchronise on a common view. Balancing attacks rely on giving two halves of the network different views, and would be prevented by view-merge.
+
+[^fn-view-merge-first]: View-merge, though not by that name, was first proposed for Ethereum in October 2021 in the Ethresear.ch post, [Change fork choice rule to mitigate balancing and reorging attacks](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion). See also [this Twitter thread](https://twitter.com/fradamt/status/1572884967461474306) for more explanation of view-merge.
+
+The Goldfish protocol, described in the paper [No More Attacks on Proof-of-Stake Ethereum?](https://arxiv.org/abs/2209.03255), builds on view-merge (called "message buffering" there) and adds vote expiry so that head block votes expire almost immediately (hence the name - rightly or wrongly, goldfish are famed for their short memories). The resulting protocol is provably reorg resilient and supports fast confirmations.
+
+Both view-merge and Goldfish come with nice proofs of their properties under synchronous conditions, which improve on Gasper under the same conditions. However, they may not fare so well under more realistic asynchronous conditions. The original view-merge article [says](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion#musings-on-latency-13) of latency greater than 2 seconds, "This is bad". One of the authors of the Goldfish paper [has said that](https://ethresear.ch/t/reorg-resilience-and-security-in-post-ssf-lmd-ghost/14164?u=benjaminion) Goldfish "is extremely brittle to asynchrony, allowing for catastrophic failures such as arbitrarily long reorgs"[^fn-goldfish-brittle], and [elsewhere](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "even a single slot of asynchrony can lead to a catastrophic failure, jeopardizing the safety of any previously confirmed block". At least with proposer boost, we know that it only degrades to normal Gasper under conditions of high latency.
+
+[^fn-goldfish-brittle]: To find the section 6.3 that this quote refers to, you need to see the [original v1 version](https://arxiv.org/pdf/2209.03255v1.pdf) of the Goldfish paper. That section is omitted from the later version of the paper.
+
+Francesco D'Amato argues in [Reorg resilience and security in post-SSF LMD-GHOST](https://ethresear.ch/t/reorg-resilience-and-security-in-post-ssf-lmd-ghost/14164?u=benjaminion) that the real origin of the reorg issues with LMD GHOST is our current committee-based voting: "The crux of the issue is that honest majority of the committee of a slot does not equal a majority of the eligible fork-choice weight", since an adversary is able to influence the fork choice with votes from other slots. The ultimate cure for this would be [single slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality) (SSF), in which all validators vote at every slot. SSF is a long way from being practical today, but a candidate for its fork choice is [RLMD-GHOST](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion) (Recent Latest Message Driven GHOST), which expires votes after a configurable time period.
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_head()`](#get_head) |
+| Uses | [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`get_ancestor()`](#get_ancestor), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance) |
+| See&nbsp;also | [`on_tick()`](#on_tick), [`on_block()`](#on_block), [`PROPOSER_SCORE_BOOST`](#proposer_score_boost) |
+
+#### `filter_block_tree`
+
+```python
+def filter_block_tree(store: Store, block_root: Root, blocks: Dict[Root, BeaconBlock]) -> bool:
+    block = store.blocks[block_root]
+    children = [
+        root for root in store.blocks.keys()
+        if store.blocks[root].parent_root == block_root
+    ]
+
+    # If any children branches contain expected finalized/justified checkpoints,
+    # add to filtered block-tree and signal viability to parent.
+    if any(children):
+        filter_block_tree_result = [filter_block_tree(store, child, blocks) for child in children]
+        if any(filter_block_tree_result):
+            blocks[block_root] = block
+            return True
+        return False
+
+    # If leaf block, check finalized/justified checkpoints as matching latest.
+    head_state = store.block_states[block_root]
+
+    correct_justified = (
+        store.justified_checkpoint.epoch == GENESIS_EPOCH
+        or head_state.current_justified_checkpoint == store.justified_checkpoint
+    )
+    correct_finalized = (
+        store.finalized_checkpoint.epoch == GENESIS_EPOCH
+        or head_state.finalized_checkpoint == store.finalized_checkpoint
+    )
+    # If expected finalized/justified, add to viable block-tree and signal viability to parent.
+    if correct_justified and correct_finalized:
+        blocks[block_root] = block
+        return True
+
+    # Otherwise, branch not viable
+    return False
+```
+
+The `filter_block_tree()` function finds the children of the given block and recursively visits them, so it explores the whole tree rooted at `block_root`. Since blockchains are singly linked, the only way to find the children is to search through every block in the Store for those that have parent `block_root`. This is one reason for keeping the Store well pruned.
+
+Child blocks that are on branches terminating in a viable leaf block are inserted into the `blocks` dictionary structure. Note that `blocks` is mutated during execution and functions as a return value from `filter_block_tree()`, alongside the actual boolean return value.
+
+"Viable" blocks are ones that have a post-state that agrees with my Store about the justified and finalised checkpoints.
+
+##### Why prune unviable branches?
+
+This function ensures that the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height", is applied to the block tree before the LMD GHOST fork choice is evaluated.
+
+Early versions of the spec considered the tip of any branch descended from the Store's justified checkpoint as a potential head block. However, a scenario [was identified](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) in which this could result in a deadlock, in which finality would not be able to advance without validators getting themselves slashed - a kind of liveness failure[^fn-plausible-liveness].
+
+[^fn-plausible-liveness]: This scenario doesn't strictly break Casper FFG's "plausible liveness" property as, in principle, voters can safely ignore the LMD GHOST fork choice and switch back to the original chain in order to advance finality. But it does create a conflict between the LMD GHOST fork choice rule and advancing finality.
+
+The `filter_block_tree()` function was [added](https://github.com/ethereum/consensus-specs/pull/1495) as a fix for this issue. Given a Store and a block root, `filter_block_tree()` returns a list of all the blocks that we know about in the tree descending from the given block, having pruned out any branches that terminate in a leaf block that is not viable. Where, as above, a "viable" block has an a post-state in which the justified and finalised checkpoints match the justified and finalised checkpoints in my Store.
+
+To illustrate the problem, consider the situation shown in the following diagrams, based on the [original description](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) of the issue. The context is that there is an adversary controlling 18% of validators that takes advantage of (or causes) a temporary network partition. We will illustrate the issue mostly in terms of checkpoints, and omit the intermediate blocks that carry the attestations - mentally insert these as necessary.
+
+We begin with a justified checkpoint $A$ that all nodes agree on.
+
+Due to the network partition, only 49% of validators, plus the adversary's 18%, see checkpoint $B$. They all make Casper FFG votes $[A \rightarrow B]$, thereby justifying $B$. A further checkpoint $C_1$ is produced on this branch, and the 49% that are honest validators dutifully vote $[B \rightarrow C_1]$, but the adversary does not, meaning that $C_1$ is not justified. Validators on this branch see $h_1$ as the head block, and have a highest justified checkpoint of $B$.
+
+<a id="img_annotated-forkchoice-filter-0"></a>
+<figure class="diagram" style="width: 90%">
+<div style="width: 70%">
+
+![A diagram illustrating the first step in a liveness attack on the unfiltered chain, making the first branch](images/diagrams/annotated-forkchoice-filter-0.svg)
+
+</div>
+<figcaption>
+
+The large blocks represent checkpoints. After checkpoint $A$ there is a network partition: 49% of validators plus the adversary see checkpoints $B$ and $C_1$. Casper votes are shown by the dashed arrows. The adversary votes for $B$, but not for $C_1$.
+
+</figcaption>
+</figure>
+
+The remaining 33% of validators do not see checkpoint $B$, but see $C_2$ instead and make Casper FFG votes $[A \rightarrow C_2]$ for it. But this is not enough votes to justify $C_2$. Checkpoint $D_2$ is produced on top of $C_2$, and a further block $h_2$. On this branch, $h_2$ is the head of the chain according to LMD GHOST, and $A$ remains the highest justified checkpoint.
+
+<a id="img_annotated-forkchoice-filter-1"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram illustrating the second step in a liveness attack on the unfiltered chain, making the second branch](images/diagrams/annotated-forkchoice-filter-1.svg)
+
+<figcaption>
+
+Meanwhile, the remaining 33% of validators do not see the branch starting at $B$, but start a new branch containing $C_2$ and its descendants. They do not have enough collective weight to justify any of the checkpoints.
+
+</figcaption>
+</figure>
+
+Now for the cunning part. The adversary switches its LMD GHOST vote (and implicitly its Casper FFG vote, although that does not matter for this exercise) from the first branch to the second branch, and lets the validators in the first branch see the blocks and votes on the second branch.
+
+Block $h_2$ now has votes from the majority of validators &ndash; 33% plus the adversary's 18% &ndash; so all honest validators should make it their head block.
+
+However, the justified checkpoint on the $h_2$ branch remains at $A$. This means that the 49% of validators who voted $[B \rightarrow C]$ _cannot_ switch their chain head from $h_1$ to $h_2$ without committing a Casper FFG surround vote, and thereby getting slashed. Switching branch would cause their highest justified checkpoint to go backwards. Since they have previously voted $[B \rightarrow C_1]$, they cannot now vote $[A \rightarrow X]$ where $X$ has a height greater than $C_1$, which they must do if they were to switch to the $h_2$ branch.
+
+<a id="img_annotated-forkchoice-filter-2"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram illustrating the third step in a liveness attack on the unfiltered chain, changing the chain head](images/diagrams/annotated-forkchoice-filter-2.svg)
+
+<figcaption>
+
+The adversary switches to the second branch, giving $h_2$ the majority LMD GHOST vote. This deadlocks finalisation: the 49% who voted $[B \rightarrow C_1]$ cannot switch to $h_2$ without being slashed.
+
+</figcaption>
+</figure>
+
+In conclusion, the chain can no longer finalise (by creating higher justified checkpoints) without a substantial proportion of validators (at least 16%) being willing to get themselves slashed.
+
+It should never be possible for the chain to get into a situation in which honest validators, following the rules of the protocol, end up in danger of being slashed. The situation here arises due to a conflict between the Casper FFG fork choice (follow the chain containing the justified checkpoint of the greatest height) and the LMD GHOST fork choice (which, in this instance, ignores that rule). It is a symptom of the clunky way in which the two have been bolted together.
+
+The chosen fix for all this is to filter the block tree before applying the LMD GHOST fork choice, so as to remove all "unviable" branches from consideration. That is, all branches whose head block's state does not agree with me about the current state of justification and finalisation.
+
+<a id="img_annotated-forkchoice-filter-3"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing that filter block tree prunes out the conflicting branch for validators following the first branch](images/diagrams/annotated-forkchoice-filter-3.svg)
+
+<figcaption>
+
+When validators that followed branch 1 apply `filter_block_tree()`, branch 2 is pruned out (as indicated by the dashed lines). This is because their Store has $B$ as the best justified checkpoint, while branch 2's leaf block has a state with $A$ as the justified checkpoint. For these validators $h_2$ is no longer a candidate head block.
+
+</figcaption>
+</figure>
+
+With this fix, the chain will recover the ability to finalise when the validators on the second branch eventually become aware of the first branch. On seeing $h_1$ and its ancestors, they will update their Stores' justified checkpoints to $B$ and mark the $h_2$ branch unviable.
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`filter_block_tree()`](#filter_block_tree) |
+| Uses | [`filter_block_tree()`](#filter_block_tree) |
+
+#### `get_filtered_block_tree`
+
+```python
+def get_filtered_block_tree(store: Store) -> Dict[Root, BeaconBlock]:
+    """
+    Retrieve a filtered block tree from ``store``, only returning branches
+    whose leaf state's justified/finalized info agrees with that in ``store``.
+    """
+    base = store.justified_checkpoint.root
+    blocks: Dict[Root, BeaconBlock] = {}
+    filter_block_tree(store, base, blocks)
+    return blocks
+```
+
+A convenience wrapper that passes the Store's justified checkpoint to [`filter_block_tree()`](#filter_block_tree). On returning, the `blocks` dictionary structure will contain all viable branches rooted at that checkpoint, and nothing that does not descend from that checkpoint. For the meaning of "viable", see [`filter_block_tree()`](#filter_block_tree).
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_head()`](#get_head) |
+| Uses | [`filter_block_tree()`](#filter_block_tree) |
+
+#### `get_head`
+
+```python
+def get_head(store: Store) -> Root:
+    # Get filtered block tree that only includes viable branches
+    blocks = get_filtered_block_tree(store)
+    # Execute the LMD-GHOST fork choice
+    head = store.justified_checkpoint.root
+    while True:
+        children = [
+            root for root in blocks.keys()
+            if blocks[root].parent_root == head
+        ]
+        if len(children) == 0:
+            return head
+        # Sort by latest attesting balance with ties broken lexicographically
+        # Ties broken by favoring block with lexicographically higher root
+        head = max(children, key=lambda root: (get_latest_attesting_balance(store, root), root))
+```
+
+`get_head()` encapsulates the fork choice rule: given a Store it returns a head block.
+
+The fork choice rule is objective in that, given the same Store, it will always return the same head block. But the overall process is subjective in that each node on the network will tend to have a different view, that is, a different Store, due to delays in receiving attestations or blocks, or having seen different sets of attestations or blocks because of network asynchrony or an attack.
+
+Looking first at the `while True` loop, this implements LMD GHOST in its purest form. Starting from a given block (which would be the genesis block in unmodified LMD GHOST), we find the weights of the children of that block. We choose the child block with the largest weight and repeat the process until we end up at a leaf block (the tip of a branch). That is, we Greedily take the Heaviest Observed Sub-Tree, GHOST. Any tie between two child blocks with the same weight is broken by comparing their block hashes, so we end up at a unique leaf block - the head that we return.
+
+<a id="img_annotated-forkchoice-lmd-ghost-0"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the weight of each block](images/diagrams/annotated-forkchoice-lmd-ghost-0.svg)
+
+<figcaption>
+
+`get_head()` starts from the root block, $A$, of a block tree. The numbers show each block's weight, which is its latest attesting balance - the sum of the effective balances of the validators that cast their latest vote for that block. [Proposer boost](#proposer-boost) can temporarily increase the latest block's score (not shown).
+
+</figcaption>
+</figure>
+
+<a id="img_annotated-forkchoice-lmd-ghost-1"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the weight of each block and the weight of each subtree](images/diagrams/annotated-forkchoice-lmd-ghost-1.svg)
+
+<figcaption>
+
+The `get_latest_attesting_balance()` function when applied to a block returns the total weight of the subtree of the block and all its descendants. These weights are shown on the lines between child and parent blocks.
+
+</figcaption>
+</figure>
+
+<a id="img_annotated-forkchoice-lmd-ghost-2"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the branch chosen by the GHOST rule](images/diagrams/annotated-forkchoice-lmd-ghost-2.svg)
+
+<figcaption>
+
+Given a block, the loop in `get_head()` considers its children and selects the one that roots the subtree with the highest weight. It repeats the process with the heaviest child block[^fn-get-head-recursive] until it reaches a block with no children. In this example, it would select the branch $A \larr C \larr E$, returning $E$ as the head block.
+
+</figcaption>
+</figure>
+
+[^fn-get-head-recursive]: The algorithm is recursive, although it is not written recursively here.
+
+##### Hybrid LMD GHOST
+
+What we've just described is the pure LMD GHOST algorithm. Starting from the genesis block, it walks the entire block tree, taking the heaviest branch at each fork until it reaches a leaf block.
+
+What is implemented in `get_head()` however, is a modified form of this that the [Gasper paper](https://arxiv.org/pdf/2003.03052.pdf)[^fn-hlmd-ghost-definition] refers to as "hybrid LMD GHOST" (HLMD GHOST). It is not pure LMD GHOST, but LMD GHOST modified by the Casper FFG consensus.
+
+[^fn-hlmd-ghost-definition]: See section 4.6 of that paper.
+
+```none
+    # Get filtered block tree that only includes viable branches
+    blocks = get_filtered_block_tree(store)
+    # Execute the LMD-GHOST fork choice
+    head = store.justified_checkpoint.root
+```
+
+Specifically, rather than starting to walk the tree from the genesis block, we start from the last justified checkpoint, and rather than considering all blocks that the Store knows about, we first filter out "unviable" branches with [`get_filtered_block_tree()`](#get_filtered_block_tree).
+
+This is the point at which the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height", meets the LMD GHOST fork choice rule. The former modifies the latter to give us the HLMD GHOST fork choice rule.
+
+|||
+|-|-|
+| Uses | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`get_latest_attesting_balance()`](#get_latest_attesting_balance) |
+
+#### `should_update_justified_checkpoint`
+
+```python
+def should_update_justified_checkpoint(store: Store, new_justified_checkpoint: Checkpoint) -> bool:
+    """
+    To address the bouncing attack, only update conflicting justified
+    checkpoints in the fork choice if in the early slots of the epoch.
+    Otherwise, delay incorporation of new justified checkpoint until next epoch boundary.
+
+    See https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114 for more detailed analysis and discussion.
+    """
+    if compute_slots_since_epoch_start(get_current_slot(store)) < SAFE_SLOTS_TO_UPDATE_JUSTIFIED:
+        return True
+
+    justified_slot = compute_start_slot_at_epoch(store.justified_checkpoint.epoch)
+    if not get_ancestor(store, new_justified_checkpoint.root, justified_slot) == store.justified_checkpoint.root:
+        return False
+
+    return True
+```
+
+This function is [due to be removed](https://github.com/ethereum/consensus-specs/pull/3290), but for the benefit of future historians I shall give a brief overview of the bouncing attack that it defends against.
+
+##### The bouncing attack
+
+The bouncing attack is specific to Casper FFG and is independent of the underlying block proposal mechanism (in our case, LMD GHOST). It allows an adversary with a relatively small amount of stake to indefinitely delay finalisation of the chain. This is considered to be a liveness failure of Casper FFG in the sense that it prevents us from achieving the "[something good eventually happens](/part2/consensus/preliminaries#liveness)" goal.
+
+The essence of the bouncing attack is that we can create scenarios in which an adversary is able to store up votes and release them later to control the timing of justification of checkpoints. By doing this carefully, the adversary can cause honest validators to switch their votes from one branch to another, since honest validators must obey the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height". In this way, the adversary is able to direct the flow of votes from honest validators back and forth between branches indefinitely, preventing finalisation from occurring.
+
+##### Example of the bouncing attack
+
+To unpack the example in the [original Ethresear.ch post](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion), consider an adversary that controls 10% of the total stake. Recall that a checkpoint is a [block&ndash;epoch pair](#checkpoint_block_epoch), so it is possible to have conflicting checkpoints at the same height.
+
+<a id="img_annotated-forkchoice-bouncing-0"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the set up of the bouncing attack, with a justified checkpoint on one branch, and a justifiable checkpoint on the other.](images/diagrams/annotated-forkchoice-bouncing-0.svg)
+
+<figcaption>
+
+The starting point for a bouncing attack. The squares are Casper FFG checkpoints, the numbers attached are the percentage of stake having made a Casper FFG vote for that checkpoint. Checkpoint $A$ is finalised; checkpoint $B_1$ is justified; checkpoint $C_2$ is "justifiable".
+
+</figcaption>
+</figure>
+
+Somehow the network has got into a state with a justified checkpoint on one branch, and a "justifiable" checkpoint on a different branch. Justifiable in this context means that there are not enough votes available from honest validators to justify it, but with the addition of the adversary's votes it would become justified. The adversary may have manoeuvred the network into this state, or it may have arisen by chance. At this point, all validators have cast votes for either $C_1$ or $C_2$, except for the adversary, who is withholding its votes for now. Sixty percent of the vote is not sufficient to justify $C_2$.
+
+<a id="img_annotated-forkchoice-bouncing-1"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the bouncing attack in progress, before the adversary justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-1.svg)
+
+<figcaption>
+
+Later, the chain has been extended with checkpoints $D_1$ and $D_2$.
+
+</figcaption>
+</figure>
+
+Honest validators are voting for $D_1$ as it is descended from the highest justified checkpoint, $B_1$. As soon as the adversary sees that $D_1$ has become justifiable, it publishes its withheld votes for $C_2$, causing that checkpoint to become justified.
+
+<a id="img_annotated-forkchoice-bouncing-2"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the bouncing attack after the adversary has belatedly justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-2.svg)
+
+<figcaption>
+
+As soon as $D_1$ has acquired around 60% of the votes, the adversary publishes its withheld votes for $C_2$, causing it to become justified. This is not slashable (it is not a surround vote).
+
+</figcaption>
+</figure>
+
+Once $C_2$ has been justified due to the adversary's votes, honest validators must vote for $D_2$, so it gains the remaining 30% of vote not controlled by the adversary. By withholding and releasing its votes at strategic times, the adversary exerts control over which checkpoint the honest majority will be voting for at any time.
+
+We end up in the inverse of the position of the situation that we started with, having a justified checkpoint on one branch and a justifiable checkpoint on the other, so the attack can be repeated. The adversary can withhold its votes for $D_1$, releasing them to justify that checkpoint just as $E_2$ (not shown) becomes justifiable with around 60% of the vote. In this way the adversary can continually prevent finalisation, which requires two consecutive justified checkpoints, by repeatedly "bouncing" the fork choice between the two branches.
+
+Note that the numbers here are arbitrary and only need to be approximately right. The point is that 60% of the vote is not enough to justify a checkpoint, whereas 60% honest votes plus 10% adversary controlled votes is more than enough.
+
+##### Defence against the bouncing attack
+
+As per the function code, the implemented defence against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) slots of an epoch. Equivalently, the Store's justified checkpoint may not switch branch during at least the last two-thirds of an epoch. Updating to a non-conflicting justified checkpoint &ndash; one that is descended from the current justified checkpoint &ndash; is not constrained.
+
+Since `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than one third of an epoch, this protection means that there is at least two-thirds of an epoch during which the adversary cannot get validators to switch branch, which is enough time for honest validators to build up enough votes to justify a new checkpoint on the same branch.
+
+##### Deprecation
+
+The bouncing attack requires the adversary to have quite strong control over the timing of what happens on the network. If an adversary is that powerful, then it can probably [work around](https://notes.ethereum.org/@fradamt/Sy6PzcRdt) the fix by splitting honest validators' views, as per the balancing attacks.
+
+Since the attack mitigation described here is not effective in such a situation, and the circumstances in which a bouncing attack could be launched are very unlikely in practice, this defence is [due to be removed](https://github.com/ethereum/consensus-specs/pull/3290) from the beacon chain.
+
+|||
+|-|-|
+| Used&nbsp;by | [`on_block()`](#on_block) |
+| Uses | [`compute_slots_since_epoch_start()`](#compute_slots_since_epoch_start), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor) |
+| See&nbsp;also | [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) |
+
+#### `on_attestation` helpers
+
+##### `validate_target_epoch_against_current_time`
+
+```python
+def validate_target_epoch_against_current_time(store: Store, attestation: Attestation) -> None:
+    target = attestation.data.target
+
+    # Attestations must be from the current or previous epoch
+    current_epoch = compute_epoch_at_slot(get_current_slot(store))
+    # Use GENESIS_EPOCH for previous when genesis to avoid underflow
+    previous_epoch = current_epoch - 1 if current_epoch > GENESIS_EPOCH else GENESIS_EPOCH
+    # If attestation target is from a future epoch, delay consideration until the epoch arrives
+    assert target.epoch in [current_epoch, previous_epoch]
+```
+
+This function simply checks that an attestation came from the current or previous epoch, based on its target checkpoint vote. The Store has a notion of the current time, maintained by the [`on_tick()`](#on_tick) handler, so it's a straightforward calculation. The timeliness check was introduced to defend against the "decoy flip-flop" attack [described below](#attestation-timeliness).
+
+Note that there is a small inconsistency here. Attestations may be [included in blocks](/part3/transition/block#attestations) only for 32 slots after the slot in which they were published. However, they are valid for consideration in the fork choice for two epochs, which is up to 64 slots.
+
+|||
+|-|-|
+| Used&nbsp;by | [`validate_on_attestation()`](#validate_on_attestation) |
+| Uses | [`get_current_slot()`](#get_current_slot), [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot) |
+
+##### `validate_on_attestation`
+
+```python
+def validate_on_attestation(store: Store, attestation: Attestation, is_from_block: bool) -> None:
+    target = attestation.data.target
+
+    # If the given attestation is not from a beacon block message, we have to check the target epoch scope.
+    if not is_from_block:
+        validate_target_epoch_against_current_time(store, attestation)
+
+    # Check that the epoch number and slot number are matching
+    assert target.epoch == compute_epoch_at_slot(attestation.data.slot)
+
+    # Attestations target be for a known block. If target block is unknown, delay consideration until the block is found
+    assert target.root in store.blocks
+
+    # Attestations must be for a known block. If block is unknown, delay consideration until the block is found
+    assert attestation.data.beacon_block_root in store.blocks
+    # Attestations must not be for blocks in the future. If not, the attestation should not be considered
+    assert store.blocks[attestation.data.beacon_block_root].slot <= attestation.data.slot
+
+    # LMD vote must be consistent with FFG vote target
+    target_slot = compute_start_slot_at_epoch(target.epoch)
+    assert target.root == get_ancestor(store, attestation.data.beacon_block_root, target_slot)
+
+    # Attestations can only affect the fork choice of subsequent slots.
+    # Delay consideration in the fork choice until their slot is in the past.
+    assert get_current_slot(store) >= attestation.data.slot + 1
+```
+
+This is a utility function for the [`on_attestation()`](#on_attestation) handler that collects together the various validity checks we want to perform on an attestation before we make any changes to the Store. Recall that a failed assertion means that the handler will exit and any changes made to the Store must be rolled back.
+
+###### Attestation timeliness
+
+```none
+    # If the given attestation is not from a beacon block message, we have to check the target epoch scope.
+    if not is_from_block:
+        validate_target_epoch_against_current_time(store, attestation)
+```
+
+First, we check the attestation's timeliness: newly received attestations are considered for the fork choice only if they came from the [current or previous epoch](#validate_target_epoch_against_current_time).
+
+This check [was introduced](https://github.com/ethereum/consensus-specs/pull/1466) to defend against a ["decoy flip-flop attack"](https://ethresear.ch/t/decoy-flip-flop-attack-on-lmd-ghost/6001?u=benjaminion) on LMD GHOST. The attack depends on two competing branches having emerged due to some network failure. An adversary with some fraction of the stake (but less than 33%) can store up votes from earlier epochs and release them at carefully timed moments to switch the winning branch (according to the LMD GHOST fork choice) so that neither branch can gain the necessary 2/3 weight for finalisation. The attack can continue until the adversary runs out of stored votes.
+
+Allowing only attestations from the current and previous epoch to be valid for updates to the Store seems to be an effective defence as it prevents the attacker from storing up attestations from previous epochs. The PR implementing this describes it as "FMD GHOST" (fresh message driven GHOST). However, the fork choice still relies on the latest message ("LMD") from each validator in the Store, no matter how old it is. We seem to have ended up with a kind of hybrid FMD/LMD GHOST in practice[^fn-lmd-fmd-ghost].
+
+[^fn-lmd-fmd-ghost]: FMD vs LMD GHOST is discussed further in the Ethresear.ch article, [Saving strategy and FMD GHOST](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion). [Later work](#alternatives-to-proposer-boost), such as the Goldfish protocol and RLMD GHOST, take vote-expiry further.
+
+As for the `if not is_from_block` test, this allows the processing of old attestations by the `on_attestation` handler if they were received in a block. It seems to have been introduced to help with test generation rather than being anything required in normal operation. Here's a [comment from the PR](https://github.com/ethereum/consensus-specs/pull/2727#pullrequestreview-812756853) that introduced it.
+
+> Also good to move ahead with processing old attestations from blocks for now - that's the only way to make atomic updates to the store work in our current testing setup. If that changes in the future, this logic should go through security analysis (esp. for flip-flop attacks).
+
+Attestations are valid for inclusion in a block only if they are less than 32 slots old. These will be a subset of the "fresh" votes made at the time (the "current plus previous epoch" criterion for freshness could encompass as many as 64 slots).
+
+###### Matching epoch and slot
+
+```none
+    # Check that the epoch number and slot number are matching
+    assert target.epoch == compute_epoch_at_slot(attestation.data.slot)
+```
+
+This check addresses an [edge case](https://github.com/ethereum/consensus-specs/issues/1501) in which validators could fabricate votes for a prior or subsequent epoch. It's probably not a big issue for the fork choice, more for the beacon chain state transition accounting. Nevertheless, the check [was implemented](https://github.com/ethereum/consensus-specs/pull/1509) in both places.
+
+###### No attestations for unknown blocks
+
+```none
+    # Attestations target be for a known block. If target block is unknown, delay consideration until the block is found
+    assert target.root in store.blocks
+    # Attestations must be for a known block. If block is unknown, delay consideration until the block is found
+    assert attestation.data.beacon_block_root in store.blocks
+```
+
+This seems like a natural check - if we don't know about a block (either a target checkpoint or the head block), there's no point processing any votes for it. These conditions [were added](https://github.com/ethereum/consensus-specs/pull/1477) to the spec without further rationale. As noted in the comments, such attestations may become valid in future and should be reconsidered then. When they receive attestations for blocks that they don't yet know about, clients will typically ask their peers to send the block to them directly.
+
+###### No attestations for future blocks
+
+```none
+    # Attestations must not be for blocks in the future. If not, the attestation should not be considered
+    assert store.blocks[attestation.data.beacon_block_root].slot <= attestation.data.slot
+```
+
+This check [was introduced](https://github.com/ethereum/consensus-specs/pull/1477) alongside the above checks for unknown blocks. Allowing votes for blocks that were published later than the attestation's assigned slot [increases the feasibility of the decoy flip-flop attack](https://github.com/ethereum/consensus-specs/issues/1406) by removing the need to have had a period of network asynchrony to set it up.
+
+###### LMD and FFG vote consistency
+
+```none
+    # LMD vote must be consistent with FFG vote target
+    target_slot = compute_start_slot_at_epoch(target.epoch)
+    assert target.root == get_ancestor(store, attestation.data.beacon_block_root, target_slot)
+```
+
+This check ensures that the block in the attestation's head vote descends from the block in its target vote.
+
+The check [was introduced](https://github.com/ethereum/consensus-specs/pull/1742) to fix three issues that had come to light.
+
+1. [Inconsistencies](https://github.com/ethereum/consensus-specs/issues/1408) between the fork choice's validation of attestations and the state transition's validation of attestations. The issue is that, if some attestations are valid with respect to the fork choice but invalid for inclusion in blocks, it is a potential source of differing network views between validators, and could impede fork choice convergence. Validators receive attestations both via attestation gossip and via blocks. Ideally, each of these channels will contain more or less the same information.[^fn-inconsistency-of-attestations-blocks-gossip]
+
+2. [Attestations from incompatible forks](https://github.com/ethereum/consensus-specs/issues/1456). Since committee shufflings are decided only at the [start of the previous epoch](/part2/building_blocks/randomness#lookahead), it can lead to implementation challenges when processing attestations where the target block is from a different fork. After a while, forks end up with different shufflings. Clients often cache shufflings and it can be a source of bugs having to handle these edge cases. This check removes any ambiguity over the state to be used when validating attestations. It also prevents validators exploiting the ability to [influence their own committee assignments](https://github.com/ethereum/consensus-specs/issues/1636) in the event of multiple forks.
+
+3. [Faulty or malicious validators](https://github.com/ethereum/consensus-specs/issues/1636) shouldn't be able to influence fork choice via exploiting this inconsistency. An attestation that fails this test would not have been produced by a correctly operating, honest validator. Therefore it is safest to ignore it.
+
+[^fn-inconsistency-of-attestations-blocks-gossip]: One such inconsistency remains: attestations are [valid in gossip](#validate_target_epoch_against_current_time) for up to two epochs, but for only 32 slots in blocks.
+
+###### Only future slots
+
+```none
+    # Attestations can only affect the fork choice of subsequent slots.
+    # Delay consideration in the fork choice until their slot is in the past.
+    assert get_current_slot(store) >= attestation.data.slot + 1
+```
+
+I guess this is an obvious criterion. It was [added to the spec](https://github.com/ethereum/consensus-specs/pull/1198) without further comment during a refactor to correctly calculate checkpoint states in the presence of skipped slots.
+
+As a point of style, I'd prefer to see the following, but I won't be bike-shedding it.
+
+```none
+    assert get_current_slot(store) > attestation.data.slot
+```
+
+|||
+|-|-|
+| Used&nbsp;by | [`on_attestation()`](#on_attestation) |
+| Uses | [`validate_target_epoch_against_current_time()`](#validate_target_epoch_against_current_time), [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor), [`get_ancestor()`](#get_ancestor) |
+
+##### `store_target_checkpoint_state`
+
+```python
+def store_target_checkpoint_state(store: Store, target: Checkpoint) -> None:
+    # Store target checkpoint state if not yet seen
+    if target not in store.checkpoint_states:
+        base_state = copy(store.block_states[target.root])
+        if base_state.slot < compute_start_slot_at_epoch(target.epoch):
+            process_slots(base_state, compute_start_slot_at_epoch(target.epoch))
+        store.checkpoint_states[target] = base_state
+```
+
+We need checkpoint states both to provide validator balances (used for weighting votes in the fork choice) and for the validator shufflings (used when validating attestations).
+
+<a id="checkpoint_block_epoch"></a>
+
+A [`Checkpoint`](/part3/containers/dependencies#checkpoint) is a reference to the first slot of an epoch and are what the Casper FFG votes in attestations point to. When an attestation targets a checkpoint that has empty slots preceding it, the checkpoint's state will not match the state of the block that it points to. Therefore, we take that block's state (`base_state`) and run the simple [`process_slots()`](/part3/transition#def_process_slots) state transition for empty slots on it to bring the state up to date with the checkpoint.
+
+<a id="img_annotated-forkchoice-processSlots"></a>
+<figure class="diagram" style="width: 70%">
+
+![A diagram showing the state being updated to the checkpoint by process_slots](images/diagrams/annotated-forkchoice-processSlots.svg)
+
+<figcaption>
+
+Consider a checkpoint that points to $[N, B]$, where $N$ is the checkpoint height (epoch number) and $B$ is the block root of the most recent block. The shapes with dotted outlines indicate skipped slots. The `process_slots()` function takes the state $S$ associated with the block and updates it to the slot of the checkpoint by playing empty slots onto it, resulting in state $S'$.
+
+</figcaption>
+</figure>
+
+|||
+|-|-|
+| Used&nbsp;by | [`on_attestation()`](#on_attestation) |
+| Uses | [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`process_slots()`](/part3/transition#def_process_slots),  |
+
+##### `update_latest_messages`
+
+```python
+def update_latest_messages(store: Store, attesting_indices: Sequence[ValidatorIndex], attestation: Attestation) -> None:
+    target = attestation.data.target
+    beacon_block_root = attestation.data.beacon_block_root
+    non_equivocating_attesting_indices = [i for i in attesting_indices if i not in store.equivocating_indices]
+    for i in non_equivocating_attesting_indices:
+        if i not in store.latest_messages or target.epoch > store.latest_messages[i].epoch:
+            store.latest_messages[i] = LatestMessage(epoch=target.epoch, root=beacon_block_root)
+```
+
+A [message](#latestmessage) comprises a timestamp and a block root (head) vote. These are extracted from the containing attestation in the form of the epoch number of the target checkpoint of the attestation, and the LMD GHOST head block vote respectively. By the time we get here, [`validate_on_attestation()`](#validate_on_attestation) has already checked that the slot for which the head vote was made belongs to the epoch corresponding to the target vote. Validators vote exactly once per epoch, so the epoch number is granular enough for tracking their latest votes.
+
+All the validators in `attesting_indices` made this same attestation. The attestation will have travelled the world as a single aggregate attestation, but it has been unpacked in [`on_attestation()`](#on_attestation) before being passed to this function. Validators on our naughty list of [equivocaters](#on_attester_slashing) are filtered out, and any that are left are considered for updates.
+
+If the validator index is not yet in the `store.latest_messages` set then its vote is inserted; if the vote that we have is newer than the vote already stored then it is updated. Each validator has at most one entry in the `latest_messages` set.
+
+|||
+|-|-|
+| Used&nbsp;by | [`on_attestation()`](#on_attestation) |
+| See&nbsp;also | [`Attestation`](/part3/containers/operations#attestation), [`LatestMessage`](#latestmessage) |
+
+### Handlers
+
+The four handlers below &ndash; `on_tick()`, `on_block()`, `on_attestation()`, and `on_attester_slashing()` &ndash; are the fork choice rule's four senses. These are the means by which the fork choice gains its knowledge of the outside world, and the only means by which the Store gets updated.
+
+None of the handlers is explicitly called by any code that appears anywhere in the spec. It is expected that client implementations will call each handler as and when required. As per the introductory material at the top of the fork choice spec, they should be called as follows.
+
+  - `on_tick(store, time)` whenever `time > store.time` where `time` is the current Unix time.
+  - `on_block(store, block)` whenever a block `block` is received.
+  - `on_attestation(store, attestation)` whenever an attestation `attestation` is received.
+  - `on_attester_slashing(store, attester_slashing)` whenever an attester slashing `attester_slashing` is received.
+
+#### `on_tick`
+
+```python
+def on_tick(store: Store, time: uint64) -> None:
+    previous_slot = get_current_slot(store)
+
+    # update store time
+    store.time = time
+
+    current_slot = get_current_slot(store)
+
+    # Reset store.proposer_boost_root if this is a new slot
+    if current_slot > previous_slot:
+        store.proposer_boost_root = Root()
+
+    # Not a new epoch, return
+    if not (current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0):
+        return
+
+    # Update store.justified_checkpoint if a better checkpoint on the store.finalized_checkpoint chain
+    if store.best_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+        ancestor_at_finalized_slot = get_ancestor(store, store.best_justified_checkpoint.root, finalized_slot)
+        if ancestor_at_finalized_slot == store.finalized_checkpoint.root:
+            store.justified_checkpoint = store.best_justified_checkpoint
+```
+
+A "tick" is not defined in the specification. Notionally, ticks are used to continually keep the fork choice's internal clock (`store.time`) updated. In practice, calling `on_tick()` is only really required at the start of a slot, at `SECONDS_PER_SLOT` `/` `INTERVALS_PER_SLOT` into a slot, and [before proposing a block](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#block-proposal). However, `on_tick()` processing is light and it can be convenient to call it more often.
+
+The Teku client calls `on_tick()` regularly [twice per second](https://github.com/ConsenSys/teku/blob/727e734e2d7c31112e1e313ef3cd2c0a004f81b2/services/timer/src/main/java/tech/pegasys/teku/services/timer/TimerService.java#L37) since it is used internally to drive other things beside the fork choice. In addition, Teku uses units of milliseconds rather than seconds for its tick interval, which is strictly speaking off-spec, but is necessary for supporting other chains such as the [Gnosis Beacon Chain](https://docs.gnosischain.com/specs) for which the `SECONDS_PER_SLOT` is not a multiple of `INTERVALS_PER_SLOT`.
+
+The `on_tick()` handler has three duties,
+
+  - updating the time,
+  - resetting proposer boost, and
+  - updating checkpoints on epoch boundaries.
+
+##### Updating the time
+
+```none
+    # update store time
+    store.time = time
+```
+
+The store has a notion of the current time that is used when calculating the [current slot](#get_current_slot) and when applying proposer boost. The time parameter does not need to be very granular. If it weren't for proposer boost, it would be fine to measure time in whole slots, at least within the fork choice[^fn-time-in-slots].
+
+[^fn-time-in-slots]: Changing `time` from seconds to slots in the fork choice was actually [suggested](https://github.com/ethereum/consensus-specs/issues/1502), but never adopted.
+
+I imagine the reason that `time` is provided as a parameter rather than looked up via the machine's clock is that it simplifies testing.
+
+##### Resetting proposer boost
+
+```none
+    # Reset store.proposer_boost_root if this is a new slot
+    if current_slot > previous_slot:
+        store.proposer_boost_root = Root()
+```
+
+[Proposer boost](#proposer-boost) is a defence against balancing attacks on LMD GHOST. It rewards timely blocks with extra weight in the fork choice, making it unlikely that an honest proposer's block will become orphaned.
+
+The Store's `proposer_boost_root` field is set in the [`on_block()`](#on_block) handler when a block is received and processed in a timely manner (within the first four seconds of its slot). For the remainder of the slot this allows extra weight to be added to the block in [`get_latest_attesting_balance()`](#get_latest_attesting_balance).
+
+The logic here resets `proposer_boost_root` to a default value at the start of the next slot, thereby removing the extra proposer boost weight until the next timely block is processed.
+
+##### Updating checkpoints
+
+```none
+    # Not a new epoch, return
+    if not (current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0):
+        return
+
+    # Update store.justified_checkpoint if a better checkpoint on the store.finalized_checkpoint chain
+    if store.best_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+        ancestor_at_finalized_slot = get_ancestor(store, store.best_justified_checkpoint.root, finalized_slot)
+        if ancestor_at_finalized_slot == store.finalized_checkpoint.root:
+            store.justified_checkpoint = store.best_justified_checkpoint
+```
+
+This logic is a mash-up of two fixes, [bouncing attack resistance](https://github.com/ethereum/consensus-specs/pull/1465), and solving a [potential inconsistency](https://github.com/ethereum/consensus-specs/pull/2518) between the Store's justified and finalised checkpoints.
+
+The bouncing attack is [described above](#the-bouncing-attack) in detail. It involves an adversary storing up votes and releasing them later to continually flip the highest justified checkpoint between two branches. The [current defence](#defence-against-the-bouncing-attack) against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) slots of an epoch. During periods when we are not allowed to update the justified checkpoint, logic in the [`on_block()`](#on_block) handler [keeps a record](#update-justified-and-finalised) of our best known justified checkpoint, and any delayed update is applied here at the start of the next epoch.
+
+I won't go into great detail on this as this particular defence against the bouncing attack is due to be [removed soon](https://github.com/ethereum/consensus-specs/pull/3290), and the code simplified accordingly.
+
+|||
+|-|-|
+| Uses | [`get_current_slot()`](#get_current_slot), [`compute_slots_since_epoch_start()`](#compute_slots_since_epoch_start), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor) |
+
+#### `on_block`
+
+```python
+def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
+    block = signed_block.message
+    # Parent block must be known
+    assert block.parent_root in store.block_states
+    # Make a copy of the state to avoid mutability issues
+    pre_state = copy(store.block_states[block.parent_root])
+    # Blocks cannot be in the future. If they are, their consideration must be delayed until they are in the past.
+    assert get_current_slot(store) >= block.slot
+
+    # Check that block is later than the finalized epoch slot (optimization to reduce calls to get_ancestor)
+    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+    assert block.slot > finalized_slot
+    # Check block is a descendant of the finalized block at the checkpoint finalized slot
+    assert get_ancestor(store, block.parent_root, finalized_slot) == store.finalized_checkpoint.root
+
+    # Check the block is valid and compute the post-state
+    state = pre_state.copy()
+    state_transition(state, signed_block, True)
+    # Add new block to the store
+    store.blocks[hash_tree_root(block)] = block
+    # Add new state for this block to the store
+    store.block_states[hash_tree_root(block)] = state
+
+    # Add proposer score boost if the block is timely
+    time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
+    is_before_attesting_interval = time_into_slot < SECONDS_PER_SLOT // INTERVALS_PER_SLOT
+    if get_current_slot(store) == block.slot and is_before_attesting_interval:
+        store.proposer_boost_root = hash_tree_root(block)
+
+    # Update justified checkpoint
+    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
+            store.best_justified_checkpoint = state.current_justified_checkpoint
+        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
+            store.justified_checkpoint = state.current_justified_checkpoint
+
+    # Update finalized checkpoint
+    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
+        store.finalized_checkpoint = state.finalized_checkpoint
+        store.justified_checkpoint = state.current_justified_checkpoint
+```
+
+The `on_block()` handler should be called whenever a new signed beacon block is received. It does the following.
+
+  - Perform some validity checks:
+  - Update the store with the block and its associated beacon state.
+  - Handle proposer boost (block timeliness).
+  - Update the Store's justified and finalised checkpoints if permitted and required.
+
+The `on_block()` handler does not call the `on_attestation()` handler for the attestations it contains, so clients need to do that separately for each attestation.
+
+##### Validity checks
+
+```none
+    # Parent block must be known
+    assert block.parent_root in store.block_states
+    # Make a copy of the state to avoid mutability issues
+    pre_state = copy(store.block_states[block.parent_root])
+    # Blocks cannot be in the future. If they are, their consideration must be delayed until they are in the past.
+    assert get_current_slot(store) >= block.slot
+
+    # Check that block is later than the finalized epoch slot (optimization to reduce calls to get_ancestor)
+    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+    assert block.slot > finalized_slot
+    # Check block is a descendant of the finalized block at the checkpoint finalized slot
+    assert get_ancestor(store, block.parent_root, finalized_slot) == store.finalized_checkpoint.root
+
+    # Check the block is valid and compute the post-state
+    state = pre_state.copy()
+    state_transition(state, signed_block, True)
+```
+
+First we do some fairly self-explanatory checks. In order to be considered in the fork choice, the block must be joined to the block tree that we already have (that is, its parent must be in the Store), it must not be from a future slot according to our Store's clock, and it must be from a branch that descends from our finalised checkpoint. By the definition of finalised, all prior branches from the canonical chain are pruned away.
+
+The final check is to run a full state transition on the block. This has two purposes, (1) it checks that the block is valid with respect to the consensus rules, and (2) it gives us the block's post-state which we need to add to the Store. We got the block's pre-state from its parent, which we know is already in the store. The `True` parameter to [`state_transition()`](/part3/transition#def_state_transition) ensures that the block's signature is checked, and that the result of applying the block to the state results in the same state root that the block claims it does (the "post-states" must match). Clients will be running this operation elsewhere when performing the state transition, so it is likely that the result of the `state_transition()` call will be cached somewhere in an optimal implementation.
+
+##### Update the Store
+
+```none
+    # Add new block to the store
+    store.blocks[hash_tree_root(block)] = block
+    # Add new state for this block to the store
+    store.block_states[hash_tree_root(block)] = state
+```
+
+Once the block has passed the validity checks, it and its post-state can be added to the Store.
+
+##### Handle proposer boost
+
+```none
+    # Add proposer score boost if the block is timely
+    time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
+    is_before_attesting_interval = time_into_slot < SECONDS_PER_SLOT // INTERVALS_PER_SLOT
+    if get_current_slot(store) == block.slot and is_before_attesting_interval:
+        store.proposer_boost_root = hash_tree_root(block)
+```
+
+[Proposer boost](#proposer-boost) is a defence against balancing attacks on LMD GHOST. It rewards timely blocks with extra weight in the fork choice, making it unlikely that an honest proposer's block will become orphaned.
+
+Here, in the `on_block()` handler, is where the block's timeliness is assessed and recorded. If the Store's time (as set by the [`on_tick()`](#on_tick) handler) is within the first third of the slot (`1 /` `INTERVALS_PER_SLOT`, that is, 4 seconds) when the block is processed, then we set `store.proposer_boost_root` to the block's root.
+
+The `store.proposer_boost_root` field can only be set during the first four seconds of a slot, and it is cleared at the start of the next slot by the [`on_tick()`](#on_tick) handler. It is used in the [`get_latest_attesting_balance()`](#get_latest_attesting_balance) function to determine whether to add the extra proposer boost weight or not.
+
+##### Update justified and finalised
+
+```none
+    # Update justified checkpoint
+    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
+            store.best_justified_checkpoint = state.current_justified_checkpoint
+        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
+            store.justified_checkpoint = state.current_justified_checkpoint
+
+    # Update finalized checkpoint
+    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
+        store.finalized_checkpoint = state.finalized_checkpoint
+        store.justified_checkpoint = state.current_justified_checkpoint
+```
+
+When we passed the incoming block through the state transition, the attestations it contains may have led to updates to the justified and finalised checkpoints. Justification and finalisation are "global" properties of our view of the chain, not specific to any one branch, so we need to keep our Store up to date with any changes.
+
+This code contains more complexity than you might expect, in the form of `store.best_justified_checkpoint.epoch` and the call to [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint). The [extra code](https://github.com/ethereum/consensus-specs/pull/1465) is intended to defend against the bouncing attack [described above](#the-bouncing-attack). The [current defence](#defence-against-the-bouncing-attack) against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) (eight) slots of an epoch, which is enforced by [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint). The [`on_tick()`](#on_tick) handler will take care of updating `store.justified_checkpoint` to `store.best_justified_checkpoint` at the start of the next epoch.
+
+Note that this particular defence against the bouncing attack is due to be [removed soon](https://github.com/ethereum/consensus-specs/pull/3290), and the code simplified accordingly.
+
+|||
+|-|-|
+| Uses | [`get_current_slot()`](#get_current_slot), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor), [`state_transition()`](/part3/transition#def_state_transition), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint) |
+| See&nbsp;also | [`INTERVALS_PER_SLOT`](#intervals_per_slot) |
+
+#### `on_attestation`
+
+```python
+def on_attestation(store: Store, attestation: Attestation, is_from_block: bool=False) -> None:
+    """
+    Run ``on_attestation`` upon receiving a new ``attestation`` from either within a block or directly on the wire.
+
+    An ``attestation`` that is asserted as invalid may be valid at a later time,
+    consider scheduling it for later processing in such case.
+    """
+    validate_on_attestation(store, attestation, is_from_block)
+
+    store_target_checkpoint_state(store, attestation.data.target)
+
+    # Get state at the `target` to fully validate attestation
+    target_state = store.checkpoint_states[attestation.data.target]
+    indexed_attestation = get_indexed_attestation(target_state, attestation)
+    assert is_valid_indexed_attestation(target_state, indexed_attestation)
+
+    # Update latest messages for attesting indices
+    update_latest_messages(store, indexed_attestation.attesting_indices, attestation)
+```
+
+Attestations may be useful no matter how we heard about them: they might have been contained in a block, or been received individually via gossip, or via a carrier pigeon[^fn-view-merge-attestations].
+
+[^fn-view-merge-attestations]: This would change were we to adopt [view-merge](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion). Only attestations that had been processed by specifically designated aggregators would be considered in the fork choice.
+
+If the attestation was unpacked from a block then the flag `is_from_block` should be set to `True`. This causes the timeliness check in [`validate_on_attestation()`](#validate_on_attestation) to be skipped: attestations not from blocks must be from the current or previous epoch in order to influence the fork choice. (So, a carrier pigeon would need to be fairly swift.)
+
+The [`validate_on_attestation()`](#validate_on_attestation) function performs a comprehensive set of validity checks on the attestation to defend against various attacks.
+
+Assuming that the attestation passes the checks, we add its target checkpoint state to the Store for later use (we also use it immediately). The [`store_target_checkpoint_state()`](#store_target_checkpoint_state) function is idempotent, so nothing happens if the state is already present.
+
+Having the target checkpoint state, we can use it to look up the correct shuffling for the validators. With the shuffling in hand, calling [`get_indexed_attestation()`](/part3/helper/accessors#def_get_indexed_attestation) turns the [`Attestation`](/part3/containers/operations#attestation) object (containing a bitlist) into an [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) object (containing a list of validator indices).
+
+Finally, we can validate the indexed attestation with [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation), which amounts to checking its aggregate BLS signature against the set of public keys of this indexed validators. Checking the signatures is relatively expensive compared with the other checks, which is one reason for deferring it to last (we also don't want to be checking them against an [inconsistent target](#lmd-and-ffg-vote-consistency)).
+
+If, and only if, everything has succeeded, we call [`update_latest_messages()`](#update_latest_messages) to refresh the Store's list of latest messages for the validators that participated in this vote.
+
+|||
+|-|-|
+| Uses | [`validate_on_attestation()`](#validate_on_attestation), [`store_target_checkpoint_state()`](#store_target_checkpoint_state), [`get_indexed_attestation()`](/part3/helper/accessors#def_get_indexed_attestation), [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation), [`update_latest_messages()`](#update_latest_messages) |
+
+#### `on_attester_slashing`
+
+> _Note_: `on_attester_slashing` should be called while syncing and a client MUST maintain the equivocation set of `AttesterSlashing`s from at least the latest finalized checkpoint.
+
+```python
+def on_attester_slashing(store: Store, attester_slashing: AttesterSlashing) -> None:
+    """
+    Run ``on_attester_slashing`` immediately upon receiving a new ``AttesterSlashing``
+    from either within a block or directly on the wire.
+    """
+    attestation_1 = attester_slashing.attestation_1
+    attestation_2 = attester_slashing.attestation_2
+    assert is_slashable_attestation_data(attestation_1.data, attestation_2.data)
+    state = store.block_states[store.justified_checkpoint.root]
+    assert is_valid_indexed_attestation(state, attestation_1)
+    assert is_valid_indexed_attestation(state, attestation_2)
+
+    indices = set(attestation_1.attesting_indices).intersection(attestation_2.attesting_indices)
+    for index in indices:
+        store.equivocating_indices.add(index)
+```
+
+<a id="equivocation_balancing_attack"></a>
+
+The `on_attester_slashing()` handler was [added](https://github.com/ethereum/consensus-specs/pull/2845) to defend against the [equivocation balancing attack](https://ethresear.ch/t/balancing-attack-lmd-edition/11853) (described more formally in [Two Attacks On Proof-of-Stake GHOST/Ethereum](https://arxiv.org/abs/2203.01315)). The attack relies on the adversary's validators equivocating about their attestations &ndash; that is, publishing multiple different attestations per epoch &ndash; and is not solved by proposer score boosting.
+
+Of course, the equivocating attestations are slashable under the Casper FFG commandments. When the attack finally ends, those validators will be punished and ejected from the validator set. Meanwhile, however, since the fork choice calculations are based on the validator set at the last justified epoch, the adversary's validators could keep the attack going indefinitely.
+
+Rather than add a lot of apparatus within the fork choice to track and detect conflicting attestations, the mechanism relies on third-party slashing claims received via blocks or directly from peers as [attester slashing messages](/part3/containers/operations#attesterslashing). The validity checks are identical to those in the state-transition's [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) method, including the use of [`is_slashable_attestation_data()`](/part3/helper/predicates#is_slashable_attestation_data). This is broader that we need for our purposes here as it will exclude validators that make surround votes as well as validators that equivocate. But excluding all misbehaving validators is probably a good idea.
+
+Any validators proven to have made conflicting attestations are added to the `store.equivocating_indices` set[^fn-python-set-add]. They will no longer be involved in calculating the [weight of branches](#get_latest_attesting_balance), and their future attestations [will be ignored](#update_latest_messages) in the fork choice. We are permitted to clear any equivocating attestation information from before the last finalised checkpoint, but those validators would have been slashed by the state-transition by then, so this ban is permanent.
+
+[^fn-python-set-add]: `store.equivocating_indices` is a Python Set. Adding an existing element again is a no-op, so it cannot grow without bounds.
+
+|||
+|-|-|
+| Uses | [`is_slashable_attestation_data()`](/part3/helper/predicates#def_is_slashable_attestation_data), [`is_valid_indexed_attestation()`](/part3/helper/predicates#def_is_valid_indexed_attestation) |
+| See&nbsp;also | [`AttesterSlashing`](/part3/containers/operations#attesterslashing), [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) |
+
+### Bellatrix Fork Choice <!-- /part3/forkchoice/bellatrix -->
+
+### Introduction
+
+This section covers the additional Bellatrix fork choice document, [version 1.2.0](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md). For a complementary take, see Vitalik's [annotated Bellatrix fork choice](https://github.com/ethereum/annotated-spec/blob/master/merge/fork-choice.md) (based on a slightly older version).
+
+As usual, text with a side bar is quoted directly from the specification.
+
+> This is the modification of the fork choice according to the executable beacon chain proposal.
+>
+> _Note_: It introduces the process of transition from the last PoW block to the first PoS block.
+
+The "executable beacon chain proposal"[^fn-executable-beacon-chain-name] is what became known as The Merge, and is specified by [EIP-3675](https://eips.ethereum.org/EIPS/eip-3675) together with the Bellatrix upgrade on the beacon chain.
+
+[^fn-executable-beacon-chain-name]: This name comes from Mikhail Kalinin's [original article on Ethresear.ch](https://ethresear.ch/t/executable-beacon-chain/8271?u=benjaminion).
+
+Upgrades to Ethereum's protocol are normally planned to take place at pre-determined block heights. For security reasons, the Merge upgrade used a different trigger, namely a [terminal total difficult](/part3/config/configuration#transition-settings) of proof of work mining. The first proof of work block to reach that amount of accumulated difficulty became the last proof of work block: all subsequent execution blocks are now merged into the proof of stake beacon chain as execution payloads.
+
+The only functional change to the fork choice that the Bellatrix upgrade introduced was about ensuring that a valid terminal proof of work block was picked up by the beacon chain at the point of the Merge. As such, this section is largely of only historical interest now.
+
+The remainder of the material in this section (mostly Engine API related) isn't really relevant to the fork choice rule at all. It mainly describes one-way communication of fork choice decisions to the execution layer. Altogether, it's a bit of a weird collection of stuff, for want of a better place to put it I suppose.
+
+### Custom types
+
+| Name | SSZ equivalent | Description |
+| - | - | - |
+| `PayloadId` | `Bytes8` | Identifier of a payload building process |
+
+`PayloadId` is used to keep track of stateful requests from the consensus client to the execution client. Specifically, the consensus client can ask the execution client to start creating a new execution payload via the [`notify_forkchoice_updated()`](#notify_forkchoice_updated) command (which maps to the [`engine_forkchoiceUpdatedV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_forkchoiceupdatedv1) RPC method in the Engine API docs). The execution client will return a `PayloadId` reference and continue to build the payload asynchronously. Later, the consensus client can obtain the payload with a call to the engine API's [`engine_getPayloadV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_getpayloadv1) method by passing it the same `PayloadId`.
+
+### Protocols
+
+#### `ExecutionEngine`
+
+> _Note_: The `notify_forkchoice_updated` function is added to the `ExecutionEngine` protocol to signal the fork choice updates.
+>
+> The body of this function is implementation dependent. The Engine API may be used to implement it with an external execution engine.
+
+Post-Merge, every consensus client (beacon chain client) must be paired up with an execution client (`ExecutionEngine`; formerly, Eth1 client). The execution client has several roles.
+
+1. It validates execution payloads.
+2. It executes execution payloads in order to maintain Ethereum's state (accounts, contracts, balances, receipts, etc.).
+3. It provides data to applications via its RPC API.
+4. It maintains a mempool of transactions from which it builds execution payloads and provides them to the consensus layer for distribution.
+
+The first and the last of these are the ones that interest us on the consensus side. The first role is important because beacon blocks are valid only if they contain valid execution payloads. The last is important because the consensus side does not directly handle ordinary Ethereum transactions and cannot build its own execution payloads.
+
+The interface between the two sides is called the [Engine API](https://github.com/ethereum/execution-apis/tree/main/src/engine). The Engine API is the RPC (remote procedure call) interface that the execution client provides to its companion consensus client. It is one-way in the sense that the consensus client can call methods on the Engine API, but the execution client does not call any methods on the consensus client.
+
+[TODO: link to `EngineAPI` section when written]::
+
+The most interesting methods that the Engine API provides are these three.
+
+  - [`engine_newPayloadV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_newpayloadv1)
+    - When the consensus client receives a new beacon block, it extracts the block's execution payload and uses this method to send it to the execution client. The execution client will validate the payload and execute the transactions it contains. The method's return value indicates whether the payload was valid or not.
+  - [`engine_forkchoiceUpdatedV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_forkchoiceupdatedv1)
+    - The function below, [`notify_forkchoice_updated()`](#notify_forkchoice_updated), uses this method for two purposes. First, it is used routinely to update the execution client with the latest consensus information: head block, safe head block, and finalised block). Second, it can be used to prompt the execution client to begin building an execution payload from its mempool. The consensus client will do this when it is about to propose a beacon block.
+  - [`engine_getPayloadV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_getpayloadv1)
+    - This is used to retrieve an execution payload previously requested via `engine_forkchoiceUpdatedV1`, using a `PayloadId` as a reference.
+
+##### `notify_forkchoice_updated`
+
+> This function performs three actions _atomically_:
+>
+>   - Re-organizes the execution payload chain and corresponding state to make `head_block_hash` the head.
+>   - Updates safe block hash with the value provided by `safe_block_hash` parameter.
+>   - Applies finality to the execution state: it irreversibly persists the chain of all execution payloads and corresponding state, up to and including `finalized_block_hash`.
+>
+> Additionally, if `payload_attributes` is provided, this function sets in motion a payload build process on top of `head_block_hash` and returns an identifier of initiated process.
+
+```python
+def notify_forkchoice_updated(self: ExecutionEngine,
+                              head_block_hash: Hash32,
+                              safe_block_hash: Hash32,
+                              finalized_block_hash: Hash32,
+                              payload_attributes: Optional[PayloadAttributes]) -> Optional[PayloadId]:
+    ...
+```
+
+This is a wrapper around the Engine API's [`engine_forkchoiceUpdatedV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_forkchoiceupdatedv1) RPC method as described above. We use it to keep the execution client up to date with the latest fork choice information, and (optionally) from time to time to request it to build a new execution payload for us.
+
+> _Note_: The `(head_block_hash, finalized_block_hash)` values of the `notify_forkchoice_updated` function call maps on the `POS_FORKCHOICE_UPDATED` event defined in the [EIP-3675](https://eips.ethereum.org/EIPS/eip-3675#definitions). As per EIP-3675, before a post-transition block is finalized, `notify_forkchoice_updated` MUST be called with `finalized_block_hash = Hash32()`.
+
+[EIP-3675](https://eips.ethereum.org/EIPS/eip-3675) is the specification of the Merge on the execution layer side (Eth1 side) of things. The `POS_FORKCHOICE_UPDATED` event described there is triggered by the consensus layer calling the Engine API's `engine_forkchoiceUpdatedV1` method, which is in turn triggered by the consensus client calling `notify_forkchoice_updated()`. The consensus client will do this periodically, in particular whenever a reorg occurs on the beacon chain so that applications built on the execution layer can know which state is current.
+
+Between the Merge and the first finalised epoch after the Merge there was no guarantee of finality on the execution chain, therefore we could not sent it a finalised block hash and had to use the placeholder default value instead.
+
+> _Note_: Client software MUST NOT call this function until the transition conditions are met on the PoW network, i.e. there exists a block for which `is_valid_terminal_pow_block` function returns `True`.
+
+The proof of work chain was not interested in the proof of stake chain's view of the world until after the Merge.
+
+> _Note_: Client software MUST call this function to initiate the payload build process to produce the merge transition block; the `head_block_hash` parameter MUST be set to the hash of a terminal PoW block in this case.
+
+The first beacon chain proposer after the terminal proof of work block had been detected would call `notify_forkchoice_updated()` with the `payload_attributes` parameter in order to request an execution payload to be build for the first merged block.
+
+If there had been multiple candidate terminal PoW blocks (as there were for the Goerli testnet Merge), the beacon block proposer would have been free to choose which of them to ask its execution client to build on.
+
+###### `safe_block_hash`
+
+> The `safe_block_hash` parameter MUST be set to return value of [`get_safe_execution_payload_hash(store: Store)`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/fork_choice/safe-block.md#get_safe_execution_payload_hash) function.
+
+The "safe block" feature is a way for the consensus protocol to signal to the execution layer that a block is very unlikely ever to be reverted. Application developers could use the safe block information to provide better user experience to their users in the form of a pseudo fast-finality. See the later [Safe Block](/part3/safe-block) section for more on this.
+
+### Helpers
+
+#### `PayloadAttributes`
+
+> Used to signal to initiate the payload build process via `notify_forkchoice_updated`.
+
+```python
+@dataclass
+class PayloadAttributes(object):
+    timestamp: uint64
+    prev_randao: Bytes32
+    suggested_fee_recipient: ExecutionAddress
+```
+
+This class maps onto the Engine API's [`PayloadAttributesV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#payloadattributesv1) class and is used when asking the execution client to start building an execution payload.
+
+The `prev_randao` field is the beacon state's current [RANDAO](/part2/building_blocks/randomness) value, having been updated by the RANDAO reveal in the previous beacon block. It is made available to execution layer applications via the EVM's new [`PREVRANDAO`](https://eips.ethereum.org/EIPS/eip-4399) opcode.
+
+`suggested_fee_recipient` is the Ethereum account that any fee income from transaction tips should be sent to when the payload is executed (formerly known as the `COINBASE`). The execution client may override this if it has its own setting for fee recipient, hence "suggested". But allowing it to be set via the Engine API makes it possible for a beacon node hosting multiple validators to use a different fee recipient address for each validator, whereas setting it on the execution side would force them all to use the same fee recipient address.
+
+### `PowBlock`
+
+```python
+class PowBlock(Container):
+    block_hash: Hash32
+    parent_hash: Hash32
+    total_difficulty: uint256
+```
+
+This class is just a succinct way to wrap up the information we need for checking proof of work blocks around the Merge. It is returned by [`get_pow_block()`](#get_pow_block) and consumed by [`is_valid_terminal_pow_block()`](#is_valid_terminal_pow_block).
+
+#### `get_pow_block`
+
+> Let `get_pow_block(block_hash: Hash32) -> Optional[PowBlock]` be the function that given the hash of the PoW block returns its data. It may result in `None` if the requested block is not yet available.
+>
+> _Note_: The `eth_getBlockByHash` JSON-RPC method may be used to pull this information from an execution client.
+
+As noted, `get_pow_block()` is a wrapper around Ethereum's [`eth_getBlockByHash`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbyhash) JSON-RPC method. Given a block hash (not its hash tree root! - Eth1 blocks are encoded with RLP rather than SSZ), it returns the information in the [`PowBlock`](#powblock) structure.
+
+`eth_getBlockByHash` is a standard Eth1 client RPC method rather than a specific Engine API method. For convenience, execution clients often provide access to this method via the Engine API port in addition to the standard RPC API port so that consensus clients can be configured to connect to only one port on the execution client.
+
+#### `is_valid_terminal_pow_block`
+
+> Used by fork-choice handler, `on_block`.
+
+```python
+def is_valid_terminal_pow_block(block: PowBlock, parent: PowBlock) -> bool:
+    is_total_difficulty_reached = block.total_difficulty >= TERMINAL_TOTAL_DIFFICULTY
+    is_parent_total_difficulty_valid = parent.total_difficulty < TERMINAL_TOTAL_DIFFICULTY
+    return is_total_difficulty_reached and is_parent_total_difficulty_valid
+```
+
+Given two [`PowBlock`](#powblock) objects (corresponding to a proof of work block and its parent proof of work block respectively), this function checks whether the block meets the criteria for being the terminal proof of work block. That is, that its total difficulty exceeds the terminal total difficulty and that its parent's total difficulty does not.
+
+#### `validate_merge_block`
+
+```python
+def validate_merge_block(block: BeaconBlock) -> None:
+    """
+    Check the parent PoW block of execution payload is a valid terminal PoW block.
+
+    Note: Unavailable PoW block(s) may later become available,
+    and a client software MAY delay a call to ``validate_merge_block``
+    until the PoW block(s) become available.
+    """
+    if TERMINAL_BLOCK_HASH != Hash32():
+        # If `TERMINAL_BLOCK_HASH` is used as an override, the activation epoch must be reached.
+        assert compute_epoch_at_slot(block.slot) >= TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH
+        assert block.body.execution_payload.parent_hash == TERMINAL_BLOCK_HASH
+        return
+
+    pow_block = get_pow_block(block.body.execution_payload.parent_hash)
+    # Check if `pow_block` is available
+    assert pow_block is not None
+    pow_parent = get_pow_block(pow_block.parent_hash)
+    # Check if `pow_parent` is available
+    assert pow_parent is not None
+    # Check if `pow_block` is a valid terminal PoW block
+    assert is_valid_terminal_pow_block(pow_block, pow_parent)
+```
+
+This is used by the Bellatrix `on_block()` handler. The `block` parameter is a beacon block that claims to be the first merged block. That is, it is the first beacon block (on the current branch) to contain a non-default [`ExecutionPayload`](/part3/containers/execution#executionpayload).
+
+The [`TERMINAL_BLOCK_HASH`](/part3/config/configuration#transition-settings) is a parameter that client operators could have agreed to use to override the terminal total difficulty mechanism if necessary. For example, if the Merge had resulted in beacon chain forks they could have been resolved by manually agreeing an Eth1 Merge block and setting `TERMINAL_BLOCK_HASH` to its value via client command line parameters. In the event, this was not needed and `TERMINAL_BLOCK_HASH` remains at its default value of `Hash32()`.
+
+The remainder of the function checks, (a) that the PoW block that's the parent of the execution payload exists, and has total difficulty greater than the [`TERMINAL_TOTAL_DIFFICULTY`](/part3/config/configuration#transition-settings), and (b) that the parent of that block exists and has a total difficulty less than the `TERMINAL_TOTAL_DIFFICULTY`. (The difficulty checks are performed in [`is_valid_terminal_pow_block()`](#is_valid_terminal_pow_block).)
+
+<a id="img_annotated-forkchoice-the-merge-block"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing the relationship between the merge block and the terminal proof of work block](images/diagrams/annotated-forkchoice-the-merge-block.svg)
+
+<figcaption>
+
+The first beacon chain merged block contains the execution payload whose parent PoW block was the terminal PoW block. The terminal PoW block is the first PoW block to have a total difficulty exceeding the [`TERMINAL_TOTAL_DIFFICULTY`](/part3/config/configuration#transition-settings).
+
+</figcaption>
+</figure>
+
+The parent and grandparent PoW blocks are retrieved via the [`get_pow_block()`](#get_pow_block) function, which in practice involves making RPC calls to the attached Eth1/execution client. If either of these calls fails, an `assert` will be triggered, and the `on_block()` handler will bail out without making any changes.
+
+### Updated fork-choice handlers
+
+#### `on_block`
+
+> _Note_: The only modification is the addition of the verification of transition block conditions.
+
+```python
+def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
+    """
+    Run ``on_block`` upon receiving a new block.
+
+    A block that is asserted as invalid due to unavailable PoW block may be valid at a later time,
+    consider scheduling it for later processing in such case.
+    """
+    block = signed_block.message
+    # Parent block must be known
+    assert block.parent_root in store.block_states
+    # Make a copy of the state to avoid mutability issues
+    pre_state = copy(store.block_states[block.parent_root])
+    # Blocks cannot be in the future. If they are, their consideration must be delayed until they are in the past.
+    assert get_current_slot(store) >= block.slot
+
+    # Check that block is later than the finalized epoch slot (optimization to reduce calls to get_ancestor)
+    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+    assert block.slot > finalized_slot
+    # Check block is a descendant of the finalized block at the checkpoint finalized slot
+    assert get_ancestor(store, block.parent_root, finalized_slot) == store.finalized_checkpoint.root
+
+    # Check the block is valid and compute the post-state
+    state = pre_state.copy()
+    state_transition(state, signed_block, True)
+
+    # [New in Bellatrix]
+    if is_merge_transition_block(pre_state, block.body):
+        validate_merge_block(block)
+
+    # Add new block to the store
+    store.blocks[hash_tree_root(block)] = block
+    # Add new state for this block to the store
+    store.block_states[hash_tree_root(block)] = state
+
+    # Add proposer score boost if the block is timely
+    time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
+    is_before_attesting_interval = time_into_slot < SECONDS_PER_SLOT // INTERVALS_PER_SLOT
+    if get_current_slot(store) == block.slot and is_before_attesting_interval:
+        store.proposer_boost_root = hash_tree_root(block)
+
+    # Update justified checkpoint
+    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
+            store.best_justified_checkpoint = state.current_justified_checkpoint
+        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
+            store.justified_checkpoint = state.current_justified_checkpoint
+
+    # Update finalized checkpoint
+    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
+        store.finalized_checkpoint = state.finalized_checkpoint
+        store.justified_checkpoint = state.current_justified_checkpoint
+```
+
+As noted, the only addition here to the normal [`on_block()`](/part3/forkchoice/phase0#on_block) handler is the lines,
+
+```none
+    # [New in Bellatrix]
+    if is_merge_transition_block(pre_state, block.body):
+        validate_merge_block(block)
+```
+
+The [`is_merge_transition_block()`](/part3/helper/predicates#def_is_merge_transition_block) function will return `True` when the given block is the first beacon block that contains an execution payload, and `False` otherwise.
+
+To ensure consistency between the execution chain and the beacon chain at the Merge, this first merged beacon block requires some extra processing. We must check that the PoW block its execution payload is derived from has indeed met the [criteria for the merge](#is_valid_terminal_pow_block). Essentially, its total difficulty must exceed the terminal total difficulty and its parent's total difficulty must not. If this test fails then something has gone wrong and the beacon block must be excluded from the fork choice.
+
+There might be several candidate execution blocks that meet this criterion in the event of PoW forks at the point of the Merge &ndash; [this occurred](https://twitter.com/vdWijden/status/1557555377314701312?) when merging one of the testnets[^fn-teku-besu-goerli-merge] &ndash; but that's fine. The proposer of the first merged beacon block[^fn-first-merged-beacon-block] that becomes canonical gets to decide which terminal execution block wins.
+
+[^fn-teku-besu-goerli-merge]: And triggered [an issue](https://hackmd.io/@ajsutton/SJJYWezC9) with some client implementations.
+
+[^fn-first-merged-beacon-block]: For the record, the first merged beacon block on mainnet was at [slot 4700013](https://beaconcha.in/slot/4700013).
+
+## Safe Block <!-- /part3/safe-block -->
+
+### Introduction
+
+The [Fork Choice Safe Block spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/fork_choice/safe-block.md) is not really part of the beacon chain's fork choice and is located in a different document in the consensus repo. It is an heuristic for using the fork choice's Store data to identify a block that will not be reverted, under some reasonable assumptions. It could be used, for example, by applications to implement a settlement period for transactions. There is an analogy with the assumption that, under proof of work, in the absence of a 51% attack, a block becomes safe from reorgs after a certain number of blocks (say, fifteen) have been built on top of it.
+
+> Under honest majority and certain network synchronicity assumptions there exist a block that is safe from re-orgs. Normally this block is pretty close to the head of canonical chain which makes it valuable to expose a safe block to users.
+>
+> This section describes an algorithm to find a safe block.
+
+Of course, the ultimate safe block is the last finalised checkpoint. But that could be several minutes in the past, even under ideal network conditions. If we assume (a) that there is an honest majority of validators, and (b) that their messages are received in a timely fashion, then we can in principle identify a more recent block that will not be at risk of reversion.
+
+#### `get_safe_beacon_block_root`
+
+```python
+def get_safe_beacon_block_root(store: Store) -> Root:
+    # Use most recent justified block as a stopgap
+    return store.justified_checkpoint.root
+```
+
+> _Note_: Currently safe block algorithm simply returns `store.justified_checkpoint.root` and is meant to be improved in the future.
+
+Since the protocol handles many attestations per slot, it ought to be possible to use the Store's `latest_messages` table to identify a very recent block as safe. [Some work](https://notes.ethereum.org/@adiasg/safe-head) has been done in this direction, but is incomplete. Meanwhile, the algorithm simply returns the most recently justified checkpoint. This is certainly safe under the assumptions above, but we could probably do better in finding a more recent safe block.
+
+#### `get_safe_execution_payload_hash`
+
+```python
+def get_safe_execution_payload_hash(store: Store) -> Hash32:
+    safe_block_root = get_safe_beacon_block_root(store)
+    safe_block = store.blocks[safe_block_root]
+
+    # Return Hash32() if no payload is yet justified
+    if compute_epoch_at_slot(safe_block.slot) >= BELLATRIX_FORK_EPOCH:
+        return safe_block.body.execution_payload.block_hash
+    else:
+        return Hash32()
+```
+
+> _Note_: This helper uses beacon block container extended in [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md).
+
+Bellatrix was the pre-Merge upgrade that added the execution payload hash to beacon blocks in readiness for the Merge itself. Applications on Ethereum are largely unaware of the beacon chain and will use the execution payload hash rather than the beacon block root as their reference point in the Eth1 blockchain.
+
 # Part 4: Upgrades <!-- /part4 -->
 
 <!-- Protocol upgrades, sometimes called hard forks, are backward-incompatible changes to the specification. This is how Ethereum has historically delivered improvements and extra capabilities to the Eth1 chain, and now to the Eth2 beacon chain. -->
@@ -9524,7 +11204,7 @@ TODO
 
 ### Introduction
 
-Through an open process in February 2021 we decided that beacon chain upgrades would be [named after stars](https://github.com/ethereum/eth2.0-pm/issues/202#issuecomment-775789449). We're taking them in English alphabetical order, with the first being [Altair](https://github.com/ethereum/consensus-specs/issues/2218). The genesis configuration remains Phase&nbsp;0 due to its origin in the now defunct [three-phase plan](https://web.archive.org/web/20220916204934/https://docs.ethhub.io/ethereum-roadmap/ethereum-2.0/eth-2.0-phases/) for delivering Ethereum&nbsp;2.0.
+Through an open process in February 2021 we decided that beacon chain (consensus layer) upgrades would be [named after stars](https://github.com/ethereum/eth2.0-pm/issues/202#issuecomment-775789449). We're taking them in English alphabetical order, with the first being [Altair](https://github.com/ethereum/consensus-specs/issues/2218). The genesis configuration remains Phase&nbsp;0 due to its origin in the now defunct [three-phase plan](https://web.archive.org/web/20220916204934/https://docs.ethhub.io/ethereum-roadmap/ethereum-2.0/eth-2.0-phases/) for delivering Ethereum&nbsp;2.0.
 
 A summary of upgrades to date follows, with more detailed descriptions in the next sections.
 
@@ -9533,7 +11213,7 @@ A summary of upgrades to date follows, with more detailed descriptions in the ne
 | [Phase&nbsp;0](/part4/history/phase0) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) |
 | [Altair](/part4/history/altair)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |
 | [Bellatrix](/part4/history/bellatrix) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) |
-| [Capella](/part4/history/capella)     | TBD    | TBD                 | The next planned upgrade | TBD  |
+| [Capella](/part4/history/capella)     | 194048 | 2023-04-12 22:27:35 | The next planned upgrade | TBD  |
 | [Deneb](/part4/history/deneb)         | TBD    | TBD                 | The next-but-one upgrade | TBD  |
 
 The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention, simultaneously with the execution layer's [Paris upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md).
@@ -9631,9 +11311,9 @@ The full description of the changes between Altair and Bellatrix is in the [Bell
 
 ### Capella <!-- /part4/history/capella -->
 
-Capella is the next planned upgrade to the beacon chain after Bellatrix.
+Capella is the next planned upgrade to the consensus layer after Bellatrix. It is scheduled to take place at 22:27:35 UTC on April the 12th, 2023.
 
-At the time of writing, the only feature to be included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
+The only feature included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
 
 Two withdrawal mechanisms are [planned](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md).
 
