@@ -5,7 +5,7 @@
 export LC_ALL=C.UTF-8
 
 here=$(dirname "$0")
-check=$here/../build/spellcheck.sh
+check=$here/../build/checks/spellcheck.sh
 source=$here/../../src/book.md
 wordlist=$here/../../src/spellings.txt
 
