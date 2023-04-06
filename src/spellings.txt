@@ -8,7 +8,7 @@ Alin
 Anders
 Arvind
 Attenborough
-Attestant's
+Attestant
 AttestationData
 Attester
 AttesterSlashing
@@ -46,7 +46,6 @@ DeFi
 Decentralization
 Devconnect
 Dfinity
-Dfinity's
 DoS
 DomainType
 Drijvers
@@ -54,16 +53,14 @@ ECDLP
 ECDSA
 EIP
 EIPs
-ETC's
+ETC
 ETH
 ETHconomics
 Elowsson
-Elowsson's
 Endianness
 Eth
 EthStaker
 Ethereum
-Ethereum's
 Ethresear
 FFG
 FLP
@@ -87,15 +84,13 @@ IndexedAttestations
 Iteratively
 Iykyk
 JSON
-Jacek's
+Jacek
 Keccak
-Kyne's
+Kyne
 LMD
 Lamport
-Lamport's
 Lifecycle
 Liskov
-Liskov's
 Liveness
 Lookahead
 MEV
@@ -108,7 +103,7 @@ Merkleize
 Merkleized
 Merkleizing
 MiMC
-Monnot's
+Monnot
 Multiprocess
 Mutators
 NFTs
@@ -127,10 +122,9 @@ PegaSys
 Permissionless
 Peta
 Piecharts
-Pintail's
+Pintail
 PoS
 PoW
-Polynya
 Potuz
 Proto
 Protoarray
@@ -140,7 +134,6 @@ Psomas
 Pythonic
 Péter
 RANDAO
-RANDAO's
 REPL
 RLP
 RPC
@@ -151,7 +144,6 @@ Runtime
 SHA
 SSLE
 SSZ
-SSZ's
 STARKs
 Satoshi
 Serialization
@@ -165,7 +157,6 @@ Stakers
 Szilágyi
 TODO
 Teku
-Teku's
 Tendermint
 TiB
 Tomescu
@@ -178,12 +169,10 @@ Validators
 Vasiliy
 Verkle
 Vitalik
-Vitalik's
 WASM
 WB
 ZK
 Zamfir
-Zamfir's
 Zcash
 Ztyp
 activations
@@ -191,7 +180,6 @@ additively
 aggregatable
 al
 attester
-attester's
 attesters
 biasability
 biasable
@@ -229,7 +217,7 @@ dev
 devs
 discretisation
 disincentivise
-else's
+else
 endian
 endianness
 et
@@ -325,7 +313,6 @@ unslashed
 unsuffixed
 uptime
 validator
-validator's
 validators
 verifiability
 verifiably
