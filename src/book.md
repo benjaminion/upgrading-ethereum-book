@@ -10884,7 +10884,7 @@ The "executable beacon chain proposal"[^fn-executable-beacon-chain-name] is what
 
 [^fn-executable-beacon-chain-name]: This name comes from Mikhail Kalinin's [original article on Ethresear.ch](https://ethresear.ch/t/executable-beacon-chain/8271?u=benjaminion).
 
-Upgrades to Ethereum's protocol are normally planned to take place at pre-determined block heights. For security reasons, the Merge upgrade used a different trigger, namely a [terminal total difficult](/part3/config/configuration#transition-settings) of proof of work mining. The first proof of work block to reach that amount of accumulated difficulty became the last proof of work block: all subsequent execution blocks are now merged into the proof of stake beacon chain as execution payloads.
+Upgrades to Ethereum's protocol are normally planned to take place at pre-determined block heights. For security reasons, the Merge upgrade used a different trigger, specifically a [terminal total difficulty](/part3/config/configuration#transition-settings) of proof of work mining. The first proof of work block to reach that amount of accumulated difficulty became the last proof of work block: all subsequent execution blocks are now merged into the proof of stake beacon chain as execution payloads.
 
 The only functional change to the fork choice that the Bellatrix upgrade introduced was about ensuring that a valid terminal proof of work block was picked up by the beacon chain at the point of the Merge. As such, this section is largely of only historical interest now.
 
