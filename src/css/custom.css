@@ -5,8 +5,7 @@
   --max-page-width: 1920px;
 
   /* Dark mode transition */
-  --duration: 0.4s;
-  --timing: ease;
+  --transition: 0.5s ease 0s;
 }
 
 .scrollable {

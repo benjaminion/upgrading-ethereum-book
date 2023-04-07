@@ -10,8 +10,8 @@ nav.sidebar {
   text-align: center;
   background-color: var(--sidebar-background);
   color: var(--sidebar-foreground);
-  transition: color var(--duration) var(--timing),
-              background-color var(--duration) var(--timing);
+  transition: color var(--transition),
+              background-color var(--transition);
 }
 
 #index {

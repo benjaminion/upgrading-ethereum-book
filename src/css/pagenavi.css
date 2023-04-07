@@ -11,7 +11,7 @@
 
 #page-navi a {
   color: var(--pagenavi-link);
-  transition: color var(--duration) var(--timing)
+  transition: color var(--transition);
 }
 
 #page-navi a:hover {
