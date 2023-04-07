@@ -432,11 +432,11 @@ div.title-page svg g#layer101 path {
   #padded-content {
     width: auto;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 5rem 1.5rem;
     min-width: auto;
   }
   footer {
-    padding-bottom: 3rem;
+    padding-bottom: 1rem;
   }
   div.title-page {
     margin: 0;
