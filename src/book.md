@@ -9548,6 +9548,14 @@ Despite all this, we are happily running Ethereum on top of the Gasper protocol 
 
 [^fn-gasper-weaknesses]: Appendix C.1 of the Goldfish, "No More Attacks on Proof-of-Stake Ethereum?" [paper](https://arxiv.org/pdf/2209.03255.pdf) is a useful overview of known weaknesses of Gasper consensus.
 
+#### Scope and terminology
+
+These fork choice specification documents don't cover the whole mechanism. They are largely concerned only with the LMD GHOST fork choice; the Casper FFG side of things (justification and finalisation) is dealt with [in the main state-transition specification](/part3/transition/epoch#justification-and-finalization).
+
+The terms attestation, vote, and message appear frequently. An attestation is a collection of [three votes](/part3/containers/dependencies#attestationdata): a vote for a source checkpoint, a vote for a target checkpoint, and a vote for the a block. The source and target votes are used by Casper FFG, and the head vote is used by LMD GHOST. We will mostly be concerned with head votes in the following sections, except when stated otherwise. LMD GHOST head votes are also called messages, being the "M" in "LMD".
+
+Where we discuss attestations, they can be a single attestation from one validator, or aggregate attestations containing the attestations of multiple validators that made the same set of votes. It will be clear from the context which of these applies.
+
 #### History
 
 [TODO: insert link to history of PoS]::
@@ -9683,8 +9691,6 @@ class LatestMessage(object):
 ```
 
 This is just a convenience class for tracking the most recent head vote from each validator - the "LM" (latest message) in LMD&nbsp;GHOST. [`Epoch`](/part3/config/types#epoch) is a `uint64` type, and [`Root`](/part3/config/types#root) is a `Bytes32` type. The Store holds a mapping of validator indices to their latest messages.
-
-As a side note on terminology, in what follows I will generally distinguish between [attestations](/part3/containers/dependencies#attestationdata) and votes. An attestation is a bundle of three votes: the Casper FFG source and target votes, and the LMD GHOST head vote.
 
 #### `Store`
 
@@ -10062,7 +10068,7 @@ To illustrate the problem, consider the situation shown in the following diagram
 
 We begin with a justified checkpoint $A$ that all nodes agree on.
 
-Due to the network partition, only 49% of validators, plus the adversary's 18%, see checkpoint $B$. They all make Casper FFG votes $[A \rightarrow B]$, thereby justifying $B$. A further checkpoint $C_1$ is produced on this branch, and the 49% that are honest validators dutifully vote $[B \rightarrow C_1]$, but the adversary does not, meaning that $C_1$ is not justified. Validators on this branch see $h_1$ as the head block, and have a highest justified checkpoint of $B$.
+Due to the network partition, only 49% of validators, plus the adversary's 18%, see checkpoint $B$. They all make Casper FFG votes $[A \rightarrow B]$, thereby justifying $B$. A further checkpoint $C_1$ is produced on this branch, and the 49% that are honest validators dutifully make the Casper FFG vote $[B \rightarrow C_1]$, but the adversary does not, meaning that $C_1$ is not justified. Validators on this branch see $h_1$ as the head block, and have a highest justified checkpoint of $B$.
 
 <a id="img_annotated-forkchoice-filter-0"></a>
 <figure class="diagram" style="width: 90%">
@@ -10096,7 +10102,7 @@ Now for the cunning part. The adversary switches its LMD GHOST vote (and implici
 
 Block $h_2$ now has votes from the majority of validators &ndash; 33% plus the adversary's 18% &ndash; so all honest validators should make it their head block.
 
-However, the justified checkpoint on the $h_2$ branch remains at $A$. This means that the 49% of validators who voted $[B \rightarrow C]$ _cannot_ switch their chain head from $h_1$ to $h_2$ without committing a Casper FFG surround vote, and thereby getting slashed. Switching branch would cause their highest justified checkpoint to go backwards. Since they have previously voted $[B \rightarrow C_1]$, they cannot now vote $[A \rightarrow X]$ where $X$ has a height greater than $C_1$, which they must do if they were to switch to the $h_2$ branch.
+However, the justified checkpoint on the $h_2$ branch remains at $A$. This means that the 49% of validators who made Casper FFG vote $[B \rightarrow C]$ _cannot_ switch their chain head from $h_1$ to $h_2$ without committing a Casper FFG surround vote, and thereby getting slashed. Switching branch would cause their highest justified checkpoint to go backwards. Since they have previously voted $[B \rightarrow C_1]$, they cannot now vote $[A \rightarrow X]$ where $X$ has a height greater than $C_1$, which they must do if they were to switch to the $h_2$ branch.
 
 <a id="img_annotated-forkchoice-filter-2"></a>
 <figure class="diagram" style="width: 90%">
@@ -10105,7 +10111,7 @@ However, the justified checkpoint on the $h_2$ branch remains at $A$. This means
 
 <figcaption>
 
-The adversary switches to the second branch, giving $h_2$ the majority LMD GHOST vote. This deadlocks finalisation: the 49% who voted $[B \rightarrow C_1]$ cannot switch to $h_2$ without being slashed.
+The adversary switches to the second branch, giving $h_2$ the majority LMD GHOST vote. This deadlocks finalisation: the 49% who made Casper FFG vote $[B \rightarrow C_1]$ cannot switch to $h_2$ without being slashed.
 
 </figcaption>
 </figure>
@@ -10288,7 +10294,7 @@ The starting point for a bouncing attack. The squares are Casper FFG checkpoints
 </figcaption>
 </figure>
 
-Somehow the network has got into a state with a justified checkpoint on one branch, and a "justifiable" checkpoint on a different branch. Justifiable in this context means that there are not enough votes available from honest validators to justify it, but with the addition of the adversary's votes it would become justified. The adversary may have manoeuvred the network into this state, or it may have arisen by chance. At this point, all validators have cast votes for either $C_1$ or $C_2$, except for the adversary, who is withholding its votes for now. Sixty percent of the vote is not sufficient to justify $C_2$.
+Somehow the network has got into a state with a justified checkpoint on one branch, and a "justifiable" checkpoint on a different branch. Justifiable in this context means that there are not enough Casper FFG votes available from honest validators to justify it, but with the addition of the adversary's votes it would become justified. The adversary may have manoeuvred the network into this state, or it may have arisen by chance. At this point, all validators have cast Casper FFG votes for either $C_1$ or $C_2$, except for the adversary, who is withholding its votes for now. Sixty percent of the Casper FFG vote is not sufficient to justify $C_2$.
 
 <a id="img_annotated-forkchoice-bouncing-1"></a>
 <figure class="diagram" style="width: 90%">
@@ -10302,7 +10308,7 @@ Later, the chain has been extended with checkpoints $D_1$ and $D_2$.
 </figcaption>
 </figure>
 
-Honest validators are voting for $D_1$ as it is descended from the highest justified checkpoint, $B_1$. As soon as the adversary sees that $D_1$ has become justifiable, it publishes its withheld votes for $C_2$, causing that checkpoint to become justified.
+Honest validators are voting for $D_1$ as it is descended from the highest justified checkpoint, $B_1$. As soon as the adversary sees that $D_1$ has become justifiable, it publishes its withheld Casper FFG votes for $C_2$, causing that checkpoint to become justified.
 
 <a id="img_annotated-forkchoice-bouncing-2"></a>
 <figure class="diagram" style="width: 90%">
@@ -10311,7 +10317,7 @@ Honest validators are voting for $D_1$ as it is descended from the highest justi
 
 <figcaption>
 
-As soon as $D_1$ has acquired around 60% of the votes, the adversary publishes its withheld votes for $C_2$, causing it to become justified. This is not slashable (it is not a surround vote).
+As soon as $D_1$ has acquired around 60% of the Casper FFG votes, the adversary publishes its withheld votes for $C_2$, causing it to become justified. This is not slashable (it is not a surround vote).
 
 </figcaption>
 </figure>
@@ -10326,7 +10332,7 @@ Note that the numbers here are arbitrary and only need to be approximately right
 
 As per the function code, the implemented defence against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) slots of an epoch. Equivalently, the Store's justified checkpoint may not switch branch during at least the last two-thirds of an epoch. Updating to a non-conflicting justified checkpoint &ndash; one that is descended from the current justified checkpoint &ndash; is not constrained.
 
-Since `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than one third of an epoch, this protection means that there is at least two-thirds of an epoch during which the adversary cannot get validators to switch branch, which is enough time for honest validators to build up enough votes to justify a new checkpoint on the same branch.
+Since `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than one third of an epoch, this protection means that there is at least two-thirds of an epoch during which the adversary cannot get validators to switch branch, which is enough time for honest validators to build up enough Casper FFG votes to justify a new checkpoint on the same branch.
 
 ##### Deprecation
 
