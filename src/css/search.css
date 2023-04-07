@@ -12,8 +12,8 @@
   border: 1px solid #ccc;
   font-size: 1rem;
   width: 50%;
-  transition: color var(--duration) var(--timing),
-              background-color var(--duration) var(--timing);
+  transition: color var(--transition),
+              background-color var(--transition);
 }
 
 #search-parameters input#search-text:focus {
