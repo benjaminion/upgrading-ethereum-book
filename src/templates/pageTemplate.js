@@ -1,5 +1,6 @@
 import React from "react"
 import { graphql } from "gatsby"
+import cheerio from "cheerio"
 
 import Banner from "../components/banner"
 import Sidebar from "../components/sidebar"
@@ -12,6 +13,15 @@ import Search from "../components/search"
 
 import "katex/dist/katex.min.css"
 import "../css/page.css"
+
+function postProcessHast($) {
+
+  // Remove `align` attributes from <td> and <th> elements - it's obsolete in HTML5
+  $('td').removeAttr('align')
+  $('th').removeAttr('align')
+
+  return $
+}
 
 export function Head({ data }) {
 
@@ -42,6 +52,8 @@ export default function Template({ data }) {
         ? <Search />
         : <Subsections indexArray={indexArray} />
 
+  const htmlPostProcessed = postProcessHast(cheerio.load(html, null, false)).html()
+
   return (
       <React.StrictMode>
         <div id="page">
@@ -51,7 +63,7 @@ export default function Template({ data }) {
             <div id="padded-content">
               <PrevNext seq={frontmatter.sequence} />
               <main
-                dangerouslySetInnerHTML={{ __html: html }}
+                dangerouslySetInnerHTML={{ __html: htmlPostProcessed }}
               />
               {pageExtras}
               <Footer />
