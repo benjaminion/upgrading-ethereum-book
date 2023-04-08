@@ -17,8 +17,11 @@ import "../css/page.css"
 function postProcessHast($) {
 
   // Remove `align` attributes from <td> and <th> elements - it's obsolete in HTML5
-  $('td').removeAttr('align')
-  $('th').removeAttr('align')
+  $('td[align]').removeAttr('align')
+  $('th[align]').removeAttr('align')
+
+  // columnspacing="" on <mtable> is not allowed
+  $('mtable[columnspacing=""]').removeAttr('columnspacing')
 
   return $
 }
