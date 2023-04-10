@@ -1048,6 +1048,11 @@ There are three relevant milestones in a validator's lifecycle: its activation e
 
 ![A timeline of the eligibility of validators for rewards](images/diagrams/incentives-rewards_eligibility.svg)
 
+<figcaption>
+
+Timeline of the eligibility of validators for rewards
+
+</figcaption>
 </figure>
 
 Validators may receive rewards only between their activation and exit epochs. Note that, after submitting a voluntary exit, there may be a delay while the validator moves through the exit queue until its exit epoch is passed. The validator is expected to participate as usual during this period.
