@@ -9944,7 +9944,7 @@ Without proposer boost, it is a losing strategy for the next proposer not to bui
 
 With proposer boost, as long as the late block has fewer votes than the proposer boost percentage, the honest proposer can be confident that its alternative block will win the fork choice for long enough that the next proposer will build on that rather than on the late block it skipped.
 
-<a id="img_annotated-forkchoice-late-block-0"></a>
+<a id="img_annotated_forkchoice_late_block_0"></a>
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
@@ -9958,7 +9958,7 @@ Block $B$ was published late, well after the 4 second attestation cut-off time. 
 </figcaption>
 </figure>
 
-<a id="img_annotated-forkchoice-late-block-1"></a>
+<a id="img_annotated_forkchoice_late_block_1"></a>
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
@@ -9972,7 +9972,7 @@ Without proposer boost, it only makes sense to build $C_1$, on top of the late b
 </figcaption>
 </figure>
 
-<a id="img_annotated-forkchoice-late-block-2"></a>
+<a id="img_annotated_forkchoice_late_block_2"></a>
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
@@ -10075,7 +10075,7 @@ We begin with a justified checkpoint $A$ that all nodes agree on.
 
 Due to the network partition, only 49% of validators, plus the adversary's 18%, see checkpoint $B$. They all make Casper FFG votes $[A \rightarrow B]$, thereby justifying $B$. A further checkpoint $C_1$ is produced on this branch, and the 49% that are honest validators dutifully make the Casper FFG vote $[B \rightarrow C_1]$, but the adversary does not, meaning that $C_1$ is not justified. Validators on this branch see $h_1$ as the head block, and have a highest justified checkpoint of $B$.
 
-<a id="img_annotated-forkchoice-filter-0"></a>
+<a id="img_annotated_forkchoice_filter_0"></a>
 <figure class="diagram" style="width: 90%">
 <div style="width: 70%">
 
@@ -10091,7 +10091,7 @@ The large blocks represent checkpoints. After checkpoint $A$ there is a network 
 
 The remaining 33% of validators do not see checkpoint $B$, but see $C_2$ instead and make Casper FFG votes $[A \rightarrow C_2]$ for it. But this is not enough votes to justify $C_2$. Checkpoint $D_2$ is produced on top of $C_2$, and a further block $h_2$. On this branch, $h_2$ is the head of the chain according to LMD GHOST, and $A$ remains the highest justified checkpoint.
 
-<a id="img_annotated-forkchoice-filter-1"></a>
+<a id="img_annotated_forkchoice_filter_1"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram illustrating the second step in a liveness attack on the unfiltered chain, making the second branch](images/diagrams/annotated-forkchoice-filter-1.svg)
@@ -10109,7 +10109,7 @@ Block $h_2$ now has votes from the majority of validators &ndash; 33% plus the a
 
 However, the justified checkpoint on the $h_2$ branch remains at $A$. This means that the 49% of validators who made Casper FFG vote $[B \rightarrow C]$ _cannot_ switch their chain head from $h_1$ to $h_2$ without committing a Casper FFG surround vote, and thereby getting slashed. Switching branch would cause their highest justified checkpoint to go backwards. Since they have previously voted $[B \rightarrow C_1]$, they cannot now vote $[A \rightarrow X]$ where $X$ has a height greater than $C_1$, which they must do if they were to switch to the $h_2$ branch.
 
-<a id="img_annotated-forkchoice-filter-2"></a>
+<a id="img_annotated_forkchoice_filter_2"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram illustrating the third step in a liveness attack on the unfiltered chain, changing the chain head](images/diagrams/annotated-forkchoice-filter-2.svg)
@@ -10127,7 +10127,7 @@ It should never be possible for the chain to get into a situation in which hones
 
 The chosen fix for all this is to filter the block tree before applying the LMD GHOST fork choice, so as to remove all "unviable" branches from consideration. That is, all branches whose head block's state does not agree with me about the current state of justification and finalisation.
 
-<a id="img_annotated-forkchoice-filter-3"></a>
+<a id="img_annotated_forkchoice_filter_3"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram showing that filter block tree prunes out the conflicting branch for validators following the first branch](images/diagrams/annotated-forkchoice-filter-3.svg)
@@ -10193,7 +10193,7 @@ The fork choice rule is objective in that, given the same Store, it will always 
 
 Looking first at the `while True` loop, this implements LMD GHOST in its purest form. Starting from a given block (which would be the genesis block in unmodified LMD GHOST), we find the weights of the children of that block. We choose the child block with the largest weight and repeat the process until we end up at a leaf block (the tip of a branch). That is, we Greedily take the Heaviest Observed Sub-Tree, GHOST. Any tie between two child blocks with the same weight is broken by comparing their block hashes, so we end up at a unique leaf block - the head that we return.
 
-<a id="img_annotated-forkchoice-lmd-ghost-0"></a>
+<a id="img_annotated_forkchoice_lmd_ghost_0"></a>
 <figure class="diagram" style="width: 85%">
 
 ![Diagram of a block tree showing the weight of each block](images/diagrams/annotated-forkchoice-lmd-ghost-0.svg)
@@ -10205,7 +10205,7 @@ Looking first at the `while True` loop, this implements LMD GHOST in its purest 
 </figcaption>
 </figure>
 
-<a id="img_annotated-forkchoice-lmd-ghost-1"></a>
+<a id="img_annotated_forkchoice_lmd_ghost_1"></a>
 <figure class="diagram" style="width: 85%">
 
 ![Diagram of a block tree showing the weight of each block and the weight of each subtree](images/diagrams/annotated-forkchoice-lmd-ghost-1.svg)
@@ -10217,7 +10217,7 @@ The `get_latest_attesting_balance()` function when applied to a block returns th
 </figcaption>
 </figure>
 
-<a id="img_annotated-forkchoice-lmd-ghost-2"></a>
+<a id="img_annotated_forkchoice_lmd_ghost_2"></a>
 <figure class="diagram" style="width: 85%">
 
 ![Diagram of a block tree showing the branch chosen by the GHOST rule](images/diagrams/annotated-forkchoice-lmd-ghost-2.svg)
@@ -10287,7 +10287,7 @@ The essence of the bouncing attack is that we can create scenarios in which an a
 
 To unpack the example in the [original Ethresear.ch post](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion), consider an adversary that controls 10% of the total stake. Recall that a checkpoint is a [block&ndash;epoch pair](#checkpoint_block_epoch), so it is possible to have conflicting checkpoints at the same height.
 
-<a id="img_annotated-forkchoice-bouncing-0"></a>
+<a id="img_annotated_forkchoice_bouncing_0"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram showing the set up of the bouncing attack, with a justified checkpoint on one branch, and a justifiable checkpoint on the other.](images/diagrams/annotated-forkchoice-bouncing-0.svg)
@@ -10301,7 +10301,7 @@ The starting point for a bouncing attack. The squares are Casper FFG checkpoints
 
 Somehow the network has got into a state with a justified checkpoint on one branch, and a "justifiable" checkpoint on a different branch. Justifiable in this context means that there are not enough Casper FFG votes available from honest validators to justify it, but with the addition of the adversary's votes it would become justified. The adversary may have manoeuvred the network into this state, or it may have arisen by chance. At this point, all validators have cast Casper FFG votes for either $C_1$ or $C_2$, except for the adversary, who is withholding its votes for now. Sixty percent of the Casper FFG vote is not sufficient to justify $C_2$.
 
-<a id="img_annotated-forkchoice-bouncing-1"></a>
+<a id="img_annotated_forkchoice_bouncing_1"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram showing the bouncing attack in progress, before the adversary justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-1.svg)
@@ -10315,7 +10315,7 @@ Later, the chain has been extended with checkpoints $D_1$ and $D_2$.
 
 Honest validators are voting for $D_1$ as it is descended from the highest justified checkpoint, $B_1$. As soon as the adversary sees that $D_1$ has become justifiable, it publishes its withheld Casper FFG votes for $C_2$, causing that checkpoint to become justified.
 
-<a id="img_annotated-forkchoice-bouncing-2"></a>
+<a id="img_annotated_forkchoice_bouncing_2"></a>
 <figure class="diagram" style="width: 90%">
 
 ![A diagram showing the bouncing attack after the adversary has belatedly justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-2.svg)
