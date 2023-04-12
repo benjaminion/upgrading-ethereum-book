@@ -2,7 +2,7 @@
 
 # Attempt to make a PDF of the whole text, using pandoc.
 #
-# All being well, the generated PDF will appear as src/book.pdf
+# All being well, the generated PDF will appear as book.pdf in your current directory.
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 filename.md"

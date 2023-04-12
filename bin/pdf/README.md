@@ -20,10 +20,10 @@ sudo apt install librsvg2-bin texlive-xetex
 
 ## Building the PDF
 
-Run the script at _bin/pdf/make\_pdf.sh_. It may or may not work, and the results may or may not delight.
+Run the script at _bin/pdf/make\_pdf_. It may or may not work, and the results may or may not delight.
 
 ```
-bin/pdf/make_pdf.sh src/book.md
+bin/pdf/make_pdf src/book.md
 ```
 
 The generated PDF will be written to your current directory as _book.pdf_.
