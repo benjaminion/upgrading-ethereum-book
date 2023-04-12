@@ -338,7 +338,7 @@ However, sometimes the new block might be a descendent of some other block in th
 
 In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the new head's branch.
 
-In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
+In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
@@ -10929,7 +10929,7 @@ The most interesting methods that the Engine API provides are these three.
   - [`engine_newPayloadV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_newpayloadv1)
     - When the consensus client receives a new beacon block, it extracts the block's execution payload and uses this method to send it to the execution client. The execution client will validate the payload and execute the transactions it contains. The method's return value indicates whether the payload was valid or not.
   - [`engine_forkchoiceUpdatedV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_forkchoiceupdatedv1)
-    - The function below, [`notify_forkchoice_updated()`](#notify_forkchoice_updated), uses this method for two purposes. First, it is used routinely to update the execution client with the latest consensus information: head block, safe head block, and finalised block). Second, it can be used to prompt the execution client to begin building an execution payload from its mempool. The consensus client will do this when it is about to propose a beacon block.
+    - The function below, [`notify_forkchoice_updated()`](#notify_forkchoice_updated), uses this method for two purposes. First, it is used routinely to update the execution client with the latest consensus information: head block, safe head block, and finalised block. Second, it can be used to prompt the execution client to begin building an execution payload from its mempool. The consensus client will do this when it is about to propose a beacon block.
   - [`engine_getPayloadV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_getpayloadv1)
     - This is used to retrieve an execution payload previously requested via `engine_forkchoiceUpdatedV1`, using a `PayloadId` as a reference.
 
