@@ -126,6 +126,10 @@ Pre-requisites:
   - _svg-text-to-path.js_ needs to be [downloaded](https://raw.githubusercontent.com/paulzi/svg-text-to-path/master/dist/svg-text-to-path.js), also to the _charts_ directory.
   - The _Gaegu-Light.ttf_ file needs to be extracted from the [Gaegu](https://fonts.google.com/specimen/Gaegu) Google font and put in the _charts/font_ directory.
 
+## Whole book PDF
+
+There's an experimental pipeline for typesetting the whole text as a PDF book in _bin/pdf/_. See the [README](bin/pdf/README.md) there for instructions.
+
 ## Coffee
 
 Kind souls sometimes ask for a way to send me a cup of coffee or make a donation. My account info is below - donations are absolutely not expected or necessary, but are always very encouraging and gratefully received.

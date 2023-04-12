@@ -347,7 +347,7 @@ In the following diagram, the node has evaluated block $F$ to be the head block,
 
 <figcaption>
 
-At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \larr B \larr D \larr E \larr F]$.
+At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \leftarrow B \leftarrow D \leftarrow E \leftarrow F]$.
 
 </figcaption>
 </figure>
@@ -365,7 +365,7 @@ After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and pro
 
 <figcaption>
 
-Now the node believes that block $G$ is the best head, and therefore its chain must change to the blocks $[A \larr B \larr C \larr G]$.
+Now the node believes that block $G$ is the best head, and therefore its chain must change to the blocks $[A \leftarrow B \leftarrow C \leftarrow G]$.
 
 </figcaption>
 </figure>
@@ -2581,10 +2581,10 @@ In the absence of any manipulation, my probability of having a tail of length ex
 
 $$
 q_k =
-\begin{dcases}
+\begin{cases}
 (1-r)r^k & 0 \leq k < 32 \\
 r^k      & k = 32
-\end{dcases}
+\end{cases}
 $$
 
 So the expected tail length for someone controlling a proportion $r$ of the stake is,
@@ -2773,10 +2773,10 @@ The second term is the probability, $r$, that I _did_ have the last slot in the 
 
 $$
 p_j =
-\begin{dcases}
+\begin{cases}
 \sum_{i=0}^{j} q_i (q_j + q_{j+1}) & 0 \leq j < 32 \\
 \sum_{i=0}^{j} q_i q_j            & j = 32
-\end{dcases}
+\end{cases}
 $$
 
 As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. To achieve a net number of exactly $j$ proposals we are looking for the combinations where either of the following holds.
@@ -10224,7 +10224,7 @@ The `get_latest_attesting_balance()` function when applied to a block returns th
 
 <figcaption>
 
-Given a block, the loop in `get_head()` considers its children and selects the one that roots the subtree with the highest weight. It repeats the process with the heaviest child block[^fn-get-head-recursive] until it reaches a block with no children. In this example, it would select the branch $A \larr C \larr E$, returning $E$ as the head block.
+Given a block, the loop in `get_head()` considers its children and selects the one that roots the subtree with the highest weight. It repeats the process with the heaviest child block[^fn-get-head-recursive] until it reaches a block with no children. In this example, it would select the branch $A \leftarrow C \leftarrow E$, returning $E$ as the head block.
 
 </figcaption>
 </figure>
