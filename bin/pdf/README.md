@@ -1,6 +1,6 @@
 # Whole book PDF
 
-This is an experimental pipeline for building the whole text as a single PDF file using `pandoc`. You don't need any of the usual installation do this (no gatsby, node, npm, etc.).
+This is an experimental pipeline for building the whole text as a single PDF file using `pandoc`. You don't need any of the usual installation to do this (no gatsby, node, npm, etc.).
 
 ## Pre-requisites
 
