@@ -346,7 +346,7 @@ However, sometimes the new block might be a descendent of some other block in th
 
 In any case, running the fork choice rule on the updated block tree might indicate a head block that is on a different branch from the previous head block. When this happens, the node must perform a reorg (short for reorganisation), also known as a reversion. It will kick out (revert) blocks that it had previously included in its chain, and will adopt the blocks on the new head's branch.
 
-In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A,$ $B,$ $D,$ $E,$ and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
+In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
 <a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
@@ -355,7 +355,7 @@ In the following diagram, the node has evaluated block $F$ to be the head block,
 
 <figcaption>
 
-At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \larr B \larr D \larr E \larr F]$.
+At this point, the node believes that block $F$ is the best head, and therefore its chain is blocks $[A \leftarrow B \leftarrow D \leftarrow E \leftarrow F]$.
 
 </figcaption>
 </figure>
@@ -373,7 +373,7 @@ After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and pro
 
 <figcaption>
 
-Now the node believes that block $G$ is the best head, and therefore its chain must change to blocks $[A \larr B \larr C \larr G]$.
+Now the node believes that block $G$ is the best head, and therefore its chain must change to the blocks $[A \leftarrow B \leftarrow C \leftarrow G]$.
 
 </figcaption>
 </figure>
@@ -2508,10 +2508,10 @@ In the absence of any manipulation, my probability of having a tail of length ex
 
 $$
 q_k =
-\begin{dcases}
+\begin{cases}
 (1-r)r^k & 0 \leq k < 32 \\
 r^k      & k = 32
-\end{dcases}
+\end{cases}
 $$
 
 So the expected tail length for someone controlling a proportion $r$ of the stake is,
@@ -2700,10 +2700,10 @@ The second term is the probability, $r$, that I _did_ have the last slot in the 
 
 $$
 p_j =
-\begin{dcases}
+\begin{cases}
 \sum_{i=0}^{j} q_i (q_j + q_{j+1}) & 0 \leq j < 32 \\
 \sum_{i=0}^{j} q_i q_j            & j = 32
-\end{dcases}
+\end{cases}
 $$
 
 As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. To achieve a net number of exactly $j$ proposals we are looking for the combinations where either of the following holds.

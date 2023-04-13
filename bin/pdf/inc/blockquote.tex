@@ -1,0 +1,23 @@
+%
+% Add a sidebar to quoted text
+%
+
+\usepackage{framed}
+
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{3pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{12pt} % Text indent
+\setlength\OuterFrameSep{2ex}
+
+\newcommand*{\leftbarcolorcmd}{\color{leftbarcolor}}%
+\colorlet{leftbarcolor}{lightgray}
+
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\leftbarcolorcmd{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{%
+    \endMakeFramed
+}
+
+\renewenvironment{quote}{\begin{leftbar}}{\end{leftbar}}

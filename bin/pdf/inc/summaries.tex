@@ -1,0 +1,17 @@
+%
+% Environment for chapter summary boxes
+%
+% mdframed docs are here:
+%   https://mirror.apps.cam.ac.uk/pub/tex-archive/macros/latex/contrib/mdframed/mdframed.pdf
+
+\usepackage[framemethod=tikz]{mdframed}
+
+\mdfdefinestyle{summarybox}{%
+leftmargin=1.27cm,rightmargin=1.27cm,
+innertopmargin=4ex,innerbottommargin=4ex,innerleftmargin=1ex,innerrightmargin=2em,
+linecolor=white,linewidth=1.3pt,
+outerlinecolor=black,outerlinewidth=0.5pt,
+innerlinecolor=black,innerlinewidth=0.5pt
+}
+
+\newenvironment{summarybox}{\vspace{5ex}\begin{mdframed}[style=summarybox]}{\end{mdframed}\vspace{3ex}}
