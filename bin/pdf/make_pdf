@@ -25,7 +25,7 @@ pandoc \
     $name.md \
     --output $outdir/$name.pdf \
     --from markdown \
-    --metadata title-meta:'Upgrading Ethereum - Bellatrix Edition' \
+    --metadata title-meta:'Upgrading Ethereum - Capella Edition' \
     --metadata author-meta:'Ben Edgington' \
     --metadata lang:en-GB \
     --lua-filter $path/filters/pagebreaks.lua \
