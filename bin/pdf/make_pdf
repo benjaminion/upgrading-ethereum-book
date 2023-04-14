@@ -16,6 +16,9 @@ path=$(cd -- $(dirname "$0") && pwd)
 
 echo "Converting $srcdir/$name.md to ./$name.pdf"
 
+# Git commit hash - used on the title page
+export UE_GIT_COMMIT=$(git log -1 --format="%h" 2>/dev/null)
+
 # For finding the logging script
 export LUA_PATH="$path/filters/?.lua;;"
 
@@ -40,6 +43,7 @@ pandoc \
     --variable geometry:margin=2.54cm \
     --variable block-headings \
     --include-before-body $path/inc/title-page.tex \
+    --include-in-header $path/inc/environment.tex \
     --include-in-header $path/inc/blockquote.tex \
     --include-in-header $path/inc/summaries.tex \
     --include-in-header $path/inc/underscore.tex \
