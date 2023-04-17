@@ -117,7 +117,7 @@ while(<$fh>) {
                 print "Link to localhost, line $."
             } elsif ($link =~ /^http:/) {
                 print "HTTP link, line $.";
-            } elsif (not $link =~ /^https:\/\//) {
+            } elsif (not $link =~ /^https:\/\// and not $link =~ /\.\.\//) {
                 print "Suspicious link, line $.: $link";
             }
         }
