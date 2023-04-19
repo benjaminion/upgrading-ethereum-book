@@ -4,7 +4,7 @@ import "../css/banner.css"
 
 const Banner = ({path}) => {
 
-  const addBanner = false
+  const addBanner = true
 
   if (addBanner) {
 
