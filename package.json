@@ -24,7 +24,7 @@
     "gatsby": "^5.9.0",
     "gatsby-plugin-catch-links": "^5.9.0",
     "gatsby-plugin-htaccess": "^1.4.0",
-    "gatsby-plugin-matomo": "^0.15.1",
+    "gatsby-plugin-matomo": "^0.15.2",
     "gatsby-remark-autolink-headers": "^6.9.0",
     "gatsby-remark-external-links": "^0.0.4",
     "gatsby-remark-katex": "^7.9.0",
@@ -37,7 +37,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^3.0.2",
-    "webpack": "^5.80.0"
+    "webpack": "^5.81.0"
   },
   "overrides": {
     "babel-plugin-lodash": {
