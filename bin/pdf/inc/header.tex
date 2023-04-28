@@ -1,0 +1,85 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get environment variables
+%
+% Based on https://tex.stackexchange.com/a/62032
+
+\usepackage{xparse}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand{\getenv}{om}
+ {
+  \sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } { } \l_tmpa_tl
+  \tl_trim_spaces:N \l_tmpa_tl
+  \IfNoValueTF { #1 }
+   {
+    \tl_use:N \l_tmpa_tl
+   }
+   {
+    \tl_set_eq:NN #1 \l_tmpa_tl
+   }
+ }
+
+\ExplSyntaxOff
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Environment for chapter summary boxes
+%
+% mdframed docs are here:
+%   https://mirror.apps.cam.ac.uk/pub/tex-archive/macros/latex/contrib/mdframed/mdframed.pdf
+
+\usepackage[framemethod=tikz]{mdframed}
+
+\mdfdefinestyle{summarybox}{%
+leftmargin=1.27cm,rightmargin=1.27cm,
+innertopmargin=4ex,innerbottommargin=4ex,innerleftmargin=1ex,innerrightmargin=2em,
+linecolor=white,linewidth=1.3pt,
+outerlinecolor=black,outerlinewidth=0.5pt,
+innerlinecolor=black,innerlinewidth=0.5pt
+}
+
+\newenvironment{summarybox}{\vspace{5ex}\begin{mdframed}[style=summarybox]}{\end{mdframed}\vspace{3ex}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add a sidebar to quoted text
+
+\usepackage{framed}
+
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{3pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{12pt} % Text indent
+\setlength\OuterFrameSep{0ex}
+
+\newcommand*{\leftbarcolorcmd}{\color{leftbarcolor}}%
+\colorlet{leftbarcolor}{lightgray}
+
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\leftbarcolorcmd{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{%
+    \endMakeFramed
+}
+
+\renewenvironment{quote}{\vspace{0.5\baselineskip}\begin{leftbar}}{\end{leftbar}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% We don't like Pandoc's \tightlist in itemize environments
+
+\def\tightlist{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fiddle with footnote presentation
+
+\usepackage[hang,flushmargin]{footmisc}
+    \footnotemargin 0em
+    \renewcommand{\hangfootparindent}{0em}
+    \setlength{\footnotesep}{12pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Allow long constant names to wrap at underscore characters
+%
+% Documentation at
+%   https://anorien.csc.warwick.ac.uk/mirrors/CTAN/macros/latex/contrib/underscore/underscore.pdf
+
+\usepackage[strings,nohyphen]{underscore}
