@@ -36,6 +36,7 @@ pandoc \
     --lua-filter $path/filters/figures.lua \
     --lua-filter $path/filters/summaries.lua \
     --lua-filter $path/filters/codeblocks.lua \
+    --lua-filter $path/filters/linebreaks.lua \
     --variable documentclass:book \
     --variable classoption:oneside \
     --variable linkcolor:violet \
@@ -43,11 +44,7 @@ pandoc \
     --variable geometry:margin=2.54cm \
     --variable block-headings \
     --include-before-body $path/inc/title-page.tex \
-    --include-in-header $path/inc/environment.tex \
-    --include-in-header $path/inc/blockquote.tex \
-    --include-in-header $path/inc/summaries.tex \
-    --include-in-header $path/inc/underscore.tex \
-    --include-in-header $path/inc/notightlist.tex \
+    --include-in-header $path/inc/header.tex \
     --toc \
     --toc-depth=3 \
     --pdf-engine=xelatex
