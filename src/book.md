@@ -636,9 +636,13 @@ $$
 
 We would like to keep $\omega$ small to allow the broadest possible participation by validators, including those on slower networks. And we would like $f$ to be as short as possible since a shorter time to finality is much more useful than a longer time[^fn-finality-utility]. Taken together, these requirements imply a cap on $n$, the total number of validators.
 
+<!-- markdownlint-disable code-block-style -->
 [^fn-finality-utility]: In an [unfinished paper](https://github.com/ethereum/research/blob/master/papers/casper-economics/casper_economics_basic.pdf) Vitalik attempts to quantify the "protocol utility" for different times to finality.
+
     > ...a blockchain with some finality time $f$ has utility roughly $-\log(f)$, or in other words increasing the finality time of a blockchain by a constant factor causes a constant loss of utility. The utility difference between 1 minute and 2 minute finality is the same as the utility difference between 1 hour and 2 hour finality.
+
     He goes on to make a justification for this (p.10).
+<!-- markdownlint-enable code-block-style -->
 
 This is a classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
@@ -1134,7 +1138,9 @@ It is plausible that setting the inclusion distance for correct source to 5 give
 </figcaption>
 </figure>
 
+<!-- markdownlint-disable code-block-style -->
 [^fn-five-slots]: This is taken from a [conversation](https://discord.com/channels/595666850260713488/595701173944713277/871340571107655700) on the Ethereum R&D Discord server:
+
     > vbuterin:<br/>
     > The rationale for the number 5 is just that 5 is geometrically halfway in between 1 and 32<br/>
     > And so we get the closest that makes sense to a smooth curve in terms of rewarding earlier inclusion<br/>
@@ -1142,6 +1148,7 @@ It is plausible that setting the inclusion distance for correct source to 5 give
     > ah I mean on an exponential curve, not quadratic<br/>
     > To me exponential feels more logical<br/>
     > What's a bigger improvement in quality, 4 slot delay vs 6 slot delay, or 20 slot delay vs 23 slot delay?
+<!-- markdownlint-enable code-block-style -->
 
 ##### Remarks
 
