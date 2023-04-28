@@ -35,7 +35,6 @@ pandoc \
     --lua-filter $path/filters/links.lua \
     --lua-filter $path/filters/figures.lua \
     --lua-filter $path/filters/summaries.lua \
-    --lua-filter $path/filters/codeblocks.lua \
     --lua-filter $path/filters/linebreaks.lua \
     --variable documentclass:book \
     --variable classoption:oneside \
@@ -47,4 +46,5 @@ pandoc \
     --include-in-header $path/inc/header.tex \
     --toc \
     --toc-depth=3 \
+    --no-highlight \
     --pdf-engine=xelatex

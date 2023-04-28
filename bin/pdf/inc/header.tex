@@ -31,11 +31,12 @@
 \usepackage[framemethod=tikz]{mdframed}
 
 \mdfdefinestyle{summarybox}{%
-leftmargin=1.27cm,rightmargin=1.27cm,
-innertopmargin=4ex,innerbottommargin=4ex,innerleftmargin=1ex,innerrightmargin=2em,
-linecolor=white,linewidth=1.3pt,
-outerlinecolor=black,outerlinewidth=0.5pt,
-innerlinecolor=black,innerlinewidth=0.5pt
+  leftmargin=1.27cm,rightmargin=1.27cm,
+  innertopmargin=4ex,innerbottommargin=4ex,
+  innerleftmargin=1ex,innerrightmargin=2em,
+  linecolor=white,linewidth=1.3pt,
+  outerlinecolor=black,outerlinewidth=0.5pt,
+  innerlinecolor=black,innerlinewidth=0.5pt
 }
 
 \newenvironment{summarybox}{\vspace{5ex}\begin{mdframed}[style=summarybox]}{\end{mdframed}\vspace{3ex}}
@@ -55,10 +56,10 @@ innerlinecolor=black,innerlinewidth=0.5pt
 \colorlet{leftbarcolor}{lightgray}
 
 \renewenvironment{leftbar}{%
-    \def\FrameCommand{{\leftbarcolorcmd{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
-    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+  \def\FrameCommand{{\leftbarcolorcmd{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+  \MakeFramed {\advance \hsize -\width \FrameRestore }%
 }{%
-    \endMakeFramed
+  \endMakeFramed
 }
 
 \renewenvironment{quote}{\vspace{0.5\baselineskip}\begin{leftbar}}{\end{leftbar}}
@@ -72,9 +73,9 @@ innerlinecolor=black,innerlinewidth=0.5pt
 % Fiddle with footnote presentation
 
 \usepackage[hang,flushmargin]{footmisc}
-    \footnotemargin 0em
-    \renewcommand{\hangfootparindent}{0em}
-    \setlength{\footnotesep}{12pt}
+\footnotemargin 0em
+\renewcommand{\hangfootparindent}{0em}
+\setlength{\footnotesep}{12pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allow long constant names to wrap at underscore characters
@@ -83,3 +84,56 @@ innerlinecolor=black,innerlinewidth=0.5pt
 %   https://anorien.csc.warwick.ac.uk/mirrors/CTAN/macros/latex/contrib/underscore/underscore.pdf
 
 \usepackage[strings,nohyphen]{underscore}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Formatting for code blocks
+%
+% See https://www.overleaf.com/learn/latex/Code_listing
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+
+\makeatletter
+\@ifpackageloaded{listings}{
+
+  % If the `--listings` param has been set on pandoc
+
+  \lstdefinestyle{mystyle}{
+    basicstyle=\ttfamily\footnotesize,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},  breaklines=true,
+    breakatwhitespace=true,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    breakindent=12em,
+    % prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    postbreak=\mbox{\ensuremath{\hookrightarrow}},
+  }
+
+  \lstset{style=mystyle}
+}{
+
+   % If the `--listings` param has not been set on pandoc
+
+  \let\origShade=\Shade
+  \def\Shade{\origShade\footnotesize}
+}
+\makeatother
+
+% The first wraps code fairly nicely in clodeblocks, but messes up wrapping of constants at underscores in inline code, and gets involved in wrapping inline code generally. The latter does not wrap code in codeblocks.
+
+% Shade does this for inline code:
+%    \texttt{INACTIVITY\_PENALTY\_QUOTIENT}
+% Listings does this:
+%    \passthrough{\lstinline!INACTIVITY\_PENALTY\_QUOTIENT!}
+
+% Blocks are:
+% \begin{lstlisting}[language=Python]
+
+% Idea: turn off Shaded, and use a Lua filter to insert the above.
+% --no-highlight inserts `\begin{verbatim}`
