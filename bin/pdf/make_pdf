@@ -36,6 +36,7 @@ pandoc \
     --lua-filter $path/filters/figures.lua \
     --lua-filter $path/filters/summaries.lua \
     --lua-filter $path/filters/linebreaks.lua \
+    --lua-filter $path/filters/codeblocks.lua \
     --variable documentclass:book \
     --variable classoption:oneside \
     --variable linkcolor:violet \
