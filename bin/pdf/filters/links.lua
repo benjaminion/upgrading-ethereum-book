@@ -8,8 +8,8 @@ local logging = require 'logging'
 --
 -- For best results run this one after the Pagebreaks filter.
 
-links, targets = {}, {}
-skip = { ["contents"] = true, ["annotated-spec"] = true }
+local links, targets = {}, {}
+local skip = { ["contents"] = true, ["annotated-spec"] = true }
 
 -- Check that there are no duplicate targets
 local function check_target(id)

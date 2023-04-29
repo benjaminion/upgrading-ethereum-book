@@ -90,21 +90,20 @@
 %
 % See https://www.overleaf.com/learn/latex/Code_listing
 
+% We don't use Pandoc's `--listings` flag as it also mutates inline code.
+\usepackage{listings}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 
-\makeatletter
-\@ifpackageloaded{listings}{
-
-  % If the `--listings` param has been set on pandoc
-
-  \lstdefinestyle{mystyle}{
+\lstdefinestyle{mystyle}{
     basicstyle=\ttfamily\footnotesize,
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},  breaklines=true,
+    stringstyle=\color{codepurple},
+    breaklines=true,
     breakatwhitespace=true,
     keepspaces=true,
     showspaces=false,
@@ -112,28 +111,7 @@
     showtabs=false,
     breakindent=12em,
     % prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-    postbreak=\mbox{\ensuremath{\hookrightarrow}},
-  }
-
-  \lstset{style=mystyle}
-}{
-
-   % If the `--listings` param has not been set on pandoc
-
-  \let\origShade=\Shade
-  \def\Shade{\origShade\footnotesize}
+    postbreak=\mbox{\ensuremath{\hookrightarrow}\space},
 }
-\makeatother
 
-% The first wraps code fairly nicely in clodeblocks, but messes up wrapping of constants at underscores in inline code, and gets involved in wrapping inline code generally. The latter does not wrap code in codeblocks.
-
-% Shade does this for inline code:
-%    \texttt{INACTIVITY\_PENALTY\_QUOTIENT}
-% Listings does this:
-%    \passthrough{\lstinline!INACTIVITY\_PENALTY\_QUOTIENT!}
-
-% Blocks are:
-% \begin{lstlisting}[language=Python]
-
-% Idea: turn off Shaded, and use a Lua filter to insert the above.
-% --no-highlight inserts `\begin{verbatim}`
+\lstset{style=mystyle}
