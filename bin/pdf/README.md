@@ -38,19 +38,15 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 ### Significant known issues
 
-- None
+- Some pages with diagrams overflow off the bottom.
 
 ### Pending improvements
 
-- Width of code blocks and overflow handling. Font size of code.
 - Better table styling.
 - Styling of figure captions.
-- More navigational info in page headers?
-  - see https://www.overleaf.com/learn/latex/Headers_and_footers#Using_the_fancyhdr_package
-  - and no. 14 from https://pandoc.org/demos.html#examples
-    - which uses https://github.com/jgm/pandoc-website/blob/master/fancyheaders.tex
-- Heading numbers?
 - `<details>` blocks need some styling.
+- Code line wrapping is good, but not perfect.
+- Heading numbers?
 
 ### Other
 
