@@ -8377,7 +8377,7 @@ For the uninitiated, in Python's array slice syntax, `bits[1:4]` means bits 1, 2
 |||
 |-|-|
 | Used&nbsp;by | [`process_justification_and_finalization()`](#def_process_justification_and_finalization) |
-| Uses | [`get_block_root()`](/part3/helper/accessors#def_get_block_root)` |
+| Uses | [`get_block_root()`](/part3/helper/accessors#def_get_block_root) |
 | See&nbsp;also | [`JUSTIFICATION_BITS_LENGTH`](/part3/config/constants#justification_bits_length), [`Checkpoint`](/part3/containers/dependencies#checkpoint) |
 
 #### Inactivity scores
