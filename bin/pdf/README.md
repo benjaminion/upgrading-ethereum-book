@@ -38,23 +38,14 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 ### Significant known issues
 
-- Some pages with diagrams overflow off the bottom.
+- A couple of pages with diagrams overflow off the bottom.
 
 ### Pending improvements
 
+- Keep all headings with their next lines on page breaks.
+  - Mostly working, but headings before summary boxes are a problem.
 - Better table styling.
 - Styling of figure captions.
 - `<details>` blocks need some styling.
 - Code line wrapping is good, but not perfect.
 - Heading numbers?
-
-### Other
-
-Occasional fatal instances of this error (due to hyperlinks spanning page breaks),
-
-```
-    Error producing PDF.
-    ! pdfTeX error (ext4): \pdfendlink ended up in different nesting level than \pdfstartlink.
-```
-
-See [here](https://www.overleaf.com/learn/latex/Questions/What_does_%22%5Cpdfendlink_ended_up_in_different_nesting_level_than_%5Cpdfstartlink%22_mean%3F). It seems to be hard to avoid. It hasn't occurred since switching to `xelatex`, however.
