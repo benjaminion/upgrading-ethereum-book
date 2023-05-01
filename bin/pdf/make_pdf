@@ -47,6 +47,6 @@ pandoc \
     --include-before-body $path/inc/title-page.tex \
     --include-in-header $path/inc/header.tex \
     --toc \
-    --toc-depth=3 \
+    --toc-depth 3 \
     --no-highlight \
-    --pdf-engine=xelatex
+    --pdf-engine xelatex
