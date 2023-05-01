@@ -27,6 +27,7 @@ cd $srcdir
 pandoc \
     $name.md \
     --output $outdir/$name.pdf \
+    --template $path/template.tex \
     --from markdown \
     --metadata title-meta:'Upgrading Ethereum - Capella Edition' \
     --metadata author-meta:'Ben Edgington' \
