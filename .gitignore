@@ -14,15 +14,14 @@ src/charts/font/*
 src/md/pages/
 src/md/annotated.md
 index.json
+public/
 
 # Junk
 node_modules/
 .cache/
-public/
 tmp/
-src/test*
-src/book.tex
-src/book.pdf
+test*
+*.pdf
 
 # IntelliJ configs
 .idea/

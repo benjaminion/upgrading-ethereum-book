@@ -119,7 +119,21 @@
 % Tables
 
 % Aligned to left margin
-\setlength{\LTleft}{0pt}
+\makeatletter
+\@ifpackageloaded{longtable}{\setlength{\LTleft}{0pt}}{}
+\makeatother
 
 % Increase row spacing
 \renewcommand*{\arraystretch}{1.2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure captions
+%
+% Docs: https://mirror.ox.ac.uk/sites/ctan.org/macros/latex/contrib/caption/caption.pdf
+
+\usepackage{caption}
+\captionsetup{
+    labelformat=empty,
+    width=1.0\linewidth,
+    textfont=it,
+}
