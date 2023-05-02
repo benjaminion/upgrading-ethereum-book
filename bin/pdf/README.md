@@ -44,8 +44,7 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 - Keep all headings with their next lines on page breaks.
   - Mostly working, but headings before summary boxes are a problem.
-- Better table styling.
-- Styling of figure captions.
+- Better table styling
 - `<details>` blocks need some styling.
 - Code line wrapping is good, but not perfect.
 - Heading numbers?
