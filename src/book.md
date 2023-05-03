@@ -3953,7 +3953,9 @@ Start of Part 1 (fixed size elements)
 64 9bcd31881817ddeab686f878c8619d664e8bfa4f8948707cba5bc25c8d74915d
 
    attestation.signature: BLSSignature / Bytes96 / Vector[uint8, 96]
-84 aaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437
+84 aaf504503ff15ae86723c906b4b6bac91ad728e4431aea3be2e8e3acc888d8af
+a4 5dffbbcf53b234ea8e3fde67fbb09120027335ec63cf23f0213cc439e8d1b856
+c4 c2ddfc1a78ed3326fb9b4fe333af4ad3702159dbf9caeb1a4633b752991ac437
 
 Start of Part 2 (variable size elements)
    attestation.attesting_indices: List[uint64, MAX_VALIDATORS_PER_COMMITTEE]
