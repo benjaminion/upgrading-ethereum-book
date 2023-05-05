@@ -7885,7 +7885,7 @@ Every active validator is expected to make an attestation exactly once per epoch
 
 Notice that the reward is weighted with `unslashed_participating_increments`, which is proportional to the total stake of the validators that made a correct vote with this flag. This means that, if participation by other validators is lower, then my rewards are lower, even if I perform my duties perfectly. The reason for this is to do with [discouragement attacks](https://raw.githubusercontent.com/ethereum/research/master/papers/discouragement/discouragement.pdf) (see also this [nice explainer](https://web.archive.org/web/20221225163839/https://hackingresear.ch/discouragement-attacks/)[^fn-discouragement-link]). In short, with this mechanism, validators are incentivised to help each other out (e.g. by forwarding gossip messages, or aggregating attestations well) rather than to attack or censor one-another.
 
-[^fn-discouragement-link]: Unfortunately, [the original page](https://hackingresear.ch/discouragement-attacks/) seems to be unavailable now. The link in the text is to archive.org, but their version is a bit broken.
+[^fn-discouragement-link]: Unfortunately, the original page, `https://hackingresear.ch/discouragement-attacks/`, seems to be unavailable now. The link in the text is to archive.org, but their version is a bit broken.
 
 Validators that did not make a correct and timely vote are penalised with a full weighted base reward for each flag that they missed, except for missing the head vote. Head votes have only a single slot to get included, so a missing block in the next slot is sufficient to cause a miss, but is completely outside the attester's control. Thus, head votes are only rewarded, not penalised. This also allows perfectly performing validators to break even during an inactivity leak, when we expect at least a third of blocks to be missing: they receive no rewards, but ideally no penalties either.
 
@@ -9771,7 +9771,7 @@ def get_forkchoice_store(anchor_state: BeaconState, anchor_block: BeaconBlock) -
     )
 ```
 
-`get_forkchoice_store()` initialises the fork choice Store object from an anchor state and its corresponding block (header). As noted, the anchor state could be the genesis state. Equally, when using a [checkpoint sync](https://docs.teku.consensys.net/en/stable/Concepts/Weak-Subjectivity/#safely-sync-your-node), the anchor state will be the finalised checkpoint state provided by the node operator, which will be [treated as if](https://github.com/ethereum/consensus-specs/issues/2566) it is a genesis state. In either case, the `latest_messages` store will be empty to begin with.
+`get_forkchoice_store()` initialises the fork choice Store object from an anchor state and its corresponding block (header). As noted, the anchor state could be the genesis state. Equally, when using a [checkpoint sync](https://docs.teku.consensys.net/get-started/checkpoint-start), the anchor state will be the finalised checkpoint state provided by the node operator, which will be [treated as if](https://github.com/ethereum/consensus-specs/issues/2566) it is a genesis state. In either case, the `latest_messages` store will be empty to begin with.
 
 #### `get_slots_since_genesis`
 
