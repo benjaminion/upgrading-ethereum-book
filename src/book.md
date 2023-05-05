@@ -8627,8 +8627,8 @@ As noted elsewhere, rewards and penalties are handled separately from each other
 
 For reference, the only other places where rewards and penalties are applied are as follows:
 
-  - during epoch processing: for [sync committee participation](/part3/transition/block#def_process_sync_aggregate), and applying [extended slashing penalties](/part3/transition/epoch#def_process_slashings).
-  - during block processing: when applying the [proposer reward](/part3/transition/block#def_process_attestation), and initial [slashing rewards and penalties](/part3/helper/mutators#def_slash_validator).
+  - during block processing: for [sync committee participation](/part3/transition/block#def_process_sync_aggregate), when applying the [proposer reward](/part3/transition/block#def_process_attestation), and when applying initial [slashing rewards and penalties](/part3/helper/mutators#def_slash_validator).
+  - during epoch processing: when applying [extended slashing penalties](/part3/transition/epoch#def_process_slashings).
 
 |||
 |-|-|
