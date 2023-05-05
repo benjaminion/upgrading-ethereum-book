@@ -7,7 +7,7 @@ use warnings;
 
 $\ = "\n"; # set output record separator
 
-my @html_entities = ('ndash', 'nbsp');
+my @html_entities = ('ndash', 'nbsp', 'trade');
 my %entities = map { $_ => 1 } @html_entities;
 
 my ($file) = @ARGV;

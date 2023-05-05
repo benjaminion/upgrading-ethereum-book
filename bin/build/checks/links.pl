@@ -106,7 +106,11 @@ while(<$fh>) {
                 print "Nonexistent image file: $link line $.";
             }
         } else {
-            if ($link =~ /^([#\/])/) {
+            if ($link =~ /^\/\.\./) {
+                if (!($link =~ /^...\/(latest|altair|bellatrix|capella)/)) {
+                    print "Link to non-existent book version, line $.: $link";
+                }
+            } elsif ($link =~ /^([#\/])/) {
                 my $anchor = ($1 eq '#') ? $pagePath . $link : $link;
                 unless (exists($anchors{$anchor})) {
                     print "Anchor not found, line $.: $link";
@@ -117,7 +121,7 @@ while(<$fh>) {
                 print "Link to localhost, line $."
             } elsif ($link =~ /^http:/) {
                 print "HTTP link, line $.";
-            } elsif (not $link =~ /^https:\/\// and not $link =~ /\.\.\//) {
+            } elsif (not $link =~ /^https:\/\//) {
                 print "Suspicious link, line $.: $link";
             }
         }

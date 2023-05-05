@@ -73,8 +73,11 @@ local function update_links(block, page)
    return block:walk {
       Link = function(link)
          local s, t = link.target, ''
-         if string.match(s, '^/') then
-            -- Link to another page
+         if string.match(s, '^/%.%.') then
+            -- Link to a different spec version
+            t = website .. string.sub(s, 4)
+         elseif string.match(s, '^/') then
+            -- Link to another internal page
             t = '#' .. norm(string.gsub(string.sub(s, 2), '[/#]', '-'))
             links[string.sub(t, 2)] = true
          elseif string.match(s, '^#') then

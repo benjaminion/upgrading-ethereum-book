@@ -8,8 +8,6 @@ The first pretty much complete part is [Part 3: The Annotated Spec](/part3). The
 
 I'm now working on [Part 2: Technical Overview](/part2) which wraps a first, hopefully more accessible, layer around the Annotated Spec. Again, I'm writing this backwards, starting with the protocol's [Building Blocks](/part2/building_blocks) and its [Incentive Mechanisms](/part2/incentives) and working forwards towards a higher level narrative of how it all fits together. The current focus is on the [Consensus](/part2/consensus) chapter.
 
-Meanwhile, I might get round to making it prettier, ensuring it is accessible and mobile-friendly, adding search, navigation and other rich information, PDF versions, maybe NFTs... who knows?
-
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
 
 ## What to expect
@@ -27,17 +25,24 @@ The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 pro
   - in-protocol data sharding, and
   - an array of potential future enhancements.
 
-I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although roll-ups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 narrative, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
+I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although rollups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 system, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
 It's a chunky list of exclusions, but there's still [plenty to talk about](/contents).
 
-## Bellatrix
+## Versions
 
-This edition covers the Bellatrix version of the deployed Ethereum&nbsp;2.0 beacon chain. The beacon chain went live with Phase&nbsp;0 on December 1st, 2020. It was upgraded to Altair on October 27th, 2021, and to Bellatrix on September 6th, 2022.
+This edition covers the Capella version of the deployed Ethereum&nbsp;2.0 consensus layer. The beacon chain went live with [Phase&nbsp;0](/part4/history/phase0) on December 1st, 2020. It was upgraded to [Altair](/part4/history/altair) on October 27th, 2021, to [Bellatrix](/part4/history/bellatrix) on September 6th, 2022, and to [Capella](/part4/history/capella) on April 12th, 2023.
 
-Specifically, unless otherwise stated, any reference to the consensus specifications is to the version [tagged v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0) (the [Ailuropoda melanoleuca](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) release[^fn-giant-panda]).
+Specifically, unless otherwise stated, any reference to the consensus specifications is to the version [tagged v1.3.0](https://github.com/ethereum/consensus-specs/tree/v1.3.0) (the [Gamlum](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0) release).
 
-[^fn-giant-panda]: To save you looking it up, Ailuropoda melanoleuca is the formal name of the [giant panda](https://en.wikipedia.org/wiki/Giant_panda).
+Historical and current versions of Upgrading Ethereum are available online:
+
+  - The old [Altair spec version](/../altair),
+  - The old [Bellatrix spec version](/../bellatrix),
+  - The current [Capella spec version](/../capella), and
+  - The [latest version](/../latest), which is currently Capella.
+
+My original annotated specification for the Phase&nbsp;0 version is [also available](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/), though largely of historical interest and now subsumed into this book.
 
 ## A note on Terminology
 
@@ -198,7 +203,7 @@ These treacherous generals exhibit what we've come to call "Byzantine behaviour"
 <a id="img_consensus_messages"></a>
 <figure class="diagram" style="width: 50%">
 
-![A picture of a node with messages coming in](images/diagrams/consensus-messages.svg)
+![A picture of a node with messages coming in.](images/diagrams/consensus-messages.svg)
 
 <figcaption>
 
@@ -247,7 +252,7 @@ Except for the special Genesis block, every block builds on and points to a pare
 <a id="img_consensus_block_chain"></a>
 <figure class="diagram" style="width: 90%">
 
-![A picture of a linear chain of blocks](images/diagrams/consensus-block_chain.svg)
+![A picture of a linear chain of blocks.](images/diagrams/consensus-block_chain.svg)
 
 <figcaption>
 
@@ -269,7 +274,7 @@ Our neat diagram of a nice linear chain will for the most part reflect what we s
 <a id="img_consensus_block_tree"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram of a block tree](images/diagrams/consensus-block_tree.svg)
+![A diagram of a block tree.](images/diagrams/consensus-block_tree.svg)
 
 <figcaption>
 
@@ -305,7 +310,7 @@ Given a block tree and some decision criteria based on a node's local view of th
 <a id="img_consensus_block_tree_resolved"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram of a block chain as a subset of the block tree](images/diagrams/consensus-block_tree_resolved.svg)
+![A diagram of a block chain as a subset of the block tree.](images/diagrams/consensus-block_tree_resolved.svg)
 
 <figcaption>
 
@@ -343,7 +348,7 @@ In the following diagram, the node has evaluated block $F$ to be the head block,
 <a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain prior to a reversion](images/diagrams/consensus-reversion_1.svg)
+![A diagram of a blockchain prior to a reversion.](images/diagrams/consensus-reversion_1.svg)
 
 <figcaption>
 
@@ -361,7 +366,7 @@ After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and pro
 <a id="img_consensus_reversion_2"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain after a reversion](images/diagrams/consensus-reversion_2.svg)
+![A diagram of a blockchain after a reversion.](images/diagrams/consensus-reversion_2.svg)
 
 <figcaption>
 
@@ -407,7 +412,7 @@ It is easy to demonstrate the CAP theorem in our blockchain context. Imagine tha
 <a id="img_consensus_partition"></a>
 <figure class="diagram" style="width: 50%">
 
-![A diagram of a network partition](images/diagrams/consensus-partition.svg)
+![A diagram of a network partition.](images/diagrams/consensus-partition.svg)
 
 <figcaption>
 
@@ -441,7 +446,7 @@ Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper F
 <a id="img_consensus_finality"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram showing a finalised portion of chain and a forkful portion](images/diagrams/consensus-finality.svg)
+![A diagram showing a finalised portion of chain and a forkful portion.](images/diagrams/consensus-finality.svg)
 
 <figcaption>
 
@@ -649,7 +654,7 @@ This is a classic scalability trilemma. Personally, I don't find these pictures 
 <a id="img_incentives_scalability_trilemma"></a>
 <figure class="diagram" style="width: 60%">
 
-![A version of the scalability trilemma](images/diagrams/incentives-scalability_trilemma.svg)
+![A version of the scalability trilemma.](images/diagrams/incentives-scalability_trilemma.svg)
 
 <figcaption>
 
@@ -720,7 +725,7 @@ Vitalik's discussion document around achieving [single slot finality](https://no
 
 The beacon chain maintains two separate records of each validator's balance: its actual balance and its effective balance.
 
-A validator's actual balance is straightforward. It is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties. Withdrawals are not yet possible, but will be subtracted from this balance when available. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee participants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$&nbsp;ETH.
+A validator's actual balance is straightforward. It is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties and withdrawals. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee participants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$&nbsp;ETH.
 
 A validator's effective balance is derived from its actual balance in such a way that it changes much more slowly. To achieve this, the units of effective balance are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
 
@@ -735,11 +740,9 @@ The scope of effective balance quickly grew, and now it completely represents th
 All the following consensus-related quantities are proportional to the effective balance of a validator:
 
   - the probability of being [selected](/part3/helper/misc#def_compute_proposer_index) as the beacon block proposer;
-  - the validator's weight in the LMD-GHOST fork choice rule;
+  - the validator's weight in the LMD-GHOST [fork choice rule](/part3/forkchoice/phase0#get_weight);
   - the validator's weight in the justification and finalisation [calculations](/part3/transition/epoch#def_weigh_justification_and_finalization); and
   - the probability of being [included](/part3/helper/accessors#def_get_next_sync_committee_indices) in a sync committee.
-
-[TODO link to fork choice rule above]::
 
 Correspondingly, the following rewards, penalties, and punishments are also weighted by effective balance:
 
@@ -775,8 +778,6 @@ The point is that light clients will not need to access the list of actual balan
 
 In summary, adding effective balances to validators' records allows us to achieve two performance goals simultaneously: avoiding the workload of frequently re-hashing the validator list in the state while not increasing the workload of light clients.
 
-[TODO: look into the fork choice efficiencies in V's third point in https://github.com/ethereum/consensus-specs/issues/685#issue-414041799]::
-
 ##### Increments
 
 Although effective balances are denominated in Gwei they can only be whole multiples of [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), which is 1&nbsp;ETH ($10^9$&nbsp;Gwei). Actual balances can be any number of Gwei.
@@ -803,7 +804,7 @@ The following chart illustrates the behaviour.
 <a id="img_hysteresis"></a>
 <figure class="chart">
 
-![A graph illustrating actual balance versus effective balance](images/charts/hysteresis.svg)
+![A graph illustrating actual balance versus effective balance.](images/charts/hysteresis.svg)
 
 <figcaption>
 
@@ -829,7 +830,7 @@ The effect of the hysteresis is that the effective balance cannot change more of
 
 ###### An edge case
 
-The hysteresis design gives rise to an interesting [edge case](https://github.com/ethereum/consensus-specs/issues/3049) in deposit processing. The [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol) allows a staker to deposit any amount greater than or equal to 1&nbsp;ETH; a deposit doesn't have to be the full 32&nbsp;ETH. This allows a stake to be accumulated from multiple deposits. For example, a deposit of 24&nbsp;ETH followed by a separate deposit of 8&nbsp;ETH makes up a full stake and will activate the validator once the second deposit has been processed.
+The hysteresis design gives rise to an interesting [edge case](https://github.com/ethereum/consensus-specs/issues/3049) in deposit processing. The [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol) allows a staker to deposit any amount greater than or equal to 1&nbsp;ETH; a deposit doesn't have to be the full 32&nbsp;ETH. This allows a stake to be accumulated from multiple deposits. For example, a deposit of 24&nbsp;ETH followed by a separate deposit of 8&nbsp;ETH makes up a full stake and will activate the validator once the second deposit has been processed.
 
 The edge case occurs when the final deposit for a validator takes its actual balance to 32&nbsp;ETH or more but, due to the hysteresis, is not sufficient to update its effective balance to 32&nbsp;ETH. For example, after a deposit of 31&nbsp;ETH the validator's actual and effective balances will both be 31&nbsp;ETH. A further deposit of 1&nbsp;ETH will take the validator's actual balance to 32&nbsp;ETH &ndash; which makes it technically eligible for activation &ndash; but will leave its effective balance at 31&nbsp;ETH due to the hysteresis calculation. Thus, it will not be activated.
 
@@ -916,7 +917,7 @@ We can graph the maximum issuance as a function of the number of validators. It'
 <a id="img_issuance_curve"></a>
 <figure class="chart">
 
-![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](images/charts/issuance_curve.svg)
+![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators.](images/charts/issuance_curve.svg)
 
 <figcaption>
 
@@ -949,7 +950,7 @@ Graphing this give us an inverse square root curve.
 <a id="img_rewards_curve"></a>
 <figure class="chart">
 
-![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](images/charts/rewards_curve.svg)
+![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators.](images/charts/rewards_curve.svg)
 
 <figcaption>
 
@@ -992,8 +993,8 @@ Anders Elowsson's work on Ethereum's circulating supply equilibrium and minimum 
 
   - Validators receive rewards for making attestations according to their view of the chain, proposing blocks, and participating in sync committees in varying proportions.
   - Votes that make up attestations must be both correct and timely in order to be rewarded.
-  - The proposer's reward is a fixed proportion (1/7) of the total reward for all the duties it is including in its block.
-  - A validator's expected long-term reward is $nb$ per epoch (number of increments times the base reward per increment), but there is significant variance around that due to the randomness of proposer and sync committee assignments.
+  - The proposer's reward is a fixed proportion, $\frac{1}{7}$, of the total reward for all the duties it includes in its block.
+  - A validator's expected long-term reward is $nb$ per epoch (number of increments times the base reward per increment), but there is significant variance due to the randomness of proposer and sync committee assignments.
   - Rewards are scaled both with a validator's effective balance and with the total participation rate of the validator set.
   - The need to defend against discouragement attacks has shaped various aspects of the protocol.
 
@@ -1019,7 +1020,7 @@ However, validators are selected at random to propose blocks or participate in s
 <a id="img_incentives_weights"></a>
 <figure class="diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each activity](images/diagrams/incentives-weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each activity.](images/diagrams/incentives-weights.svg)
 
 <figcaption>
 
@@ -1050,7 +1051,7 @@ There are three relevant milestones in a validator's lifecycle: its activation e
 <a id="img_incentives_rewards_eligibility"></a>
 <figure class="diagram" style="width:80%">
 
-![A timeline of the eligibility of validators for rewards](images/diagrams/incentives-rewards_eligibility.svg)
+![A timeline of the eligibility of validators for rewards.](images/diagrams/incentives-rewards_eligibility.svg)
 
 <figcaption>
 
@@ -1129,7 +1130,7 @@ The choice of distance for including the source vote is interesting. It is chose
 <a id="img_reward_timeliness"></a>
 <figure class="chart">
 
-![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](images/charts/reward_timeliness.svg)
+![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison.](images/charts/reward_timeliness.svg)
 
 <figcaption>
 
@@ -1221,7 +1222,7 @@ In the following charts, I have separated out the validator rewards from the pro
 <a id="img_incentives_reward_split"></a>
 <figure class="diagram">
 
-![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](images/diagrams/incentives-reward_split.svg)
+![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties.](images/diagrams/incentives-reward_split.svg)
 
 <figcaption>
 
@@ -1283,7 +1284,7 @@ The following chart shows the expected distribution of annual rewards for 500,00
 
 <!-- Number of validators -->
 
-![A bar chart of the distribution of annual reward for 500,000 validators with 32&nbsp;ETH staked](images/charts/reward_variance.svg)
+![A bar chart of the distribution of annual reward for 500,000 validators with 32&nbsp;ETH staked.](images/charts/reward_variance.svg)
 
 <figcaption>
 
@@ -1474,7 +1475,7 @@ In the continuous approximation, the inactivity penalty quotient, $\alpha$, is t
 
 For Phase&nbsp;0 of the beacon chain, the value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from $2^{24}$ to $2^{26}$, so that validators would be penalised less severely if there were non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the whole eleven months of Phase&nbsp;0 of the beacon chain.
 
-The value was decreased by one quarter in the Altair upgrade from `2**26` (`INACTIVITY_PENALTY_QUOTIENT`) to `3 * 2**24` (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of `2**24` (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the Bellatrix upgrade. Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
+The value was decreased by one quarter in the Altair upgrade from `2**26` (`INACTIVITY_PENALTY_QUOTIENT`) to `3 * 2**24` (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of `2**24` (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the [Bellatrix upgrade](/part4/history/bellatrix). Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
 
 #### Inactivity scores
 
@@ -1493,7 +1494,7 @@ Graphically, the flow-chart looks like this.
 <a id="img_incentives_inactivity_scores_flow"></a>
 <figure class="diagram">
 
-![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated.](images/diagrams/incentives-inactivity_scores_flow.svg)
 
 <figcaption>
 
@@ -1521,7 +1522,7 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 <a id="img_inactivity_scores"></a>
 <figure class="chart">
 
-![A graph illustrating inactivity score scenarios](images/charts/inactivity_scores.svg)
+![A graph illustrating inactivity score scenarios.](images/charts/inactivity_scores.svg)
 
 <figcaption>
 
@@ -1556,7 +1557,7 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 <a id="img_inactivity_balances"></a>
 <figure class="chart">
 
-![A graph showing the effect of the inactivity leak in five different scenarios](images/charts/inactivity_balances.svg)
+![A graph showing the effect of the inactivity leak in five different scenarios.](images/charts/inactivity_balances.svg)
 
 <figcaption>
 
@@ -1648,7 +1649,7 @@ The behaviours that lead to slashing are as follows.
 
 All of these slashable behaviours relate to "equivocation", which is when a validator contradicts something it previously advertised to the network.[^fn-avoid-slashing]
 
-[^fn-avoid-slashing]: To avoid being slashed, simply be sure not to equivocate. Any normally operating client (in the absence of bugs) will never do so. As far as can be determined, every Ethereum slashing to date has been due to a node operator simultaneously running the same validator keys on two different nodes, perhaps as a misguided way to improve uptime. Don't do this.
+[^fn-avoid-slashing]: To avoid being slashed, simply be sure not to equivocate. Any normally operating client (in the absence of bugs) will never do so. As far as can be determined, every Ethereum slashing to date has been due to a node operator simultaneously running the same validator keys on two different nodes, perhaps as a misguided way to improve uptime. Don't do this. (Update: [one slashing](https://beaconcha.in/slot/6142320#proposer-slashings) was due to a proposer [attacking a MEV Relay](https://collective.flashbots.net/t/post-mortem-april-3rd-2023-mev-boost-relay-incident-and-related-timing-issue/1540).)
 
 The slashing conditions related to Casper FFG underpin Ethereum&nbsp;2.0's [economic finality](/part2/incentives/staking#economic-finality) guarantee. They effectively impose a well-determined price on reverting finality.
 
@@ -1672,7 +1673,7 @@ This initial penalty was [introduced](https://github.com/ethereum/consensus-spec
 
 Along with the initial penalty, the validator is queued for exit, and has its withdrawability epoch set to around 36 days ([`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector), which is 8192 epochs) in the future.
 
-During Phase&nbsp;0 the initial penalty was $\frac{1}{128}$ of the offender's effective balance, and during Altair, $\frac{1}{64}$. It was raised to its full value of $\frac{1}{32}$ of the slashed validator's effective balance, a maximum of 1&nbsp;ETH, in the pre-Merge Bellatrix upgrade.
+During Phase&nbsp;0 the initial penalty was $\frac{1}{128}$ of the offender's effective balance, and during Altair, $\frac{1}{64}$. It was raised to its full value of $\frac{1}{32}$ of the slashed validator's effective balance, a maximum of 1&nbsp;ETH, in the pre-Merge [Bellatrix upgrade](/part4/history/bellatrix).
 
 ##### The correlation penalty
 
@@ -1688,7 +1689,7 @@ The correlated penalty is calculated as follows.
  2. Multiply this sum by [`PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX`](/part3/config/preset#proportional_slashing_multiplier), but cap the result at `total_balance`, the total active balance of all validators.
  3. Multiply the slashed validator's effective balance by the result of #2 and then divide by the `total_balance`. This results in an amount between zero and the full effective balance of the slashed validator. That amount is subtracted from its actual balance as the penalty. Note that the effective balance could exceed the actual balance in odd corner cases, but [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) ensures the balance does not go negative.
 
-The slashing multiplier in Bellatrix is set to 3. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
+The slashing multiplier since Bellatrix is set to 3. With $S$ being the sum of increments in the list of slashed validators over the last 36 days, $B$ my effective balance, and $T$ the total increments, the calculation looks as follows.
 
 $$
 \text{Correlation penalty} = \min(B, \frac{3SB}{T})
@@ -1710,7 +1711,7 @@ A validator that is slashed continues to receive attestation penalties until its
 
 So, in addition to the initial slashing penalty and the correlation penalty, there is a further penalty of up to $8192\frac{14 + 26}{64}32b = 82{,}739{,}200 \text{ Gwei} = 0.0827 \text{ ETH}$, based on 500k validators, where $b$ is the [base reward per increment](/part2/incentives/issuance#the-base-reward-per-increment). This assumes that the chain is not in an inactivity leak; the penalties will be much higher if it is.
 
-Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to skip slashed validators, but that is not how it is implemented currently.)
+Slashed validators are eligible to be selected to propose blocks until they reach their exit epoch, but those blocks will be considered invalid, so there is no proposer reward available to them. This is in preference to immediately recomputing the duties assignments which would break the lookahead guarantees they have. (The proposer selection algorithm could easily be modified to [skip slashed validators](https://github.com/ethereum/consensus-specs/pull/3175), but that is not how it is implemented currently.)
 
 In an interesting edge case, however, slashed validators are eligible to be selected for sync committee duty until they reach their exit epoch and to receive the rewards for sync committee participation. The odds of this happening, though, in the absence of a mass slashing event, are pretty tiny.
 
@@ -1925,7 +1926,7 @@ More mathematically, things look like this. We use two subgroups of the BLS12-38
 <a id="img_bls_key"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing how we will depict the various components in the diagrams below](images/diagrams/bls-key.svg)
+![Diagram showing how we will depict the various components in the diagrams below.](images/diagrams/bls-key.svg)
 
 <figcaption>
 
@@ -1947,7 +1948,7 @@ The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a p
 <a id="img_bls_setup"></a>
 <figure class="diagram" style="width:50%">
 
-![Diagram of the generation of the public key](images/diagrams/bls-setup.svg)
+![Diagram of the generation of the public key.](images/diagrams/bls-setup.svg)
 
 <figcaption>
 
@@ -1975,7 +1976,7 @@ Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it ser
 <a id="img_bls_signing"></a>
 <figure class="diagram" style="width:65%">
 
-![Diagram of signing a message](images/diagrams/bls-signing.svg)
+![Diagram of signing a message.](images/diagrams/bls-signing.svg)
 
 <figcaption>
 
@@ -2026,7 +2027,7 @@ Note that elliptic curves supporting such a pairing function are very rare. Such
 <a id="img_bls_verifying"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram of verifying a signature](images/diagrams/bls-verifying.svg)
+![Diagram of verifying a signature.](images/diagrams/bls-verifying.svg)
 
 <figcaption>
 
@@ -2058,7 +2059,7 @@ The process is conceptually very simple: we simply "add up" the signatures. The 
 <a id="img_bls_signature_aggregation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing aggregation of signatures](images/diagrams/bls-signature_aggregation.svg)
+![Diagram showing aggregation of signatures.](images/diagrams/bls-signature_aggregation.svg)
 
 <figcaption>
 
@@ -2074,7 +2075,7 @@ To verify an aggregate signature, we need an aggregate public key. As long as we
 <a id="img_bls_pubkey_aggregation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of public key aggregation](images/diagrams/bls-pubkey_aggregation.svg)
+![Diagram of public key aggregation.](images/diagrams/bls-pubkey_aggregation.svg)
 
 <figcaption>
 
@@ -2090,7 +2091,7 @@ Since aggregate signatures are indistinguishable from normal signatures, and agg
 <a id="img_bls_aggregate_verify"></a>
 <figure class="diagram" style="width:70%">
 
-![Diagram of verification of an aggregate signature](images/diagrams/bls-aggregate_verify.svg)
+![Diagram of verification of an aggregate signature.](images/diagrams/bls-aggregate_verify.svg)
 
 <figcaption>
 
@@ -2147,7 +2148,7 @@ This diagram illustrates the full flow from signing, through aggregating, to ver
 <a id="img_bls_aggregation"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing the end-to-end aggregate signature workflow](images/diagrams/bls-aggregation.svg)
+![Diagram showing the end-to-end aggregate signature workflow.](images/diagrams/bls-aggregation.svg)
 
 <figcaption>
 
@@ -2164,7 +2165,7 @@ Two useful examples of how aggregate signatures are used in practice are in aggr
 
 Aggregate attestations are a very compact way to store and prove which validators made a particular attestation.
 
-Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attesting).
+Within each beacon chain committee at each slot, individual validators attest to their view of the chain, as described in the [validator spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#attesting).
 
 An [`Attestation`](/part3/containers/operations#attestation) object looks like this:
 
@@ -2177,9 +2178,9 @@ class Attestation(Container):
 
 When making its attestation, the validator sets a single bit in the `aggregation_bits` field to indicate which member of the committee it is. That is sufficient, in conjunction with the slot number and the committee index, to uniquely identify the attesting validator in the global validator set.
 
-The `signature` field is the validator's [signature](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregate-signature) over the `AttestationData` in the `data` field.
+The `signature` field is the validator's [signature](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregate-signature) over the `AttestationData` in the `data` field.
 
-This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
+This attestation will later be [aggregated](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#attestation-aggregation) with other attestations from the committee that contain identical `data`. An attestation is added to an aggregate by copying over its bit from the `aggregation_bits` field and adding (in the sense of elliptic curve addition) its signature to the `signature` field. Aggregate attestations can be aggregated together in the same way, but only if their `aggregation_bits` lists are disjoint: we must not include a validator more than once. (In principle we could include individual validators multiple times, but then we'd need more than a single bit to track how many times, and the redundancy is not useful.)
 
 This aggregate attestation will be gossiped around the network and eventually included in a block. At each step the aggregate signature will be verified.
 
@@ -2215,7 +2216,7 @@ class SyncCommittee(Container):
     aggregate_pubkey: BLSPubkey
 ```
 
-Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
+Production and aggregation of sync committee messages [differs slightly](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#sync-committees) from attestations, but is sufficiently similar that I'll skip over it here.
 
 The main points of interest are that the `SyncCommittee` object contains the actual public keys of all the members (possibly with duplicates), rather than validator indices. It also contains a pre-computed `aggregate_pubkey` field that is the aggregate of all the public keys in the committee.
 
@@ -2297,7 +2298,7 @@ In case someone overnight unveils a sufficiently capable quantum computer, [EIP-
 
 #### BLS library functions
 
-As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the draft [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)[^fn-ietf-irtf-0]. Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the draft [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)[^fn-ietf-irtf-0]. Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
 
 [^fn-ietf-irtf-0]: This document does not have the full force of an IETF standard. For one thing, it remains a draft (that is now expired), for another it is an IRTF document, meaning that it is from a research group rather than being on the IETF standards track. [Some context](https://mailarchive.ietf.org/arch/msg/ietf/A8MaBwNpbWf_DJoWj0sRROIml3Y/) from Brian Carpenter, former IETF chair,
     > I gather that you are referring to an issue in draft-irtf-cfrg-bls-signature-04. That is not even an IETF draft; it's an IRTF draft, apparently being discussed in an IRTF Research Group. So it is not even remotely under consideration to become an IETF standard...
@@ -2311,7 +2312,7 @@ As a reference, the following are the BLS library functions used in the Ethereum
   - `def` [`FastAggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4)`(pubkeys: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) - bool`
     - Verify an aggregate signature given the message and the list of public keys corresponding to the validators that contributed to the aggregate signature.
   - `def` [`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
-    - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
+    - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/_features/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
   - `def` [`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
     - Checks that a public key is valid. That is, it lies on the elliptic curve, it is not the group's identity point (corresponding to the zero secret key), and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
 
@@ -2399,7 +2400,7 @@ We can think of a RANDAO as being like a deck of cards that's passed round the t
 <a id="img_randomness_shuffle"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating repeated shuffling of a deck of cards](images/diagrams/randomness-shuffle.svg)
+![Diagram illustrating repeated shuffling of a deck of cards.](images/diagrams/randomness-shuffle.svg)
 
 <figcaption>
 
@@ -2454,7 +2455,7 @@ Some other sources of entropy for the RANDAO are noted in [EIP-4399](https://eip
 
 When a validator proposes [a block](/part3/containers/blocks#beaconblockbody), it includes a field `randao_reveal` which has `BLSSignature` type. This is the proposer's signature over the [epoch number](https://github.com/ethereum/consensus-specs/pull/498), using its normal signing secret key.
 
-The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
+The `randao_reveal` is [computed](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#randao-reveal) by the proposer as follows, the `privkey` input being the validator's random secret key.
 
 ```python
 def get_epoch_signature(state: BeaconState, block: BeaconBlock, privkey: int) -> BLSSignature:
@@ -2486,7 +2487,7 @@ Second, the hash of the signature is mixed in to the beacon state's RANDAO using
 <a id="img_randomness_reveal"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating updating the RANDAO](images/diagrams/randomness-reveal.svg)
+![Diagram illustrating updating the RANDAO.](images/diagrams/randomness-reveal.svg)
 
 <figcaption>
 
@@ -2519,7 +2520,7 @@ To prevent this, we assume a maximum feasible lookahead that an attacker might a
 <a id="img_randomness_lookahead"></a>
 <figure class="diagram" style="width:90%">
 
-![Diagram showing min and max lookahead](images/diagrams/randomness-lookahead.svg)
+![Diagram showing min and max lookahead.](images/diagrams/randomness-lookahead.svg)
 
 <figcaption>
 
@@ -2541,7 +2542,7 @@ The RANDAO value for an epoch is set at the end of the previous epoch, and duty 
 <a id="img_randomness_assignments"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating calculation of duties based on the RANDAO](images/diagrams/randomness-assignments.svg)
+![Diagram illustrating calculation of duties based on the RANDAO.](images/diagrams/randomness-assignments.svg)
 
 <figcaption>
 
@@ -2555,7 +2556,7 @@ Thus, when a validator happens to be assigned to propose a block in the last slo
 <a id="img_randomness_biasing"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating biasing the RANDAO](images/diagrams/randomness-biasing.svg)
+![Diagram illustrating biasing the RANDAO.](images/diagrams/randomness-biasing.svg)
 
 <figcaption>
 
@@ -2603,7 +2604,7 @@ $$
 <a id="img_randao_tail"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](images/charts/randao_tail.svg)
+![Graph of the expected RANDAO tail.](images/charts/randao_tail.svg)
 
 <figcaption>
 
@@ -2629,7 +2630,7 @@ Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded
 <a id="img_randomness_tail_probabilities"></a>
 <figure class="diagram" style="width:40%">
 
-![Matrix of tail length probabilities](images/diagrams/randomness-tail_probabilities.svg)
+![Matrix of tail length probabilities.](images/diagrams/randomness-tail_probabilities.svg)
 
 <figcaption>
 
@@ -2653,7 +2654,7 @@ Graphing this for various values of $k$ we get the following. Note that the soli
 <a id="img_randao_extend_0"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](images/charts/randao_extend_0.svg)
+![Graph of the expected RANDAO tail.](images/charts/randao_extend_0.svg)
 
 <figcaption>
 
@@ -2671,7 +2672,7 @@ To investigate this, consider the following graph. Here, for each $k$ line we ha
 <a id="img_randao_extend_1"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected change in RANDAO tail](images/charts/randao_extend_1.svg)
+![Graph of the expected change in RANDAO tail.](images/charts/randao_extend_1.svg)
 
 <figcaption>
 
@@ -2687,7 +2688,7 @@ For completeness, we shouldn't only look at expectations, but also at probabilit
 <a id="img_randao_extend_2"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the probability that my tail will shrink](images/charts/randao_extend_2.svg)
+![Graph of the probability that my tail will shrink.](images/charts/randao_extend_2.svg)
 
 <figcaption>
 
@@ -2798,7 +2799,7 @@ Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be include
 <a id="img_randomness_propose_probabilities"></a>
 <figure class="diagram" style="width:40%">
 
-![Matrix of proposal number probabilities](images/diagrams/randomness-propose_probabilities.svg)
+![Matrix of proposal number probabilities.](images/diagrams/randomness-propose_probabilities.svg)
 
 <figcaption>
 
@@ -2816,7 +2817,7 @@ $$
 <a id="img_randao_proposals"></a>
 <figure class="chart" style="width:100%">
 
-![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](images/charts/randao_proposals.svg)
+![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO.](images/charts/randao_proposals.svg)
 
 <figcaption>
 
@@ -2830,7 +2831,7 @@ The maximum percentage gain in block proposals that I can acquire is shown in th
 <a id="img_randao_proposals_percent"></a>
 <figure class="chart" style="width:100%">
 
-![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](images/charts/randao_proposals_percent.svg)
+![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO.](images/charts/randao_proposals_percent.svg)
 
 <figcaption>
 
@@ -2932,7 +2933,7 @@ For example, formally committees are assigned by shuffling the full validator li
 
 #### Swap-or-not Specification
 
-The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
+The algorithm for shuffling [in the specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/beacon-chain.md#compute_shuffled_index) deals with only a single index at a time.
 
 ```python
 def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) -> uint64:
@@ -2995,7 +2996,7 @@ With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$
 <a id="img_shuffling_0"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the pivot and the first mirror index](images/diagrams/shuffling-0.svg)
+![A diagram showing the pivot and the first mirror index.](images/diagrams/shuffling-0.svg)
 
 <figcaption>
 
@@ -3017,7 +3018,7 @@ We make the same swap-or-not decision for each index between $m_1$ and $p$.
 <a id="img_shuffling_1"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing swapping or not from the first mirror up to the pivot](images/diagrams/shuffling-1.svg)
+![A diagram showing swapping or not from the first mirror up to the pivot.](images/diagrams/shuffling-1.svg)
 
 <figcaption>
 
@@ -3035,7 +3036,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 <a id="img_shuffling_2"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the second mirror index](images/diagrams/shuffling-2.svg)
+![A diagram showing the second mirror index.](images/diagrams/shuffling-2.svg)
 
 <figcaption>
 
@@ -3051,7 +3052,7 @@ Finally, we repeat the swap-or-not process, considering all the points $j$ from 
 <a id="img_shuffling_3"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing swapping or not from the pivot to the second mirror](images/diagrams/shuffling-3.svg)
+![A diagram showing swapping or not from the pivot to the second mirror.](images/diagrams/shuffling-3.svg)
 
 <figcaption>
 
@@ -3069,7 +3070,7 @@ The next round begins by incrementing (or decrementing for a reverse shuffle) th
 <a id="img_shuffling_4"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the whole process running from one mirror to the other in a single round](images/diagrams/shuffling-4.svg)
+![A diagram showing the whole process running from one mirror to the other in a single round.](images/diagrams/shuffling-4.svg)
 
 <figcaption>
 
@@ -3122,7 +3123,7 @@ In summary, we can compute the destination of element $i$ in $O(1)$ operations, 
 
 ##### Keeping light clients light
 
-This property is important for light clients. Light clients are observers of the Eth2 beacon and shard chains that do not store the entire state, but do wish to be able to securely access data on the chains. As part of verifying that they have the correct data &ndash; that no-one has lied to them &ndash; it is necessary to compute the committees that attested to that data. This means shuffling, and we don't want light clients to have to hold and shuffle the entire list of validators. By using the swap-or-not shuffle, light clients need only to consider the small subset of validators that they are interested in, which is vastly more efficient overall.
+This property is important for light clients. Light clients are observers of the Eth2 beacon chain that do not store the entire state, but do wish to be able to securely access the chain's data. As part of verifying that they have the correct data &ndash; that no-one has lied to them &ndash; it is necessary to compute the committees that attested to that data. This means shuffling, and we don't want light clients to have to hold and shuffle the entire list of validators. By using the swap-or-not shuffle, light clients need only to consider the small subset of validators that they are interested in, which is vastly more efficient overall.
 
 #### See also
 
@@ -3168,7 +3169,7 @@ The composition of the committees for an epoch is fully determined at the start 
 <a id="img_committees_random"></a>
 <figure class="diagram" style="width: 80%">
 
-![Diagram showing circles and triangles randomly divided into committees](images/diagrams/committees-random.svg)
+![Diagram showing circles and triangles randomly divided into committees.](images/diagrams/committees-random.svg)
 
 <figcaption>
 
@@ -3182,7 +3183,7 @@ We assign validators to committees randomly in order to defend against a minorit
 <a id="img_committees_organised"></a>
 <figure class="diagram" style="width: 80%">
 
-![Diagram showing circles and triangles divided into committees under the influence of an attacker](images/diagrams/committees-organised.svg)
+![Diagram showing circles and triangles divided into committees under the influence of an attacker.](images/diagrams/committees-organised.svg)
 
 <figcaption>
 
@@ -3206,7 +3207,7 @@ Clearly, the first goal is not achievable if there are fewer than `SLOTS_PER_EPO
 <a id="img_committees_all"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram showing N committees at each slot and 32 slots per epoch](images/diagrams/committees-all.svg)
+![A diagram showing N committees at each slot and 32 slots per epoch.](images/diagrams/committees-all.svg)
 
 <figcaption>
 
@@ -3287,7 +3288,7 @@ The length of the vector returned will be either `n // (32 * N)` or `1 + n // (3
 <a id="img_committees_selection"></a>
 <figure class="diagram" style="width: 95%">
 
-![A diagram showing how the validator set is sliced up into committees](images/diagrams/committees-selection.svg)
+![A diagram showing how the validator set is sliced up into committees.](images/diagrams/committees-selection.svg)
 
 <figcaption>
 
@@ -3378,10 +3379,10 @@ In the current beacon chain design, voting is done in committees with the goal o
 
 The process of aggregation is as follows:
 
-1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s or [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that the whole committee is subscribed to.
+1. Committee members sign their votes ([`Attestation`](/part3/containers/operations#attestation)s or [`SyncCommitteeMessage`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#synccommitteemessage)s depending on which type of committee we are considering) and broadcast them to a peer-to-peer subnet that the whole committee is subscribed to.
 2. A subset of the committee is selected to be aggregators for that committee.
-3. The aggregators listen on the subnet for votes, then aggregate all the votes they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#synccommitteecontribution)).
-4. Each aggregator wraps its aggregate vote with a proof that it was indeed an aggregator for that committee, and it signs the resulting data ([`SignedAggregateAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#signedaggregateandproof) or [`SignedContributionAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#signedcontributionandproof))
+3. The aggregators listen on the subnet for votes, then aggregate all the votes they receive that agree with their own view of the network into a single aggregate vote (aggregate [`Attestation`](/part3/containers/operations#attestation) or [`SyncCommitteeContribution`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#synccommitteecontribution)).
+4. Each aggregator wraps its aggregate vote with a proof that it was indeed an aggregator for that committee, and it signs the resulting data ([`SignedAggregateAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#signedaggregateandproof) or [`SignedContributionAndProof`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#signedcontributionandproof))
 5. Finally, the aggregator broadcasts its aggregated vote and proof to a global channel to be received by the next block proposer.
 
 This section is concerned with steps 2 and 4: how the aggregators are selected for duty, and how they prove that they were indeed selected.
@@ -3389,7 +3390,7 @@ This section is concerned with steps 2 and 4: how the aggregators are selected f
 <a id="img_aggregators"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram of the workflow of aggregating attestations from beacon committees](images/diagrams/aggregators.svg)
+![A diagram of the workflow of aggregating attestations from beacon committees.](images/diagrams/aggregators.svg)
 
 <figcaption>
 
@@ -3406,15 +3407,15 @@ First, the size of the resulting aggregator set. With very high probability we w
 
 Second, secrecy. We'd prefer that nobody be able to calculate who the aggregators are until after they have broadcast their aggregations. This helps to avoid denial of service (DoS) attacks. Disrupting consensus would be much simpler via a network DoS attack against a small number of aggregators than against a whole committee. The secrecy property prevents this.
 
-Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make and broadcast aggregate attestations to ensure that at least one aggregate includes their own attestation. This would destroy the benefits of the whole aggregator scheme.
+Third, verifiability. We want it to be easy to verify a claim that a particular validator was selected to be an aggregator. The rationale for this is [explained in the p2p spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/p2p-interface.md#why-are-aggregate-attestations-broadcast-to-the-global-topic-as-aggregateandproofs-rather-than-just-as-attestations). Basically, without verifiability it would be a good strategy for _all_ the validators in the committee to make and broadcast aggregate attestations to ensure that at least one aggregate includes their own attestation. This would destroy the benefits of the whole aggregator scheme.
 
 #### Aggregator selection details
 
-The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection).
+The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#aggregation-selection).
 
 It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures). Each validator in the committee generates a signature over the current slot number using its secret signing key. If that signature modulo a given number is zero then it is an aggregator, otherwise it is not an aggregator.
 
-The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
+The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
 
 <a id="def_get_slot_signature"></a>
 
@@ -3447,7 +3448,7 @@ The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the mi
 <a id="img_committee_aggregators"></a>
 <figure class="chart">
 
-![A bar chart showing the probability of different numbers of aggregators in a committee of 256](images/charts/committee_aggregators.svg)
+![A bar chart showing the probability of different numbers of aggregators in a committee of 256.](images/charts/committee_aggregators.svg)
 
 <figcaption>
 
@@ -3544,7 +3545,7 @@ On the first of these, there is a bias in Ethereum&nbsp;2 to [favour](https://gi
 
 On the second, when we receive an object over the wire, often the first thing we will want to do is to serialise it to calculate its data root for consensus. If we receive it already serialised in the right format then it saves a deserialise/reserialise round trip.
 
-SSZ does not make any effort to compact or compress the serialised data, and there were concerns that this might make it inefficient for the wire transfer protocol. These concerns were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#encoding-strategies) on the wire, as is already done in Ethereum&nbsp;1.
+SSZ does not make any effort to compact or compress the serialised data, and there were concerns that this might make it inefficient for the wire transfer protocol. These concerns were alleviated by adding [Snappy compression](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/p2p-interface.md#encoding-strategies) on the wire, as is already done in Ethereum&nbsp;1.
 
 ##### SSZ development
 
@@ -3562,7 +3563,7 @@ There was one final substantial re-work of the SSZ spec in [June 2019](https://g
 
 #### Overview
 
-The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is maintained in the main consensus specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
+The [specification of SSZ](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md) is maintained in the main consensus specs repo, and that's the place to go for all the details. I will only be presenting an introductory overview here, with a few examples.
 
 The ultimate goal of SSZ is to be able to represent complex internal data structures such as the [BeaconState](/part3/containers/state#beaconstate) as strings of bytes.
 
@@ -3581,7 +3582,7 @@ Unlike RLP, SSZ is not self-describing. You can decode RLP data into a structure
 
 #### Specification
 
-I don't plan to go into every last detail of SSZ &ndash; that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is for &ndash; rather, we'll take a general overview and then dive into a [worked example](#worked-example).
+I don't plan to go into every last detail of SSZ &ndash; that's what the [specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md) is for &ndash; rather, we'll take a general overview and then dive into a [worked example](#worked-example).
 
 The building blocks of SSZ are its basic types and its composite types.
 
@@ -3637,7 +3638,7 @@ A list is an ordered variable-length homogeneous collection with a maximum of `N
 
 In the SSZ spec a list is denoted by `List[type, N]`. For example, `List[uint64, 100]` is a list containing anywhere between zero and one hundred `uint64` types.
 
-The maximum length parameter, `N`, on lists is [not used](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216) in serialisation or deserialisation. It is used, however, in Merkleization, and in particular enables [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/merkle-proofs.md#generalized-merkle-tree-index) in Merkle proof generation.
+The maximum length parameter, `N`, on lists is [not used](https://github.com/ethereum/consensus-specs/pull/1180#issuecomment-504169216) in serialisation or deserialisation. It is used, however, in Merkleization, and in particular enables [generalised indices](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/merkle-proofs.md#generalized-merkle-tree-index) in Merkle proof generation.
 
 [TODO: link to Merkleization and generalised indices]::
 
@@ -3712,7 +3713,7 @@ As an example, this bitlist with three elements is encoded into a single byte. T
 <a id="img_ssz_bitlist"></a>
 <figure class="diagram" style="width: 60%">
 
-![A diagram showing how the bitlist sentinel works](images/diagrams/ssz-bitlist.svg)
+![A diagram showing how the bitlist sentinel works.](images/diagrams/ssz-bitlist.svg)
 
 <figcaption>
 
@@ -3798,7 +3799,7 @@ In Part&nbsp;1, instead of directly encoding the variable size list in place, it
 <a id="img_ssz_examples_baz"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of the serialisation of the Baz container](images/diagrams/ssz-examples_Baz.svg)
+![Diagram of the serialisation of the Baz container.](images/diagrams/ssz-examples_Baz.svg)
 
 <figcaption>
 
@@ -3817,7 +3818,7 @@ It's not only containers that use this format, it applies to any type that conta
 
 ##### Aliases
 
-Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#aliases) here for completeness:
+Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#aliases) here for completeness:
 
 > For convenience we alias:
 >
@@ -3830,7 +3831,7 @@ In the main beacon chain spec, a bunch of [custom types](/part3/config/types#tab
 
 ##### Default values
 
-Finally, each type has a default value. Once again directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#default-values):
+Finally, each type has a default value. Once again directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#default-values):
 
 | Type | Default Value |
 | ---- | ------------- |
@@ -3882,8 +3883,8 @@ Now we have enough information to build the `IndexedAttestation` object and calc
 
 ```python
 from eth2spec.utils.ssz.ssz_typing import *
-from eth2spec.bellatrix import mainnet
-from eth2spec.bellatrix.mainnet import *
+from eth2spec.capella import mainnet
+from eth2spec.capella.mainnet import *
 
 attestation = IndexedAttestation(
     attesting_indices = [33652, 59750, 92360],
@@ -3969,7 +3970,7 @@ All the remaining items are fixed size, and are encoded in-place, including recu
 <a id="img_ssz_examples_indexedattestation"></a>
 <figure class="diagram" style="width:72%">
 
-![Diagram of the serialisation of the IndexedAttestation container](images/diagrams/ssz-examples_IndexedAttestation.svg)
+![Diagram of the serialisation of the IndexedAttestation container.](images/diagrams/ssz-examples_IndexedAttestation.svg)
 
 <figcaption>
 
@@ -4020,7 +4021,7 @@ Another thing to note is that, since `attestation_1` and `attestation_2` are ide
 <a id="img_ssz_examples_attesterslashing"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of the serialisation of the AttesterSlashing container](images/diagrams/ssz-examples_AttesterSlashing.svg)
+![Diagram of the serialisation of the AttesterSlashing container.](images/diagrams/ssz-examples_AttesterSlashing.svg)
 
 <figcaption>
 
@@ -4031,7 +4032,7 @@ Serialisation of the `AttesterSlashing` container.
 
 #### See also
 
-The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is the authoritative source. There is also a curated list of [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138).
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md) is the authoritative source. There is also a curated list of [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138).
 
 The historical discussion threads around whether to use SSZ for both consensus and p2p serialisation or not are a goldmine of insight and wisdom.
 
@@ -4045,7 +4046,7 @@ Other SSZ resources:
   - [SSZ encoding diagrams](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
   - Formal verification of the SSZ specification: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
   - An excellent [SSZ explainer](https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
-  - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0, Altair and Bellatrix available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
+  - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for the various consensus layer upgrades available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
 ### Hash Tree Roots and Merkleization <!-- /part2/building_blocks/merkleization -->
 
@@ -4082,7 +4083,7 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 <!-- markdownlint-disable code-block-style -->
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
-    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
 <!-- markdownlint-enable code-block-style -->
 
 Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
@@ -4117,7 +4118,7 @@ In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, 
 <a id="img_merkleization_tree"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram of a Merkle tree](images/diagrams/merkleization-tree.svg)
+![Diagram of a Merkle tree.](images/diagrams/merkleization-tree.svg)
 
 <figcaption>
 
@@ -4160,7 +4161,7 @@ The difference with Merkleization is that the Merkle tree is computed on-the-fly
 'bfe3c665d2e561f13b30606c580cb703b2041287e212ade110f0bfd8563e21bb'
 ```
 
-The Merkleization function (called `merkleize()` in the SSZ spec, and [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) in the executable spec) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
+The Merkleization function (called `merkleize()` in the SSZ spec, and [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) in the executable spec) takes a list of 32-byte chunks and returns the root of the tree for which those chunks are the leaves.
 
 The list of chunks passed to `merkleize_chunks()` can be any length, but will be padded with zero chunks so that the total number of chunks is rounded up to the next whole power of two, such that we conceptually have a full binary tree. Thus, a list of three chunks gets implicitly padded with an extra zero chunk:
 
@@ -4193,12 +4194,12 @@ The hash tree root is a generalisation of Merkleization that we can apply to the
 
 Calculating the hash tree root of an SSZ object is recursive. Given a composite SSZ object, we iteratively move through the layers of its structure until we reach a basic type or collection of basic types that we can pack into chunks and Merkleize directly. Then we move back through the structure using the calculated hash tree roots as chunks themselves.
 
-The process of calculating a hash tree root is defined in the [Simple Serialize specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization), and that's the place to go for the full details. However, in simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when finding an object's hash tree root.
+The process of calculating a hash tree root is defined in the [Simple Serialize specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization), and that's the place to go for the full details. However, in simplified form (once again ignoring the SSZ union type) there are basically two paths to choose from when finding an object's hash tree root.
 
   - For basic types or collections of basic types (lists and vectors), we just pack and Merkleize directly.
   - For containers and collections of composite types, we recursively find the hash tree roots of the contents.
 
-The following two rules are a simplified summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization).
+The following two rules are a simplified summary of the first six rules listed in [the specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization).
 
  1. If `X` is an SSZ basic object, a list or vector of basic objects, or a bitlist or bitvector, then `hash_tree_root(X) = merkleize_chunks(pack(X))`. The `pack()` function returns a list of chunks that can be Merkleized directly.
  2. If `X` is an SSZ container, or a vector or list of composite objects, then the hash tree root is calculated recursively, `hash_tree_root(X) = merkleize_chunks([hash_tree_root(x) for x in X])`. The list comprehension is a list of hash tree roots, which is equivalent to a list of chunks.
@@ -4209,7 +4210,7 @@ We'll see plenty of concrete applications of these two rules in the [worked exam
 
 Merkleization operates on lists of "chunks" which are 32-byte blobs of data. Lists generated by means of step 2 above are already in this form. However, step 1 involves basic objects that require a "packing and chunking" operation prior to Merkleization.
 
-The [spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization) gives the precise rules, but it basically looks like this:
+The [spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization) gives the precise rules, but it basically looks like this:
 
   - The object (a basic type, a list/vector of basic types, or a bitlist/bitvector) is serialised via SSZ. The sentinel bit is omitted from the serialisation of bitlist types.
   - The serialisation is right-padded with zero bytes up to the next full chunk (32 byte boundary).
@@ -4251,7 +4252,7 @@ Bitlists require a similar treatment since we remove the sentinel bit before Mer
 
 #### Summaries and Expansions
 
-The SSZ spec describes features of Merkleization called [summaries and expansions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#summaries-and-expansions). These are not explicit functions of Merkleization, but implicitly arise as consequences of the design.
+The SSZ spec describes features of Merkleization called [summaries and expansions](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#summaries-and-expansions). These are not explicit functions of Merkleization, but implicitly arise as consequences of the design.
 
 Simply put, anywhere in the process, an entire SSZ object can be replaced with its hash tree root without affecting the final result.
 
@@ -4299,7 +4300,7 @@ A container's hash tree root is the Merkleization of the list of hash tree roots
 <a id="img_merkleization_indexedattestation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation.svg)
+![Diagram showing how to calculate the hash tree root of an IndexedAttestation type.](images/diagrams/merkleization-IndexedAttestation.svg)
 
 <figcaption>
 
@@ -4319,7 +4320,7 @@ assert(a.hash_tree_root() == merkleize_chunks(
     ]))
 ```
 
-The [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) function is provided by the `merkle_minimal.py` library. We can apply this function directly as the hash tree roots in the list already constitute chunks. (We could also use the [`get_merkle_root()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L30) function, but then we'd have to specify a `pad_to` value of 4 to get a tree of the correct depth.)
+The [`merkleize_chunks()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L47) function is provided by the `merkle_minimal.py` library. We can apply this function directly as the hash tree roots in the list already constitute chunks. (We could also use the [`get_merkle_root()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/tests/core/pyspec/eth2spec/utils/merkle_minimal.py#L30) function, but then we'd have to specify a `pad_to` value of 4 to get a tree of the correct depth.)
 
 ##### The `attesting_indices` root
 
@@ -4357,7 +4358,7 @@ In diagram form the hash tree root calculation for the list looks like this.
 <a id="img_merkleization_attestingindices"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a List type](images/diagrams/merkleization-AttestingIndices.svg)
+![Diagram showing how to calculate the hash tree root of a List type.](images/diagrams/merkleization-AttestingIndices.svg)
 
 <figcaption>
 
@@ -4426,7 +4427,7 @@ assert(a.data.hash_tree_root() == merkleize_chunks(
 <a id="img_merkleization_attestationdata"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing how to calculate the hash tree root of an AttestationData type](images/diagrams/merkleization-AttestationData.svg)
+![Diagram showing how to calculate the hash tree root of an AttestationData type.](images/diagrams/merkleization-AttestationData.svg)
 
 <figcaption>
 
@@ -4447,7 +4448,7 @@ assert(a.signature.hash_tree_root() ==
 <a id="img_merkleization_signature"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a Signature type](images/diagrams/merkleization-Signature.svg)
+![Diagram showing how to calculate the hash tree root of a Signature type.](images/diagrams/merkleization-Signature.svg)
 
 <figcaption>
 
@@ -4465,7 +4466,7 @@ Assembling all these parts we can illustrate in both diagram form and code form 
 <a id="img_merkleization_indexedattestation_all"></a>
 <figure class="diagram" style="width:100%">
 
-![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation_all.svg)
+![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type.](images/diagrams/merkleization-IndexedAttestation_all.svg)
 
 <figcaption>
 
@@ -4479,8 +4480,8 @@ Illustrating the steps required to calculate the hash tree root of an `IndexedAt
 The following code illustrates all the points from the worked example. You can run it by setting up the executable spec as described in [the Appendix](/appendices/running). If everything goes well the only thing it should print is `Success!`.
 
 ```python
-from eth2spec.bellatrix import mainnet
-from eth2spec.bellatrix.mainnet import *
+from eth2spec.capella import mainnet
+from eth2spec.capella.mainnet import *
 from eth2spec.utils.ssz.ssz_typing import *
 from eth2spec.utils.merkle_minimal import merkleize_chunks
 
@@ -4577,7 +4578,7 @@ print("Success!")
 
 [What is a Merkle Tree?](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/) by Alin Tomescu is the best primer I have found on Merkle trees, and a great starting point if you are unsure about their construction and properties.
 
-The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
+The [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md) is the authoritative source for Merkleization as well as serialisation. Many [SSZ implementations](https://github.com/ethereum/consensus-specs/issues/2138) also include Merkleization.
 
 A formal verification of Merkleization has been performed: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/merkleise-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/merkle).
 
@@ -4668,21 +4669,17 @@ The contents of each are identical.
 
 ### Version information
 
-This edition of Upgrading Ethereum is based on the Bellatrix version of the beacon chain specification, and corresponds to [Release v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0), made on the 22nd of September 2022.
+This edition of Upgrading Ethereum is based on the Capella version of the beacon chain specification, and corresponds to [Release v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0), made on the 18th of April, 2023.
 
-There is no single specification document that covers Bellatrix. Rather, we have the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md), an additional [Altair specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md), and the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md). Each builds on top of the previous version in a kind of text-based diff.
+There is no single specification document that covers Capella. Rather, we have the [Phase&nbsp;0 specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/beacon-chain.md), the [Altair specification changes](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/beacon-chain.md), the [Bellatrix specification changes](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/beacon-chain.md), and the [Capella specification changes](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/capella/beacon-chain.md). Each builds on top of the previous version in a kind of text-based diff. In addition, these documents are not stable between upgrades. For example, the Phase&nbsp;0 specs [were updated](https://github.com/ethereum/consensus-specs/compare/v1.2.0..v1.3.0#diff-0e824f6ab9ff551699ddf9d108c0b3705ce41e2bd72f68c7f1f32269e58f0bdf) as part of the Capella release. This can all be rather confusing and difficult to track.
 
-To make the whole thing easier to follow in this chapter, I have consolidated the three specifications, omitting most of the parts that were superseded by Altair and then Bellatrix. In general, I have tried to reflect the existing structure of the documents to make them easier to read side-by-side with the original specs. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document into the flow of this one.
+To make the whole thing easier to follow in this chapter, I have consolidated all of the specifications to date, (mostly) omitting parts that have been superseded[^fn-superseded-parts]. In general, I have tried to reflect the existing structure of the documents to make them easier to read side-by-side with the original specs. However, I have included the separate [BLS](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/bls.md) document into the flow of this one.
+
+[^fn-superseded-parts]: You can still find old versions, as described in the [Preface](/preface#versions).
 
 #### See also
 
-The main references:
-
-  - [The Phase&nbsp;0](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/beacon-chain.md) beacon chain specification.
-  - [Altair updates](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/beacon-chain.md) to the beacon chain specification.
-  - [Bellatrix updates](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) to the beacon chain specification.
-
-Other useful, but in places outdated references:
+In addition to the spec documents referenced above, a few other current and historical documents exist.
 
   - Vitalik's [annotated specifications](https://github.com/ethereum/annotated-spec), covering Phase&nbsp;0, Altair, The Merge, and beyond.
   - [Serenity Design Rationale](https://notes.ethereum.org/@vbuterin/rkhCgQteN)
@@ -4733,7 +4730,8 @@ And regarding "64-bit", early versions of the spec used [other](https://github.c
 | `BLSSignature`       | `Bytes96`      | a BLS12-381 signature                                      |
 | `ParticipationFlags` | `uint8`        | a succinct representation of 8 boolean participation flags |
 | `Transaction`        | `ByteList[MAX_BYTES_PER_TRANSACTION]` | either a [typed transaction envelope](https://eips.ethereum.org/EIPS/eip-2718#opaque-byte-array-rather-than-an-rlp-array) or a legacy transaction |
-| `ExecutionAddress`   | `Bytes20` | Address of account on the execution layer |
+| `ExecutionAddress`   | `Bytes20`      | Address of account on the execution layer |
+| `WithdrawalIndex`    | `uint64`       | an index of a `Withdrawal` |
 
 #### Slot
 
@@ -4758,9 +4756,7 @@ Fun fact: Epochs were originally [called Cycles](https://github.com/ethereum/con
 
 Validators are organised into committees that collectively vote (make attestations) on blocks. Each committee is active at exactly one slot per epoch, but several committees are active at each slot. The `CommitteeIndex` type is an index into the list of committees active at a slot.
 
-The beacon chain's committee-based design is a large part of what makes it practical to implement while maintaining security. If all validators were active all the time, there would be an overwhelming number of messages to deal with. The random shuffling of committees make them very hard to subvert by an attacker without a supermajority of stake.
-
-[TODO: link to Committees section]::
+The beacon chain's [committee-based design](/part2/building_blocks/committees) is a large part of what makes it practical to implement while maintaining security. If all validators were active all the time, there would be an overwhelming number of messages to deal with. The random shuffling of committees make them very hard to subvert by an attacker without a supermajority of stake.
 
 #### ValidatorIndex
 
@@ -4794,7 +4790,7 @@ Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept 
 
 #### DomainType
 
-`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Ten domain types are [defined in Bellatrix](/part3/config/constants#domain-types).
+`DomainType` is just a [cryptographic nicety](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-12#section-2.2.5): messages intended for different purposes are tagged with different domains before being hashed and possibly signed. It's a kind of name-spacing to avoid clashes; probably unnecessary, but considered a best-practice. Eleven domain types are [defined in Capella](/part3/config/constants#domain-types).
 
 #### ForkDigest
 
@@ -4803,7 +4799,7 @@ Unlike Ethereum 1[^fn-eth1-forkid], the beacon chain has an in-protocol concept 
 The `ForkDigest` serves two purposes.
 
   1. Within the consensus protocol to prevent, for example, attestations from validators on one fork (that maybe haven't upgraded yet) being counted on a different fork.
-  2. Within the networking protocol to help to distinguish between useful peers that on the same chain, and useless peers that are on a different chain. This usage is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice), where `ForkDigest` appears frequently.
+  2. Within the networking protocol to help to distinguish between useful peers that on the same chain, and useless peers that are on a different chain. This usage is described in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice), where `ForkDigest` appears frequently.
 
 Specifically, `ForkDigest` is the first four bytes of the hash tree root of the [`ForkData`](/part3/containers/dependencies#forkdata) object containing the current chain [`Version`](#version) and the [`genesis_validators_root`](/part3/containers/state#genesis_validators_root) which was created at beacon chain [initialisation](/part3/initialise#def_initialize_beacon_state_from_eth1). It is computed in [`compute_fork_digest()`](/part3/helper/misc#def_compute_fork_digest).
 
@@ -4843,7 +4839,7 @@ As an aside, it might have been more intuitive if `ParticipationFlags` were a `B
 
 The Transaction type was introduced in the Bellatrix pre-Merge upgrade to allow for Ethereum transactions to be included in beacon blocks. It appears in [`ExecutionPayload`](/part3/containers/execution#executionpayload) objects.
 
-Transactions are completely opaque to the beacon chain and are exclusively handled in the execution layer. A note reflecting this is included in the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md):
+Transactions are completely opaque to the beacon chain and are exclusively handled in the execution layer. A note reflecting this is included in the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/beacon-chain.md):
 
 > _Note_: The `Transaction` type is a stub which is not final.
 
@@ -4852,6 +4848,12 @@ The maximum size of a transaction is [`MAX_BYTES_PER_TRANSACTION`](/part3/config
 #### ExecutionAddress
 
 The ExecutionAddress type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20-byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
+
+#### WithdrawalIndex
+
+The WithdrawalIndex keeps track of the total number of withdrawal transactions made from the consensus layer to the execution layer. All nodes store this number in their state, so a block containing withdrawal transactions that have unexpected withdrawal indices is invalid.
+
+At the maximum rate of 16 withdrawals per slot, a `uint64` will take 438 billion years to overflow. This ought to be enough.
 
 #### References
 
@@ -4951,7 +4953,7 @@ The apportioning of rewards was overhauled in the Altair upgrade to better refle
 <a id="img_incentives_weights"></a>
 <figure class="diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](images/diagrams/incentives-weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards.](images/diagrams/incentives-weights.svg)
 
 <figcaption>
 
@@ -4969,25 +4971,31 @@ The proportion of the total reward derived from each of the micro-rewards.
 
 [TODO: link to somewhere useful for withdrawal creds]::
 
-Withdrawal prefixes relate to the withdrawal credentials provided when deposits are made for validators. The withdrawal credential is a commitment to a private key that may be used later to withdraw funds from the validator's balance on the beacon chain.
+Withdrawal prefixes relate to the withdrawal credentials provided when deposits are made for validators.
 
 Two ways to specify the withdrawal credentials are currently available, versioned with these prefixes, with others such as [`0x02`](https://github.com/ethereum/consensus-specs/pull/2454) and [`0x03`](https://ethresear.ch/t/0x03-withdrawal-credentials-simple-eth1-triggerable-withdrawals/10021?u=benjaminion) under discussion.
 
-These withdrawal credential prefixes are not yet significant in the core beacon chain spec, but will become significant when withdrawals are enabled in a future upgrade. The withdrawal credentials data is not consensus-critical, and future withdrawal credential types can be added without a hard fork. There are [suggestions](https://ethresear.ch/t/withdrawal-credential-rotation-from-bls-to-eth1/8722?u=benjaminion) as to how existing credentials might be changed between methods which would be consensus critical.
-
-The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
-
-See the [Withdrawals](/part5/withdrawals) section for discussion on what the mechanism might look like.
+When processing deposits onto the consensus layer, the `withdrawal_credential` of the deposit is not checked in any way. It's up to the depositor to ensure that they are using the correct prefix and contents to be able to receive their rewards and retrieve their stake back after exiting the consensus layer. This also means that we can potentially introduce new types of withdrawal credentials at any time, enabling them later with a hard fork, just as we did with `0x01` credentials ahead of the [Capella upgrade](/part4/history/capella) that began using them.
 
 ##### `BLS_WITHDRAWAL_PREFIX`
 
-The beacon chain launched with only BLS-style withdrawal credentials available, so all early stakers used this. The `0x00` prefix on the credential distinguishes this type from the others: it replaces the first byte of the hash of the BLS public key that corresponds to the BLS private key of the staker.
+The beacon chain launched with only BLS-style withdrawal credentials available, so all early stakers used this.
 
-With this type of credential, in addition to a BLS signing key, stakers need a second BLS key that they will later use for withdrawals. The credential registered in the deposit data is the 32 byte SHA256 hash of the validators withdrawal public key, with the first byte set to `BLS_WITHDRAWAL_PREFIX`.
+It was not at all clear in the early days what accounts on Ethereum&nbsp;2.0 would look like, and what addressing scheme they might use. The `0x00` credential created a placeholder or commitment to a future withdrawal credential change.
+
+With this type of credential, in addition to a BLS signing key, stakers have a second BLS "withdrawal" key. Since the Capella upgrade, stakers have been able to use their withdrawal key to sign a message instructing the consensus layer to [change its withdrawal credential](/part3/transition/block#def_process_bls_to_execution_change) from type `0x00` to type `0x01`.
+
+The credential registered in the deposit data is the 32 byte SHA256 hash of the validator's withdrawal public key, with the first byte set to `0x00` (`BLS_WITHDRAWAL_PREFIX`).
 
 ##### `ETH1_ADDRESS_WITHDRAWAL_PREFIX`
 
-Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.com/ethereum/consensus-specs/pull/2149) once it became clear that Ethereum&nbsp;2.0 would not be using a BLS-based address scheme for accounts at any time soon. These provide a commitment that stakers will be able to withdraw their beacon chain funds to a normal Ethereum account (possibly a contract account) at a future date.
+Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.com/ethereum/consensus-specs/pull/2149) once it became clear that Ethereum&nbsp;2.0 would not be using a BLS-based address scheme for accounts at any time soon. The Capella upgrade enables automatic partial and full withdrawals of validators' balances from the beacon chain to normal Ethereum accounts and wallets.
+
+An Eth1 withdrawal credential looks like the byte `0x01` (`ETH1_ADDRESS_WITHDRAWAL_PREFIX`), followed by eleven `0x00` bytes, followed by the 20-byte Ethereum address of the destination account.
+
+In addition to enabling withdrawal transactions for validators having `0x01` Eth1 credentials, the Capella upgrade gives validators with old `0x00` BLS style credentials the opportunity to make a [one-time change](/part3/transition/block#def_process_bls_to_execution_change) from BLS to Eth1 withdrawal credentials[^fn-capella-bls-eth1].
+
+[^fn-capella-bls-eth1]: Fun fact: at the point of the Capella upgrade, out of 567,144 total validators, 322,491 (56.9%) had `0x00` BLS withdrawal credentials and 244,653 (43.1%) had `0x01` Eth1 withdrawal credentials.
 
 #### Domain types
 
@@ -5001,19 +5009,21 @@ Eth1 withdrawal credentials are much simpler, and were [adopted](https://github.
 <a id="domain_sync_committee"></a>
 <a id="domain_sync_committee_selection_proof"></a>
 <a id="domain_contribution_and_proof"></a>
+<a id="domain_bls_to_execution_change"></a>
 
 | Name | Value |
 | - | - |
-| `DOMAIN_BEACON_PROPOSER` | `DomainType('0x00000000')` |
-| `DOMAIN_BEACON_ATTESTER` | `DomainType('0x01000000')` |
-| `DOMAIN_RANDAO` | `DomainType('0x02000000')` |
-| `DOMAIN_DEPOSIT` | `DomainType('0x03000000')` |
-| `DOMAIN_VOLUNTARY_EXIT` | `DomainType('0x04000000')` |
-| `DOMAIN_SELECTION_PROOF` | `DomainType('0x05000000')` |
-| `DOMAIN_AGGREGATE_AND_PROOF` | `DomainType('0x06000000')` |
-| `DOMAIN_SYNC_COMMITTEE` | `DomainType('0x07000000')` |
+| `DOMAIN_BEACON_PROPOSER`                | `DomainType('0x00000000')` |
+| `DOMAIN_BEACON_ATTESTER`                | `DomainType('0x01000000')` |
+| `DOMAIN_RANDAO`                         | `DomainType('0x02000000')` |
+| `DOMAIN_DEPOSIT`                        | `DomainType('0x03000000')` |
+| `DOMAIN_VOLUNTARY_EXIT`                 | `DomainType('0x04000000')` |
+| `DOMAIN_SELECTION_PROOF`                | `DomainType('0x05000000')` |
+| `DOMAIN_AGGREGATE_AND_PROOF`            | `DomainType('0x06000000')` |
+| `DOMAIN_SYNC_COMMITTEE`                 | `DomainType('0x07000000')` |
 | `DOMAIN_SYNC_COMMITTEE_SELECTION_PROOF` | `DomainType('0x08000000')` |
-| `DOMAIN_CONTRIBUTION_AND_PROOF` | `DomainType('0x09000000')` |
+| `DOMAIN_CONTRIBUTION_AND_PROOF`         | `DomainType('0x09000000')` |
+| `DOMAIN_BLS_TO_EXECUTION_CHANGE`        | `DomainType('0x0A000000')` |
 
 These domain types are used in three ways: for seeds, for signatures, and for selecting aggregators.
 
@@ -5033,8 +5043,13 @@ In addition, as a cryptographic nicety, each of the protocol's signature types i
   - Deposit data messages incorporate `DOMAIN_DEPOSIT`
   - Validator voluntary exit messages incorporate `DOMAIN_VOLUNTARY_EXIT`
   - Sync committee signatures incorporate `DOMAIN_SYNC_COMMITTEE`
+  - BLS withdrawal credential change messages incorporate `DOMAIN_BLS_TO_EXECUTION_CHANGE`
 
-In each case, except for deposits, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. Deposits are valid across forks, but other messages are not. Note that this would allow validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
+For most of these, the fork version is [also incorporated](/part3/helper/accessors#get_domain) before signing. This allows validators to participate, if they wish, in two independent forks of the beacon chain without fear of being slashed.
+
+However, the user-signed messages for deposits (`DOMAIN_DEPOSIT`) and for BLS withdrawal credential changes (`DOMAIN_BLS_TO_EXECUTION_CHANGE`) do not incorporate the fork version when signed. This makes them valid across all forks, which is a usability enhancement.
+
+Voluntary exit messages (`DOMAIN_VOLUNTARY_EXIT`) are a bit of an anomaly in that they are user signed but also incorporate the fork version, meaning that they expire after two upgrades (voluntary exit messages signed in Phase 0 or Altair are no longer valid in Capella). There is [some discussion](https://github.com/ethereum/consensus-specs/pull/3288) about making voluntary exits non-expiring in future.
 
 See the [BLS signatures](/part2/building_blocks/signatures) chapter for more information.
 
@@ -5046,7 +5061,7 @@ Briefly, at each slot, validators are selected to aggregate attestations from th
 
 These four are not part of the consensus-critical state-transition, but are nonetheless important to the healthy functioning of the chain.
 
-This mechanism is described in the [Phase&nbsp;0 honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection) for attestation aggregation, and in the [Altair honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection) for sync committee aggregation.
+This mechanism is described in the [Phase&nbsp;0 honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection) for attestation aggregation, and in the [Altair honest validator spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#aggregation-selection) for sync committee aggregation.
 
 See the [Aggregator Selection](/part2/building_blocks/aggregator) chapter for more information.
 
@@ -5062,11 +5077,11 @@ This is the compressed [serialisation](https://github.com/zcash/librustzcash/blo
 
 It was introduced as a convenience when verifying aggregate signatures that contain no public keys in [`eth_fast_aggregate_verify()`](/part3/helper/crypto#def_eth_fast_aggregate_verify). The underlying [FastAggregateVerify](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3.4) function from the BLS signature standard would reject these.
 
-`G2_POINT_AT_INFINITY` is described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document, but included here for convenience.
+`G2_POINT_AT_INFINITY` is described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/bls.md) document, but included here for convenience.
 
 ### Preset <!-- /part3/config/preset -->
 
-The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/v1.2.0/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/v1.2.0/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/v1.2.0/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
+The "presets" are consistent collections of configuration variables that are bundled together. The [specs repo](https://github.com/ethereum/consensus-specs/tree/v1.3.0/configs) currently defines two sets of presets, [mainnet](https://github.com/ethereum/consensus-specs/blob/v1.3.0/configs/mainnet.yaml) and [minimal](https://github.com/ethereum/consensus-specs/blob/v1.3.0/configs/minimal.yaml). The mainnet configuration is running in production on the beacon chain; minimal is often used for testing. Other configurations are possible. For example, Teku uses a [swift](https://github.com/ConsenSys/teku/blob/d368fd44ec43eb93923dd4c150a6649d82798e43/util/src/main/resources/tech/pegasys/teku/util/config/configs/swift.yaml) configuration for acceptance testing.
 
 All the values discussed below are from the mainnet configuration.
 
@@ -5089,7 +5104,9 @@ Validators are organised into committees to do their work. At any one time, each
 
 On the beacon chain, up to 64 committees are active in a slot and effectively act as a single committee as far as the fork-choice rule is concerned. They all vote on the proposed block for the slot, and their votes/attestations are pooled. In a similar way, all committees active during an epoch (that is, the whole active validator set) act effectively as a single committee as far as justification and finalisation are concerned.
 
-The number 64 is intended to map to [one committee per shard](https://github.com/ethereum/consensus-specs/pull/1428) once data shards are deployed, since these committees will also vote on shard crosslinks.
+The number 64 was intended to map to [one committee per shard](https://github.com/ethereum/consensus-specs/pull/1428) once data shards were deployed in the now abandoned Phase&nbsp;1 of the Ethereum&nbsp;2.0 roadmap. The plan was for each committee to also vote on one shard crosslink, for a total of 64 shards. We are no longer going down that path, but the committees remain at each slot.
+
+All the above is discussed further in the section on [Committees](/part2/building_blocks/committees).
 
 Note that sync committees are a different thing: there is only one sync committee active at any time.
 
@@ -5138,7 +5155,7 @@ These calculations are done in [`process_effective_balance_updates()`](/part3/tr
 
 ##### `MIN_DEPOSIT_AMOUNT`
 
-`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the beacon chain specification document. Rather, it is enforced in the [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
+`MIN_DEPOSIT_AMOUNT` is not actually used anywhere within the beacon chain specification document. Rather, it is enforced in the [deposit contract](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L113) that [was deployed](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code) to the Ethereum 1 chain. Any amount less than this value sent to the deposit contract is reverted.
 
 Allowing stakers to make deposits smaller than a full stake is useful for topping-up a validator's balance if its effective balance has dropped below 32&nbsp;Ether in order to maintain full productivity. However, this actually led to a [vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) for some staking pools, involving the front-running of deposits. In some circumstances, a front-running attacker could change a genuine depositor's withdrawal credentials to their own.
 
@@ -5180,9 +5197,7 @@ One aspect of performance is network bandwidth. When a validator becomes the blo
 
 `MIN_ATTESTATION_INCLUSION_DELAY` was an attempt to "level the playing field" by setting a minimum number of slots before an attestation can be included in a beacon block. It was [originally set at 4](https://github.com/ethereum/consensus-specs/pull/143), with a 6-second slot time, allowing 24 seconds for attestations to propagate around the network.
 
-It was [later set to one](https://github.com/ethereum/consensus-specs/pull/1157) &ndash; attestations are included as early as possible &ndash; and, now that we plan to crosslink shards every slot, this is the only value that makes sense. So `MIN_ATTESTATION_INCLUSION_DELAY` exists today as a kind of relic of the earlier design.
-
-The current slot time of 12 seconds is assumed to allow sufficient time for attestations to propagate and be aggregated sufficiently within one slot.
+It was [later set to one](https://github.com/ethereum/consensus-specs/pull/1157) &ndash; attestations are included as early as possible &ndash; and `MIN_ATTESTATION_INCLUSION_DELAY` exists today as a relic of the earlier design. The current slot time of 12 seconds is assumed to allow sufficient time for attestations to propagate and be aggregated sufficiently within one slot.
 
 ##### `SLOTS_PER_EPOCH`
 
@@ -5198,7 +5213,7 @@ Since every validator attests one every epoch, there is an interplay between the
 
 A random seed is used to select all the committees and proposers for an epoch. During each epoch, the beacon chain accumulates randomness from proposers via the RANDAO and stores it. The seed for the current epoch is based on the RANDAO output from the epoch `MIN_SEED_LOOKAHEAD` ` + ` `1` ago. With `MIN_SEED_LOOKAHEAD` set to one, the effect is that we can know the seed for the current epoch and the next epoch, but not beyond, since the next-but-one epoch depends on randomness from the current epoch that hasn't been accumulated yet.
 
-This mechanism is designed to allow sufficient time for committee members to find each other on the peer-to-peer network, and in future to sync up any shard data they need. But preventing committee makeup being known too far ahead limits the opportunity for coordinated collusion between validators.
+This mechanism is designed to allow sufficient time for members of newly formed committees to find each other on the peer-to-peer network, while preventing committee makeup being known too far ahead limits the opportunity for coordinated collusion between validators.
 
 ##### `MAX_SEED_LOOKAHEAD`
 
@@ -5216,7 +5231,7 @@ In order to safely onboard new validators, the beacon chain needs to take a view
 
 `EPOCHS_PER_ETH1_VOTING_PERIOD` ` * ` `SLOTS_PER_EPOCH` is the total number of votes for Eth1 blocks that are collected. As soon as half of this number of votes are for the same Eth1 block, that block is adopted by the beacon chain and deposit processing can continue.
 
-Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
+Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
 
 This parameter [was increased](https://github.com/ethereum/consensus-specs/pull/2093/files) from 32 to 64 epochs for the beacon chain mainnet. This increase is intended to allow devs more time to respond if there is any trouble on the Eth1 chain, in addition to the eight hours grace provided by `ETH1_FOLLOW_DISTANCE`.
 
@@ -5224,7 +5239,7 @@ For a detailed analysis of these parameters, see this [article](https://ethresea
 
 ##### `SLOTS_PER_HISTORICAL_ROOT`
 
-There have been several redesigns of the way the beacon chain stores its past history. The current design is a [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion). The block root and state root for every slot are stored in the state for `SLOTS_PER_HISTORICAL_ROOT` slots. When that list is full, both lists are Merkleized into a single Merkle root, which is added to the ever-growing `state.historical_roots` list.
+There have been several redesigns of the way the beacon chain stores its past history. The current design is a [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion). The block root and state root for every slot are stored in the state for `SLOTS_PER_HISTORICAL_ROOT` slots. When those lists are full, each list is [Merkleized separately](/part3/transition/epoch#def_process_historical_summaries_update), and their roots are added to the ever-growing `state.historical_summaries` list within an [`HistoricalSummary`](/part3/containers/dependencies#historicalsummary) container.
 
 #### State list lengths
 
@@ -5288,7 +5303,7 @@ Note that there are similar constants with different values here.
   - Constants updated in the Altair upgrade have the suffix `_ALTAIR`.
   - Constants updated in the Bellatrix upgrade have the suffix `_BELLATRIX`.
 
-This is [explained](https://github.com/ethereum/consensus-specs/tree/v1.2.0/configs#forking) in the specs repo as follows:
+This is [explained](https://github.com/ethereum/consensus-specs/tree/v1.3.0/configs#forking) in the specs repo as follows:
 
 > Variables are not replaced but extended with forks. This is to support syncing from one state to another over a fork boundary, without hot-swapping a config. Instead, for forks that introduce changes in a variable, the variable name is suffixed with the fork name.
 
@@ -5377,14 +5392,16 @@ However, for the initial stage of the beacon chain, Phase&nbsp;0, `PROPORTIONAL_
 <a id="max_attestations"></a>
 <a id="max_deposits"></a>
 <a id="max_voluntary_exits"></a>
+<a id="max_bls_to_execution_changes"></a>
 
 | Name | Value |
 | - | - |
-| `MAX_PROPOSER_SLASHINGS` | `2**4` (= 16) |
-| `MAX_ATTESTER_SLASHINGS` | `2**1` (= 2) |
-| `MAX_ATTESTATIONS` | `2**7` (= 128) |
-| `MAX_DEPOSITS` | `2**4` (= 16) |
-| `MAX_VOLUNTARY_EXITS` | `2**4` (= 16) |
+| `MAX_PROPOSER_SLASHINGS`       | `2**4` (= 16)  |
+| `MAX_ATTESTER_SLASHINGS`       | `2**1` (= 2)   |
+| `MAX_ATTESTATIONS`             | `2**7` (= 128) |
+| `MAX_DEPOSITS`                 | `2**4` (= 16)  |
+| `MAX_VOLUNTARY_EXITS`          | `2**4` (= 16)  |
+| `MAX_BLS_TO_EXECUTION_CHANGES` | `2**4` (= 16)  |
 
 These parameters are used to size lists in the beacon block bodies for the purposes of SSZ serialisation, as well as constraining the maximum size of beacon blocks so that they can propagate efficiently, and avoid DoS attacks.
 
@@ -5428,6 +5445,7 @@ With 500,000 validators, the expected time between being selected for sync commi
 <a id="max_transactions_per_payload"></a>
 <a id="bytes_per_logs_bloom"></a>
 <a id="max_extra_data_bytes"></a>
+<a id="max_withdrawals_per_payload"></a>
 
 | Name | Value |
 | - | - |
@@ -5435,12 +5453,31 @@ With 500,000 validators, the expected time between being selected for sync commi
 | `MAX_TRANSACTIONS_PER_PAYLOAD` | `uint64(2**20)` (= 1,048,576) |
 | `BYTES_PER_LOGS_BLOOM` | `uint64(2**8)` (= 256) |
 | `MAX_EXTRA_DATA_BYTES` | `2**5` (= 32) |
+| `MAX_WITHDRAWALS_PER_PAYLOAD` | `uint64(2**4)` (= 16) |
 
-These constants were introduced at the Bellatrix pre-Merge upgrade and are used only to size some fields within the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
+These first four of these constants were introduced at the Bellatrix pre-Merge upgrade and are used only to size some fields within the [`ExecutionPayload`](/part3/containers/execution#executionpayload) class.
 
 The execution payload (formerly known as an Eth1 block) contains a list of up to `MAX_TRANSACTIONS_PER_PAYLOAD` normal Ethereum transactions. Each of these has size up to `MAX_BYTES_PER_TRANSACTION`. These constants are needed only because [SSZ list types](/part2/building_blocks/ssz#lists) require a maximum size to be specified. They are set ludicrously large, but that's not a problem in practice.
 
 `BYTES_PER_LOGS_BLOOM` and `MAX_EXTRA_DATA_BYTES` are a direct carry-over from Eth1 blocks as specified in the [Yellow Paper](https://ethereum.org/615606b8e1e1da72687e66dba79771e9/yellow-paper-berlin.pdf), being the size of a block's Bloom filter and the size of a block's extra data field respectively. The execution payload's extra data is analogous to a beacon block's graffiti - the block builder can set it to any value they choose.
+
+`MAX_WITHDRAWALS_PER_PAYLOAD` was introduced at the [Capella upgrade](/part4/history/capella). It is the maximum number of withdrawals that the consensus client will ask the execution client to include in an execution payload. As a consequence, the rate of withdrawals is limited to `MAX_WITHDRAWALS_PER_PAYLOAD` per slot.
+
+#### Withdrawals processing
+
+<a id="max_validators_per_withdrawals_sweep"></a>
+
+| Name | Value |
+| - | - |
+| `MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP` | `16384` (= 2**14 ) |
+
+This preset constant was introduced in the [Capella upgrade](/part4/history/capella) to bound the amount of work each node wold need to do when processing withdrawals.
+
+The number of withdrawal transactions per block is bounded at [`MAX_WITHDRAWALS_PER_PAYLOAD`](#max_withdrawals_per_payload). But not all validators will be eligible for a withdrawal transaction, meaning that nodes might have to search indefinitely through the validator set to find enough withdrawals to include. Searching the validator set can be an expensive operation, therefore we [bound the search](/part3/transition/block#def_get_expected_withdrawals), considering only `MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP` validators per block. If we find fewer withdrawable validators than `MAX_WITHDRAWALS_PER_PAYLOAD` then we make fewer withdrawal transactions.
+
+The primary reason that a validator might not be withdrawable is that it still has an old `0x00` [BLS withdrawal credential](/part3/config/constants#withdrawal-prefixes). At least in the early days of Capella this could have led to long stretches of the validator set that were not withdrawable, before many validators had updated their credentials.
+
+Another reason might be having an effective balance lower than [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance). In the event of an [inactivity leak](/part2/incentives/inactivity) this could also lead to long stretches of validators being non-withdrawable.
 
 ### Configuration <!-- /part3/config/configuration -->
 
@@ -5459,7 +5496,7 @@ The following parameters refer to the actual mainnet beacon chain genesis, and I
 
 ##### `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT`
 
-`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` is the minimum number of full validator stakes that must have been deposited before the beacon chain can start producing blocks. The number is chosen to ensure a degree of security. It allows for four 128 member committees per slot, rather than the 64 committees per slot eventually desired to support fully operational data shards. Fewer validators means higher rewards per validator, so it is designed to attract early participants to get things bootstrapped.
+`MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` is the minimum number of full validator stakes that must have been deposited before the beacon chain can start producing blocks. The number is chosen to ensure a degree of security. It allows for four 128 member committees per slot, rather than the 64 committees per slot eventually desired to support the fully operational data shards that were on the roadmap at that time (but no longer). Fewer validators means higher rewards per validator, so it is designed to attract early participants to get things bootstrapped.
 
 `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` used to be much higher (65,536 = 2 million Ether staked), but was reduced when `MIN_GENESIS_TIME`, below, was added.
 
@@ -5477,21 +5514,25 @@ The beacon chain actually started at 12:00:23 UTC on the 1st of December 2020. T
 
 Unlike Ethereum&nbsp;1.0, the beacon chain gives in-protocol versions to its forks. See the [Version custom type](/part3/config/types#version) for more explanation.
 
-`GENESIS_FORK_VERSION` is the fork version the beacon chain starts with at its "genesis" event: the point at which the chain first starts producing blocks. In Bellatrix, this value is used only when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages, which are valid across all forks.
+`GENESIS_FORK_VERSION` is the fork version the beacon chain starts with at its "genesis" event: the point at which the chain first starts producing blocks. Nowadays, this value is used only when [computing](/part3/helper/misc#compute_domain) the cryptographic domain for deposit messages and BLS credential change messages, which are valid across all forks.
 
-Fork versions and timings for the [Altair](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/fork.md#configuration) and [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork.md#configuration) upgrades are defined in their respective specifications as follows.
+Fork versions and timings for the [Altair](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/fork.md#configuration), [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/fork.md#configuration), and [Capella](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/capella/fork.md#configuration) upgrades are defined in their respective specifications as follows.
 
 <a id="altair_fork_version"></a>
 <a id="altair_fork_epoch"></a>
 <a id="bellatrix_fork_version"></a>
 <a id="bellatrix_fork_epoch"></a>
+<a id="capella_fork_version"></a>
+<a id="capella_fork_epoch"></a>
 
 | Name | Value |
 | - | - |
-| `ALTAIR_FORK_VERSION` | `Version('0x01000000')` |
-| `ALTAIR_FORK_EPOCH` | `Epoch(74240)` (Oct 27, 2021, 10:56:23am UTC) |
+| `ALTAIR_FORK_VERSION`    | `Version('0x01000000')` |
+| `ALTAIR_FORK_EPOCH`      | `Epoch(74240)` (Oct 27, 2021, 10:56:23am UTC) |
 | `BELLATRIX_FORK_VERSION` | `Version('0x02000000')` |
-| `BELLATRIX_FORK_EPOCH` | `Epoch(144896)` (Sept 6, 2022, 11:34:47am UTC) |
+| `BELLATRIX_FORK_EPOCH`   | `Epoch(144896)` (Sept 6, 2022, 11:34:47am UTC) |
+| `CAPELLA_FORK_VERSION`   | `Version('0x03000000')` |
+| `CAPELLA_FORK_EPOCH`     | `Epoch(194048)` (April 12, 2023, 10:27:35pm UTC) |
 
 ##### `GENESIS_DELAY`
 
@@ -5533,19 +5574,17 @@ The [average Eth1 block time](https://etherscan.io/chart/blocktime) since Januar
 
 ##### `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`
 
-A validator can stop participating once it has made it through the exit queue. However, its funds remain locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. Initially, this is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) into the future). When data shards are introduced this delay will also allow for shard rewards to be credited and for proof of custody challenges to be mounted.
+A validator can stop participating once it has made it through the exit queue. However, its stake remains locked for the duration of `MIN_VALIDATOR_WITHDRAWABILITY_DELAY`. This is to allow some time for any slashable behaviour to be detected and reported so that the validator can still be penalised (in which case the validator's withdrawable time is pushed [`EPOCHS_PER_SLASHINGS_VECTOR`](/part3/config/preset#epochs_per_slashings_vector) into the future).
 
-Note that, for the time being, there is no mechanism to withdraw a validator's balance in any case. Nonetheless, being in a "withdrawable" state means that a validator has now fully exited from the protocol.
+Once the `MIN_VALIDATOR_WITHDRAWABILITY_DELAY` period has passed, the validator becomes eligible for a full withdrawal of its stake and rewards on the next withdrawals sweep, as long as it has [`ETH1_ADDRESS_WITHDRAWAL_PREFIX`](/part3/config/constants#eth1_address_withdrawal_prefix) (`0x01`) withdrawal credentials set. In any case, being in a "withdrawable" state means that a validator has now fully exited from the protocol.
 
 ##### `SHARD_COMMITTEE_PERIOD`
 
-This really anticipates the implementation of data shards. The [idea is](https://github.com/ethereum/consensus-specs/issues/675#issuecomment-468159678) that it's bad for the stability of longer-lived committees if validators can appear and disappear very rapidly. Therefore, a validator cannot initiate a voluntary exit until `SHARD_COMMITTEE_PERIOD` epochs after it is activated. Note that it could still be ejected by slashing before this time.
+This really anticipates the implementation of data shards, which is no longer planned, at least in its originally envisaged form. The [idea is](https://github.com/ethereum/consensus-specs/issues/675#issuecomment-468159678) that it's bad for the stability of longer-lived committees if validators can appear and disappear very rapidly. Therefore, a validator cannot initiate a voluntary exit until `SHARD_COMMITTEE_PERIOD` epochs after it has been activated. However, it could still be ejected by slashing before this time.
 
 ##### `ETH1_FOLLOW_DISTANCE`
 
-[TODO: Update link to process deposits]::
-
-This is used to calculate the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise#initialise-state) process and the [processing of deposits](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
+This is used to calculate the minimum depth of block on the Ethereum&nbsp;1 chain that can be considered by the Eth2 chain: it applies to the [Genesis](/part3/initialise#initialise-state) process and the [processing of deposits](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#process-deposit) by validators.  The Eth1 chain depth is estimated by multiplying this value by the target average Eth1 block time, [`SECONDS_PER_ETH1_BLOCK`](#seconds_per_eth1_block).
 
 The value of `ETH1_FOLLOW_DISTANCE` is not based on the expected depth of any reorgs of the Eth1 chain, which are rarely if ever more than 2-3 blocks deep. It is about providing time to respond to an incident on the Eth1 chain such as a consensus failure between clients.
 
@@ -5626,7 +5665,7 @@ See the section on the [Inactivity Leak](/part2/incentives/inactivity) for some 
 | `TERMINAL_BLOCK_HASH` | `Hash32()` |
 | `TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH` | `FAR_FUTURE_EPOCH` |
 
-These values are not used in the main beacon chain specification, but are used in the Bellatrix [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) and [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/validator.md) to determine the point of handover from proof of work to proof of stake for the execution chain.
+These values are not used in the main beacon chain specification, but are used in the Bellatrix [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/fork-choice.md) and [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/validator.md) to determine the point of handover from proof of work to proof of stake for the execution chain.
 
 All previous upgrades to the Ethereum proof of work chain took place at a pre-defined block height. That approach was deemed to be insecure for the Merge due to the irreversible dynamics of the switch to proof of stake. The rationale is given in the Security Considerations section of [EIP-3675](https://eips.ethereum.org/EIPS/eip-3675).
 
@@ -5719,9 +5758,7 @@ class Validator(Container):
 
 This is the data structure that stores most of the information about an individual validator, with only validators' balances and inactivity scores stored elsewhere.
 
-[TODO: link to effective balance]::
-
-Validators' actual balances are stored separately in the `BeaconState` structure, and only the slowly changing "effective balance" is stored here. This is because actual balances are liable to change quite frequently (every epoch): the Merkleization process used to calculate state roots means that only the parts that change need to be recalculated; the roots of unchanged parts can be cached. Separating out the validator balances potentially means that only 1/15th (8/121) as much data needs to be rehashed every epoch compared to storing them here, which is an important optimisation.
+Validators' actual balances are stored separately in the `BeaconState` structure, and only the slowly changing "[effective balance](/part2/incentives/balances)" is stored here. This is because actual balances are liable to change quite frequently (at least every epoch, and sometimes more frequently): the Merkleization process used to calculate state roots means that only the parts that change need to be recalculated; the roots of unchanged parts can be cached. Separating out the validator balances potentially means that only 1/15th (8/121) as much data needs to be rehashed every epoch compared to storing them here, which is an important optimisation.
 
 For similar reasons, validators' inactivity scores are stored outside validator records as well, as they are also updated every epoch.
 
@@ -5730,7 +5767,7 @@ A validator's record is [created](/part3/transition/block#def_get_validator_from
 Also stored in `Validator`:
 
   - `pubkey` serves as both the unique identity of the validator and the means of cryptographically verifying messages purporting to have been signed by it. The public key is stored raw, unlike in Eth1, where it is hashed to form the account address. This allows public keys to be aggregated for verifying aggregated attestations.
-  - Validators actually have two private/public key pairs, the one above used for signing protocol messages, and a separate "withdrawal key". `withdrawal_credentials` is a commitment generated from the validator's withdrawal key so that, at some time in the future, a validator can prove it owns the funds and will be able to withdraw them. There are two types of [withdrawal credential](/part3/config/constants#withdrawal-prefixes) currently defined, one corresponding to BLS keys, and one corresponding to standard Ethereum ECDSA keys.
+  - Depending on its [prefix](/part3/config/constants#withdrawal-prefixes), `withdrawal_credentials` might specify an Eth1 account to which withdrawal transactions will be made, or it might be an old-style BLS commitment that needs to be updated before withdrawals can occur for that validator. The withdrawal credentials included in a validator's deposit data are not checked in any way by the consensus layer.
   - `effective_balance` is a topic of its own that we've [touched upon already](/part3/config/preset#max_effective_balance), and will discuss more fully when we look at [effective balances updates](/part3/transition/epoch#effective-balances-updates).
   - `slashed` indicates that a validator has been slashed, that is, punished for violating the slashing conditions. A validator can be slashed only once.
   - The remaining values are the epochs in which the validator changed, or is due to change state.
@@ -5746,7 +5783,7 @@ A detailed explanation of the stages in a validator's lifecycle is [here](https:
   5. On reaching `activation_epoch` the validator becomes active, and should carry out its duties.
   6. At any time after [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) epochs have passed, a validator may request a voluntary exit. `exit_epoch` is set according to the validator's position in the exit queue and [`MAX_SEED_LOOKAHEAD`](/part3/config/preset#max_seed_lookahead), and `withdrawable_epoch` is set [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) epochs after that.
   7. From `exit_epoch` onward the validator is no longer active. There is no mechanism for exited validators to rejoin: exiting is permanent.
-  8. After `withdrawable_epoch`, the validator's balance can in principle be withdrawn, although there is no mechanism for doing this for the time being.
+  8. After `withdrawable_epoch`, the validator's full stake can be withdrawn.
 
 The above does not account for slashing or forced exits due to low balance.
 
@@ -5828,8 +5865,8 @@ class Eth1Data(Container):
 
 Proposers include their view of the Ethereum&nbsp;1 chain in blocks, and this is how they do it. The beacon chain stores these votes up in the [beacon state](/part3/containers/state#beaconstate) until there is a simple majority consensus, then the winner is committed to beacon state. This is to allow the [processing](/part3/transition/block#deposits) of Eth1 deposits, and creates a simple "honest-majority" one-way bridge from Eth1 to Eth2. The 1/2 majority assumption for this (rather than 2/3 for committees) is considered safe as the number of validators voting each time is large: [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset#epochs_per_eth1_voting_period) `*` [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch) = 64 `*` 32 = 2048.
 
-  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
-  - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
+  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
+  - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
   - `block_hash` is the hash of the Eth1 block being voted for. This doesn't have any current use within the Eth2 protocol, but is "too potentially useful to not throw in there", to quote Danny Ryan.
 
 #### `HistoricalBatch`
@@ -5840,7 +5877,11 @@ class HistoricalBatch(Container):
     state_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
 ```
 
-This is used to implement part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion) for the past history of the chain. Once [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) block roots and the same number of state roots have been accumulated in the beacon state, they are put in a `HistoricalBatch` object and the hash tree root of that is appended to the `historical_roots` list in beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period. See [`process_historical_roots_update()`](/part3/transition/epoch#def_process_historical_roots_update).
+The `HistoricalBatch` container has been superseded by [`HistoricalSummary`](/part3/containers/dependencies#historicalsummary) in the [Capella upgrade](/part4/history/capella). It remains in the spec since the `historical_roots` list remains in the [`BeaconState`](/part3/containers/state#beaconstate), albeit it now frozen forever.
+
+`HistoricalBatch` is no longer used anywhere in the state transition. However, applications validating pre-Capella data against the `historical_roots` list will need to use it.
+
+See [`process_historical_summaries_update()`](/part3/transition/epoch#def_process_historical_summaries_update) for more discussion of this change.
 
 #### `DepositMessage`
 
@@ -5916,6 +5957,60 @@ class SigningData(Container):
 ```
 
 This is just a convenience container, used only in [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root) to calculate the hash tree root of an object along with a domain. The resulting root is the message data that gets signed with a BLS signature. The `SigningData` object itself is never stored or transmitted.
+
+#### `Withdrawal`
+
+```python
+class Withdrawal(Container):
+    index: WithdrawalIndex
+    validator_index: ValidatorIndex
+    address: ExecutionAddress
+    amount: Gwei
+```
+
+A container for handling validator balance withdrawals from the consensus layer to the execution layer. The [`index`](/part3/config/types#withdrawalindex) is a simple count of the total number of withdrawal transactions made since withdrawals were enabled in the [Capella upgrade](/part4/history/capella).
+
+As per the type definition of the `amount` field, the consensus layer denominates withdrawals in Gwei (as it does all Ether amounts), while the execution layer denominates withdrawals in Wei (as it does all Ether amounts). Care needs to be taken when dealing with withdrawal transactions not to end up a factor of $10^9$ wrong.
+
+#### `HistoricalSummary`
+
+```python
+class HistoricalSummary(Container):
+    """
+    `HistoricalSummary` matches the components of the phase0 `HistoricalBatch`
+    making the two hash_tree_root-compatible.
+    """
+    block_summary_root: Root
+    state_summary_root: Root
+```
+
+This is part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion) mechanism implemented by [`process_historical_summaries_update()`](/part3/transition/epoch#def_process_historical_summaries_update). It was introduced in the [Capella upgrade](/part4/history/capella) and supersedes [`HistoricalBatch`] as the structure for storing roots of historical data.
+
+The comment here is interesting. It reflects the invariant that the SSZ [hash tree root](/part2/building_blocks/merkleization#the-hash-tree-root) of a container of objects is the same as the hash tree root of a container of the objects' hash tree roots - what I call [the magic of Merkleization](/part2/building_blocks/merkleization#summaries-and-expansions).
+
+The following code demonstrates this equivalence between the pre- and post-Capella constructions. It should [run](/appendices/running) with no errors.
+
+```python
+from eth2spec.capella import mainnet
+from eth2spec.capella.mainnet import *
+from eth2spec.utils.ssz.ssz_typing import *
+
+# Dummy data
+roots = [Root('0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')] * SLOTS_PER_HISTORICAL_ROOT
+block_roots = state_roots = Vector[Root, SLOTS_PER_HISTORICAL_ROOT](*roots)
+
+# Pre-Capella
+historical_batch = HistoricalBatch(
+    block_roots = block_roots,
+    state_roots = state_roots)
+
+# Post-Capella
+historical_summary = HistoricalSummary(
+    block_summary_root = hash_tree_root(block_roots),
+    state_summary_root = hash_tree_root(state_roots))
+
+assert(hash_tree_root(historical_batch) == hash_tree_root(historical_summary))
+```
 
 ### Beacon operations <!-- /part3/containers/operations -->
 
@@ -6013,6 +6108,19 @@ The `sync_committee_signature` is the aggregate signature of all the validators 
 
 `SyncAggregate`s are handled by [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate).
 
+#### `BLSToExecutionChange`
+
+```python
+class BLSToExecutionChange(Container):
+    validator_index: ValidatorIndex
+    from_bls_pubkey: BLSPubkey
+    to_execution_address: ExecutionAddress
+```
+
+The [Capella upgrade](/part4/history/capella) gives validators that have old style [BLS withdrawal credentials](/part3/config/constants#withdrawal-prefixes) a one-time opportunity to update them to Eth1 withdrawal credentials.
+
+To make this change, a staker needs to broadcast a [signed message](/part3/containers/envelopes#signedblstoexecutionchange) containing this information via a consensus node. It will eventually be included in a block at which point nodes will verify it and update their validator registries. The `from_bls_pubkey` is verified against the validator's existing withdrawal credential, and the message's signature is verified against the `from_bls_pubkey`.
+
 ### Beacon blocks <!-- /part3/containers/blocks -->
 
 #### `BeaconBlockBody`
@@ -6031,6 +6139,8 @@ class BeaconBlockBody(Container):
     sync_aggregate: SyncAggregate  # [New in Altair]
     # Execution
     execution_payload: ExecutionPayload  # [New in Bellatrix]
+    # Capella operations
+    bls_to_execution_changes: List[SignedBLSToExecutionChange, MAX_BLS_TO_EXECUTION_CHANGES]  # [New in Capella]
 ```
 
 The two fundamental data structures for nodes are the `BeaconBlock` and the `BeaconState`. The `BeaconBlock` is how the leader (the chosen proposer in a slot) communicates network updates to all the other validators, and those validators update their own `BeaconState` by applying `BeaconBlock`s. The idea is that (eventually) all validators on the network come to agree on the same `BeaconState`.
@@ -6057,9 +6167,10 @@ The proposer earns rewards for including any of the following. Rewards for attes
   - `attester_slashings`: up to [`MAX_ATTESTER_SLASHINGS`](/part3/config/preset#max_attester_slashings) [`AttesterSlashing`](/part3/containers/operations#attesterslashing) objects may be included.
   - `attestations`: up to [`MAX_ATTESTATIONS`](/part3/config/preset#max_attestations) (aggregated) [`Attestation`](/part3/containers/operations#attestation) objects may be included. The block proposer is incentivised to include well-packed aggregate attestations, as it receives a micro reward for each unique attestation. In a perfect world, with perfectly aggregated attestations, `MAX_ATTESTATIONS` would be equal to `MAX_COMMITTEES_PER_SLOT`; in our configuration it is double. This provides capacity in blocks to catch up with attestations after skip slots, and also room to include some imperfectly aggregated attestations.
 
-Including voluntary exits is optional, and there are no explicit rewards for including them.
+Including voluntary exits and BLS to execution changes is optional, and there are no explicit rewards for doing so.
 
   - `voluntary_exits`: up to [`MAX_VOLUNTARY_EXITS`](/part3/config/preset#max_voluntary_exits) [`SignedVoluntaryExit`](/part3/containers/envelopes#signedvoluntaryexit) objects may be included.
+  - `bls_to_execution_changes`: up to [`MAX_BLS_TO_EXECUTION_CHANGES`](/part3/config/preset#max_bls_to_execution_changes) [`SignedBLSToExecutionChange`](/part3/containers/envelopes#signedblstoexecutionchange) objects may be included.
 
 #### `BeaconBlock`
 
@@ -6099,7 +6210,7 @@ class BeaconState(Container):
     latest_block_header: BeaconBlockHeader
     block_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
     state_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
-    historical_roots: List[Root, HISTORICAL_ROOTS_LIMIT]
+    historical_roots: List[Root, HISTORICAL_ROOTS_LIMIT]  # Frozen in Capella, replaced by historical_summaries
     # Eth1
     eth1_data: Eth1Data
     eth1_data_votes: List[Eth1Data, EPOCHS_PER_ETH1_VOTING_PERIOD * SLOTS_PER_EPOCH]
@@ -6126,6 +6237,11 @@ class BeaconState(Container):
     next_sync_committee: SyncCommittee  # [New in Altair]
     # Execution
     latest_execution_payload_header: ExecutionPayloadHeader  # [New in Bellatrix]
+    # Withdrawals
+    next_withdrawal_index: WithdrawalIndex  # [New in Capella]
+    next_withdrawal_validator_index: ValidatorIndex  # [New in Capella]
+    # Deep history valid from Capella onwards
+    historical_summaries: List[HistoricalSummary, HISTORICAL_ROOTS_LIMIT]  # [New in Capella]
 ```
 
 All roads lead to the `BeaconState`. Maintaining this data structure is the sole purpose of all the apparatus in all the spec documents. This state is the focus of consensus among the beacon nodes; it is what everybody, eventually, must agree on.
@@ -6148,9 +6264,7 @@ How do we know which chain we're on, and where we are on it? The information her
 
 `genesis_validators_root` is calculated at [Genesis time](/part3/initialise#initialisation) (when the chain starts) and is fixed for the life of the chain. This, combined with the `fork` identifier, should serve to uniquely identify the chain that we are on.
 
-[TODO: internal link to fork choice]::
-
-`genesis_time` is used by the [fork choice rule](https://github.com/ethereum/consensus-specs/blob/v1.0.0/specs/phase0/fork-choice.md) to work out what slot we're in, and (since Bellatrix) to [validate execution payloads](/part3/transition/block#process_execution_payload).
+`genesis_time` is used by the [fork choice rule](/part3/forkchoice) to work out what slot we're in, and (since The Merge) to [validate execution payloads](/part3/transition/block#process_execution_payload).
 
 The values of these two fields is fixed for the life of the chain. For the mainnet beacon chain they have the following values:
 
@@ -6161,27 +6275,27 @@ The values of these two fields is fixed for the life of the chain. For the mainn
 
 The `fork` [object](/part3/containers/dependencies#fork) is manually updated as part of beacon chain upgrades, also called hard forks. This invalidates blocks and attestations from validators not following the new fork.
 
-Since the Bellatrix fork, the `fork` field has contained the following values:
+Since the Capella fork, the `fork` field has contained the following values:
 
 |||
 |-|-|
-| `previous_version` | `0x01000000` |
-| `current_version` | `0x02000000` |
-| `epoch` | 144896 |
+| `previous_version` | `0x02000000` |
+| `current_version` | `0x03000000` |
+| `epoch` | 194048 |
 
-[TODO: link to upgrades section]::
+Historical info on fork versions and upgrade timing is in the [Upgrade History](/part4/history) chapter.
 
 ```code
     # History
     latest_block_header: BeaconBlockHeader
     block_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
     state_roots: Vector[Root, SLOTS_PER_HISTORICAL_ROOT]
-    historical_roots: List[Root, HISTORICAL_ROOTS_LIMIT]
+    historical_roots: List[Root, HISTORICAL_ROOTS_LIMIT]  # Frozen in Capella, replaced by historical_summaries
 ```
 
 `latest_block_header` is only used to make sure that the next block we process is a direct descendent of the previous block. It's a blockchain thing.
 
-Past `block_roots` and `state_roots` are stored in lists here until the lists are full. Once they are full, the Merkle root is taken of both the lists together and [appended](/part3/transition/epoch#def_process_historical_roots_update) to `historical_roots`. `historical_roots` effectively grows without bound ([`HISTORICAL_ROOTS_LIMIT`](/part3/config/preset#historical_roots_limit) is _large_), but at a rate of only 10&nbsp;KB per year. Keeping this data is useful for light clients, and also allows Merkle proofs to be created against past states, for example [historical deposit data](https://github.com/ethereum/consensus-specs/issues/1343#issuecomment-521453223).
+Past `block_roots` and `state_roots` are stored in the lists here until the lists are full. Before the Capella upgrade, once the lists were full, they were Merkleized together and the root appended to `historical_roots`. Since Capella, they are now Merkleized separately and appended to `historical_summaries` (see below). The `historical_roots` list is now frozen and continues to exist only to allow proofs to be made against pre-Capella blocks and states.
 
 ```code
     # Eth1
@@ -6200,7 +6314,7 @@ Past `block_roots` and `state_roots` are stored in lists here until the lists ar
     balances: List[Gwei, VALIDATOR_REGISTRY_LIMIT]
 ```
 
-The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes much more frequently than the `validators` list. Roughly speaking, balances of active validators are updated every epoch, while the `validators` list has only minor updates per epoch. When combined with [SSZ tree hashing](/part2/building_blocks/merkleization), this results in a big saving in the amount of data to be rehashed on registry updates. See also validator inactivity scores under [Inactivity](#inactivity) which we treat similarly.
+The registry of [`Validator`](/part3/containers/dependencies#validator)s and their balances. The `balances` list is separated out as it changes much more frequently than the `validators` list. Roughly speaking, balances of active validators are updated at least once per epoch, while the `validators` list has only minor updates per epoch. When combined with [SSZ tree hashing](/part2/building_blocks/merkleization), this results in a big saving in the amount of data to be rehashed on registry updates. See also validator inactivity scores under [Inactivity](#inactivity) which we treat similarly.
 
 ```code
     # Randomness
@@ -6264,6 +6378,23 @@ Sync committees were introduced in the Altair upgrade. The next sync committee i
 
 Since the Merge, the [header](/part3/containers/execution#executionpayloadheader) of the most recent execution payload is cached in the beacon state. This serves two functions for now, though possibly more in future. First, it allows the chain to check whether the Merge has been completed or not. See [`is_merge_transition_complete()`](/part3/helper/predicates#is_merge_transition_complete). Second, it allows the beacon chain to check that the execution chain is unbroken when processing a new execution payload. See [`process_execution_payload()`](/part3/transition/block#process_execution_payload).
 
+```code
+    # Withdrawals
+    next_withdrawal_index: WithdrawalIndex  # [New in Capella]
+    next_withdrawal_validator_index: ValidatorIndex  # [New in Capella]
+```
+
+Automatic validator balance withdrawals were added in the [Capella upgrade](/part4/history/capella). The `next_withdrawal_index` maintains a count of the total number of withdrawal transactions performed so far, while `next_withdrawal_validator_index` cycles through the validator registry to keep track of which validator should be considered for a withdrawal next. Validators are considered for withdrawals consecutively in order of their validator indices, and the withdrawals sweep wraps round to zero after considering the highest-numbered validator. A maximum of [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload) withdrawals may be made per block.
+
+```code
+    # Deep history valid from Capella onwards
+    historical_summaries: List[HistoricalSummary, HISTORICAL_ROOTS_LIMIT]  # [New in Capella]
+```
+
+Hash tree roots of `state.block_roots` and `state.state_roots` are periodically added to `historical_summaries` every [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots as part of the protocol's [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion). The work is done by [`process_historical_summaries_update()`](/part3/transition/epoch#def_process_historical_summaries_update).
+
+The `state.historical_summaries` list was introduced in the Capella upgrade and functionally replaces the `state.historical_roots` list that's now frozen (see above). It uses the [`HistoricalSummary`](/part3/containers/dependencies#historicalsummary) container, which is twice as big as a `Root` type (64 bytes per item rather than 32). The list will effectively grow without bound ([`HISTORICAL_ROOTS_LIMIT`](/part3/config/preset#historical_roots_limit) is _large_), but at a rate of only 20&nbsp;KB per year. Keeping this data is useful for light clients, and also allows Merkle proofs to be created against past states, for example [historical deposit data](https://github.com/ethereum/consensus-specs/issues/1343#issuecomment-521453223).
+
 #### Historical Note
 
 There was a period during which beacon state was split into "crystallized state" and "active state". The active state was constantly changing; the crystallized state changed only once per epoch (or what passed for epochs back then). Separating out the fast-changing state from the slower-changing state was an attempt to avoid having to constantly rehash the whole state every slot. With the introduction of [SSZ tree hashing](/part2/building_blocks/merkleization), this was [no longer necessary](https://github.com/ethereum/consensus-specs/pull/122#issuecomment-437170249), as the roots of the slower changing parts could simply be cached, which was a nice simplification. There remains an echo of this approach, however, in the splitting out of validator balances and inactivity scores into different structures withing the beacon state.
@@ -6290,6 +6421,7 @@ class ExecutionPayload(Container):
     # Extra payload fields
     block_hash: Hash32  # Hash of execution block
     transactions: List[Transaction, MAX_TRANSACTIONS_PER_PAYLOAD]
+    withdrawals: List[Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD]  # [New in Capella]
 ```
 
 Since the Merge, blocks on the beacon chain contain Ethereum transaction data, formerly known as Eth1 blocks, and now called execution payloads.
@@ -6319,6 +6451,8 @@ The execution payload differs from an old Eth1 block in the following respects:
 
 Individual transactions are represented by the [Transaction](/part3/config/types#transaction) custom type. There can be up to [`MAX_TRANSACTIONS_PER_PAYLOAD`](/part3/config/preset#max_transactions_per_payload) of them in a single execution payload. The values of `MAX_BYTES_PER_TRANSACTION` and `MAX_TRANSACTIONS_PER_PAYLOAD` are huge, and suggest that an execution payload could be up to a petabyte in size. These sizes are specified only because [SSZ `List`](/part2/building_blocks/ssz#lists) types require them. They will occupy only the minimum necessary space in practice.
 
+The `withdrawals` field was added in the [Capella upgrade](/part4/history/capella). Withdrawal transactions are unusual in that they affect state on both the consensus side and the execution side. Uniquely, withdrawal transactions are the only data that's generated by the consensus layer but only communicated between nodes in execution payloads.
+
 #### `ExecutionPayloadHeader`
 
 ```python
@@ -6339,6 +6473,7 @@ class ExecutionPayloadHeader(Container):
     # Extra payload fields
     block_hash: Hash32  # Hash of execution block
     transactions_root: Root
+    withdrawals_root: Root  # [New in Capella]
 ```
 
 The same as [`ExecutionPayload`](#executionpayload) but with the transactions represented only by their root. By the [magic of Merkleization](/part2/building_blocks/merkleization#summaries-and-expansions), the [hash tree root](/part2/building_blocks/merkleization#the-hash-tree-root) of an `ExecutionPayloadHeader` will be the same as the hash tree root of its corresponding `ExecutionPayload`.
@@ -6384,6 +6519,18 @@ class SignedBeaconBlockHeader(Container):
 This is used only when reporting proposer slashing, within a [`ProposerSlashing`](/part3/containers/operations#proposerslashing) object.
 
 Through the magic of [SSZ hash tree roots](/part2/building_blocks/merkleization), a valid signature for a `SignedBeaconBlock` is also a valid signature for a `SignedBeaconBlockHeader`. Proposer slashing makes use of this to save space in slashing reports.
+
+#### `SignedBLSToExecutionChange`
+
+```python
+class SignedBLSToExecutionChange(Container):
+    message: BLSToExecutionChange
+    signature: BLSSignature
+```
+
+A message [requesting a change](/part3/containers/operations#blstoexecutionchange) from BLS withdrawal credentials to Eth1 withdrawal credentials.
+
+Uniquely, this message is signed with the validator's withdrawal key rather than its usual signing key. Only validators that made deposits with `0x00` [BLS credentials](/part3/config/constants#withdrawal-prefixes) have a withdrawal key, and it will usually be different from the signing key (although it may be [derived from the same mnemonic](https://eips.ethereum.org/EIPS/eip-2334#validator-keys)).
 
 ## Helper Functions <!-- /part3/helper -->
 
@@ -6483,14 +6630,14 @@ def bytes_to_uint64(data: bytes) -> uint64:
 
 `bytes_to_uint64()` is the inverse of [`uint_to_bytes()`](#def_uint_to_bytes), and is used by the [shuffling algorithm](/part3/helper/misc#compute_shuffled_index) to create a random index from the output of a hash.
 
-It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection).
+It is also used in the validator specification when selecting validators to aggregate [attestations](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection), and [sync committee messages](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#aggregation-selection).
 
 `int.from_bytes` is a [built-in](https://docs.python.org/3/library/stdtypes.html#int.from_bytes) Python&nbsp;3 method. The `uint64` cast is provided by the spec's SSZ implementation.
 
 |||
 |-|-|
 | Used&nbsp;by | [`compute_shuffled_index`](/part3/helper/misc#def_compute_shuffled_index) |
-| See&nbsp;also | [attestation aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection), [sync committee aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/validator.md#aggregation-selection) |
+| See&nbsp;also | [attestation aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection), [sync committee aggregator selection](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#aggregation-selection) |
 
 ### Crypto <!-- /part3/helper/crypto -->
 
@@ -6512,7 +6659,7 @@ The hash function serves two purposes within the protocol. The main use, computa
 
 <a id="def_hash_tree_root"></a>
 
-> `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization).
+> `def hash_tree_root(object: SSZSerializable) -> Root` is a function for hashing objects into a single root by utilizing a hash tree structure, as defined in the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization).
 
 The development of the tree hashing process was transformational for the Ethereum&nbsp;2.0 specification, and it is now used everywhere.
 
@@ -6546,7 +6693,7 @@ The detailed specification of the cryptographic functions underlying Ethereum&nb
 
 Our intention in conforming to the in-progress standard is to provide for maximal interoperability with other chains, applications, and cryptographic libraries. Ethereum Foundation researchers and Eth2 developers had input to the [development](https://github.com/cfrg/draft-irtf-cfrg-bls-signature) of the standard. Nevertheless, there were some challenges involved in trying to keep up as the standard evolved. For example, the [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09) standard was still changing [rather late](https://hackmd.io/@benjaminion/BkdbG45II#Multiclient-testnet-discussion) in the beacon chain testing phase. In the end, everything worked out fine.
 
-The following two functions are described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/bls.md) document, but included here for convenience.
+The following two functions are described in the separate [BLS Extensions](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/bls.md) document, but included here for convenience.
 
 #### `eth_aggregate_pubkeys`
 
@@ -6841,7 +6988,7 @@ This function was added in the Bellatrix pre-Merge upgrade.
 |||
 |-|-|
 | Uses | [`is_merge_transition_complete()`](#def_is_merge_transition_complete) |
-| Used&nbsp;by | [`is_execution_enabled()`](#def_is_execution_enabled) |
+| Used&nbsp;by | [`is_execution_enabled()`](#def_is_execution_enabled), [`on_block()`](/part3/forkchoice/bellatrix#on_block) (Bellatrix version) |
 | See&nbsp;also | [`ExecutionPayload`](/part3/containers/execution#executionpayload) |
 
 #### `is_execution_enabled`
@@ -6861,6 +7008,64 @@ This function was added in the Bellatrix pre-Merge upgrade.
 |-|-|
 | Uses | [`is_merge_transition_block()`](#def_is_merge_transition_block), [`is_merge_transition_complete()`](#def_is_merge_transition_complete) |
 | Used&nbsp;by | [`process_block()`](/part3/transition/block#def_process_block) |
+
+#### `has_eth1_withdrawal_credential`
+
+<a id="def_has_eth1_withdrawal_credential"></a>
+
+```python
+def has_eth1_withdrawal_credential(validator: Validator) -> bool:
+    """
+    Check if ``validator`` has an 0x01 prefixed "eth1" withdrawal credential.
+    """
+    return validator.withdrawal_credentials[:1] == ETH1_ADDRESS_WITHDRAWAL_PREFIX
+```
+
+Only validators that have [Eth1 withdrawal credentials](/part3/config/constants#withdrawal-prefixes) are eligible for balance withdrawals of any sort.
+
+#### `is_fully_withdrawable_validator`
+
+<a id="def_is_fully_withdrawable_validator"></a>
+
+```python
+def is_fully_withdrawable_validator(validator: Validator, balance: Gwei, epoch: Epoch) -> bool:
+    """
+    Check if ``validator`` is fully withdrawable.
+    """
+    return (
+        has_eth1_withdrawal_credential(validator)
+        and validator.withdrawable_epoch <= epoch
+        and balance > 0
+    )
+```
+
+A validator is fully withdrawable only when (a) it has an [Eth1 withdrawal credential](/part3/config/constants#withdrawal-prefixes) to make the withdrawal to, (b) it has become withdrawable, meaning that its exit has been processed and it has passed through its [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration#min_validator_withdrawability_delay) period, and (c) it has a nonzero balance.
+
+#### `is_partially_withdrawable_validator`
+
+<a id="def_is_partially_withdrawable_validator"></a>
+
+```python
+def is_partially_withdrawable_validator(validator: Validator, balance: Gwei) -> bool:
+    """
+    Check if ``validator`` is partially withdrawable.
+    """
+    has_max_effective_balance = validator.effective_balance == MAX_EFFECTIVE_BALANCE
+    has_excess_balance = balance > MAX_EFFECTIVE_BALANCE
+    return has_eth1_withdrawal_credential(validator) and has_max_effective_balance and has_excess_balance
+```
+
+A partial withdrawal is the withdrawal of excess Ether from an active (non-exited) validator.
+
+A validator has excess Ether only when (a) it's effective balance is at [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance), (b) its actual balance is greater than MAX_EFFECTIVE_BALANCE, and (c) it has an Eth1 withdrawal credential to make the withdrawal to.
+
+The first of these conditions is related to the [hysteresis](/part2/incentives/balances#hysteresis) in the effective balance. If a validator has previously suffered a drop in its balance, it's effective balance might be 31 Ether even while its actual balance is greater than 32 Ether. If we were to start skimming withdrawals in this situation, the validator's balance would never reach the 32.25 Ether necessary to bring its effective balance up to 32 Ether, and it would be forever stuck at 31 ETH. Therefore, only validators with the full effective balance are eligible for the excess to be withdrawn.
+
+|||
+|-|-|
+| Used&nbsp;by | [`get_expected_withdrawals()`](/part3/transition/block#def_get_expected_withdrawals) |
+| Uses | [`has_eth1_withdrawal_credential()`](#def_has_eth1_withdrawal_credential) |
+| See&nbsp;also | [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance), [hysteresis](/part2/incentives/balances#hysteresis) |
 
 ### Misc <!-- /part3/helper/misc -->
 
@@ -6954,9 +7159,7 @@ There is exactly one beacon block proposer per slot, selected randomly from amon
 
 A validator's chance of being the proposer is [weighted](https://github.com/ethereum/consensus-specs/pull/772) by its effective balance: a validator with a 32 Ether effective balance is twice as likely to be chosen as a validator with a 16 Ether effective balance.
 
-[TODO: link to Effective Balance]::
-
-To account for the need to weight by effective balance, this function implements as a try-and-increment algorithm. A counter `i` starts at zero. This counter does double duty:
+To account for the need to weight by [effective balance](/part2/incentives/balances), this function implements as a try-and-increment algorithm. A counter `i` starts at zero. This counter does double duty:
 
   - First `i` is used to uniformly select a candidate proposer with probability $1/N$ where, $N$ is the number of active validators. This is done by using the [`compute_shuffled_index`](#compute_shuffled_index) routine to shuffle index `i` to a new location, which is then the `candidate_index`.
   - Then `i` is used to generate a pseudo-random byte using the hash function as a seeded PRNG with at least 256 bits of output. The lower 5 bits of `i` select a byte in the hash function, and the upper bits salt the seed. (An obvious optimisation is that the output of the hash changes only once every 32 iterations.)
@@ -7054,7 +7257,7 @@ Maybe should read,
 
 |||
 |-|-|
-| Used&nbsp;by | [`get_block_root()`](/part3/helper/accessors#def_get_block_root) |
+| Used&nbsp;by | [`get_block_root()`](/part3/helper/accessors#def_get_block_root), [`compute_slots_since_epoch_start()`](/part3/forkchoice/phase0#compute_slots_since_epoch_start) |
 | See&nbsp;also | [`SLOTS_PER_EPOCH`](/part3/config/preset#slots_per_epoch), [`GENESIS_SLOT`](/part3/config/constants#genesis_slot), [`GENESIS_EPOCH`](/part3/config/constants#genesis_epoch) |
 
 #### `compute_activation_exit_epoch`
@@ -7120,7 +7323,7 @@ def compute_fork_digest(current_version: Version, genesis_validators_root: Root)
 
 Extracts the first four bytes of the [fork data root](#compute_fork_data_root) as a [`ForkDigest`](/part3/config/types#forkdigest) type. It is primarily used for domain separation on the peer-to-peer networking layer.
 
-`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice) to distinguish between independent beacon chain networks or forks: it is important that activity on one chain does not interfere with other chains.
+`compute_fork_digest()` is used extensively in the [Ethereum 2.0 networking specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/p2p-interface.md#how-should-fork-version-be-used-in-practice) to distinguish between independent beacon chain networks or forks: it is important that activity on one chain does not interfere with other chains.
 
 |||
 |-|-|
@@ -7177,11 +7380,9 @@ def compute_signing_root(ssz_object: SSZObject, domain: Domain) -> Root:
 
 This is a pre-processor for signing objects with BLS signatures:
 
- 1. calculate the [hash tree root](/part3/helper/crypto#hash_tree_root) of the object;
+ 1. calculate the [hash tree root](/part2/building_blocks/merkleization#the-hash-tree-root) of the object;
  2. combine the hash tree root with the [`Domain`](/part3/config/types#domain) inside a temporary [`SigningData`](/part3/containers/dependencies#signingdata) object;
  3. return the hash tree root of that, which is the data to be signed.
-
-[TODO: link to hash tree root explanation]::
 
 The `domain` is usually the output of [`get_domain()`](/part3/helper/accessors#def_get_domain), which mixes in the [cryptographic domain](/part3/config/constants#domain-types), the fork version, and the genesis validators root to the message hash. For deposits, it is the output of [`compute_domain()`](#def_compute_domain), ignoring the fork version and genesis validators root.
 
@@ -7463,6 +7664,8 @@ As far as the LMD GHOST consensus protocol is concerned, all the validators atte
  1. Having multiple smaller committees reduces the load on the aggregators that collect and aggregate the attestations from committee members. This is important, as validating the signatures and aggregating them takes time. The downside is that blocks need to be larger, as, in the best case, there are up to 64 aggregate attestations to store per block rather than a single large aggregate signature over all attestations.
  2. It maps well onto the future plans for data shards, when each committee will be responsible for committing to a block on one shard in addition to its current duties.
 
+Since the original Phase&nbsp;1 sharding design that required these committees has now been abandoned, the second of these points no longer applies.
+
 There is always at least one committee per slot, and never more than [`MAX_COMMITTEES_PER_SLOT`](/part3/config/preset#max_committees_per_slot), currently 64.
 
 Subject to these constraints, the actual number of committees per slot is $N / 4096$, where $N$ is the total number of active validators.
@@ -7504,7 +7707,7 @@ This function returns the list of committee members given a slot number and an i
 
 Note that, since this uses [`get_seed()`](#def_get_seed), we can obtain committees only up to [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) epochs into the past (minus [`MIN_SEED_LOOKAHEAD`](/part3/config/preset#min_seed_lookahead)).
 
-`get_beacon_committee` is used by [`get_attesting_indices()`](#def_get_attesting_indices) and [`process_attestation()`](/part3/transition/block#def_process_attestation) when processing attestations coming from a committee, and by validators when checking their [committee assignments](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#validator-assignments) and [aggregation duties](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#aggregation-selection).
+`get_beacon_committee` is used by [`get_attesting_indices()`](#def_get_attesting_indices) and [`process_attestation()`](/part3/transition/block#def_process_attestation) when processing attestations coming from a committee, and by validators when checking their [committee assignments](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#validator-assignments) and [aggregation duties](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection).
 
 |||
 |-|-|
@@ -7535,6 +7738,8 @@ The RANDAO seed returned by [`get_seed()`](#def_get_seed) is updated once per ep
 
 There is a chance of the same proposer being selected in two consecutive slots, or more than once per epoch. If every validator has the same effective balance, then the probability of being selected in a particular slot is simply $\frac{1}{N}$ independent of any other slot, where $N$ is the number of active validators in the epoch corresponding to the slot.
 
+Currently, neither `get_beacon_proposer_index()` nor [`compute_proposer_index()`](/part3/helper/misc#def_compute_proposer_index) filter out slashed validators. This could result in a slashed validator, prior to its exit, being selected to propose a block. Its block would, however, be invalid due to the check in [`process_block_header()`](/part3/transition/block#def_process_block_header). A [fix for this](https://github.com/ethereum/consensus-specs/pull/3175) has been proposed so as to avoid many missed slots (slots with invalid blocks) in the event of a mass slashing.
+
 |||
 |-|-|
 | Used&nbsp;by | [`slash_validator()`](/part3/helper/mutators#def_slash_validator), [`process_block_header()`](/part3/transition/block#def_process_block_header), [`process_randao()`](/part3/transition/block#def_process_randao), [`process_attestation()`](/part3/transition/block#def_process_attestation), [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate) |
@@ -7549,7 +7754,7 @@ def get_total_balance(state: BeaconState, indices: Set[ValidatorIndex]) -> Gwei:
     """
     Return the combined effective balance of the ``indices``.
     ``EFFECTIVE_BALANCE_INCREMENT`` Gwei minimum to avoid divisions by zero.
-    Math safe up to ~10B ETH, afterwhich this overflows uint64.
+    Math safe up to ~10B ETH, after which this overflows uint64.
     """
     return Gwei(max(EFFECTIVE_BALANCE_INCREMENT, sum([state.validators[index].effective_balance for index in indices])))
 ```
@@ -7605,7 +7810,9 @@ def get_domain(state: BeaconState, domain_type: DomainType, epoch: Epoch=None) -
 
 Except for `DOMAIN_DEPOSIT`, domains are always combined with the fork [version](/part3/config/types#version) before being used in signature generation. This is to distinguish messages from different chains, and ensure that validators don't get slashed if they choose to participate on two independent forks. (That is, deliberate forks, aka hard-forks. Participating on both branches of temporary consensus forks is punishable: that's basically the whole point of slashing.)
 
-Note that a message signed under one fork version will be valid during the next fork version, but not thereafter. So, for example, voluntary exit messages signed during Altair will be valid after the Bellatrix beacon chain upgrade, but not after the Capella upgrade (the one after Bellatrix). Voluntary exit messages signed during Phase&nbsp;0 are valid under Altair but will be made invalid by the Bellatrix upgrade.
+Note that a message signed under one fork version will be valid during the next fork version, but not thereafter. So, for example, voluntary exit messages signed during Altair will be valid after the Bellatrix beacon chain upgrade, but not after the Capella upgrade. Voluntary exit messages signed during Phase&nbsp;0 are valid under Altair but were made invalid by the Bellatrix upgrade[^fn-vem-fork-agnostic].
+
+[^fn-vem-fork-agnostic]: There is [some discussion](https://github.com/ethereum/consensus-specs/pull/3288) around changing this to make voluntary exit messages fork-agnostic in future, but that has not yet been implemented.
 
 |||
 |-|-|
@@ -7885,7 +8092,7 @@ Every active validator is expected to make an attestation exactly once per epoch
 
 Notice that the reward is weighted with `unslashed_participating_increments`, which is proportional to the total stake of the validators that made a correct vote with this flag. This means that, if participation by other validators is lower, then my rewards are lower, even if I perform my duties perfectly. The reason for this is to do with [discouragement attacks](https://raw.githubusercontent.com/ethereum/research/master/papers/discouragement/discouragement.pdf) (see also this [nice explainer](https://web.archive.org/web/20221225163839/https://hackingresear.ch/discouragement-attacks/)[^fn-discouragement-link]). In short, with this mechanism, validators are incentivised to help each other out (e.g. by forwarding gossip messages, or aggregating attestations well) rather than to attack or censor one-another.
 
-[^fn-discouragement-link]: Unfortunately, [the original page](https://hackingresear.ch/discouragement-attacks/) seems to be unavailable now. The link in the text is to archive.org, but their version is a bit broken.
+[^fn-discouragement-link]: Unfortunately, the original page, `https://hackingresear.ch/discouragement-attacks/` seems to be unavailable now. The link in the text is to archive.org, but their version is a bit broken.
 
 Validators that did not make a correct and timely vote are penalised with a full weighted base reward for each flag that they missed, except for missing the head vote. Head votes have only a single slot to get included, so a missing block in the next slot is sufficient to cause a miss, but is completely outside the attester's control. Thus, head votes are only rewarded, not penalised. This also allows perfectly performing validators to break even during an inactivity leak, when we expect at least a third of blocks to be missing: they receive no rewards, but ideally no penalties either.
 
@@ -8030,7 +8237,7 @@ When a validator is slashed, several things happen immediately:
 
 In short, a slashed validator receives an initial minor penalty, can expect to receive a further penalty later, and is marked for exit.
 
-Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
+Note that the `whistleblower_index` defaults to `None` in the parameter list. This is never used in Phase&nbsp;0, with the result that the proposer that included the slashing gets the entire whistleblower reward; there is no separate whistleblower reward for the finder of proposer or attester slashings. One reason is simply that reports are too easy to steal: if I report a slashable event to a block proposer, there is nothing to prevent that proposer claiming the report as its own. We could introduce some fancy ZK protocol to make this trustless, but this is what we're going with for now. Later developments, such as the [proof-of-custody game](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/_features/custody_game/beacon-chain.md#early-derived-secret-reveals), may reward whistleblowers directly.
 
 |||
 |-|-|
@@ -8197,7 +8404,7 @@ Ethereum's "Merge" to proof of stake occurred on the 15th of September 2022. As 
 
 The beacon chain does not know how to validate Ethereum transactions. The entire point of the Merge was to enable beacon chain clients to hand off the validation of the execution payload to a locally connected execution client (formerly an Eth1 client). The beacon chain consensus client does this hand-off via the `notify_new_payload()` function described below.
 
-Architecturally, the `notify_new_payload()` function is accessed via a new interface called the Engine API which the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md) characterises as follows.
+Architecturally, the `notify_new_payload()` function is accessed via a new interface called the Engine API which the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/beacon-chain.md) characterises as follows.
 
 > The implementation-dependent `ExecutionEngine` protocol encapsulates the execution sub-system logic via:
 >
@@ -8244,12 +8451,12 @@ def process_epoch(state: BeaconState) -> None:
     process_effective_balance_updates(state)
     process_slashings_reset(state)
     process_randao_mixes_reset(state)
-    process_historical_roots_update(state)
+    process_historical_summaries_update(state)  # [Modified in Capella]
     process_participation_flag_updates(state)  # [New in Altair]
     process_sync_committee_updates(state)  # [New in Altair]
 ```
 
-The long laundry list of things that need to be done at the end of an epoch. You can see from the comments that a bunch of extra work was added in Altair. By contrast, no substantive changes were made to epoch processing in the Bellatrix upgrade.
+The long laundry list of things that need to be done at the end of an epoch. You can see from the comments that a bunch of extra work was added in the Altair upgrade.
 
 |||
 |-|-|
@@ -8288,7 +8495,7 @@ These aggregate balances are passed to [`weigh_justification_and_finalization()`
 
 |||
 |-|-|
-| Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
+| Used&nbsp;by | [`process_epoch()`](#def_process_epoch), [`compute_pulled_up_tip`](/part3/forkchoice/phase0#compute_pulled_up_tip) |
 | Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors#def_get_unslashed_participating_indices), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance), [`get_total_balance()`](/part3/helper/accessors#def_get_total_balance), [`weigh_justification_and_finalization()`](#def_weigh_justification_and_finalization) |
 | See&nbsp;also | [participation flag indices](/part3/config/constants#participation-flag-indices) |
 
@@ -8363,7 +8570,7 @@ On the beacon chain we are using $2$-finality, since target votes may be include
 <a id="img_k_finality"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram of the four k-finality scenarios](images/diagrams/k_finality.svg)
+![A diagram of the four k-finality scenarios.](images/diagrams/k_finality.svg)
 
 <figcaption>
 
@@ -8414,7 +8621,7 @@ Since the Altair upgrade, each validator has an individual inactivity score in t
 <a id="img_incentives_inactivity_scores_flow"></a>
 <figure class="diagram">
 
-![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated.](images/diagrams/incentives-inactivity_scores_flow.svg)
 
 <figcaption>
 
@@ -8810,27 +9017,34 @@ At the end of every epoch, final value of the RANDAO for this epoch is copied ov
 | Uses | [`get_randao_mix()`](/part3/helper/accessors#def_get_randao_mix) |
 | See&nbsp;also | [`process_randao()`](/part3/transition/block#def_process_randao), [`EPOCHS_PER_HISTORICAL_VECTOR`](/part3/config/preset#epochs_per_historical_vector) |
 
-#### Historical roots updates
+#### Historical summaries updates
 
-<a id="def_process_historical_roots_update"></a>
+<a id="def_process_historical_summaries_update"></a>
 
 ```python
-def process_historical_roots_update(state: BeaconState) -> None:
-    # Set historical root accumulator
+def process_historical_summaries_update(state: BeaconState) -> None:
+    # Set historical block root accumulator.
     next_epoch = Epoch(get_current_epoch(state) + 1)
     if next_epoch % (SLOTS_PER_HISTORICAL_ROOT // SLOTS_PER_EPOCH) == 0:
-        historical_batch = HistoricalBatch(block_roots=state.block_roots, state_roots=state.state_roots)
-        state.historical_roots.append(hash_tree_root(historical_batch))
+        historical_summary = HistoricalSummary(
+            block_summary_root=hash_tree_root(state.block_roots),
+            state_summary_root=hash_tree_root(state.state_roots),
+        )
+        state.historical_summaries.append(historical_summary)
 ```
 
-Every [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots, the historical roots accumulator is updated. This is implements part of the [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion) for the past history of the chain. Once `SLOTS_PER_HISTORICAL_ROOT` block roots and the same number of state roots have been accumulated in the beacon state, they are put in a [`HistoricalBatch`](/part3/containers/dependencies#historicalbatch) object and the hash tree root of that is appended to the `historical_roots` list in the beacon state. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period.
+This routine replaced [`process_historical_roots_update()`](/../bellatrix/part3/transition/epoch#def_process_historical_roots_update) at the [Capella upgrade](/part4/history/capella).
 
-Storing past roots like this allows historical Merkle proofs to be constructed if required.
+Previously, both the `state.block_roots` and `state.state_roots` lists were Merkleized together into a single root before being added to the `state.historical_roots` [double batched accumulator](https://ethresear.ch/t/double-batched-merkle-log-accumulator/571?u=benjaminion). Now they are separately Merkleized and appended to `state.historical_summaries` via the [`HistoricalSummary`](/part3/containers/dependencies#historicalsummary) container. The Capella upgrade [changed this](https://github.com/ethereum/consensus-specs/pull/2649) to make it possible to validate past block history without having to know the state history.
+
+The summary is appended to the list every [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots. At 64 bytes per summary, the list will grow at the rate of 20&nbsp;KB per year. The corresponding block and state root lists in the beacon state are circular and just get overwritten in the next period.
+
+The `process_historical_roots_update()` function that this replaces remains [documented in the Bellatrix edition](/../bellatrix/part3/transition/epoch#def_process_historical_roots_updates).
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_epoch()`](#def_process_epoch) |
-| See&nbsp;also | [`HistoricalBatch`](/part3/containers/dependencies#historicalbatch), [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) |
+| See&nbsp;also | [`HistoricalSummary`](/part3/containers/dependencies#historicalsummary), [`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) |
 
 #### Participation flags updates
 
@@ -8877,11 +9091,12 @@ Sync committees are rotated every [`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/co
 def process_block(state: BeaconState, block: BeaconBlock) -> None:
     process_block_header(state, block)
     if is_execution_enabled(state, block.body):
-        process_execution_payload(state, block.body.execution_payload, EXECUTION_ENGINE)  # [New in Bellatrix]
+        process_withdrawals(state, block.body.execution_payload)  # [New in Capella]
+        process_execution_payload(state, block.body.execution_payload, EXECUTION_ENGINE)  # [Modified in Capella]
     process_randao(state, block.body)
     process_eth1_data(state, block.body)
-    process_operations(state, block.body)  # [Modified in Altair]
-    process_sync_aggregate(state, block.body.sync_aggregate)  # [New in Altair]
+    process_operations(state, block.body)  # [Modified in Capella]
+    process_sync_aggregate(state, block.body.sync_aggregate)
 ```
 
 These are the tasks that the beacon node performs in order to process a block and update the state. If any of the called functions triggers the failure of an `assert` statement, or any other kind of exception, then the [entire block is invalid](/part3/transition#assert), and any state changes must be rolled back.
@@ -8935,6 +9150,110 @@ The version of the block header object that this routine stores in the state is 
 | Uses | [`get_beacon_proposer_index()`](/part3/helper/accessors#def_get_beacon_proposer_index), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root) |
 | See&nbsp;also | [BeaconBlockHeader](/part3/containers/dependencies#beaconblockheader), [`process_slot()`](/part3/transition#def_process_slot) |
 
+#### Withdrawals
+
+##### `get_expected_withdrawals`
+
+<a id="def_get_expected_withdrawals"></a>
+
+```python
+def get_expected_withdrawals(state: BeaconState) -> Sequence[Withdrawal]:
+    epoch = get_current_epoch(state)
+    withdrawal_index = state.next_withdrawal_index
+    validator_index = state.next_withdrawal_validator_index
+    withdrawals: List[Withdrawal] = []
+    bound = min(len(state.validators), MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP)
+    for _ in range(bound):
+        validator = state.validators[validator_index]
+        balance = state.balances[validator_index]
+        if is_fully_withdrawable_validator(validator, balance, epoch):
+            withdrawals.append(Withdrawal(
+                index=withdrawal_index,
+                validator_index=validator_index,
+                address=ExecutionAddress(validator.withdrawal_credentials[12:]),
+                amount=balance,
+            ))
+            withdrawal_index += WithdrawalIndex(1)
+        elif is_partially_withdrawable_validator(validator, balance):
+            withdrawals.append(Withdrawal(
+                index=withdrawal_index,
+                validator_index=validator_index,
+                address=ExecutionAddress(validator.withdrawal_credentials[12:]),
+                amount=balance - MAX_EFFECTIVE_BALANCE,
+            ))
+            withdrawal_index += WithdrawalIndex(1)
+        if len(withdrawals) == MAX_WITHDRAWALS_PER_PAYLOAD:
+            break
+        validator_index = ValidatorIndex((validator_index + 1) % len(state.validators))
+    return withdrawals
+```
+
+This is used in both block processing and block building to construct the list of automatic validator withdrawals that we expect to see in the block.
+
+At most [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset#max_validators_per_withdrawals_sweep) validators will be considered for a withdrawal. As described under that heading, this serves to bound the load on nodes when eligible validators are few and far between.
+
+Picking up where the previous sweep left off (`state.next_withdrawal_validator_index`), we consider validators in turn, in increasing order of their validator indices. If a validator is [eligible for a full withdrawal](/part3/helper/predicates#def_is_fully_withdrawable_validator) then a withdrawal transaction for its entire balance is added to the list. If a validator is [eligible for a partial_withdrawal](/part3/helper/predicates#def_is_partially_withdrawable_validator) then a withdrawal transaction for its excess balance above [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) is added to the list.
+
+Each [withdrawal transaction](/part3/containers/dependencies#withdrawal) is associated with a unique, consecutive [withdrawal index](/part3/config/types#withdrawalindex), which is the total number of previous withdrawals.
+
+Once either [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload) transactions have been assembled, or [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset#max_validators_per_withdrawals_sweep) have been considered, the sweep terminates and returns the list of transactions.
+
+The `next_withdrawal_index` and `next_withdrawal_validator_index` counters in the beacon state are not updated here, but in the calling function.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_withdrawals()`](#def_process_withdrawals) |
+| Uses | [`is_fully_withdrawable_validator()`](/part3/helper/predicates#def_is_fully_withdrawable_validator), [`is_partially_withdrawable_validator()`](/part3/helper/predicates#def_is_partially_withdrawable_validator) |
+| See&nbsp;also | [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload), [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset#max_validators_per_withdrawals_sweep), [Withdrawal](/part3/containers/dependencies#withdrawal) |
+
+##### `process_withdrawals`
+
+<a id="def_process_withdrawals"></a>
+
+```python
+def process_withdrawals(state: BeaconState, payload: ExecutionPayload) -> None:
+    expected_withdrawals = get_expected_withdrawals(state)
+    assert len(payload.withdrawals) == len(expected_withdrawals)
+
+    for expected_withdrawal, withdrawal in zip(expected_withdrawals, payload.withdrawals):
+        assert withdrawal == expected_withdrawal
+        decrease_balance(state, withdrawal.validator_index, withdrawal.amount)
+
+    # Update the next withdrawal index if this block contained withdrawals
+    if len(expected_withdrawals) != 0:
+        latest_withdrawal = expected_withdrawals[-1]
+        state.next_withdrawal_index = WithdrawalIndex(latest_withdrawal.index + 1)
+
+    # Update the next validator index to start the next withdrawal sweep
+    if len(expected_withdrawals) == MAX_WITHDRAWALS_PER_PAYLOAD:
+        # Next sweep starts after the latest withdrawal's validator index
+        next_validator_index = ValidatorIndex((expected_withdrawals[-1].validator_index + 1) % len(state.validators))
+        state.next_withdrawal_validator_index = next_validator_index
+    else:
+        # Advance sweep by the max length of the sweep if there was not a full set of withdrawals
+        next_index = state.next_withdrawal_validator_index + MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP
+        next_validator_index = ValidatorIndex(next_index % len(state.validators))
+        state.next_withdrawal_validator_index = next_validator_index
+```
+
+The withdrawal transactions in a block appear in its [`ExecutionPayload`](/part3/containers/execution#executionpayload) since they span both the consensus and execution layers. When processing the withdrawals, we first check that they match what we expect to see. This is taken care of by the call to [`get_expected_withdrawals()`](#def_get_expected_withdrawals) and the pairwise comparison within the `for` loop[^fn-withdrawals-zip]. If any of the `assert` tests fails then the entire block is invalid and all changes, including balance updates already made, must be rolled back. For each withdrawal, the corresponding validator's balance is decreased; the execution client will add the same amount to the validator's Eth1 withdrawal address on the execution layer.
+
+[^fn-withdrawals-zip]: The use of [`zip()`](https://docs.python.org/3/library/functions.html#zip) here is quite Pythonic, but just means that with two lists of equal length we take their elements pairwise in turn.
+
+After that we have some trickery for updating the values of `next_withdrawal_index` and `next_withdrawal_validator_index` in the beacon state.
+
+For `next_withdrawal_index`, which just counts the number of withdrawals every made, we take the index of the last withdrawal in our list and add one. Adding the length of the list to our current value would be equivalent.
+
+For `next_withdrawal_validator_index`, we have two cases. If we have a full list of [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload) withdrawal transactions then we know that this is the condition that terminated the sweep. Therefore the first validator we need to consider next time is the one after the validator in the last withdrawal transaction. Otherwise, the sweep was terminated by reaching [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset#max_validators_per_withdrawals_sweep), and the first validator we need to consider next time is the one after that.
+
+I can't help thinking that it would have been easier to return these both from [`get_expected_withdrawals()`](#def_get_expected_withdrawals), where they have just been calculated independently.
+
+|||
+|-|-|
+| Used&nbsp;by | [`process_block()`](#def_process_block) |
+| Uses | [`get_expected_withdrawals()`](#def_get_expected_withdrawals), [`decrease_balance()`](/part3/helper/mutators#def_decrease_balance) |
+| See&nbsp;also | [WithdrawalIndex](/part3/config/types#withdrawalindex), [ValidatorIndex](/part3/config/types#validatorindex), [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload), [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset#max_validators_per_withdrawals_sweep) |
+
 #### Execution payload
 
 ##### `process_execution_payload`
@@ -8968,6 +9287,7 @@ def process_execution_payload(state: BeaconState, payload: ExecutionPayload, exe
         base_fee_per_gas=payload.base_fee_per_gas,
         block_hash=payload.block_hash,
         transactions_root=hash_tree_root(payload.transactions),
+        withdrawals_root=hash_tree_root(payload.withdrawals),  # [New in Capella]
     )
 ```
 
@@ -9070,18 +9390,24 @@ def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
     for_ops(body.attestations, process_attestation)
     for_ops(body.deposits, process_deposit)
     for_ops(body.voluntary_exits, process_voluntary_exit)
+    for_ops(body.bls_to_execution_changes, process_bls_to_execution_change)  # [New in Capella]
 ```
 
 Just a dispatcher for handling the various optional contents in a block.
 
-Deposits are optional only in the sense that some blocks have them and some don't. However, as per the `assert` statement, if, according to the beacon chain's view of the Eth1 chain, there are deposits pending, then the block _must_ include them, otherwise the block is invalid. On the face of it, this suggests that it is important for a block proposer to have access to an Eth1 node, so it can obtain the deposit data. In practice, this turns out to be [not so important](https://github.com/ethereum/consensus-specs/issues/2152), although. with Altair, the proposer reward was increased by a factor of four, increasing the importance of the Eth1 node. This is now largely academic since, post-Merge, a connection to an Eth1 node is mandatory.
+Deposits are optional only in the sense that some blocks have them and some don't. However, as per the `assert` statement, if, according to the beacon chain's view of the Eth1 chain, there are deposits pending, then the block _must_ include them, otherwise the block is invalid.
 
-Block proposers are explicitly rewarded for including any available attestations and slashing reports. There is a validity condition, and thus an implicit reward, related to including deposit messages. The incentive for including voluntary exits is that a smaller validator set means higher rewards for the remaining validators.
+Regarding incentives for block proposers to include each of these elements:
+
+  - Proposers are explicitly rewarded for including any available attestations and slashing reports.
+  - There is a validity condition, and thus an implicit reward, related to including deposit messages.
+  - The incentive for including voluntary exits is that a smaller validator set means higher rewards for the remaining validators.
+  - There is no incentive, implicit or explicit, for including BLS withdrawal credential change messages. These are handled on a purely altruistic basis.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_block()`](#def_process_block) |
-| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit()`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit) |
+| Uses | [`process_proposer_slashing()`](#def_process_proposer_slashing), [`process_attester_slashing()`](#def_process_attester_slashing), [`process_attestation()`](#def_process_attestation), [`process_deposit()`](#def_process_deposit), [`process_voluntary_exit()`](#def_process_voluntary_exit), [`process_bls_to_execution_change()`](#def_process_bls_to_execution_change) |
 | See&nbsp;also | [`BeaconBlockBody`](/part3/containers/blocks#beaconblockbody) |
 
 ##### Proposer slashings
@@ -9236,16 +9562,17 @@ Where $I_A$ is the total maximum reward per epoch for attesters, calculated in [
 
 ##### Deposits
 
+The code in this section handles deposit transactions that were included in a block. A deposit is created when a user transfers one or more ETH to the [deposit contract](/part2/deposits/contract). We need to check that the data sent with the deposit is valid. If it is, we either create a new validator record (for the first deposit for a validator) or update an existing record.
+
 <a id="def_get_validator_from_deposit"></a>
 
 ```python
-def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validator:
-    amount = deposit.data.amount
+def get_validator_from_deposit(pubkey: BLSPubkey, withdrawal_credentials: Bytes32, amount: uint64) -> Validator:
     effective_balance = min(amount - amount % EFFECTIVE_BALANCE_INCREMENT, MAX_EFFECTIVE_BALANCE)
 
     return Validator(
-        pubkey=deposit.data.pubkey,
-        withdrawal_credentials=deposit.data.withdrawal_credentials,
+        pubkey=pubkey,
+        withdrawal_credentials=withdrawal_credentials,
         activation_eligibility_epoch=FAR_FUTURE_EPOCH,
         activation_epoch=FAR_FUTURE_EPOCH,
         exit_epoch=FAR_FUTURE_EPOCH,
@@ -9254,14 +9581,64 @@ def get_validator_from_deposit(state: BeaconState, deposit: Deposit) -> Validato
     )
 ```
 
-Create a newly initialised validator object from a deposit. This was [factored out](https://github.com/ethereum/consensus-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the (now deprecated) sharding spec.
+Create a newly initialised validator object based on deposit data. This was [factored out](https://github.com/ethereum/consensus-specs/commit/1623086088e6f0496566ab7d50d16a8c78cdebf0) of `process_deposit()` for better code reuse between the Phase&nbsp;0 spec and the (now deprecated) sharding spec.
 
-The `state` parameter in the input argument list is an oversight: it is not used or required.
+The `pubkey` is supplied in the initial deposit transaction. The depositor generates the validator's public key from the its private key.
+
+|||
+|-|-|
+| Used&nbsp;by | [`apply_deposit()`](#def_apply_deposit) |
+| See&nbsp;also | [`Validator`](/part3/containers/dependencies#validator), [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch), [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset#effective_balance_increment), [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) |
+
+<a id="def_apply_deposit"></a>
+
+```python
+def apply_deposit(state: BeaconState,
+                  pubkey: BLSPubkey,
+                  withdrawal_credentials: Bytes32,
+                  amount: uint64,
+                  signature: BLSSignature) -> None:
+    validator_pubkeys = [validator.pubkey for validator in state.validators]
+    if pubkey not in validator_pubkeys:
+        # Verify the deposit signature (proof of possession) which is not checked by the deposit contract
+        deposit_message = DepositMessage(
+            pubkey=pubkey,
+            withdrawal_credentials=withdrawal_credentials,
+            amount=amount,
+        )
+        domain = compute_domain(DOMAIN_DEPOSIT)  # Fork-agnostic domain since deposits are valid across forks
+        signing_root = compute_signing_root(deposit_message, domain)
+        # Initialize validator if the deposit signature is valid
+        if bls.Verify(pubkey, signing_root, signature):
+            state.validators.append(get_validator_from_deposit(pubkey, withdrawal_credentials, amount))
+            state.balances.append(amount)
+            # [New in Altair]
+            state.previous_epoch_participation.append(ParticipationFlags(0b0000_0000))
+            state.current_epoch_participation.append(ParticipationFlags(0b0000_0000))
+            state.inactivity_scores.append(uint64(0))
+    else:
+        # Increase balance by deposit amount
+        index = ValidatorIndex(validator_pubkeys.index(pubkey))
+        increase_balance(state, index, amount)
+```
+
+The `apply_deposit()` function was [factored out](https://github.com/ethereum/consensus-specs/pull/3177) of `process_deposit()` in the Capella release for better code reuse between the Phase&nbsp;0 spec and the [EIP-6110 spec](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/_features/eip6110)[^fn-eip-6110].
+
+[^fn-eip-6110]: [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) is a potential future upgrade that would allow deposits to be processed more or less instantly, rather than having to go through the [Eth1 follow distance](/part3/config/configuration#eth1_follow_distance) and [Eth1 voting period](/part3/config/preset#epochs_per_eth1_voting_period) as they do now.
+
+Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain upgrades (such as Phase&nbsp;0, Altair, and Bellatrix), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
+
+An interesting quirk of this routine is that only the first deposit for a validator needs to be signed. Subsequent deposits for the same public key do not have their signatures checked. This could allow one staker (the key holder) to make an initial deposit (1 ETH, say), and for that to be topped up by others who do not have the private key. I don't know of any practical uses for this feature, but would be glad to hear of any. It slightly reduces the risk for stakers making multiple deposits for the same validator as they don't need to worry about incorrectly signing any but the first deposit.
+
+Similarly, once a validator's withdrawal credentials have been set by the initial deposit transaction, the withdrawal credentials of subsequent deposits for the same validator are ignored. Only the credentials appearing on the initial deposit are stored on the beacon chain. This is an important security measure. If an attacker steals a validator's signing key (which signs deposit transactions), we don't want them to be able to change the withdrawal credentials in order to steal the stake for themselves. However, it works both ways, and [a vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) was identified for staking pools in which a malicious operator could potentially front-run a deposit transaction with a 1&nbsp;ETH deposit to set the withdrawal credentials to their own.
+
+Note that the `withdrawal_credential` in the deposit data is not checked in any way. It's up to the depositor to ensure that they are using the [correct prefix](/part3/config/constants#withdrawal-prefixes) and contents to be able to receive their rewards and retrieve their stake back after exiting the consensus layer.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_deposit()`](#def_process_deposit) |
-| See&nbsp;also | [`Validator`](/part3/containers/dependencies#validator), [`Deposit`](/part3/containers/operations#deposit), [`FAR_FUTURE_EPOCH`](/part3/config/constants#far_future_epoch), [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset#max_effective_balance) |
+| Uses | [`compute_domain()`](/part3/helper/misc#def_compute_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`get_validator_from_deposit()`](#def_get_validator_from_deposit) |
+| See&nbsp;also | [`DepositMessage`](/part3/containers/dependencies#depositmessage), [`DOMAIN_DEPOSIT`](/part3/config/constants#domain_deposit) |
 
 <a id="def_process_deposit"></a>
 
@@ -9279,46 +9656,28 @@ def process_deposit(state: BeaconState, deposit: Deposit) -> None:
     # Deposits must be processed in order
     state.eth1_deposit_index += 1
 
-    pubkey = deposit.data.pubkey
-    amount = deposit.data.amount
-    validator_pubkeys = [validator.pubkey for validator in state.validators]
-    if pubkey not in validator_pubkeys:
-        # Verify the deposit signature (proof of possession) which is not checked by the deposit contract
-        deposit_message = DepositMessage(
-            pubkey=deposit.data.pubkey,
-            withdrawal_credentials=deposit.data.withdrawal_credentials,
-            amount=deposit.data.amount,
-        )
-        domain = compute_domain(DOMAIN_DEPOSIT)  # Fork-agnostic domain since deposits are valid across forks
-        signing_root = compute_signing_root(deposit_message, domain)
-        # Initialize validator if the deposit signature is valid
-        if bls.Verify(pubkey, signing_root, deposit.data.signature):
-            state.validators.append(get_validator_from_deposit(state, deposit))
-            state.balances.append(amount)
-            state.previous_epoch_participation.append(ParticipationFlags(0b0000_0000))
-            state.current_epoch_participation.append(ParticipationFlags(0b0000_0000))
-            state.inactivity_scores.append(uint64(0))
-    else:
-        # Increase balance by deposit amount
-        index = ValidatorIndex(validator_pubkeys.index(pubkey))
-        increase_balance(state, index, amount)
+    apply_deposit(
+        state=state,
+        pubkey=deposit.data.pubkey,
+        withdrawal_credentials=deposit.data.withdrawal_credentials,
+        amount=deposit.data.amount,
+        signature=deposit.data.signature,
+    )
 ```
 
 Here, we process a deposit from a block. If the deposit is valid, either a new validator is created or the deposit amount is added to an existing validator.
 
 The call to [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch) ensures that it is not possible to fake a deposit. The `eth1data.deposit_root` from the deposit contract has been [agreed](/part3/transition/block#eth1-data) by the beacon chain and includes all pending deposits visible to the beacon chain. The deposit itself contains a Merkle proof that it is included in that root. The `state.eth1_deposit_index` counter ensures that deposits are processed in order. In short, the proposer provides `leaf` and `branch`, but neither `index` nor `root`.
 
-Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain upgrades (such as Phase&nbsp;0, Altair, and Bellatrix), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
+If the Merkle branch check fails, then the whole block is invalid. However, individual deposits can fail the signature check without invalidating the block.
 
-If the Merkle branch check fails, then the whole block is invalid. However, individual deposits can fail the signature check without invalidating the block. This allows incorrectly signed deposits to be de-queued (via `state.eth1_deposit_index += 1`) without blocking further progress (that increment would have to be reverted if the block were invalid).
-
-Note that it is not possible to change a validator's withdrawal credentials after the initial deposit: the withdrawal credentials of subsequent deposits for the same validator are ignored; only the credentials appearing on the initial deposit are stored on the beacon chain. This is an important security measure. If an attacker steals a validator's signing key, we don't want them to be able to change the withdrawal credentials in order to steal the stake for themselves. However, it works both ways, and [a vulnerability](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971) was identified for staking pools in which a malicious operator could potentially front-run a deposit transaction with a 1&nbsp;ETH deposit to set the withdrawal credentials to their own.
+Deposits must be processed in order, and all available deposits must be included in the block (up to [`MAX_DEPOSITS`](/part3/config/preset#max_deposits) - checked in [`process_operations()`](#def_process_operations)). This ensures that the beacon chain cannot censor deposit transactions, except at the expense of stopping block production entirely.
 
 |||
 |-|-|
 | Used&nbsp;by | [`process_operations()`](#def_process_operations) |
-| Uses | [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`compute_domain()`](/part3/helper/misc#def_compute_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`get_validator_from_deposit()`](#def_get_validator_from_deposit) |
-| See&nbsp;also | [`Deposit`](/part3/containers/operations#deposit) |
+| Uses | [`is_valid_merkle_branch()`](/part3/helper/predicates#def_is_valid_merkle_branch), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`apply_deposit()`](#def_apply_deposit) |
+| See&nbsp;also | [`Deposit`](/part3/containers/operations#deposit), [`DEPOSIT_CONTRACT_TREE_DEPTH`](/part3/config/constants#deposit_contract_tree_depth) |
 
 ##### Voluntary exits
 
@@ -9362,7 +9721,45 @@ At present, it is [not possible](https://notes.ethereum.org/elDvTNrbRqmgP6np_YWc
 | Uses | [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator), [`get_domain()`](/part3/helper/accessors#def_get_domain), [`compute_signing_root()`](/part3/helper/misc#def_compute_signing_root), [`bls.Verify()`](/part3/helper/crypto#bls-signatures), [`initiate_validator_exit()`](/part3/helper/mutators#def_initiate_validator_exit) |
 | See&nbsp;also | [`VoluntaryExit`](/part3/containers/operations#voluntaryexit), [`SHARD_COMMITTEE_PERIOD`](/part3/config/configuration#shard_committee_period) |
 
-##### Sync aggregate processing
+##### `process_bls_to_execution_change`
+
+<a id="def_process_bls_to_execution_change"></a>
+
+```python
+def process_bls_to_execution_change(state: BeaconState,
+                                    signed_address_change: SignedBLSToExecutionChange) -> None:
+    address_change = signed_address_change.message
+
+    assert address_change.validator_index < len(state.validators)
+
+    validator = state.validators[address_change.validator_index]
+
+    assert validator.withdrawal_credentials[:1] == BLS_WITHDRAWAL_PREFIX
+    assert validator.withdrawal_credentials[1:] == hash(address_change.from_bls_pubkey)[1:]
+
+    # Fork-agnostic domain since address changes are valid across forks
+    domain = compute_domain(DOMAIN_BLS_TO_EXECUTION_CHANGE, genesis_validators_root=state.genesis_validators_root)
+    signing_root = compute_signing_root(address_change, domain)
+    assert bls.Verify(address_change.from_bls_pubkey, signing_root, signed_address_change.signature)
+
+    validator.withdrawal_credentials = (
+        ETH1_ADDRESS_WITHDRAWAL_PREFIX
+        + b'\x00' * 11
+        + address_change.to_execution_address
+    )
+```
+
+The [Capella upgrade](/part4/history/capella) provides a one-time operation to allow stakers to change their withdrawal credentials from BLS type ([`BLS_WITHDRAWAL_PREFIX`](/part3/config/constants#bls_withdrawal_prefix)), which do not allow withdrawals, to Eth1 style ([`ETH1_ADDRESS_WITHDRAWAL_PREFIX`](/part3/config/constants#eth1_address_withdrawal_prefix)), which enable automatic withdrawals.
+
+Stakers can make the change by signing a [`BLSToExecutionChange`](/part3/containers/operations#blstoexecutionchange) message and broadcasting it to the network. At some point a proposer will include the change message in a block and it will arrive at this function in the state transition.
+
+For [BLS credentials](/part3/config/constants#bls_withdrawal_prefix) the withdrawal credential contains the last 31 bytes of the SHA256 hash of a public key. That public key is the validator's withdrawal key, distinct from its signing key, although often [derived from the same mnemonic](https://eips.ethereum.org/EIPS/eip-2334#validator-keys). By checking its hash, we are confirming that the public key provided in the change message is the same one that created the withdrawal credential in the initial deposit.
+
+Once we are satisfied that the public key is the same on previously committed to, then we can use it to verify the signature on the withdrawal transaction. Again, this transaction must be signed with the validator's withdrawal private key, not its usual signing key.
+
+Having verified the signature, we can finally, and irrevocably, update the validator's withdrawal credentials from BLS style to Eth1 style.
+
+#### Sync aggregate processing
 
 <a id="def_process_sync_aggregate"></a>
 
@@ -9450,17 +9847,19 @@ Proof-of-work blocks must only be considered once they are at least `SECONDS_PER
 
 Aka genesis.
 
-This helper function is only for initializing the state for pure Altair testnets and tests.
+This helper function is only for initializing the state for pure Capella testnets and tests.
 
 <a id="def_initialize_beacon_state_from_eth1"></a>
 
 ```python
-def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
+def initialize_beacon_state_from_eth1(eth1_block_hash: Hash32,
                                       eth1_timestamp: uint64,
-                                      deposits: Sequence[Deposit]) -> BeaconState:
+                                      deposits: Sequence[Deposit],
+                                      execution_payload_header: ExecutionPayloadHeader=ExecutionPayloadHeader()
+                                      ) -> BeaconState:
     fork = Fork(
-        previous_version=ALTAIR_FORK_VERSION,  # [Modified in Altair] for testing only
-        current_version=ALTAIR_FORK_VERSION,  # [Modified in Altair]
+        previous_version=CAPELLA_FORK_VERSION,  # [Modified in Capella] for testing only
+        current_version=CAPELLA_FORK_VERSION,  # [Modified in Capella]
         epoch=GENESIS_EPOCH,
     )
     state = BeaconState(
@@ -9489,15 +9888,18 @@ def initialize_beacon_state_from_eth1(eth1_block_hash: Bytes32,
     # Set genesis validators root for domain separation and chain versioning
     state.genesis_validators_root = hash_tree_root(state.validators)
 
-    # [New in Altair] Fill in sync committees
+    # Fill in sync committees
     # Note: A duplicate committee is assigned for the current and next committee at genesis
     state.current_sync_committee = get_next_sync_committee(state)
     state.next_sync_committee = get_next_sync_committee(state)
 
+    # Initialize the execution payload header
+    state.latest_execution_payload_header = execution_payload_header
+
     return state
 ```
 
-TODO
+Each state fields start with its [default SSZ value](/part2/building_blocks/ssz#default-values) unless a value is explicitly provided. So, for example, `state.next_withdrawal_index` will be initialised to zero, and `state.historical_summaries` to an empty list.
 
 ### Genesis state
 
@@ -9526,7 +9928,7 @@ TODO
 
 ### Introduction
 
-The beacon chain's fork choice is documented separately from the main state transition specification. Like the main specification, the fork choice spec is incremental, with later versions specifying only the changes since the previous version. When annotating the main spec I combined the incremental versions into a single up-to-date document. In the following, however, I will deal separately with the original [Phase 0 fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) and the incremental [Bellatrix fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) update as the latter mainly introduced one-off functionality specific to the Merge transition. There were no changes to fork choice in the Altair upgrade.
+The beacon chain's fork choice is documented separately from the main state transition specification. Like the main specification, the fork choice spec is incremental, with later versions specifying only the changes since the previous version. When annotating the main spec I combined the incremental versions into a single up-to-date document. In the following, however, I will deal separately with the original [Phase 0 fork choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/fork-choice.md) and the incremental [Bellatrix fork choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/fork-choice.md) update as the latter mainly introduced one-off functionality specific to the Merge transition.
 
 #### What's a fork choice?
 
@@ -9542,10 +9944,10 @@ Ethereum's fork choice comprises the LMD GHOST fork choice rule, modified by (co
 
 [^fn-last-finalised]: I'm simplifying here. LMD GHOST can only consider descendants of the last justified checkpoint at any one time. But the last justified checkpoint can change. LMD GHOST will never consider branches from before the last finalised checkpoint. More on this later.
 
-<a id="img_annotated-forkchoice-gasper"></a>
+<a id="img_annotated_forkchoice_gasper"></a>
 <figure class="diagram" style="width: 90%">
 
-![Diagram of a block tree showing that Casper FFG finalises the early chain up to a checkpoint and LMD GHOST handles fork choice after that](images/diagrams/annotated-forkchoice-gasper.svg)
+![Diagram of a block tree showing that Casper FFG finalises the early chain up to a checkpoint and LMD GHOST handles fork choice after that.](images/diagrams/annotated-forkchoice-gasper.svg)
 
 <figcaption>
 
@@ -9554,7 +9956,7 @@ Casper FFG's role is to finalise a checkpoint. History prior to the finalised ch
 </figcaption>
 </figure>
 
-This combination has [come to be known](https://arxiv.org/abs/2003.03052) as "Gasper", and appears to be relatively simple [at first sight](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion). However, the emergence of various edge cases, and a relentless stream of potential attacks has led third party researchers [to declare](https://arxiv.org/pdf/2009.04987.pdf) that "The Gasper protocol is complex". And that was said before implementing many of the fixes that we'll be reviewing in the following sections. Vitalik himself [has written](https://notes.ethereum.org/@vbuterin/single_slot_finality#Bad-news-hybrid-consensus-mechanisms-actually-have-many-unavoidable-problems) that
+This combination has [come to be known](https://arxiv.org/abs/2003.03052) as "Gasper", and appears to be relatively simple [at first sight](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion). However, the emergence of various edge cases, and a relentless stream of potential attacks has led third party researchers [to declare](https://arxiv.org/pdf/2009.04987.pdf) that "The Gasper protocol is complex". And that remark was made before implementing many of the fixes that we'll be reviewing in the following sections. Vitalik himself [has written](https://notes.ethereum.org/@vbuterin/single_slot_finality#Bad-news-hybrid-consensus-mechanisms-actually-have-many-unavoidable-problems) that
 
 > The "interface" between Casper FFG finalization and LMD GHOST fork choice is a source of significant complexity, leading to a number of attacks that have required fairly complicated patches to fix, with more weaknesses being regularly discovered.
 
@@ -9566,7 +9968,7 @@ Despite all this, we are happily running Ethereum on top of the Gasper protocol 
 
 These fork choice specification documents don't cover the whole mechanism. They are largely concerned only with the LMD GHOST fork choice; the Casper FFG side of things (justification and finalisation) is dealt with [in the main state-transition specification](/part3/transition/epoch#justification-and-finalization).
 
-The terms attestation, vote, and message appear frequently. An attestation is a collection of [three votes](/part3/containers/dependencies#attestationdata): a vote for a source checkpoint, a vote for a target checkpoint, and a vote for the a block. The source and target votes are used by Casper FFG, and the head vote is used by LMD GHOST. We will mostly be concerned with head votes in the following sections, except when stated otherwise. LMD GHOST head votes are also called messages, being the "M" in "LMD".
+The terms attestation, vote, and message appear frequently. An attestation is a collection of [three votes](/part3/containers/dependencies#attestationdata): a vote for a source checkpoint, a vote for a target checkpoint, and a vote for a head block. The source and target votes are used by Casper FFG, and the head vote is used by LMD GHOST. We will mostly be concerned with head votes in the following sections, except when stated otherwise. LMD GHOST head votes are also called messages, being the "M" in "LMD".
 
 Where we discuss attestations, they can be a single attestation from one validator, or aggregate attestations containing the attestations of multiple validators that made the same set of votes. It will be clear from the context which of these applies.
 
@@ -9580,13 +9982,13 @@ Vitalik published the original [mini-spec](https://ethresear.ch/t/beacon-chain-c
 
 [^fn-imd-ghost]: If I've understood correctly. Traces of IMD GHOST are difficult to find these days, and that's probably for the better.
 
-The [initial fork choice spec](https://github.com/ethereum/consensus-specs/blob/a103e79e676ca08cac0040f60c90fecf7e2ea3f2/specs/core/0_fork-choice.md) was published to GitHub in April 2019, numbering a mere 96 lines. The [current Phase 0 specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) has 488 lines.
+The [initial fork choice spec](https://github.com/ethereum/consensus-specs/blob/a103e79e676ca08cac0040f60c90fecf7e2ea3f2/specs/core/0_fork-choice.md) was published to GitHub in April 2019, numbering a mere 96 lines. The [current Phase 0 fork choice spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/fork-choice.md) has 576 lines.
 
 Various issues have caused the fork choice specification to balloon in complexity.
 
 In August 2019, a "decoy flip-flop attack" on LMD GHOST [was identified](https://ethresear.ch/t/decoy-flip-flop-attack-on-lmd-ghost/6001?u=benjaminion) that could be used by an adversary to delay finalisation (for a limited period of time). The defence against this is to [add a check](https://github.com/ethereum/consensus-specs/pull/1466/files) that newly considered attestations are from either the current or previous epoch only. We'll cover this under [`validate_on_attestation()`](/part3/forkchoice/phase0#attestation-timeliness).
 
-In September 2019 a "bouncing attack" on Casper FFG [was identified](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion) that could delay finalisation indefinitely. The [suggested fix](https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114?u=benjaminion) involves only allowing the fork choice's justified checkpoint to be updated during the early part of an epoch. This was implemented in the consensus specs in [November, 2019](https://github.com/ethereum/consensus-specs/pull/1465). We'll be devoting a whole section to [the bouncing attack](/part3/forkchoice/phase0#the-bouncing-attack).
+In September 2019 a "bouncing attack" on Casper FFG [was identified](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion) that can delay finalisation indefinitely. Up to the Capella spec release we had [a fix](https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114?u=benjaminion) for this that only allowed the fork choice's justified checkpoint to be updated during the early part of an epoch. The fix was removed in the Capella upgrade since it adds significant complexity to the fork choice, and in any case can be [worked around](https://notes.ethereum.org/@fradamt/Sy6PzcRdt) by splitting honest validators' views. The bouncing attack is very difficult to set up and an adversary with the power to do this could probably attack the chain in more interesting ways. The bouncing attack and its original fix remain documented in the [Bellatrix edition](/../bellatrix/part3/forkchoice/phase0#the-bouncing-attack).
 
 In July 2021, an edge case [was identified](https://notes.ethereum.org/@hww/fork-choice-store-inconsistency) in which (if 1/3 of validators were prepared to be slashed) the invariant that the store's justified checkpoint must be a descendant of the finalised checkpoint could become violated. [A fix](https://github.com/ethereum/consensus-specs/pull/2518) to the [`on_tick()`](/part3/forkchoice/phase0#on_tick) handler was implemented to maintain the invariant.
 
@@ -9594,22 +9996,26 @@ In November 2021, some overly complicated logic [was identified](https://notes.e
 
 [Proposer boost](/part3/forkchoice/phase0#proposer-boost) was also [added](https://github.com/ethereum/consensus-specs/pull/2730) in November 2021. This is a defence against potential [balancing attacks](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion) on LMD GHOST that could prevent Casper FFG from finalising. We'll cover this in detail in the [proposer boost](/part3/forkchoice/phase0#proposer-boost) section.
 
-A [new type](https://ethresear.ch/t/balancing-attack-lmd-edition/11853?u=benjaminion) of balancing attack was published in January 2022 that relies on the attacker's validators making equivocating attestations (multiple different attestations at the same slot). To counter this, a [defence against equivocating indices](https://github.com/ethereum/consensus-specs/pull/2845) was added in March 2022. We'll discuss this when we get to the [`on_attester_slashing()`](/part3/forkchoice/phase0#equivocation_balancing_attack) handler.
+A [new type](https://ethresear.ch/t/balancing-attack-lmd-edition/11853?u=benjaminion) of balancing attack was published in January 2022 that relies on the attacker's validators making equivocating attestations (multiple different attestations at the same slot). To counter this, a [defence against equivocating indices](https://github.com/ethereum/consensus-specs/pull/2845) was added in March 2022. We'll discuss this when we get to the [`on_attester_slashing()`](/part3/forkchoice/phase0#equivocation_balancing_attack) handler. This defence was bolstered in the Capella spec update by excluding all slashed validators from having an influence in the fork choice.
 
-We will study each of these in more detail as we work through the fork choice specification in the following two sections.
+Several issues involving "unrealised justfication" were discovered during the first half of 2022. First, an [unrealised justification reorg](https://notes.ethereum.org/@adiasg/unrealized-justification) attack that allowed the proposer of the first block of an epoch to easily fork out up to nine blocks from the end of the previous epoch. A variant of that attack was also found to be able to cause validators to make slashable attestations. Second, a [justification withholding attack](https://hackmd.io/o9tGPQL2Q4iH3Mg7Mma9wQ) that an adversary could use to reorg arbitrary numbers of blocks at the start of an epoch. These issues were addressed in the Capella spec update with the "pull up tips" and [unrealised justification logic](/part3/forkchoice/phase0#unrealised-justification) that it introduced.
+
+A reader might infer from this catalogue of issues that the fork choice is fiendishly difficult to reason about, and the reader would not be wrong. Some long-overdue [formal verification](/part3/forkchoice/phase0#formal-proofs) work on the fork choice rule has recently been completed. It seeks to prove certain desirable properties, such as that an honest validator following the rules can never make slashable attestations.
+
+We will study each of the issues above in more detail as we work through the fork choice specification in the following two sections.
 
   - [Phase 0 fork choice](/part3/forkchoice/phase0) is the main fork choice specification.
   - [Bellatrix fork choice](/part3/forkchoice/bellatrix) covers the changes to the fork choice around the Merge.
 
-Note that a [substantial rewrite](https://github.com/ethereum/consensus-specs/pull/3290) of the fork choice specification is in-flight. The rewrite removes the bouncing attack fix and introduces the "pulled tips" defence against a new attack, among other things. I will update the following sections when the changes have been released as part of the Capella upgrade.
+Note that the [Capella upgrade](/part4/history/capella) included a [substantial rewrite](https://github.com/ethereum/consensus-specs/pull/3290) of the fork choice specification. The rewrite removed the bouncing attack fix and introduced the "pull up tips" defence against a new attack, among other things. The following sections are based on the updated Capella version, but the previous annotated fork choice [remains available](/../bellatrix/part3/forkchoice). All of these changes were quietly rolled out prior to Capella, buried within various client software updates, while the updated spec was held back until the Capella upgrade itself[^fn-fork-choice-updates]. A [public disclosure](https://notes.ethereum.org/@djrtwo/2023-fork-choice-reorg-disclosure) of the issues was made a few weeks after the Capella upgrade.
+
+[^fn-fork-choice-updates]: When issues are found with the fork choice it is common for them to be "silently" fixed in client releases before being made public. Paradoxically, changes to the fork choice rule are not consensus breaking and do not usually require simultaneous activation in clients. Hard fork upgrades such as Capella ensure that all node operators have, of necessity, upgraded to the latest software versions, at which point it is safe to publish details of the problems and fixes. This is one good reason for keeping your software up to date, even between mandatory upgrades.
 
 ### Phase 0 Fork Choice <!-- /part3/forkchoice/phase0 -->
 
-This section covers the [Phase 0 Fork Choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md) document. It is based on the Bellatrix, [1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0), spec release version. A [major rewrite](https://github.com/ethereum/consensus-specs/pull/3290) of the fork choice rule is due to be released with the Capella upgrade that I will document in a future version of this annotated specification.
+This section covers the [Phase 0 Fork Choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/fork-choice.md) document. It is based on the Capella, [v1.3.0](https://github.com/ethereum/consensus-specs/tree/v1.3.0), spec release version. For an alternative take, I recommend [Vitalik's annotated fork choice](https://github.com/ethereum/annotated-spec/blob/master/phase0/fork-choice.md) document.
 
-For an alternative take, I recommend [Vitalik's annotated fork choice](https://github.com/ethereum/annotated-spec/blob/master/phase0/fork-choice.md) document. I deliberately didn't consult that while preparing this, so that we gain the value of two independent expositions.
-
-Block-quoted content below (with a sidebar) has been copied over verbatim from the specs repo, as well as all the function code.
+Block-quoted content below (with a sidebar) has been copied over verbatim from the specs repo, as has all the function code.
 
 > The head block root associated with a `store` is defined as `get_head(store)`. At genesis, let `store = get_forkchoice_store(genesis_state, genesis_block)` and update `store` by running:
 >
@@ -9632,7 +10038,7 @@ Leap seconds will no longer occur [after 2035](https://www.timeanddate.com/news/
 
 In practice, the synchrony assumptions are stronger than this. Any node whose clock is more than `SECONDS_PER_SLOT` `/` `INTERVALS_PER_SLOT` (four seconds) adrift will suffer degraded performance and can be considered Byzantine (faulty), at least for the LMD GHOST fork choice.
 
-> 3) **Eth1 data**: The large `ETH1_FOLLOW_DISTANCE` specified in the [honest validator document](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md) should ensure that `state.latest_eth1_data` of the canonical beacon chain remains consistent with the canonical Ethereum proof-of-work chain. If not, emergency manual intervention will be required.
+> 3) **Eth1 data**: The large `ETH1_FOLLOW_DISTANCE` specified in the [honest validator document](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md) should ensure that `state.latest_eth1_data` of the canonical beacon chain remains consistent with the canonical Ethereum proof-of-work chain. If not, emergency manual intervention will be required.
 
 Post-Merge, consistency between the execution and consensus layers is no longer an issue, although we retain the [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration#eth1_follow_distance) for now.
 
@@ -9656,20 +10062,6 @@ After reading the spec you may be puzzled by the "ease of understanding" claim. 
 Only blocks that arrive during the first `1 /` `INTERVALS_PER_SLOT` of a slot's duration are eligible to have the [proposer score boost](#proposer-boost) added. This moment is the point in the slot at which validators are expected to [publish attestations](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/validator.md#attesting) declaring their view of the head of the chain.
 
 In the Ethereum consensus specification `INTERVALS_PER_SLOT` neatly divides `SECONDS_PER_SLOT`, and all time quantities are strictly `uint64` numbers of seconds. However, other chains that run the same basic protocol as Ethereum might not have this property. For example, the [Gnosis Beacon Chain](https://docs.gnosischain.com/specs) has five-second slots. We [changed](https://github.com/ConsenSys/teku/pull/5321) Teku's internal clock from seconds to milliseconds to support this, which is technically off-spec, but nothing broke.
-
-### Preset
-
-<a id="safe_slots_to_update_justified"></a>
-
-| Name                             | Value        | Unit  |  Duration  |
-| -------------------------------- | ------------ | :---: | :--------: |
-| `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` | `2**3` (= 8) | slots | 96 seconds |
-
-This is used in [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint) to constrain when we may update the Store's justified checkpoint. The Store will only consent to switch to a conflicting justified checkpoint (one not descended from the current justified checkpoint) during the first `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` slots of an epoch. The intention is to address a [bouncing attack](#the-bouncing-attack) that was identified fairly early the beacon chain's design and that could delay finality.
-
-The [recommended value](https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114?u=benjaminion) of `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than `SLOTS_PER_EPOCH` `/ 3` slots. There seems to be no surviving rationale for why it was set to 8 rather than 10. I assume it's to do with the our [obsession with powers of two](/part3/config/preset#preset).
-
-Note that this mechanism was removed in [a more recent update](https://github.com/ethereum/consensus-specs/pull/3290) to the fork choice due to it having [limited effectiveness](https://notes.ethereum.org/@fradamt/Sy6PzcRdt) and simplicity being preferred.
 
 ### Configuration
 
@@ -9708,22 +10100,35 @@ This is just a convenience class for tracking the most recent head vote from eac
 
 #### `Store`
 
+> The `Store` is responsible for tracking information required for the fork choice algorithm. The important fields being tracked are described below:
+>
+>   - `justified_checkpoint`: the justified checkpoint used as the starting point for the LMD GHOST fork choice algorithm.
+>   - `finalized_checkpoint`: the highest known finalized checkpoint. The fork choice only considers blocks that are not conflicting with this checkpoint.
+>   - `unrealized_justified_checkpoint` & `unrealized_finalized_checkpoint`: these track the highest justified & finalized checkpoints resp., without regard to whether on-chain _**realization**_ has occurred, i.e. FFG processing of new attestations within the state transition function. This is an important distinction from `justified_checkpoint` & `finalized_checkpoint`, because they will only track the checkpoints that are realized on-chain. Note that on-chain processing of FFG information only happens at epoch boundaries.
+>   - `unrealized_justifications`: stores a map of block root to the unrealized justified checkpoint observed in that block.
+
+These explanatory points were added in the Capella upgrade[^fn-explanatory-points]. We will expand on them below in the appropriate places.
+
+[^fn-explanatory-points]: It's interesting to see some explanation finding its way back into the spec documents now, after it was all diligently stripped out a while ago. Turns out that people appreciate explanations, I guess.
+
 ```python
 class Store(object):
     time: uint64
     genesis_time: uint64
     justified_checkpoint: Checkpoint
     finalized_checkpoint: Checkpoint
-    best_justified_checkpoint: Checkpoint
+    unrealized_justified_checkpoint: Checkpoint
+    unrealized_finalized_checkpoint: Checkpoint
     proposer_boost_root: Root
     equivocating_indices: Set[ValidatorIndex]
     blocks: Dict[Root, BeaconBlock] = field(default_factory=dict)
     block_states: Dict[Root, BeaconState] = field(default_factory=dict)
     checkpoint_states: Dict[Checkpoint, BeaconState] = field(default_factory=dict)
     latest_messages: Dict[ValidatorIndex, LatestMessage] = field(default_factory=dict)
+    unrealized_justifications: Dict[Root, Checkpoint] = field(default_factory=dict)
 ```
 
-A node's Store records all the fork choice related information that it has about the outside world. It is the node's view of the network, in more classical terms. The Store is updated only by the [four handler functions](#handlers).
+A node's Store records all the fork choice related information that it has about the outside world. In more classical terms, the Store is the node's view of the network. The Store is updated only by the [four handler functions](#handlers).
 
 The basic fields are as follows.
 
@@ -9737,11 +10142,27 @@ The basic fields are as follows.
 
 The following fields were added at various times as new attacks and defences were found.
 
-  - `best_justified_checkpoint` was [added](https://github.com/ethereum/consensus-specs/pull/1465) to the Store to defend against the [FFG bouncing attack](#the-bouncing-attack).
   - `proposer_boost_root` was [added](https://github.com/ethereum/consensus-specs/pull/2730) when proposer boost was implemented as a defence against the [LMD balancing attack](#proposer-boost). It is set to the root of the current block for the duration of a slot, as long as that block arrived within the first third of a slot.
   - The `equivocating_indices` set was [added](https://github.com/ethereum/consensus-specs/pull/2845) to defend against the [equivocation balancing attack](#equivocation_balancing_attack). It contains the indices of any validators reported as having committed an attester slashing violation. These validators must be removed from consideration in the fork choice rule until the last justified checkpoint state catches up with the fact that the validators have been slashed.
+  - The `unrealized_justified_checkpoint` and `unrealized_finalized_checkpoint`fields were [added](https://github.com/ethereum/consensus-specs/pull/3290) in the Capella update. They are used to avoid certain problems with [unrealised justification](#unrealised-justification) that the old version of `filter_block_tree()` suffered.
+  - Also added in the Capella update was `unrealized_justifications`, which is a map of block roots to unrealised justification checkpoints. It is maintained by [`compute_pulled_up_tip()`](#compute_pulled_up_tip). For every block, it stores the justified checkpoint that results from running [`process_justification_and_finalization()`](/part3/transition/epoch#def_process_justification_and_finalization) on the block's post-state. In the beacon state, that calculation is done only on epoch boundaries, so, within the fork choice, we call the result "unrealised".
 
 For non-Pythonistas, [`Set`](https://docs.python.org/3/library/typing.html#typing.Set) and [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict) are Python generic types. A `Set` is an unordered collection of objects; a `Dict` provides key&ndash;value look-up.
+
+#### `is_previous_epoch_justified`
+
+```python
+def is_previous_epoch_justified(store: Store) -> bool:
+    current_slot = get_current_slot(store)
+    current_epoch = compute_epoch_at_slot(current_slot)
+    return store.justified_checkpoint.epoch + 1 == current_epoch
+```
+
+Based on the current time in the Store, this function returns `True` if the checkpoint at the start of the previous epoch has been justified - that is, has received a super-majority Casper FFG vote.
+
+|||
+|-|-|
+| Used&nbsp;by | [`filter_block_tree()`](#filter_block_tree) |
 
 #### `get_forkchoice_store`
 
@@ -9762,16 +10183,18 @@ def get_forkchoice_store(anchor_state: BeaconState, anchor_block: BeaconBlock) -
         genesis_time=anchor_state.genesis_time,
         justified_checkpoint=justified_checkpoint,
         finalized_checkpoint=finalized_checkpoint,
-        best_justified_checkpoint=justified_checkpoint,
+        unrealized_justified_checkpoint=justified_checkpoint,
+        unrealized_finalized_checkpoint=finalized_checkpoint,
         proposer_boost_root=proposer_boost_root,
         equivocating_indices=set(),
         blocks={anchor_root: copy(anchor_block)},
         block_states={anchor_root: copy(anchor_state)},
         checkpoint_states={justified_checkpoint: copy(anchor_state)},
+        unrealized_justifications={anchor_root: justified_checkpoint}
     )
 ```
 
-`get_forkchoice_store()` initialises the fork choice Store object from an anchor state and its corresponding block (header). As noted, the anchor state could be the genesis state. Equally, when using a [checkpoint sync](https://docs.teku.consensys.net/en/stable/Concepts/Weak-Subjectivity/#safely-sync-your-node), the anchor state will be the finalised checkpoint state provided by the node operator, which will be [treated as if](https://github.com/ethereum/consensus-specs/issues/2566) it is a genesis state. In either case, the `latest_messages` store will be empty to begin with.
+`get_forkchoice_store()` initialises the fork choice Store object from an anchor state and its corresponding block (header). As noted, the anchor state could be the genesis state. Equally, when using a [checkpoint sync](https://docs.teku.consensys.net/get-started/checkpoint-start), the anchor state will be the finalised checkpoint state provided by the node operator, which will be [treated as if](https://github.com/ethereum/consensus-specs/issues/2566) it is a genesis state. In either case, the `latest_messages` store will be empty to begin with.
 
 #### `get_slots_since_genesis`
 
@@ -9797,7 +10220,7 @@ Self explanatory. [`GENESIS_SLOT`](/part3/config/constants#genesis_slot) is usua
 
 |||
 |-|-|
-| Used&nbsp;by | [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`validate_target_epoch_against_current_time()`](#validate_target_epoch_against_current_time), [`validate_on_attestation()`](#validate_on_attestation), [`on_tick()`](#on_tick), [`on_block()`](#on_block) |
+| Used&nbsp;by | [`get_voting_source()`](#get_voting_source), [`filter_block_tree()`](#filter_block_tree), [`compute_pulled_up_tip()`](#compute_pulled_up_tip), [`on_tick_per_slot`](#on_tick_per_slot), [`validate_target_epoch_against_current_time()`](#validate_target_epoch_against_current_time), [`validate_on_attestation()`](#validate_on_attestation), [`on_tick()`](#on_tick), [`on_block()`](#on_block) |
 | Uses | [`get_slots_since_genesis()`](#get_slots_since_genesis) |
 
 #### `compute_slots_since_epoch_start`
@@ -9807,12 +10230,12 @@ def compute_slots_since_epoch_start(slot: Slot) -> int:
     return slot - compute_start_slot_at_epoch(compute_epoch_at_slot(slot))
 ```
 
-Self explanatory. Used only for the [bouncing attack](#the-bouncing-attack) defence.
+Self explanatory.
 
 |||
 |-|-|
-| Used&nbsp;by | [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`on_tick()`](#on_tick) |
-| Uses | [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch) |
+| Used&nbsp;by | [`on_tick_per_slot()`](#on_tick_per_slot) |
+| Uses | [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch) |
 
 #### `get_ancestor`
 
@@ -9821,31 +10244,29 @@ def get_ancestor(store: Store, root: Root, slot: Slot) -> Root:
     block = store.blocks[root]
     if block.slot > slot:
         return get_ancestor(store, block.parent_root, slot)
-    elif block.slot == slot:
-        return root
-    else:
-        # root is older than queried slot, thus a skip slot. Return most recent root prior to slot
-        return root
+    return root
 ```
 
-`get_ancestor()` recursively walks backwards through the chain. It starts with a given block with root hash `root`, and finds its ancestor block at slot `slot`, returning the ancestor's root hash. If the desired `slot` is empty (on this branch) then it returns the most recent root prior to `slot` on this branch. (When the block at slot `slot` has root `root`, then that block root is returned, so it should probably be called `get_ancestor_or_self()` or something.)
+Given a block root `root`, `get_ancestor()` returns the ancestor block (on the same branch) that was published at slot `slot`. If there was no block published at `slot`, then the ancestor block most recently published prior to `slot` is returned.
 
 This function is sometimes used just to confirm that the block with root `root` is descended from a particular block at slot `slot`, and sometimes used actually to retrieve that ancestor block's root.
 
 |||
 |-|-|
-| Used&nbsp;by | [`get_latest_attesting_balance()`](#get_latest_attesting_balance), [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint), [`validate_on_attestation()`](#validate_on_attestation), [`on_tick()`](#on_tick), [`on_block()`](#on_block) |
+| Uses | `get_ancestor()` (recursively) |
+| Used&nbsp;by | [`get_weight()`](#get_weight), [`filter_block_tree()`](#filter_block_tree), [`validate_on_attestation()`](#validate_on_attestation), [`on_block()`](#on_block), `get_ancestor()` (recursively) |
 
-#### `get_latest_attesting_balance`
-
-This function is arguably misnamed, and in the latest spec versions [has been renamed](https://github.com/ethereum/consensus-specs/pull/3250) to `get_weight()`.
+#### `get_weight`
 
 ```python
-def get_latest_attesting_balance(store: Store, root: Root) -> Gwei:
+def get_weight(store: Store, root: Root) -> Gwei:
     state = store.checkpoint_states[store.justified_checkpoint]
-    active_indices = get_active_validator_indices(state, get_current_epoch(state))
+    unslashed_and_active_indices = [
+        i for i in get_active_validator_indices(state, get_current_epoch(state))
+        if not state.validators[i].slashed
+    ]
     attestation_score = Gwei(sum(
-        state.validators[i].effective_balance for i in active_indices
+        state.validators[i].effective_balance for i in unslashed_and_active_indices
         if (i in store.latest_messages
             and i not in store.equivocating_indices
             and get_ancestor(store, store.latest_messages[i].root, store.blocks[root].slot) == root)
@@ -9858,10 +10279,7 @@ def get_latest_attesting_balance(store: Store, root: Root) -> Gwei:
     proposer_score = Gwei(0)
     # Boost is applied if ``root`` is an ancestor of ``proposer_boost_root``
     if get_ancestor(store, store.proposer_boost_root, store.blocks[root].slot) == root:
-        num_validators = len(get_active_validator_indices(state, get_current_epoch(state)))
-        avg_balance = get_total_active_balance(state) // num_validators
-        committee_size = num_validators // SLOTS_PER_EPOCH
-        committee_weight = committee_size * avg_balance
+        committee_weight = get_total_active_balance(state) // SLOTS_PER_EPOCH
         proposer_score = (committee_weight * PROPOSER_SCORE_BOOST) // 100
     return attestation_score + proposer_score
 ```
@@ -9874,21 +10292,26 @@ Ignoring the proposer boost part for the time being, the main calculation being 
 
 ```none
     state = store.checkpoint_states[store.justified_checkpoint]
-    active_indices = get_active_validator_indices(state, get_current_epoch(state))
+    unslashed_and_active_indices = [
+        i for i in get_active_validator_indices(state, get_current_epoch(state))
+        if not state.validators[i].slashed
+    ]
     attestation_score = Gwei(sum(
-        state.validators[i].effective_balance for i in active_indices
+        state.validators[i].effective_balance for i in unslashed_and_active_indices
         if (i in store.latest_messages
             and i not in store.equivocating_indices
             and get_ancestor(store, store.latest_messages[i].root, store.blocks[root].slot) == root)
     ))
 ```
 
+We only consider the votes of active and unslashed validators. (Slashed validators might still be in the exit queue and are technically "active", at least according to [`is_active_validator()`](/part3/helper/predicates#def_is_active_validator).) The exclusion of validators that have been slashed in-protocol at the last justified checkpoint was added in the Capella specification to complement the [`on_attester_slashing()`](#on_attester_slashing) handler. It will additionally exclude validators slashed via proposer slashings, and validators slashed long ago (when the exit queue is long) and for which we have discarded the attester slashing from the Store.
+
 Given a block root, `root`, this adds up all the votes for blocks that are descended from that block. More precisely, it calculates the sum of the effective balances of all validators whose latest head vote was for a descendant of `root` or for `root` itself. It's the fact that we're basing our weight calculations only on each validator's _latest_ vote that makes this "LMD" (latest message drive) GHOST.
 
-<a id="img_annotated-forkchoice-get-weight-0"></a>
+<a id="img_annotated_forkchoice_get_weight_0"></a>
 <figure class="diagram" style="width: 90%">
 
-![Diagram of a block tree with weights and latest attesting balances shown for each block](images/diagrams/annotated-forkchoice-get-weight-0.svg)
+![Diagram of a block tree with weights and latest attesting balances shown for each block.](images/diagrams/annotated-forkchoice-get-weight-0.svg)
 
 <figcaption>
 
@@ -9920,19 +10343,6 @@ Proposer boost modifies our nice, intuitive calculation of a branch's weight, ba
 
 The simple intuition behind proposer boost [is summarised](https://barnabe.substack.com/p/pos-ethereum-reorg) by Barnabé Monnot as, "a block that is timely shouldn’t expect to be re-orged". In respect of the balancing attack, proposer boost is designed to overwhelm the votes from validators controlled by the adversary and instead allow the proposer of the timely block to choose the fork that will win. Quoting [Francesco D'Amato](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion#high-level-mitigation-idea-3), "the general strategy is to empower honest proposers to impose their view of the fork-choice, but without giving them too much power and making committees irrelevant".
 
-Note that the proposer boost calculation in this spec version is over-complicated, possibly due to concerns about integer overflows. The calculation has [been simplified](https://github.com/ethereum/consensus-specs/pull/3246/files) to the following in more recent spec versions.
-
-```none
-    if store.proposer_boost_root == Root():
-        # Return only attestation score if ``proposer_boost_root`` is not set
-        return attestation_score
-    # Boost is applied if ``root`` is an ancestor of ``proposer_boost_root``
-    if get_ancestor(store, store.proposer_boost_root, store.blocks[root].slot) == root:
-        committee_weight = get_total_active_balance(state) // SLOTS_PER_EPOCH
-        proposer_score = (committee_weight * PROPOSER_SCORE_BOOST) // 100
-    return attestation_score + proposer_score
-```
-
 The default setting for `store.proposer_boost_root` is `Root()`. That is, the "empty" or "null" [default SSZ](/part2/building_blocks/ssz#default-values) root value, with all bytes set to zero. Whenever a block is received during the first `1 /` `INTERVALS_PER_SLOT` portion of a slot &ndash; that is, when the block is timely &ndash; `store.proposer_boost_root` is set to the hash tree root of that block by the [`on_block()`](/part3/forkchoice/phase0#on_block) handler. At the end of each slot it is reset to `Root()` by the [`on_tick()`](/part3/forkchoice/phase0#on_block) handler. Thus, proposer boost has an effect on the fork choice calculation from the point at which a timely block is received until the end of that slot, where "timely" on Ethereum's beacon chain means "within the first four seconds".
 
 Proposer boost causes entire branches to be favoured when the block at their tip is timely. When proposer boost is in effect, and the timely block in the current slot (which has root, `store.proposer_boost_root`) is descended from the block we are calculating the weight for, then that block's weight is also increased, since the calculation includes the weights of all its descendants. In this way, proposer boost weighting [propagates to the boosted block's ancestors](https://github.com/ethereum/consensus-specs/pull/2760) in the same way as vote weights do.
@@ -9957,7 +10367,7 @@ With proposer boost, as long as the late block has fewer votes than the proposer
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
-![Diagram showing a proposer choosing whether to build on a late block or its parent](images/diagrams/annotated-forkchoice-late-block-0.svg)
+![Diagram showing a proposer choosing whether to build on a late block or its parent.](images/diagrams/annotated-forkchoice-late-block-0.svg)
 
 </div>
 <figcaption>
@@ -9971,7 +10381,7 @@ Block $B$ was published late, well after the 4 second attestation cut-off time. 
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
-![Diagram showing that without proposer score boosting a proposer should build on the late block](images/diagrams/annotated-forkchoice-late-block-1.svg)
+![Diagram showing that without proposer score boosting a proposer should build on the late block.](images/diagrams/annotated-forkchoice-late-block-1.svg)
 
 </div>
 <figcaption>
@@ -9985,7 +10395,7 @@ Without proposer boost, it only makes sense to build $C_1$, on top of the late b
 <figure class="diagram" style="width: 90%">
 <div style="width: 80%">
 
-![Diagram showing that with proposer score boosting a proposer may build on the late block's parent](images/diagrams/annotated-forkchoice-late-block-2.svg)
+![Diagram showing that with proposer score boosting a proposer may build on the late block's parent.](images/diagrams/annotated-forkchoice-late-block-2.svg)
 
 </div>
 <figcaption>
@@ -10023,7 +10433,41 @@ Francesco D'Amato argues in [Reorg resilience and security in post-SSF LMD-GHOST
 | Uses | [`get_active_validator_indices()`](/part3/helper/accessors#def_get_active_validator_indices), [`get_ancestor()`](#get_ancestor), [`get_total_active_balance()`](/part3/helper/accessors#def_get_total_active_balance) |
 | See&nbsp;also | [`on_tick()`](#on_tick), [`on_block()`](#on_block), [`PROPOSER_SCORE_BOOST`](#proposer_score_boost) |
 
+#### `get_voting_source`
+
+```python
+def get_voting_source(store: Store, block_root: Root) -> Checkpoint:
+    """
+    Compute the voting source checkpoint in event that block with root ``block_root`` is the head block
+    """
+    block = store.blocks[block_root]
+    current_epoch = compute_epoch_at_slot(get_current_slot(store))
+    block_epoch = compute_epoch_at_slot(block.slot)
+    if current_epoch > block_epoch:
+        # The block is from a prior epoch, the voting source will be pulled-up
+        return store.unrealized_justifications[block_root]
+    else:
+        # The block is not from a prior epoch, therefore the voting source is not pulled up
+        head_state = store.block_states[block_root]
+        return head_state.current_justified_checkpoint
+```
+
+If the given block (which is a leaf block in the Store's block tree) is from a prior epoch, then return its [unrealised justification](#unrealised-justification). Otherwise return the justified checkpoint from its post-state (its realised justification).
+
+Returning the unrealised justification is called "pulling up" the block (or "pulling the tip of a branch") as it is equivalent to running the end-of-epoch state transition accounting on the block's post-state: the block is notionally pulled up from its actual slot to the first slot of the next epoch.
+
+The Casper FFG source vote is the checkpoint that a validator believes is the highest justified at the time of the vote. As such, this function returns the source checkpoint that validators with this block as head will use when casting a Casper FFG vote in the current epoch. This has an important role in [`filter_block_tree()`](#filter_block_tree) and is used in the [formal proof of non-self-slashability](#formal-proofs).
+
+|||
+|-|-|
+| Used&nbsp;by | [`filter_block_tree()`](#filter_block_tree) |
+| Uses | [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot) |
+
 #### `filter_block_tree`
+
+> _Note_: External calls to `filter_block_tree` (i.e., any calls that are not made by the recursive logic in this function) MUST set `block_root` to `store.justified_checkpoint`.
+
+The only external call to `filter_block_tree()` comes from [`get_filtered_block_tree()`](#get_filtered_block_tree), which uses `store.justified_checkpoint.root`. So we're all good. This is a requirement of [Hybrid LMD GHOST](#hybrid-lmd-ghost) - it enforces Casper FFG's fork choice rule.
 
 ```python
 def filter_block_tree(store: Store, block_root: Root, blocks: Dict[Root, BeaconBlock]) -> bool:
@@ -10042,9 +10486,62 @@ def filter_block_tree(store: Store, block_root: Root, blocks: Dict[Root, BeaconB
             return True
         return False
 
-    # If leaf block, check finalized/justified checkpoints as matching latest.
-    head_state = store.block_states[block_root]
+    current_epoch = compute_epoch_at_slot(get_current_slot(store))
+    voting_source = get_voting_source(store, block_root)
 
+    # The voting source should be at the same height as the store's justified checkpoint
+    correct_justified = (
+        store.justified_checkpoint.epoch == GENESIS_EPOCH
+        or voting_source.epoch == store.justified_checkpoint.epoch
+    )
+
+    # If the previous epoch is justified, the block should be pulled-up. In this case, check that unrealized
+    # justification is higher than the store and that the voting source is not more than two epochs ago
+    if not correct_justified and is_previous_epoch_justified(store):
+        correct_justified = (
+            store.unrealized_justifications[block_root].epoch >= store.justified_checkpoint.epoch and
+            voting_source.epoch + 2 >= current_epoch
+        )
+
+    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+    correct_finalized = (
+        store.finalized_checkpoint.epoch == GENESIS_EPOCH
+        or store.finalized_checkpoint.root == get_ancestor(store, block_root, finalized_slot)
+    )
+    # If expected finalized/justified, add to viable block-tree and signal viability to parent.
+    if correct_justified and correct_finalized:
+        blocks[block_root] = block
+        return True
+
+    # Otherwise, branch not viable
+    return False
+```
+
+The `filter_block_tree()` function is at the heart of how LMD GHOST and Casper FFG are bolted together.
+
+The basic structure is fairly simple. Given a block, `filter_block_tree()` recursively walks the Store's block tree visiting the block's descendants in depth-first fashion. When it arrives at a leaf block (the tip of a branch), if the leaf block is "viable" as head then it and all its ancestors (the whole branch) will be added to the `blocks` list, otherwise the branch will be ignored.
+
+In other words, the algorithm prunes out branches that terminate in an unviable head block, and keeps branches that terminate in a viable head block.
+
+<a id="img_annotated_viable_nonviable"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing the pruning of nonviable branches.](images/diagrams/annotated-forkchoice-viable-nonviable.svg)
+
+<figcaption>
+
+Block $J$ is the Store's justified checkpoint. There are four candidate head blocks descended from it. Two are viable ($V$), and two are nonviable ($NV$). Blocks in branches terminating at viable heads are returned by the filter; blocks in branches terminating at nonviable heads are filtered out.
+
+</figcaption>
+</figure>
+
+##### Viability
+
+What dictates whether a leaf block is viable or not?
+
+Pre-Capella, there was a fairly straightforward requirement for a leaf block to be a viable head block: viable head blocks had a post-state that agreed with the Store about the justified and finalised checkpoints. This was encapsulated in the following code from the [Bellatrix spec](/../bellatrix/part3/forkchoice/phase0#filter_block_tree),
+
+```none
     correct_justified = (
         store.justified_checkpoint.epoch == GENESIS_EPOCH
         or head_state.current_justified_checkpoint == store.justified_checkpoint
@@ -10057,28 +10554,21 @@ def filter_block_tree(store: Store, block_root: Root, blocks: Dict[Root, BeaconB
     if correct_justified and correct_finalized:
         blocks[block_root] = block
         return True
-
-    # Otherwise, branch not viable
-    return False
 ```
 
-The `filter_block_tree()` function finds the children of the given block and recursively visits them, so it explores the whole tree rooted at `block_root`. Since blockchains are singly linked, the only way to find the children is to search through every block in the Store for those that have parent `block_root`. This is one reason for keeping the Store well pruned.
-
-Child blocks that are on branches terminating in a viable leaf block are inserted into the `blocks` dictionary structure. Note that `blocks` is mutated during execution and functions as a return value from `filter_block_tree()`, alongside the actual boolean return value.
-
-"Viable" blocks are ones that have a post-state that agrees with my Store about the justified and finalised checkpoints.
+The code we have in the Capella update is considerably more complex and less intuitive. But before we get to that we need to take a step back and discuss why we should filter the block tree at all.
 
 ##### Why prune unviable branches?
 
-This function ensures that the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height", is applied to the block tree before the LMD GHOST fork choice is evaluated.
+Filtering the block tree like this ensures that the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height", is applied to the block tree before the LMD GHOST fork choice is evaluated.
 
-Early versions of the spec considered the tip of any branch descended from the Store's justified checkpoint as a potential head block. However, a scenario [was identified](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) in which this could result in a deadlock, in which finality would not be able to advance without validators getting themselves slashed - a kind of liveness failure[^fn-plausible-liveness].
+Very early versions of the spec considered the tip of any branch descended from the Store's justified checkpoint as a potential head block. However, a scenario [was identified](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) in which this could result in a deadlock, in which finality would not be able to advance without validators getting themselves slashed - a kind of liveness failure[^fn-plausible-liveness].
 
 [^fn-plausible-liveness]: This scenario doesn't strictly break Casper FFG's "plausible liveness" property as, in principle, voters can safely ignore the LMD GHOST fork choice and switch back to the original chain in order to advance finality. But it does create a conflict between the LMD GHOST fork choice rule and advancing finality.
 
-The `filter_block_tree()` function was [added](https://github.com/ethereum/consensus-specs/pull/1495) as a fix for this issue. Given a Store and a block root, `filter_block_tree()` returns a list of all the blocks that we know about in the tree descending from the given block, having pruned out any branches that terminate in a leaf block that is not viable. Where, as above, a "viable" block has an a post-state in which the justified and finalised checkpoints match the justified and finalised checkpoints in my Store.
+The `filter_block_tree()` function was [added](https://github.com/ethereum/consensus-specs/pull/1495) as a fix for this issue. Given a Store and a block root, `filter_block_tree()` returns the list of all the blocks that we know about in the tree descending from the given block, having pruned out any branches that terminate in a leaf block that is not viable in some sense.
 
-To illustrate the problem, consider the situation shown in the following diagrams, based on the [original description](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) of the issue. The context is that there is an adversary controlling 18% of validators that takes advantage of (or causes) a temporary network partition. We will illustrate the issue mostly in terms of checkpoints, and omit the intermediate blocks that carry the attestations - mentally insert these as necessary.
+To illustrate the problem, consider the situation shown in the following diagrams, based on the [original description](https://notes.ethereum.org/Fj-gVkOSTpOyUx-zkWjuwg?view) of the issue. The context is that there is an adversary controlling 18% of validators that takes advantage of (or causes) a temporary network partition. We will illustrate the issue mostly in terms of checkpoints, and omit the intermediate blocks that carry the attestations - you can mentally insert these as necessary.
 
 We begin with a justified checkpoint $A$ that all nodes agree on.
 
@@ -10086,11 +10576,9 @@ Due to the network partition, only 49% of validators, plus the adversary's 18%, 
 
 <a id="img_annotated_forkchoice_filter_0"></a>
 <figure class="diagram" style="width: 90%">
-<div style="width: 70%">
 
-![A diagram illustrating the first step in a liveness attack on the unfiltered chain, making the first branch](images/diagrams/annotated-forkchoice-filter-0.svg)
+![A diagram illustrating the first step in a liveness attack on the unfiltered chain, making the first branch.](images/diagrams/annotated-forkchoice-filter-0.svg)
 
-</div>
 <figcaption>
 
 The large blocks represent checkpoints. After checkpoint $A$ there is a network partition: 49% of validators plus the adversary see checkpoints $B$ and $C_1$. Casper votes are shown by the dashed arrows. The adversary votes for $B$, but not for $C_1$.
@@ -10103,7 +10591,7 @@ The remaining 33% of validators do not see checkpoint $B$, but see $C_2$ instead
 <a id="img_annotated_forkchoice_filter_1"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram illustrating the second step in a liveness attack on the unfiltered chain, making the second branch](images/diagrams/annotated-forkchoice-filter-1.svg)
+![A diagram illustrating the second step in a liveness attack on the unfiltered chain, making the second branch.](images/diagrams/annotated-forkchoice-filter-1.svg)
 
 <figcaption>
 
@@ -10121,7 +10609,7 @@ However, the justified checkpoint on the $h_2$ branch remains at $A$. This means
 <a id="img_annotated_forkchoice_filter_2"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram illustrating the third step in a liveness attack on the unfiltered chain, changing the chain head](images/diagrams/annotated-forkchoice-filter-2.svg)
+![A diagram illustrating the third step in a liveness attack on the unfiltered chain, changing the chain head.](images/diagrams/annotated-forkchoice-filter-2.svg)
 
 <figcaption>
 
@@ -10139,7 +10627,7 @@ The chosen fix for all this is to filter the block tree before applying the LMD 
 <a id="img_annotated_forkchoice_filter_3"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram showing that filter block tree prunes out the conflicting branch for validators following the first branch](images/diagrams/annotated-forkchoice-filter-3.svg)
+![A diagram showing that filter block tree prunes out the conflicting branch for validators following the first branch.](images/diagrams/annotated-forkchoice-filter-3.svg)
 
 <figcaption>
 
@@ -10150,10 +10638,249 @@ When validators that followed branch 1 apply `filter_block_tree()`, branch 2 is 
 
 With this fix, the chain will recover the ability to finalise when the validators on the second branch eventually become aware of the first branch. On seeing $h_1$ and its ancestors, they will update their Stores' justified checkpoints to $B$ and mark the $h_2$ branch unviable.
 
+##### Unrealised justification
+
+A major feature of the Capella [update to the fork choice specification](https://github.com/ethereum/consensus-specs/pull/3290) is the logic for handling "unrealised justification" when filtering the block tree.
+
+Several issues had arisen in the [former fork choice spec](/../bellatrix/part3/forkchoice/phase0). First, an [unrealised justification reorg](https://notes.ethereum.org/@adiasg/unrealized-justification) attack that allowed the proposer of the first block of an epoch to easily fork out up to nine blocks from the end of the previous epoch. A variant of that attack was also found to be able to cause validators to make slashable attestations - the very issue the filter is intended to prevent. Second, a [justification withholding attack](https://hackmd.io/o9tGPQL2Q4iH3Mg7Mma9wQ) that an adversary could use to reorg arbitrary numbers of blocks at the start of an epoch.
+
+The root issue is that, within the consensus layer's state transition, the calculations that update justification and finality are done only at epoch boundaries. An adversary had a couple of ways they could use this to filter out competing branches within `filter_block_tree()`. Essentially, in not accounting for unrealised justifications, the filtering was being applied too aggressively.
+
+To be clear, both of the attacks described here apply to the [old version of `filter_block_tree()`](/../bellatrix/part3/forkchoice/phase0#filter_block_tree) and have been remedied in the current release. This is the old, much simpler, code for evaluating `correct_justified` and `correct_finalized`,
+
+```none
+    correct_justified = (
+        store.justified_checkpoint.epoch == GENESIS_EPOCH
+        or head_state.current_justified_checkpoint == store.justified_checkpoint
+    )
+    correct_finalized = (
+        store.finalized_checkpoint.epoch == GENESIS_EPOCH
+        or head_state.finalized_checkpoint == store.finalized_checkpoint
+    )
+```
+
+This meant that the tip of a branch was included for consideration if (a) the justified checkpoint in its post-state matched that in the store, and (b) the finalised checkpoint in its post-state matched that in the store. These nice simple criteria have been changed to the mess we have today, which we'll look at in a moment. But first, let's see what was wrong with the old criteria.
+
+###### Unrealised justification reorg
+
+The [unrealised justification reorg](https://notes.ethereum.org/@adiasg/unrealized-justification) allowed an adversary assigned to propose a block in the first slot of an epoch to reorg out a chain of up to nine blocks at the end of the previous epoch.
+
+The key to this is the idea of _unrealised justification_. Towards the end of an epoch (within the last third of an epoch, that is, the last nine slots), the beacon chain might have gathered enough Casper FFG votes to justify the checkpoint at the start of that epoch. However, justification and finalisation calculations take place only at epoch boundaries, so the achieved justification is "unrealised": until the end of the epoch, all the blocks will continue have a post-state justification that points to an earlier checkpoint.
+
+<a id="img_annotated_forkchoice_unrealised_justification-reorg_0"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the setup for an unrealised justification reorg scenario.](images/diagrams/annotated-forkchoice-unrealised-justification-reorg-0.svg)
+
+<figcaption>
+
+The solid vertical lines are epoch boundaries, and the squares $C_1$ and $C_2$ are their checkpoints. A block's $J$ value shows the justified checkpoint in its post-state. Its $U$ value is the hypothetical unrealised justification. During an epoch, the chain may gather enough Casper FFG votes to justify a new checkpoint, but justification in the beacon state happens only at epoch boundaries, so it is unrealised in the interim. Block $Y$ is clearly the head block.
+
+</figcaption>
+</figure>
+
+When the adversary is the proposer in the first slot of an epoch, it could have used the unrealised justification in the previous epoch to fork out the last blocks of that epoch - up to around nine of them, depending on the FFG votes the adversary's block contains. By building a competing head block the adversary could trick `filter_block_tree()` into filtering out the previous head branch from consideration.
+
+<a id="img_annotated_forkchoice_unrealised_justification_reorg_1"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing how the adversary executes the unrealised justification reorg.](images/diagrams/annotated-forkchoice-unrealised-justification-reorg-1.svg)
+
+<figcaption>
+
+The adversary adds a block $Z$ in the first slot of the next epoch. It builds on $W$, which has unrealised justification. At the epoch boundary, the state's justified checkpoint is calculated, so $W$'s post-state has $C_2$. In the former fork choice, only branches with tips that agreed with the Store about the justified checkpoint could be considered. On that basis, the branch ending in $Y$ would have been excluded by the filter, making $Z$ the head, even though it might have zero LMD GHOST support. Blocks $X$ and $Y$ would be orphaned (reorged out).
+
+</figcaption>
+</figure>
+
+###### Unrealised justification deadlock
+
+It also became apparent that the pre-Capella formulation of `filter_block_tree()` did not fully prevent the possibility of deadlock - the very thing that filtering the block tree is [intended to prevent](#why-prune-unviable-branches). Deadlock is a situation in which honest validators are forced to choose between making a slashable attestation or not voting at all.
+
+The setup and attack is described in [Aditya Asgaonkar's document](https://notes.ethereum.org/@adiasg/unrealized-justification), and is a variant of the reorg above. The original deadlock attack relied on the network being partitioned, so that validators had split views. This newer deadlock attack did not need a network partition, but under some fairly specific unrealised justification conditions, the adversary could make the justified checkpoint go backwards. Doing this after some honest validators had already used the higher checkpoint as their Casper FFG source vote forced them subsequently to either make a surround vote, or not to vote.
+
+###### Justification withholding attack
+
+The [justification withholding attack](https://hackmd.io/o9tGPQL2Q4iH3Mg7Mma9wQ) was similar to the [unrealised justification reorg](#unrealised-justification-reorg) in that it involved using unrealised justification to get `filter_block_tree()` to exclude other branches besides the adversary's.
+
+In this attack, the adversary needs to have several proposals in a row at the end of an epoch - enough that, if the adversary does not publish the blocks, the epoch does not get justified by the time it finishes. That is, without the adversary's blocks, there is no unrealised justification, with the adversary's blocks there would be unrealised justification.
+
+<a id="img_annotated_forkchoice_justification_withholding_0"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing how an adversary sets up a justification withholding attack.](images/diagrams/annotated-forkchoice-justification-withholding-0.svg)
+
+<figcaption>
+
+The adversary has a string of proposals at the end of an epoch. These blocks contain enough FFG votes to justify the epoch's checkpoint $C_2$, but the adversary withholds them for now.
+
+</figcaption>
+</figure>
+
+The remainder of the chain is unaware of the adversary's blocks, so continues to build as if they were skipped slots.
+
+<a id="img_annotated_forkchoice_justification_withholding_1"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the chain progressing after the setup of the justification withholding attack, but before its execution.](images/diagrams/annotated-forkchoice-justification-withholding-1.svg)
+
+<figcaption>
+
+The remainder of the validators continue to build blocks $A$ and $B$ at the start of the next epoch. Without the adversary's blocks, checkpoint 2 is not justified, so $A$ and $B$ have $C_1$ as justified in their post-states (their unrealised justification is irrelevant here). Block $B$ is the chain's head.
+
+</figcaption>
+</figure>
+
+The adversary has a block proposal at some point in epoch 3 - it does not matter when.
+
+<a id="img_annotated_forkchoice_justification_withholding_2"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing the execution of the justification withholding attack.](images/diagrams/annotated-forkchoice-justification-withholding-2.svg)
+
+<figcaption>
+
+When the adversary publishes block $Z$ in epoch 3, it releases its withheld blocks at the same time. Block $Z$ has a post-state justified checkpoint of $C_2$ (updated at the epoch boundary). Under the old `filter_block_tree()` that would have excluded $B$ from consideration as head, and the adversary's block $Z$ would have become head, even with no LMD support.
+
+</figcaption>
+</figure>
+
+##### Viable and unviable branches
+
+The block tree filtering is done by checking that blocks at the tip of branches have the "correct" justification and finalisation in some sense. Both the `correct_justified` and `correct_finalised` flags must be true for the branch to be considered viable.
+
+###### `correct_justified`
+
+The newer, more complex, `correct_justified` evaluation from the Capella update is as follows.
+
+```none
+    current_epoch = compute_epoch_at_slot(get_current_slot(store))
+    voting_source = get_voting_source(store, block_root)
+
+    # The voting source should be at the same height as the store's justified checkpoint
+    correct_justified = (
+        store.justified_checkpoint.epoch == GENESIS_EPOCH
+        or voting_source.epoch == store.justified_checkpoint.epoch # A
+    )
+
+    # If the previous epoch is justified, the block should be pulled-up. In this case, check that unrealized
+    # justification is higher than the store and that the voting source is not more than two epochs ago
+    if not correct_justified and is_previous_epoch_justified(store): # B
+        correct_justified = (
+            store.unrealized_justifications[block_root].epoch >= store.justified_checkpoint.epoch and # C
+            voting_source.epoch + 2 >= current_epoch # D
+        )
+```
+
+I'm not going to pretend that I understand this fully - it seems very far from intuitive, and its correctness far from obvious[^fn-fc-fv]. For now I will quote some explanation that Aditya shared with me directly.
+
+[^fn-fc-fv]: Some evidence for how challenging the fork choice is to reason about is provided by the [formal proofs of correctness](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) created by Roberto Saltini and team at ConsenSys. [One of the proofs alone](https://docs.google.com/document/d/1V0sabk-DKnIl3BKgt-GkEFSFq-K-Ie8gmuezHRnVn0c/edit#) is 28 pages long when printed.
+
+> The `correct_justified` condition ensures that:
+> (a) we pick a head block that has a "good" justification in its chain, and
+> (b) that validators can vote for the chosen head block without the risk of creating slashable messages.
+>
+> I describe (a) here informally, but you can think of the fork choice as a heuristic to choose where to vote so that we advance our finalized checkpoint as fast as possible. Generally, this means we vote on the highest justified checkpoint we know of, but the "that we know of" part is tricky because of the nuances of unrealized justifications and the associated reorg attacks.
+>
+> Now, if you ignore unrealized justification and the reorg attacks, this first appearance of `correct_justified` [Line `A`] is sufficient to address (a) & (b). Then, to fix the reorg attacks, we add an additional version of `correct_justified` for pulled-up blocks, where the first line [line `C`] addresses (a) and the second line [line `D`] addresses (b).
+
+Recall that the chief goal of filtering the block tree is to avoid honest validators being forced to make surround votes in Casper FFG, as these are slashable. However, earlier remedies for this were too eager in filtering out candidate heads, and an adversary could use unrealised justification to force reorgs, and even the kind of self-slashing we want to avoid.
+
+The current fork choice apparatus preserves two key properties[^fn-fc-mikhail].
+
+[^fn-fc-mikhail]: I am grateful to Mikhail Kalinin for helping me with his very lucid and careful explanation. My explanation is based on his; any errors and over-simplifications are all my own work.
+
+1. The `voting_source.epoch` of a candidate head block is always less than or equal to the `store.justified_checkpoint.epoch`.
+   - This is because [`on_block()`](#on_block) always calls [`update_checkpoints()`](#update_checkpoints), and the way that the [`get_voting_source()`](#get_voting_source) function is constructed.
+   - The `voting_source.epoch` is the Casper FFG source vote that validators with that block as head will use when making a Casper FFG vote in the current epoch.
+2. `store.justified_checkpoint.epoch` never decreases (it is monotonically increasing).
+   - It is only ever written to in [`update_checkpoints()`](#update_checkpoints), and it is easy to see from there that this is true.
+
+With respect to the line I've marked `A` in the source code, if the voting source matches the Store's justified checkpoint, then all is good, we have no reason not to consider the block as head, and we can short-circuit the rest of the logic. By property 2, the Store's justified checkpoint never decreases, so a validator's Casper FFG vote based on this cannot ever be a surround vote. (Since the target vote strictly increases, it cannot be a surrounded vote either.)
+
+<a id="img_annotated_forkchoice_correct_justified_0"></a>
+<figure class="diagram" style="width: 85%">
+
+![A diagram showing that it is always safe to vote when the voting source is the same as the store's justified checkpoint.](images/diagrams/annotated-forkchoice-correct-justified-0.svg)
+
+<figcaption>
+
+When the voting source is the same as the store's justified checkpoint, it is always safe to vote. The store's justified checkpoint never decreases, so we cannot commit a surround vote.
+
+</figcaption>
+</figure>
+
+If the block is not a viable head by the first criterion, it might still be a viable head by the second (line `D`). Recall that the reorg attacks above rely on the adversary taking advantage of unrealised justification to update the Store's justified checkpoint, leaving the previous head of the chain "stale" with respect to its realised justification, although based on its unrealised justification it would still be viable. To avoid this, we wish to safely include as many viable heads as possible.
+
+We know that any Casper FFG vote we make at this point will have `voting_source.epoch` strictly less than `store.justified_checkpoint.epoch`, by property 1, and since we already dealt with the equality case.
+
+Line `D` in the source code says that it is safe to allow votes where `voting_source.epoch == current_epoch - 2` and `voting_source.epoch == current_epoch - 1`. Any honest vote's target epoch will be `current_epoch`, so the gap between source and target is at most two epochs, which is not enough to surround a previous vote. That is, a vote $[s_2 \rightarrow t_2]$ that surrounds a previous vote $[s_1 \rightarrow t_1]$ requires that $s_2 < s_1 < t_1 < t_2$. This is not possible if $t_2 - s_2 \le 2$.
+
+<a id="img_annotated_forkchoice_correct_justified_1"></a>
+<figure class="diagram" style="width: 85%">
+
+![A diagram showing that it is safe to vote from two epochs ago.](images/diagrams/annotated-forkchoice-correct-justified-1.svg)
+
+<figcaption>
+
+When the voting source is within two epochs of the current epoch then it is safe to vote as a surround vote must encompass at least two intervening checkpoints.
+
+</figcaption>
+</figure>
+
+Both line `B` (the condition on justification of the previous epoch) and line `C` seem to be unnecessary, and may be [removed in future](https://github.com/ethereum/consensus-specs/pull/3339/files#diff-f58759020c0d7542f963e2b88fef66c2179d740beb5af45b7e2c90913477be11L277-L290). See sections 3.3 and 3.4 of the (draft) [A Confirmation Rule for the Ethereum Consensus Protocol](https://ethresear.ch/uploads/short-url/fV7zyTggJtMn8xlUUNVXTOB532G.pdf) paper for discussion of this. Note, though, that the proof of the [honest viable head](https://docs.google.com/document/d/1riyJxPPCuTwxmpKWqUD9noGMPB5FtvUW81JN9kaUQBo/edit) property described [below](#formal-proofs) relies on the weaker condition that `store.justified_checkpoint.epoch >= current_epoch - 2` (that either the previous or previous but one epoch is justified).
+
+###### `correct_finalized`
+
+The Capella update's change to `correct_finalized` is more limited, and more intuitive.
+
+```none
+    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+    correct_finalized = (
+        store.finalized_checkpoint.epoch == GENESIS_EPOCH
+        or store.finalized_checkpoint.root == get_ancestor(store, block_root, finalized_slot)
+    )
+```
+
+This simply ensures that a viable block is descended from the Store's finalised checkpoint
+
+The [previous version](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/fork-choice.md?plain=1#L231-L234) made use the post-state of the block being considered for viability, which caused it to suffer from similar complications to `correct_justified` with respect to unrealised finality. We don't actually care about the block's post-state view of finalisation, since finality is a global property: as long as the block is descended from the finalised checkpoint it should be eligible for consideration to become viable.
+
+The `correct_finalized` check might appear redundant at first sight since we are always filtering based on a tree rooted at the last justified checkpoint, which (in the absence of a mass slashing) must be descended from the last finalised checkpoint. The check, however, guarantees the further condition that a node's own view of the finalised checkpoint is irreversible, even if there were to be a mass slashing - this is the [irreversible local finality](https://docs.google.com/document/d/194dC7UmDSY5pDsrqi2B4VWpF1ORCkftHXhmtxtEaHT4/edit) formal property in the next section. Maintaining this invariant is a huge help in building efficient clients - we are free to forget about everything prior to the last finalised checkpoint.
+
+###### Formal proofs
+
+As referenced in the Ethereum Foundation's [disclosure](https://notes.ethereum.org/@djrtwo/2023-fork-choice-reorg-disclosure) on the Capella fork choice spec updates, some properties of the new fork choice have been [formally verified](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) by Roberto Saltini and his team at ConsenSys.
+
+This formal verification process involves selecting some properties that we wish to be true for the fork choice, and manually constructing proofs that they are always preserved by the specification. It is a much more robust and rigorous process than manual testing, fuzz testing, or general hand-waving that have hitherto been the main approaches.
+
+Four properties were proved in [the documents](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit).
+
+  - [Non-Self-Slashability](https://docs.google.com/document/d/12dF-84w6G62KH68L2dO_ym7RGXEZ0k9d7mOksgzp3Ls/edit)
+    - Any validator that follows the [honest validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md) will never slash itself.
+  - [Honest Viable Head](https://docs.google.com/document/d/1riyJxPPCuTwxmpKWqUD9noGMPB5FtvUW81JN9kaUQBo/edit)
+    - Assuming a synchronous network, `current_epoch - 2` being justified, and honest nodes having received enough attestations to justify the highest possible justified checkpoint, any block proposed by an honest node during the current epoch that is a descendent of the highest possible justified checkpoint is included in the output of [`get_filtered_block_tree()`](#get_filtered_block_tree).
+  - [Deadlock Freedom](https://docs.google.com/document/d/1V0sabk-DKnIl3BKgt-GkEFSFq-K-Ie8gmuezHRnVn0c/edit)
+    - A distributed system running the Ethereum protocol can never end up in a state in which it is impossible to finalise a new epoch.
+  - [Irreversible Local Finality](https://docs.google.com/document/d/194dC7UmDSY5pDsrqi2B4VWpF1ORCkftHXhmtxtEaHT4/edit)
+    - A block, once finalized in the local view of an honest validator, is never reverted from the canonical chain in the local view.
+
+Given the complexity of reasoning about the fork choice, and it's rather chequered history, it is hugely reassuring now to have [these proofs](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) of correctness[^fn-fv-assumptions].
+
+[^fn-fv-assumptions]: However, there remain some assumptions in the proofs that are over-simplified, such as, "No bound on the amount of attestations that can be included in a block", and, "Honest nodes do not discard any attestation that they receive regardless of how old it is". There is some history of failed proofs around the fork choice that were based on assumptions that were too broad. Hopefully these will stand; I am not equipped to judge.
+
+##### Conclusion
+
+This has been a long section on a short function. As I said at the start of the section, `filter_block_tree()` is at the heart of how LMD GHOST and Casper FFG are bolted together, and I think it has surprised everybody how many complexities lurk here.
+
+As an exercise for the reader, we can imagine life without having to filter the block tree. Potuz has documented some thoughts on this in, [Fork choice without on-state FFG filtering](https://hackmd.io/@potuz/rkB25feBi).
+
+Ultimately, as with [proposer boost](#proposer-boost), the complexities around the Gasper fork choice largely arise from our slot-based voting, with votes accumulated gradually through an epoch. This results in unrealised justification and the rest of it. The long-term fix is also probably the same: moving to [single slot finality](#alternatives-to-proposer-boost).
+
 |||
 |-|-|
-| Used&nbsp;by | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`filter_block_tree()`](#filter_block_tree) |
-| Uses | [`filter_block_tree()`](#filter_block_tree) |
+| Used&nbsp;by | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`filter_block_tree()`](#filter_block_tree) (recursively) |
+| Uses | [`filter_block_tree()`](#filter_block_tree) (recursively), [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot), [`get_voting_source()`](#get_voting_source), [`is_previous_epoch_justified()`](#is_previous_epoch_justified), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor) |
 
 #### `get_filtered_block_tree`
 
@@ -10169,7 +10896,7 @@ def get_filtered_block_tree(store: Store) -> Dict[Root, BeaconBlock]:
     return blocks
 ```
 
-A convenience wrapper that passes the Store's justified checkpoint to [`filter_block_tree()`](#filter_block_tree). On returning, the `blocks` dictionary structure will contain all viable branches rooted at that checkpoint, and nothing that does not descend from that checkpoint. For the meaning of "viable", see [`filter_block_tree()`](#filter_block_tree).
+A convenience wrapper that passes the Store's justified checkpoint to [`filter_block_tree()`](#filter_block_tree). On returning, the `blocks` dictionary structure will contain the blocks from all viable branches rooted at that checkpoint, and nothing that does not descend from that checkpoint. For the meaning of "viable", see [above](#viable-and-unviable-branches).
 
 |||
 |-|-|
@@ -10193,7 +10920,7 @@ def get_head(store: Store) -> Root:
             return head
         # Sort by latest attesting balance with ties broken lexicographically
         # Ties broken by favoring block with lexicographically higher root
-        head = max(children, key=lambda root: (get_latest_attesting_balance(store, root), root))
+        head = max(children, key=lambda root: (get_weight(store, root), root))
 ```
 
 `get_head()` encapsulates the fork choice rule: given a Store it returns a head block.
@@ -10205,7 +10932,7 @@ Looking first at the `while True` loop, this implements LMD GHOST in its purest 
 <a id="img_annotated_forkchoice_lmd_ghost_0"></a>
 <figure class="diagram" style="width: 85%">
 
-![Diagram of a block tree showing the weight of each block](images/diagrams/annotated-forkchoice-lmd-ghost-0.svg)
+![Diagram of a block tree showing the weight of each block.](images/diagrams/annotated-forkchoice-lmd-ghost-0.svg)
 
 <figcaption>
 
@@ -10217,11 +10944,11 @@ Looking first at the `while True` loop, this implements LMD GHOST in its purest 
 <a id="img_annotated_forkchoice_lmd_ghost_1"></a>
 <figure class="diagram" style="width: 85%">
 
-![Diagram of a block tree showing the weight of each block and the weight of each subtree](images/diagrams/annotated-forkchoice-lmd-ghost-1.svg)
+![Diagram of a block tree showing the weight of each block and the weight of each subtree.](images/diagrams/annotated-forkchoice-lmd-ghost-1.svg)
 
 <figcaption>
 
-The `get_latest_attesting_balance()` function when applied to a block returns the total weight of the subtree of the block and all its descendants. These weights are shown on the lines between child and parent blocks.
+The `get_weight()` function when applied to a block returns the total weight of the subtree of the block and all its descendants. These weights are shown on the lines between child and parent blocks.
 
 </figcaption>
 </figure>
@@ -10229,7 +10956,7 @@ The `get_latest_attesting_balance()` function when applied to a block returns th
 <a id="img_annotated_forkchoice_lmd_ghost_2"></a>
 <figure class="diagram" style="width: 85%">
 
-![Diagram of a block tree showing the branch chosen by the GHOST rule](images/diagrams/annotated-forkchoice-lmd-ghost-2.svg)
+![Diagram of a block tree showing the branch chosen by the GHOST rule.](images/diagrams/annotated-forkchoice-lmd-ghost-2.svg)
 
 <figcaption>
 
@@ -10261,104 +10988,177 @@ This is the point at which the Casper FFG fork choice rule, "follow the chain co
 
 |||
 |-|-|
-| Uses | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`get_latest_attesting_balance()`](#get_latest_attesting_balance) |
+| Uses | [`get_filtered_block_tree()`](#get_filtered_block_tree), [`get_weight()`](#get_weight) |
 
-#### `should_update_justified_checkpoint`
+#### `update_checkpoints`
 
 ```python
-def should_update_justified_checkpoint(store: Store, new_justified_checkpoint: Checkpoint) -> bool:
+def update_checkpoints(store: Store, justified_checkpoint: Checkpoint, finalized_checkpoint: Checkpoint) -> None:
     """
-    To address the bouncing attack, only update conflicting justified
-    checkpoints in the fork choice if in the early slots of the epoch.
-    Otherwise, delay incorporation of new justified checkpoint until next epoch boundary.
-
-    See https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114 for more detailed analysis and discussion.
+    Update checkpoints in store if necessary
     """
-    if compute_slots_since_epoch_start(get_current_slot(store)) < SAFE_SLOTS_TO_UPDATE_JUSTIFIED:
-        return True
+    # Update justified checkpoint
+    if justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+        store.justified_checkpoint = justified_checkpoint
 
-    justified_slot = compute_start_slot_at_epoch(store.justified_checkpoint.epoch)
-    if not get_ancestor(store, new_justified_checkpoint.root, justified_slot) == store.justified_checkpoint.root:
-        return False
-
-    return True
+    # Update finalized checkpoint
+    if finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
+        store.finalized_checkpoint = finalized_checkpoint
 ```
 
-This function is [due to be removed](https://github.com/ethereum/consensus-specs/pull/3290), but for the benefit of future historians I shall give a brief overview of the bouncing attack that it defends against.
+Update the checkpoints in the store if either of the given justified or finalised checkpoints is newer.
 
-##### The bouncing attack
+Justification and finalisation are supposed to be "global" properties of the chain, not specific to any one branch, so we keep our Store up to date with the highest checkpoints we've seen.
 
-The bouncing attack is specific to Casper FFG and is independent of the underlying block proposal mechanism (in our case, LMD GHOST). It allows an adversary with a relatively small amount of stake to indefinitely delay finalisation of the chain. This is considered to be a liveness failure of Casper FFG in the sense that it prevents us from achieving the "[something good eventually happens](/part2/consensus/preliminaries#liveness)" goal.
+Note that, by construction, the Store's justified and finalised checkpoints can only increase monotonically. The former is important for the [formal proof of non-self-slashability](#formal-proofs).
 
-The essence of the bouncing attack is that we can create scenarios in which an adversary is able to store up votes and release them later to control the timing of justification of checkpoints. By doing this carefully, the adversary can cause honest validators to switch their votes from one branch to another, since honest validators must obey the Casper FFG fork choice rule, "follow the chain containing the justified checkpoint of the greatest height". In this way, the adversary is able to direct the flow of votes from honest validators back and forth between branches indefinitely, preventing finalisation from occurring.
+|||
+|-|-|
+| Used&nbsp;by | [`compute_pulled_up_tip()`](#compute_pulled_up_tip), [`on_tick_per_slot()`](#on_tick_per_slot), [`on_block()`](#on_block) |
 
-##### Example of the bouncing attack
+#### `update_unrealized_checkpoints`
 
-To unpack the example in the [original Ethresear.ch post](https://ethresear.ch/t/analysis-of-bouncing-attack-on-ffg/6113?u=benjaminion), consider an adversary that controls 10% of the total stake. Recall that a checkpoint is a [block&ndash;epoch pair](#checkpoint_block_epoch), so it is possible to have conflicting checkpoints at the same height.
+```python
+def update_unrealized_checkpoints(store: Store, unrealized_justified_checkpoint: Checkpoint,
+                                  unrealized_finalized_checkpoint: Checkpoint) -> None:
+    """
+    Update unrealized checkpoints in store if necessary
+    """
+    # Update unrealized justified checkpoint
+    if unrealized_justified_checkpoint.epoch > store.unrealized_justified_checkpoint.epoch:
+        store.unrealized_justified_checkpoint = unrealized_justified_checkpoint
 
-<a id="img_annotated_forkchoice_bouncing_0"></a>
-<figure class="diagram" style="width: 90%">
+    # Update unrealized finalized checkpoint
+    if unrealized_finalized_checkpoint.epoch > store.unrealized_finalized_checkpoint.epoch:
+        store.unrealized_finalized_checkpoint = unrealized_finalized_checkpoint
+```
 
-![A diagram showing the set up of the bouncing attack, with a justified checkpoint on one branch, and a justifiable checkpoint on the other.](images/diagrams/annotated-forkchoice-bouncing-0.svg)
+The counterpart to [`update_checkpoints()`](#update_checkpoints) for unrealised justified and finalised checkpoints.
+
+|||
+|-|-|
+| Used&nbsp;by | [`compute_pulled_up_tip()`](#compute_pulled_up_tip) |
+
+#### Pull-up tip helpers
+
+##### `compute_pulled_up_tip`
+
+```python
+def compute_pulled_up_tip(store: Store, block_root: Root) -> None:
+    state = store.block_states[block_root].copy()
+    # Pull up the post-state of the block to the next epoch boundary
+    process_justification_and_finalization(state)
+
+    store.unrealized_justifications[block_root] = state.current_justified_checkpoint
+    update_unrealized_checkpoints(store, state.current_justified_checkpoint, state.finalized_checkpoint)
+
+    # If the block is from a prior epoch, apply the realized values
+    block_epoch = compute_epoch_at_slot(store.blocks[block_root].slot)
+    current_epoch = compute_epoch_at_slot(get_current_slot(store))
+    if block_epoch < current_epoch:
+        update_checkpoints(store, state.current_justified_checkpoint, state.finalized_checkpoint)
+```
+
+`compute_pulled_up_tip()` is called for every block processed in order to maintain the `update_unrealized_checkpoints` map. It was added in the Capella spec update.
+
+The major work in this routine is in the call to [`process_justification_and_finalization()`](/part3/transition/epoch#def_process_justification_and_finalization). In the state transition, this is called once per epoch. Now we are calling it once per block, which would add significant load if implemented naively.
+
+Since the state transition only calls `process_justification_and_finalization()` at epoch boundaries, the beacon state's justification and finalisation information cannot change mid-epoch. However, Casper FFG votes accumulate throughout the progress of the epoch, and at some point prior to the end of the epoch, enough votes will usually have been included on chain to justify a new checkpoint. When this occurs, we call it "unrealised justification" since it is not yet reflected on chain (in the beacon state). Unrealised justification reflects what the beacon state would be if the end of epoch accounting were to be run immediately on the block - hence the "pulled up tip" naming.
+
+We simulate "pulling up" the block to the next epoch boundary to find out what the justification and finalisation status would be. When the next epoch begins, the unrealised values will become realised.
+
+<a id="img_annotated_forkchoice_pull_up_tip"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing how unrealised justification becomes realised when a block is "pulled up" to the next epoch.](images/diagrams/annotated-forkchoice-pull-up-tip.svg)
 
 <figcaption>
 
-The starting point for a bouncing attack. The squares are Casper FFG checkpoints, the numbers attached are the percentage of stake having made a Casper FFG vote for that checkpoint. Checkpoint $A$ is finalised; checkpoint $B_1$ is justified; checkpoint $C_2$ is "justifiable".
+Each block has a $J$ value, which is the justified checkpoint its post-state knows about. $J$ is updated only at epoch boundaries. We notionally add a $U$ value, which is the justified checkpoint that would be in the block's post-state were it to be "pulled up" to the next epoch boundary, where the beacon state's justification and finalisation calculations are done (shown as $W'$).
 
 </figcaption>
 </figure>
 
-Somehow the network has got into a state with a justified checkpoint on one branch, and a "justifiable" checkpoint on a different branch. Justifiable in this context means that there are not enough Casper FFG votes available from honest validators to justify it, but with the addition of the adversary's votes it would become justified. The adversary may have manoeuvred the network into this state, or it may have arisen by chance. At this point, all validators have cast Casper FFG votes for either $C_1$ or $C_2$, except for the adversary, who is withholding its votes for now. Sixty percent of the Casper FFG vote is not sufficient to justify $C_2$.
+As illustrated, the unrealised justification, $U$, can differ from the realised justification, $J$, due to unprocessed Casper FFG votes accumulating during an epoch. However, an epoch's own checkpoint cannot gain unrealised justification until at least 2/3 of the way through an epoch (23 slots, since attestations are included one slot after the slot they attest to). That is, the earliest that block $W$ could occur is in slot 22 of epoch 2 (slot counting is zero-based).
 
-<a id="img_annotated_forkchoice_bouncing_1"></a>
-<figure class="diagram" style="width: 90%">
+After adding the block and its unrealised justification checkpoint to the `store.unrealized_justifications` map, the Store's `unrealized_justified_checkpoint` and `unrealized_finalized_checkpoint` are updated if the block's values are newer.
 
-![A diagram showing the bouncing attack in progress, before the adversary justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-1.svg)
-
-<figcaption>
-
-Later, the chain has been extended with checkpoints $D_1$ and $D_2$.
-
-</figcaption>
-</figure>
-
-Honest validators are voting for $D_1$ as it is descended from the highest justified checkpoint, $B_1$. As soon as the adversary sees that $D_1$ has become justifiable, it publishes its withheld Casper FFG votes for $C_2$, causing that checkpoint to become justified.
-
-<a id="img_annotated_forkchoice_bouncing_2"></a>
-<figure class="diagram" style="width: 90%">
-
-![A diagram showing the bouncing attack after the adversary has belatedly justified the justifiable checkpoint.](images/diagrams/annotated-forkchoice-bouncing-2.svg)
-
-<figcaption>
-
-As soon as $D_1$ has acquired around 60% of the Casper FFG votes, the adversary publishes its withheld votes for $C_2$, causing it to become justified. This is not slashable (it is not a surround vote).
-
-</figcaption>
-</figure>
-
-Once $C_2$ has been justified due to the adversary's votes, honest validators must vote for $D_2$, so it gains the remaining 30% of vote not controlled by the adversary. By withholding and releasing its votes at strategic times, the adversary exerts control over which checkpoint the honest majority will be voting for at any time.
-
-We end up in the inverse of the position of the situation that we started with, having a justified checkpoint on one branch and a justifiable checkpoint on the other, so the attack can be repeated. The adversary can withhold its votes for $D_1$, releasing them to justify that checkpoint just as $E_2$ (not shown) becomes justifiable with around 60% of the vote. In this way the adversary can continually prevent finalisation, which requires two consecutive justified checkpoints, by repeatedly "bouncing" the fork choice between the two branches.
-
-Note that the numbers here are arbitrary and only need to be approximately right. The point is that 60% of the vote is not enough to justify a checkpoint, whereas 60% honest votes plus 10% adversary controlled votes is more than enough.
-
-##### Defence against the bouncing attack
-
-As per the function code, the implemented defence against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) slots of an epoch. Equivalently, the Store's justified checkpoint may not switch branch during at least the last two-thirds of an epoch. Updating to a non-conflicting justified checkpoint &ndash; one that is descended from the current justified checkpoint &ndash; is not constrained.
-
-Since `SAFE_SLOTS_TO_UPDATE_JUSTIFIED` is less than one third of an epoch, this protection means that there is at least two-thirds of an epoch during which the adversary cannot get validators to switch branch, which is enough time for honest validators to build up enough Casper FFG votes to justify a new checkpoint on the same branch.
-
-##### Deprecation
-
-The bouncing attack requires the adversary to have quite strong control over the timing of what happens on the network. If an adversary is that powerful, then it can probably [work around](https://notes.ethereum.org/@fradamt/Sy6PzcRdt) the fix by splitting honest validators' views, as per the balancing attacks.
-
-Since the attack mitigation described here is not effective in such a situation, and the circumstances in which a bouncing attack could be launched are very unlikely in practice, this defence is [due to be removed](https://github.com/ethereum/consensus-specs/pull/3290) from the beacon chain.
+If the block is from a previous epoch, then its justification and finalisation are no longer unrealised, since the beacon state has gone through an actual epoch transition since then, so we can update the Store's `justified_checkpoint` and `finalized_checkpoint` if the block has newer ones.
 
 |||
 |-|-|
 | Used&nbsp;by | [`on_block()`](#on_block) |
-| Uses | [`compute_slots_since_epoch_start()`](#compute_slots_since_epoch_start), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor) |
-| See&nbsp;also | [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) |
+| Uses | [`process_justification_and_finalization()`](/part3/transition/epoch#def_process_justification_and_finalization), [`update_unrealized_checkpoints()`](#update_unrealized_checkpoints), [`compute_epoch_at_slot()`](/part3/helper/misc#def_compute_epoch_at_slot), [`update_checkpoints()`](#update_checkpoints) |
+
+#### `on_tick` helpers
+
+##### `on_tick_per_slot`
+
+```python
+def on_tick_per_slot(store: Store, time: uint64) -> None:
+    previous_slot = get_current_slot(store)
+
+    # Update store time
+    store.time = time
+
+    current_slot = get_current_slot(store)
+
+    # If this is a new slot, reset store.proposer_boost_root
+    if current_slot > previous_slot:
+        store.proposer_boost_root = Root()
+
+    # If a new epoch, pull-up justification and finalization from previous epoch
+    if current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0:
+        update_checkpoints(store, store.unrealized_justified_checkpoint, store.unrealized_finalized_checkpoint)
+```
+
+The `on_tick_per_slot()` helper is called at least once every slot. If a tick hasn't been processed for multiple slots, then the [`on_tick()`](#on_tick) handler calls it repeatedly to process (synthetic) ticks for the those slots. This ensures that `update_checkpoints()` is called when there is no tick processed during the first slot of an epoch.
+
+The `on_tick_per_slot()` helper has three duties,
+
+  - updating the time,
+  - resetting proposer boost, and
+  - updating checkpoints on epoch boundaries.
+
+###### Updating the time
+
+```none
+    # update store time
+    store.time = time
+```
+
+The store has a notion of the current time that is used when calculating the [current slot](#get_current_slot) and when applying proposer boost. The time parameter does not need to be very granular. If it weren't for proposer boost, it would be fine to measure time in whole slots, at least within the fork choice[^fn-time-in-slots].
+
+[^fn-time-in-slots]: Changing `time` from seconds to slots in the fork choice has been [suggested](https://github.com/ethereum/consensus-specs/issues/1502), but never adopted.
+
+###### Resetting proposer boost
+
+```none
+    # Reset store.proposer_boost_root if this is a new slot
+    if current_slot > previous_slot:
+        store.proposer_boost_root = Root()
+```
+
+[Proposer boost](#proposer-boost) is a defence against balancing attacks on LMD GHOST. It rewards timely blocks with extra weight in the fork choice, making it unlikely that an honest proposer's block will become orphaned.
+
+The Store's `proposer_boost_root` field is set in the [`on_block()`](#on_block) handler when a block is received and processed in a timely manner (within the first four seconds of its slot). For the remainder of the slot this allows extra weight to be added to the block in [`get_weight()`](#get_weight).
+
+The logic here resets `proposer_boost_root` to a default value at the start of the next slot, thereby removing the extra proposer boost weight until the next timely block is processed.
+
+###### Updating checkpoints
+
+```none
+    # If a new epoch, pull-up justification and finalization from previous epoch
+    if current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0:
+        update_checkpoints(store, store.unrealized_justified_checkpoint, store.unrealized_finalized_checkpoint)
+```
+
+If it's the first slot of an epoch, then we have gone through an epoch boundary since the last tick, and our unrealised justification and finalisation have become realised. They should now be in-sync with the justified and finalised checkpoints in the beacon state.
+
+|||
+|-|-|
+| Used&nbsp;by | [`on_tick()`](#on_tick) |
+| Uses | [`get_current_slot()`](#get_current_slot), [`compute_slots_since_epoch_start()`](#compute_slots_since_epoch_start), [`update_checkpoints()`](#update_checkpoints) |
 
 #### `on_attestation` helpers
 
@@ -10398,7 +11198,7 @@ def validate_on_attestation(store: Store, attestation: Attestation, is_from_bloc
     # Check that the epoch number and slot number are matching
     assert target.epoch == compute_epoch_at_slot(attestation.data.slot)
 
-    # Attestations target be for a known block. If target block is unknown, delay consideration until the block is found
+    # Attestation target must be for a known block. If target block is unknown, delay consideration until block is found
     assert target.root in store.blocks
 
     # Attestations must be for a known block. If block is unknown, delay consideration until the block is found
@@ -10527,10 +11327,10 @@ We need checkpoint states both to provide validator balances (used for weighting
 
 A [`Checkpoint`](/part3/containers/dependencies#checkpoint) is a reference to the first slot of an epoch and are what the Casper FFG votes in attestations point to. When an attestation targets a checkpoint that has empty slots preceding it, the checkpoint's state will not match the state of the block that it points to. Therefore, we take that block's state (`base_state`) and run the simple [`process_slots()`](/part3/transition#def_process_slots) state transition for empty slots on it to bring the state up to date with the checkpoint.
 
-<a id="img_annotated-forkchoice-processSlots"></a>
+<a id="img_annotated_forkchoice_processSlots"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram showing the state being updated to the checkpoint by process_slots](images/diagrams/annotated-forkchoice-processSlots.svg)
+![A diagram showing the state being updated to the checkpoint by process_slots.](images/diagrams/annotated-forkchoice-processSlots.svg)
 
 <figcaption>
 
@@ -10558,7 +11358,7 @@ def update_latest_messages(store: Store, attesting_indices: Sequence[ValidatorIn
 
 A [message](#latestmessage) comprises a timestamp and a block root (head) vote. These are extracted from the containing attestation in the form of the epoch number of the target checkpoint of the attestation, and the LMD GHOST head block vote respectively. By the time we get here, [`validate_on_attestation()`](#validate_on_attestation) has already checked that the slot for which the head vote was made belongs to the epoch corresponding to the target vote. Validators vote exactly once per epoch, so the epoch number is granular enough for tracking their latest votes.
 
-All the validators in `attesting_indices` made this same attestation. The attestation will have travelled the world as a single aggregate attestation, but it has been unpacked in [`on_attestation()`](#on_attestation) before being passed to this function. Validators on our naughty list of [equivocaters](#on_attester_slashing) are filtered out, and any that are left are considered for updates.
+All the validators in `attesting_indices` made this same attestation. The attestation will have travelled the world as a single [aggregate attestation](/part3/containers/operations#attestation), but it has been unpacked in [`on_attestation()`](#on_attestation) before being passed to this function. Validators on our naughty list of [equivocaters](#on_attester_slashing) are filtered out, and any that are left are considered for updates.
 
 If the validator index is not yet in the `store.latest_messages` set then its vote is inserted; if the vote that we have is newer than the vote already stored then it is updated. Each validator has at most one entry in the `latest_messages` set.
 
@@ -10582,90 +11382,27 @@ None of the handlers is explicitly called by any code that appears anywhere in t
 
 ```python
 def on_tick(store: Store, time: uint64) -> None:
-    previous_slot = get_current_slot(store)
-
-    # update store time
-    store.time = time
-
-    current_slot = get_current_slot(store)
-
-    # Reset store.proposer_boost_root if this is a new slot
-    if current_slot > previous_slot:
-        store.proposer_boost_root = Root()
-
-    # Not a new epoch, return
-    if not (current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0):
-        return
-
-    # Update store.justified_checkpoint if a better checkpoint on the store.finalized_checkpoint chain
-    if store.best_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-        finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
-        ancestor_at_finalized_slot = get_ancestor(store, store.best_justified_checkpoint.root, finalized_slot)
-        if ancestor_at_finalized_slot == store.finalized_checkpoint.root:
-            store.justified_checkpoint = store.best_justified_checkpoint
+    # If the ``store.time`` falls behind, while loop catches up slot by slot
+    # to ensure that every previous slot is processed with ``on_tick_per_slot``
+    tick_slot = (time - store.genesis_time) // SECONDS_PER_SLOT
+    while get_current_slot(store) < tick_slot:
+        previous_time = store.genesis_time + (get_current_slot(store) + 1) * SECONDS_PER_SLOT
+        on_tick_per_slot(store, previous_time)
+    on_tick_per_slot(store, time)
 ```
 
-A "tick" is not defined in the specification. Notionally, ticks are used to continually keep the fork choice's internal clock (`store.time`) updated. In practice, calling `on_tick()` is only really required at the start of a slot, at `SECONDS_PER_SLOT` `/` `INTERVALS_PER_SLOT` into a slot, and [before proposing a block](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/phase0/validator.md#block-proposal). However, `on_tick()` processing is light and it can be convenient to call it more often.
+A "tick" is not defined in the specification. Notionally, ticks are used to continually keep the fork choice's internal clock (`store.time`) updated. In practice, calling `on_tick()` is only really required at the start of a slot, at `SECONDS_PER_SLOT` `/` `INTERVALS_PER_SLOT` into a slot, and [before proposing a block](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#block-proposal). However, `on_tick()` processing is light and it can be convenient to call it more often.
 
 The Teku client calls `on_tick()` regularly [twice per second](https://github.com/ConsenSys/teku/blob/727e734e2d7c31112e1e313ef3cd2c0a004f81b2/services/timer/src/main/java/tech/pegasys/teku/services/timer/TimerService.java#L37) since it is used internally to drive other things beside the fork choice. In addition, Teku uses units of milliseconds rather than seconds for its tick interval, which is strictly speaking off-spec, but is necessary for supporting other chains such as the [Gnosis Beacon Chain](https://docs.gnosischain.com/specs) for which the `SECONDS_PER_SLOT` is not a multiple of `INTERVALS_PER_SLOT`.
 
-The `on_tick()` handler has three duties,
+The `while` loop was introduced in the Capella specification. It ensures that the processing in [`on_tick_per_slot()`](#on_tick_per_slot) is done every slot. When multiple slots have passed since the last tick was processed, the loop calls `on_tick_per_slot()` for each of them so as to catch up. The only thing this makes a difference to is updating the checkpoints at epoch boundaries. Previously, if a tick was not processed during the first slot of an epoch, then the checkpoint update could be incorrectly skipped. Note that `on_tick_per_slot()` updates `store.time`, which in turn updates the output of `get_current_slot()`, so the loop will terminate.
 
-  - updating the time,
-  - resetting proposer boost, and
-  - updating checkpoints on epoch boundaries.
-
-##### Updating the time
-
-```none
-    # update store time
-    store.time = time
-```
-
-The store has a notion of the current time that is used when calculating the [current slot](#get_current_slot) and when applying proposer boost. The time parameter does not need to be very granular. If it weren't for proposer boost, it would be fine to measure time in whole slots, at least within the fork choice[^fn-time-in-slots].
-
-[^fn-time-in-slots]: Changing `time` from seconds to slots in the fork choice was actually [suggested](https://github.com/ethereum/consensus-specs/issues/1502), but never adopted.
-
-I imagine the reason that `time` is provided as a parameter rather than looked up via the machine's clock is that it simplifies testing.
-
-##### Resetting proposer boost
-
-```none
-    # Reset store.proposer_boost_root if this is a new slot
-    if current_slot > previous_slot:
-        store.proposer_boost_root = Root()
-```
-
-[Proposer boost](#proposer-boost) is a defence against balancing attacks on LMD GHOST. It rewards timely blocks with extra weight in the fork choice, making it unlikely that an honest proposer's block will become orphaned.
-
-The Store's `proposer_boost_root` field is set in the [`on_block()`](#on_block) handler when a block is received and processed in a timely manner (within the first four seconds of its slot). For the remainder of the slot this allows extra weight to be added to the block in [`get_latest_attesting_balance()`](#get_latest_attesting_balance).
-
-The logic here resets `proposer_boost_root` to a default value at the start of the next slot, thereby removing the extra proposer boost weight until the next timely block is processed.
-
-##### Updating checkpoints
-
-```none
-    # Not a new epoch, return
-    if not (current_slot > previous_slot and compute_slots_since_epoch_start(current_slot) == 0):
-        return
-
-    # Update store.justified_checkpoint if a better checkpoint on the store.finalized_checkpoint chain
-    if store.best_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-        finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
-        ancestor_at_finalized_slot = get_ancestor(store, store.best_justified_checkpoint.root, finalized_slot)
-        if ancestor_at_finalized_slot == store.finalized_checkpoint.root:
-            store.justified_checkpoint = store.best_justified_checkpoint
-```
-
-This logic is a mash-up of two fixes, [bouncing attack resistance](https://github.com/ethereum/consensus-specs/pull/1465), and solving a [potential inconsistency](https://github.com/ethereum/consensus-specs/pull/2518) between the Store's justified and finalised checkpoints.
-
-The bouncing attack is [described above](#the-bouncing-attack) in detail. It involves an adversary storing up votes and releasing them later to continually flip the highest justified checkpoint between two branches. The [current defence](#defence-against-the-bouncing-attack) against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) slots of an epoch. During periods when we are not allowed to update the justified checkpoint, logic in the [`on_block()`](#on_block) handler [keeps a record](#update-justified-and-finalised) of our best known justified checkpoint, and any delayed update is applied here at the start of the next epoch.
-
-I won't go into great detail on this as this particular defence against the bouncing attack is due to be [removed soon](https://github.com/ethereum/consensus-specs/pull/3290), and the code simplified accordingly.
+I expect that the reason `time` is provided as a parameter rather than looked up via the machine's clock is that it simplifies testing.
 
 |||
 |-|-|
-| Uses | [`get_current_slot()`](#get_current_slot), [`compute_slots_since_epoch_start()`](#compute_slots_since_epoch_start), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor) |
+| Uses | [`get_current_slot()`](#get_current_slot), [`on_tick_per_slot()`](#on_tick_per_slot) |
+| See&nbsp;also | [`SECONDS_PER_SLOT`](/part3/config/configuration#seconds_per_slot) |
 
 #### `on_block`
 
@@ -10687,11 +11424,12 @@ def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
 
     # Check the block is valid and compute the post-state
     state = pre_state.copy()
+    block_root = hash_tree_root(block)
     state_transition(state, signed_block, True)
     # Add new block to the store
-    store.blocks[hash_tree_root(block)] = block
+    store.blocks[block_root] = block
     # Add new state for this block to the store
-    store.block_states[hash_tree_root(block)] = state
+    store.block_states[block_root] = state
 
     # Add proposer score boost if the block is timely
     time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
@@ -10699,17 +11437,11 @@ def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
     if get_current_slot(store) == block.slot and is_before_attesting_interval:
         store.proposer_boost_root = hash_tree_root(block)
 
-    # Update justified checkpoint
-    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
-            store.best_justified_checkpoint = state.current_justified_checkpoint
-        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
-            store.justified_checkpoint = state.current_justified_checkpoint
+    # Update checkpoints in store if necessary
+    update_checkpoints(store, state.current_justified_checkpoint, state.finalized_checkpoint)
 
-    # Update finalized checkpoint
-    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
-        store.finalized_checkpoint = state.finalized_checkpoint
-        store.justified_checkpoint = state.current_justified_checkpoint
+    # Eagerly compute unrealized justification and finality
+    compute_pulled_up_tip(store, block_root)
 ```
 
 The `on_block()` handler should be called whenever a new signed beacon block is received. It does the following.
@@ -10739,6 +11471,7 @@ The `on_block()` handler does not call the `on_attestation()` handler for the at
 
     # Check the block is valid and compute the post-state
     state = pre_state.copy()
+    block_root = hash_tree_root(block)
     state_transition(state, signed_block, True)
 ```
 
@@ -10750,9 +11483,9 @@ The final check is to run a full state transition on the block. This has two pur
 
 ```none
     # Add new block to the store
-    store.blocks[hash_tree_root(block)] = block
+    store.blocks[block_root] = block
     # Add new state for this block to the store
-    store.block_states[hash_tree_root(block)] = state
+    store.block_states[block_root] = state
 ```
 
 Once the block has passed the validity checks, it and its post-state can be added to the Store.
@@ -10771,33 +11504,25 @@ Once the block has passed the validity checks, it and its post-state can be adde
 
 Here, in the `on_block()` handler, is where the block's timeliness is assessed and recorded. If the Store's time (as set by the [`on_tick()`](#on_tick) handler) is within the first third of the slot (`1 /` `INTERVALS_PER_SLOT`, that is, 4 seconds) when the block is processed, then we set `store.proposer_boost_root` to the block's root.
 
-The `store.proposer_boost_root` field can only be set during the first four seconds of a slot, and it is cleared at the start of the next slot by the [`on_tick()`](#on_tick) handler. It is used in the [`get_latest_attesting_balance()`](#get_latest_attesting_balance) function to determine whether to add the extra proposer boost weight or not.
+The `store.proposer_boost_root` field can only be set during the first four seconds of a slot, and it is cleared at the start of the next slot by the [`on_tick()`](#on_tick) handler. It is used in the [`get_weight()`](#get_weight) function to determine whether to add the extra proposer boost weight or not.
 
 ##### Update justified and finalised
 
 ```none
-    # Update justified checkpoint
-    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
-            store.best_justified_checkpoint = state.current_justified_checkpoint
-        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
-            store.justified_checkpoint = state.current_justified_checkpoint
+    # Update checkpoints in store if necessary
+    update_checkpoints(store, state.current_justified_checkpoint, state.finalized_checkpoint)
 
-    # Update finalized checkpoint
-    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
-        store.finalized_checkpoint = state.finalized_checkpoint
-        store.justified_checkpoint = state.current_justified_checkpoint
+    # Eagerly compute unrealized justification and finality
+    compute_pulled_up_tip(store, block_root)
 ```
 
-When we passed the incoming block through the state transition, the attestations it contains may have led to updates to the justified and finalised checkpoints. Justification and finalisation are "global" properties of our view of the chain, not specific to any one branch, so we need to keep our Store up to date with any changes.
+[`update_checkpoints()`](#update_checkpoints) simply updates the Store's justified and finalised checkpoints if those in the block's post-state are better (that is, higher, more recent). The Store always tracks the best known justified and finalised checkpoints that it is able to validate.
 
-This code contains more complexity than you might expect, in the form of `store.best_justified_checkpoint.epoch` and the call to [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint). The [extra code](https://github.com/ethereum/consensus-specs/pull/1465) is intended to defend against the bouncing attack [described above](#the-bouncing-attack). The [current defence](#defence-against-the-bouncing-attack) against the bouncing attack is to allow the Store's justified checkpoint to be updated to a conflicting checkpoint only within the first [`SAFE_SLOTS_TO_UPDATE_JUSTIFIED`](#safe_slots_to_update_justified) (eight) slots of an epoch, which is enforced by [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint). The [`on_tick()`](#on_tick) handler will take care of updating `store.justified_checkpoint` to `store.best_justified_checkpoint` at the start of the next epoch.
-
-Note that this particular defence against the bouncing attack is due to be [removed soon](https://github.com/ethereum/consensus-specs/pull/3290), and the code simplified accordingly.
+[`compute_pulled_up_tip()`](#compute_pulled_up_tip) runs the epoch transition Casper FFG accounting on the block &ndash; notionally "pulling it up" from its current slot to the first slot of the next epoch &ndash; to see if it has achieved [unrealised justification](#unrealised-justification). The block's unrealised justification will be stored for later use by [`filter_block_tree()`](#filter_block_tree), and the Store's unrealised justification and unrealised finalisation trackers may be updated. If the block is from a previous epoch, then the unrealised checkpoints become realised, and [`update_checkpoints()`](#update_checkpoints) will be called again, potentially over-writing the update we just made in the line above.
 
 |||
 |-|-|
-| Uses | [`get_current_slot()`](#get_current_slot), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor), [`state_transition()`](/part3/transition#def_state_transition), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`should_update_justified_checkpoint()`](#should_update_justified_checkpoint) |
+| Uses | [`get_current_slot()`](#get_current_slot), [`compute_start_slot_at_epoch()`](/part3/helper/misc#def_compute_start_slot_at_epoch), [`get_ancestor()`](#get_ancestor), [`hash_tree_root()`](/part3/helper/crypto#hash_tree_root), [`state_transition()`](/part3/transition#def_state_transition), [`update_checkpoints()`](#update_checkpoints), [`compute_pulled_up_tip()`](#compute_pulled_up_tip) |
 | See&nbsp;also | [`INTERVALS_PER_SLOT`](#intervals_per_slot) |
 
 #### `on_attestation`
@@ -10831,7 +11556,7 @@ If the attestation was unpacked from a block then the flag `is_from_block` shoul
 
 The [`validate_on_attestation()`](#validate_on_attestation) function performs a comprehensive set of validity checks on the attestation to defend against various attacks.
 
-Assuming that the attestation passes the checks, we add its target checkpoint state to the Store for later use (we also use it immediately). The [`store_target_checkpoint_state()`](#store_target_checkpoint_state) function is idempotent, so nothing happens if the state is already present.
+Assuming that the attestation passes the checks, we add its target checkpoint state to the Store for later use, as well as using it immediately. The [`store_target_checkpoint_state()`](#store_target_checkpoint_state) function is idempotent, so nothing happens if the state is already present.
 
 Having the target checkpoint state, we can use it to look up the correct shuffling for the validators. With the shuffling in hand, calling [`get_indexed_attestation()`](/part3/helper/accessors#def_get_indexed_attestation) turns the [`Attestation`](/part3/containers/operations#attestation) object (containing a bitlist) into an [`IndexedAttestation`](/part3/containers/dependencies#indexedattestation) object (containing a list of validator indices).
 
@@ -10873,7 +11598,7 @@ Of course, the equivocating attestations are slashable under the Casper FFG comm
 
 Rather than add a lot of apparatus within the fork choice to track and detect conflicting attestations, the mechanism relies on third-party slashing claims received via blocks or directly from peers as [attester slashing messages](/part3/containers/operations#attesterslashing). The validity checks are identical to those in the state-transition's [`process_attester_slashing()`](/part3/transition/block#def_process_attester_slashing) method, including the use of [`is_slashable_attestation_data()`](/part3/helper/predicates#is_slashable_attestation_data). This is broader that we need for our purposes here as it will exclude validators that make surround votes as well as validators that equivocate. But excluding all misbehaving validators is probably a good idea.
 
-Any validators proven to have made conflicting attestations are added to the `store.equivocating_indices` set[^fn-python-set-add]. They will no longer be involved in calculating the [weight of branches](#get_latest_attesting_balance), and their future attestations [will be ignored](#update_latest_messages) in the fork choice. We are permitted to clear any equivocating attestation information from before the last finalised checkpoint, but those validators would have been slashed by the state-transition by then, so this ban is permanent.
+Any validators proven to have made conflicting attestations are added to the `store.equivocating_indices` set[^fn-python-set-add]. They will no longer be involved in calculating the [weight of branches](#get_weight), and their future attestations [will be ignored](#update_latest_messages) in the fork choice. We are permitted to clear any equivocating attestation information from before the last finalised checkpoint, but those validators would have been slashed by the state-transition by then, so this ban is permanent.
 
 [^fn-python-set-add]: `store.equivocating_indices` is a Python Set. Adding an existing element again is a no-op, so it cannot grow without bounds.
 
@@ -10886,7 +11611,7 @@ Any validators proven to have made conflicting attestations are added to the `st
 
 ### Introduction
 
-This section covers the additional Bellatrix fork choice document, [version 1.2.0](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md). For a complementary take, see Vitalik's [annotated Bellatrix fork choice](https://github.com/ethereum/annotated-spec/blob/master/merge/fork-choice.md) (based on a slightly older version).
+This section covers the additional Bellatrix fork choice document, [v1.3.0](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/fork-choice.md). For a complementary take, see Vitalik's [annotated Bellatrix fork choice](https://github.com/ethereum/annotated-spec/blob/master/merge/fork-choice.md) (based on a slightly older version).
 
 As usual, text with a side bar is quoted directly from the specification.
 
@@ -10981,7 +11706,7 @@ If there had been multiple candidate terminal PoW blocks (as there were for the 
 
 ###### `safe_block_hash`
 
-> The `safe_block_hash` parameter MUST be set to return value of [`get_safe_execution_payload_hash(store: Store)`](https://github.com/ethereum/consensus-specs/blob/v1.2.0/fork_choice/safe-block.md#get_safe_execution_payload_hash) function.
+> The `safe_block_hash` parameter MUST be set to return value of [`get_safe_execution_payload_hash(store: Store)`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/fork_choice/safe-block.md#get_safe_execution_payload_hash) function.
 
 The "safe block" feature is a way for the consensus protocol to signal to the execution layer that a block is very unlikely ever to be reverted. Application developers could use the safe block information to provide better user experience to their users in the form of a pseudo fast-finality. See the later [Safe Block](/part3/safe-block) section for more on this.
 
@@ -10997,13 +11722,16 @@ class PayloadAttributes(object):
     timestamp: uint64
     prev_randao: Bytes32
     suggested_fee_recipient: ExecutionAddress
+    withdrawals: Sequence[Withdrawal]  # [New in Capella]
 ```
 
-This class maps onto the Engine API's [`PayloadAttributesV1`](https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#payloadattributesv1) class and is used when asking the execution client to start building an execution payload.
+This class maps onto the Engine API's [`PayloadAttributesV2`](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#payloadattributesv2) class and is used when asking the execution client to start building an execution payload.
 
 The `prev_randao` field is the beacon state's current [RANDAO](/part2/building_blocks/randomness) value, having been updated by the RANDAO reveal in the previous beacon block. It is made available to execution layer applications via the EVM's new [`PREVRANDAO`](https://eips.ethereum.org/EIPS/eip-4399) opcode.
 
 `suggested_fee_recipient` is the Ethereum account that any fee income from transaction tips should be sent to when the payload is executed (formerly known as the `COINBASE`). The execution client may override this if it has its own setting for fee recipient, hence "suggested". But allowing it to be set via the Engine API makes it possible for a beacon node hosting multiple validators to use a different fee recipient address for each validator, whereas setting it on the execution side would force them all to use the same fee recipient address.
+
+The `withdrawals` field was added in the [Capella upgrade](/part4/history/capella). It allows the consensus layer to pass a list of withdrawals to the execution layer to include in an execution payload. There will be at most [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset#max_withdrawals_per_payload) of them. When the block containing the payload is processed, for each withdrawal, the amount will be deducted from validator's balance on the beacon chain, and will be added to the balance of the Ethereum account in the [`Withdrawal`](/part3/containers/dependencies#withdrawal) object's `ExecutionAddress` field. The `ExecutionAddress` is derived from the validator's [withdrawal credentials](/part3/config/constants#eth1_address_withdrawal_prefix).
 
 ### `PowBlock`
 
@@ -11072,10 +11800,10 @@ The [`TERMINAL_BLOCK_HASH`](/part3/config/configuration#transition-settings) is 
 
 The remainder of the function checks, (a) that the PoW block that's the parent of the execution payload exists, and has total difficulty greater than the [`TERMINAL_TOTAL_DIFFICULTY`](/part3/config/configuration#transition-settings), and (b) that the parent of that block exists and has a total difficulty less than the `TERMINAL_TOTAL_DIFFICULTY`. (The difficulty checks are performed in [`is_valid_terminal_pow_block()`](#is_valid_terminal_pow_block).)
 
-<a id="img_annotated-forkchoice-the-merge-block"></a>
+<a id="img_annotated_forkchoice_the_merge_block"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram showing the relationship between the merge block and the terminal proof of work block](images/diagrams/annotated-forkchoice-the-merge-block.svg)
+![A diagram showing the relationship between the merge block and the terminal proof of work block.](images/diagrams/annotated-forkchoice-the-merge-block.svg)
 
 <figcaption>
 
@@ -11116,6 +11844,7 @@ def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
 
     # Check the block is valid and compute the post-state
     state = pre_state.copy()
+    block_root = hash_tree_root(block)
     state_transition(state, signed_block, True)
 
     # [New in Bellatrix]
@@ -11123,9 +11852,9 @@ def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
         validate_merge_block(block)
 
     # Add new block to the store
-    store.blocks[hash_tree_root(block)] = block
+    store.blocks[block_root] = block
     # Add new state for this block to the store
-    store.block_states[hash_tree_root(block)] = state
+    store.block_states[block_root] = state
 
     # Add proposer score boost if the block is timely
     time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
@@ -11133,17 +11862,11 @@ def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
     if get_current_slot(store) == block.slot and is_before_attesting_interval:
         store.proposer_boost_root = hash_tree_root(block)
 
-    # Update justified checkpoint
-    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
-            store.best_justified_checkpoint = state.current_justified_checkpoint
-        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
-            store.justified_checkpoint = state.current_justified_checkpoint
+    # Update checkpoints in store if necessary
+    update_checkpoints(store, state.current_justified_checkpoint, state.finalized_checkpoint)
 
-    # Update finalized checkpoint
-    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
-        store.finalized_checkpoint = state.finalized_checkpoint
-        store.justified_checkpoint = state.current_justified_checkpoint
+    # Eagerly compute unrealized justification and finality.
+    compute_pulled_up_tip(store, block_root)
 ```
 
 As noted, the only addition here to the normal [`on_block()`](/part3/forkchoice/phase0#on_block) handler is the lines,
@@ -11168,7 +11891,7 @@ There might be several candidate execution blocks that meet this criterion in th
 
 ### Introduction
 
-The [Fork Choice Safe Block spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/fork_choice/safe-block.md) is not really part of the beacon chain's fork choice and is located in a different document in the consensus repo. It is an heuristic for using the fork choice's Store data to identify a block that will not be reverted, under some reasonable assumptions. It could be used, for example, by applications to implement a settlement period for transactions. There is an analogy with the assumption that, under proof of work, in the absence of a 51% attack, a block becomes safe from reorgs after a certain number of blocks (say, fifteen) have been built on top of it.
+The [Fork Choice Safe Block spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/fork_choice/safe-block.md) is not really part of the beacon chain's fork choice and is located in a different document in the consensus repo. It is an heuristic for using the fork choice's Store data to identify a block that will not be reverted, under some reasonable assumptions. It could be used, for example, by applications to implement a settlement period for transactions. There is an analogy with the assumption that, under proof of work, in the absence of a 51% attack, a block becomes safe from reorgs after a certain number of blocks (say, fifteen) have been built on top of it.
 
 > Under honest majority and certain network synchronicity assumptions there exist a block that is safe from re-orgs. Normally this block is pretty close to the head of canonical chain which makes it valuable to expose a safe block to users.
 >
@@ -11186,7 +11909,9 @@ def get_safe_beacon_block_root(store: Store) -> Root:
 
 > _Note_: Currently safe block algorithm simply returns `store.justified_checkpoint.root` and is meant to be improved in the future.
 
-Since the protocol handles many attestations per slot, it ought to be possible to use the Store's `latest_messages` table to identify a very recent block as safe. [Some work](https://notes.ethereum.org/@adiasg/safe-head) has been done in this direction, but is incomplete. Meanwhile, the algorithm simply returns the most recently justified checkpoint. This is certainly safe under the assumptions above, but we could probably do better in finding a more recent safe block.
+Since the protocol handles many attestations per slot, it ought to be possible to use the Store's `latest_messages` table to identify a very recent block as safe. [Some work](https://notes.ethereum.org/@adiasg/safe-head) has been done in this direction, but is incomplete. Meanwhile, the algorithm simply returns the most recently justified checkpoint. This is certainly safe under the assumptions above, but we could probably do better in finding a more recent safe block[^fn-safe-block-wip].
+
+[^fn-safe-block-wip]: Substantial progress has been made recently towards providing a more useful safe block. See the [blog post](https://www.adiasg.me/confirmation-rule-for-ethereum/), the article [Confirmation Rule for Ethereum PoS](https://ethresear.ch/t/confirmation-rule-for-ethereum-pos/15454?u=benjaminion) on Ethresear.ch, and the linked [draft paper](https://ethresear.ch/uploads/short-url/fV7zyTggJtMn8xlUUNVXTOB532G.pdf).
 
 #### `get_safe_execution_payload_hash`
 
@@ -11202,7 +11927,7 @@ def get_safe_execution_payload_hash(store: Store) -> Hash32:
         return Hash32()
 ```
 
-> _Note_: This helper uses beacon block container extended in [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/beacon-chain.md).
+> _Note_: This helper uses beacon block container extended in [Bellatrix](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/beacon-chain.md).
 
 Bellatrix was the pre-Merge upgrade that added the execution payload hash to beacon blocks in readiness for the Merge itself. Applications on Ethereum are largely unaware of the beacon chain and will use the execution payload hash rather than the beacon block root as their reference point in the Eth1 blockchain.
 
@@ -11226,21 +11951,25 @@ TODO
 
 Through an open process in February 2021 we decided that beacon chain (consensus layer) upgrades would be [named after stars](https://github.com/ethereum/eth2.0-pm/issues/202#issuecomment-775789449). We're taking them in English alphabetical order, with the first being [Altair](https://github.com/ethereum/consensus-specs/issues/2218). The genesis configuration remains Phase&nbsp;0 due to its origin in the now defunct [three-phase plan](https://web.archive.org/web/20220916204934/https://docs.ethhub.io/ethereum-roadmap/ethereum-2.0/eth-2.0-phases/) for delivering Ethereum&nbsp;2.0.
 
-A summary of upgrades to date follows, with more detailed descriptions in the next sections.
+A summary of upgrades to date is below, with more detailed descriptions in the following sections.
 
-| Name | Epoch | Date (UTC) | Comments | Spec tag |
-| - | - | - | - | - |
-| [Phase&nbsp;0](/part4/history/phase0) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) |
-| [Altair](/part4/history/altair)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |
-| [Bellatrix](/part4/history/bellatrix) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) |
-| [Capella](/part4/history/capella)     | 194048 | 2023-04-12 22:27:35 | The next planned upgrade | TBD  |
-| [Deneb](/part4/history/deneb)         | TBD    | TBD                 | The next-but-one upgrade | TBD  |
+| Name | Epoch | Date&nbsp;(UTC) | Comments | Spec&nbsp;tag | Release&nbsp;name |
+| - | - | - | - | - | - |
+| [Phase&nbsp;0](/part4/history/phase0) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) | Cosmic Egg |
+| [Altair](/part4/history/altair)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |  The Great Machine |
+| [Bellatrix](/part4/history/bellatrix) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) | Ailuropoda melanoleuca[^fn-giant-panda] |
+| [Capella](/part4/history/capella)     | 194048 | 2023-04-12 22:27:35 | Withdrawals enabled | [v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0)  | Gamlum[^fn-gamlum] |
+| [Deneb](/part4/history/deneb)         | TBD    | TBD                 | TBD | TBD  | TBD |
+
+[^fn-giant-panda]: Ailuropoda melanoleuca is the formal name of the [giant panda](https://en.wikipedia.org/wiki/Giant_panda).
+
+[^fn-gamlum]: Gamlum may have been a goat-related ancient name for [Capella](https://en.wikipedia.org/wiki/Capella).
 
 The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention, simultaneously with the execution layer's [Paris upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md).
 
 [TODO: link to Merge section when done]::
 
-The consensus layer specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.2.0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.2.0).
+The consensus layer specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.3.0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.3.0).
 
 The consensus specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/das) (data-availability sampling), [custody_game](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/sharding). These reflect different research directions and are in varying states of currency.
 
@@ -11248,7 +11977,7 @@ The consensus specs repo contains some other, unreleased, versions such as [das]
 
 Under proof of work, upgrades (with the exception of the Merge) were performed at block heights that had been chosen several weeks in advance. Due to changes in hash power, predicting their timing was difficult - they could occur several hours, or even a day or two, adrift from their target time.
 
-Under proof of stake, we have the luxury of being able to time network upgrades to the second. Nevertheless, we aim to do upgrades on 256-epoch boundaries. These boundaries correspond both to the [batching interval](/part3/transition/epoch#historical-roots-updates) of state roots ([`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots), and the sync committee period ([`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#sync-committee)). Having the protocol not change in the middle of these periods will make it easier to verify proofs using their data later.
+Under proof of stake, we have the luxury of being able to time network upgrades to the second. Nevertheless, we aim to do upgrades on 256-epoch boundaries. These boundaries correspond both to the [batching interval](/part3/transition/epoch#historical-summaries-updates) of block and state roots ([`SLOTS_PER_HISTORICAL_ROOT`](/part3/config/preset#slots_per_historical_root) slots), and the sync committee period ([`EPOCHS_PER_SYNC_COMMITTEE_PERIOD`](/part3/config/preset#sync-committee) epochs). Having the protocol not change in the middle of these periods will make it easier to verify proofs using their data later.
 
 A period of 256 epochs is around 27 hours, so we get about one opportunity per day to perform an upgrade.
 
@@ -11263,7 +11992,9 @@ Beacon chain genesis took place at 12:00:23 UTC on the 1st of December 2020. The
 | `MIN_GENESIS_TIME` | `uint64(1606824000)` (Dec 1, 2020, 12pm UTC) |
 | `GENESIS_FORK_VERSION` | `Version('0x00000000')` |
 
-See the [Phase 0 specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/phase0) for the full description. These specs still apply to the beacon chain today, except where they were superseded by the [Altair](/part4/history/altair) or [Bellatrix](/part4/history/bellatrix) upgrades.
+See the [Phase 0 specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/phase0) for the full description. These specs still apply to the beacon chain today, except where they were superseded by the [Altair](/part4/history/altair), [Bellatrix](/part4/history/bellatrix), or later upgrades.
+
+My [Phase&nbsp;0 annotated specification](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) remains available.
 
 ### Altair <!-- /part4/history/altair -->
 
@@ -11289,7 +12020,7 @@ The following changes were made for sync committee support.
     - [`get_next_sync_committee()`](/part3/helper/accessors#def_get_next_sync_committee);
     - [`process_sync_aggregate()`](/part3/transition/block#def_process_sync_aggregate), which takes care of reward and penalty accounting for sync committee participation; and
     - [`process_sync_committee_updates()`](/part3/transition/epoch#def_process_sync_committee_updates).
-  - Gossip topics were added to the [P2P specification](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/altair/p2p-interface.md) to support sync committee activity
+  - Gossip topics were added to the [P2P specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/p2p-interface.md) to support sync committee activity
 
 The reforms to the accounting were extensive, and I won't list them all here as they are thoroughly covered elsewhere in the annotated spec and book. But in summary,
 
@@ -11303,7 +12034,9 @@ As for the penalty parameters, the following parameters were updated. These had 
   - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset#min_slashing_penalty_quotient_bellatrix) decreased from 128 to 64. This sets the initial slashing penalty to 0.5&nbsp;ETH for a validator with a full stake rather than the 0.25&nbsp;ETH of Phase&nbsp;0.
   - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset#proportional_slashing_multiplier_bellatrix) increased from 1 to 2 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of two-thirds of their stakes rather than the one-third of Phase&nbsp;0.
 
-The full description of the changes between Phase&nbsp;0 and Altair is in the [Altair specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/altair).
+The full description of the changes between Phase&nbsp;0 and Altair is in the [Altair specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair).
+
+My [Altair annotated specification](/../altair/part3) remains available.
 
 ### Bellatrix <!-- /part4/history/bellatrix -->
 
@@ -11318,8 +12051,8 @@ The primary goal of Bellatrix was to ready the beacon chain for [the Merge](/par
 
   - Data structures for holding execution payloads were added, namely [`ExecutionPayload`](/part3/containers/execution#executionpayload) and [`ExecutionPayloadHeader`](/part3/containers/execution#executionpayloadheader).
   - The [processing of execution payloads](/part3/transition/block#process_execution_payload) was added to [block processing](/part3/transition/block#block-processing).
-  - The [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/fork-choice.md) was updated to recognise the transition from proof of work to proof of stake on the beacon chain side.
-  - The maximum size of gossip messages and Req/Resp chunks was increased in the [P2P spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/specs/bellatrix/p2p-interface.md) to allow for the extra size of beacon blocks due to the execution payload. Also, the validity rules for gossiped blocks were updated.
+  - The [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/fork-choice.md) was updated to recognise the transition from proof of work to proof of stake on the beacon chain side.
+  - The maximum size of gossip messages and Req/Resp chunks was increased in the [P2P spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/p2p-interface.md) to allow for the extra size of beacon blocks due to the execution payload. Also, the validity rules for gossiped blocks were updated.
 
 In addition, continuing the changes from Altair, some penalty parameters were updated to their final values. These had been softened for the pre-Merge releases as we got used to running the beacon chain:
 
@@ -11327,30 +12060,35 @@ In addition, continuing the changes from Altair, some penalty parameters were up
   - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset#min_slashing_penalty_quotient_bellatrix) decreased from 64 to 32. This sets the initial slashing penalty to 1&nbsp;ETH for a validator with a full stake rather than 0.5&nbsp;ETH.
   - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset#proportional_slashing_multiplier_bellatrix) increased from 2 to 3 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of their entire stakes.
 
-The full description of the changes between Altair and Bellatrix is in the [Bellatrix specs](https://github.com/ethereum/consensus-specs/tree/v1.2.0/specs/bellatrix).
+The full description of the changes between Altair and Bellatrix is in the [Bellatrix specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix).
+
+My [Bellatrix annotated specification](/../bellatrix/part3) remains available.
 
 ### Capella <!-- /part4/history/capella -->
 
-Capella is the next planned upgrade to the consensus layer after Bellatrix. It is scheduled to take place at 22:27:35 UTC on April the 12th, 2023.
+The Capella upgrade took place at 22:27:35 UTC on April the 12th, 2023.
 
-The only feature included in the Capella upgrade is beacon chain withdrawals. Withdrawals will finally allow stakers to recover their stakes and rewards from the beacon chain into normal Ethereum addresses.
+Capella included the following updates:
 
-Two withdrawal mechanisms are [planned](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md).
+  - it enabled [automatic withdrawals](/part3/transition/block#def_process_withdrawals) from the beacon chain to Eth1 accounts;
+  - it provided a way for stakers to make a [one-time change](/part3/transition/block#def_process_bls_to_execution_change) from BLS-style withdrawal credentials to Eth1-style withdrawal credentials;
+  - the way historical roots are stored in the beacon state [was modified](/part3/transition/epoch#def_process_historical_summaries_update); and,
+  - there was a big refactor of the [fork choice rule](/part3/forkchoice) specification, along with some behavioural changes.
 
-  1. Exited and withdrawable validators will have their full balances automatically transferred to their withdrawal addresses.
-  2. Excess balances from active validators will be regularly swept into their withdrawal addresses.
+By finally enabling withdrawals, Capella in some sense completed The Merge, fulfilling the promise to stakers made 2.5 years earlier that they would eventually be able to claim their rewards and reclaim their stakes.
 
-The above operations are possible only for validators that have `0x01` type [credentials](/part3/config/constants#withdrawal-prefixes). A mechanism for [updating validators](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-process_bls_to_execution_change) from `0x00` to `0x01` credentials will also be provided.
+Two withdrawal mechanisms were implemented.
 
-The Engine API will be [modified](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/validator.md) to allow withdrawal data to be passed from the consensus client to the execution client. The execution client will credit users' accounts accordingly.
+  1. Exited and withdrawable validators have their full balances automatically transferred to their withdrawal addresses.
+  2. Excess balances from active validators are regularly swept into their withdrawal addresses.
 
-A working draft of changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/dev/specs/capella).
+The consensus layer's Capella upgrade took place at the same time as the execution layer's [Shanghai upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md).
 
-The consensus layer's Capella upgrade will happen simultaneously with the execution layer's [Shanghai upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md).
+The full description of the changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/capella).
 
 ### Deneb <!-- /part4/history/deneb -->
 
-The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://github.com/ethereum/consensus-specs/tree/dev/specs/eip4844) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
+The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://github.com/ethereum/consensus-specs/tree/dev/specs/deneb) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
 
 ## The Merge <!-- /part4/merge* -->
 
@@ -11526,7 +12264,7 @@ We can also run the spec ourselves to do interesting things. In this exercise we
 ```python
 from inspect import getmembers, isclass
 from eth2spec.utils.ssz.ssz_typing import Container
-from eth2spec.bellatrix import mainnet
+from eth2spec.capella import mainnet
 
 def get_spec_ssz_types():
     return [
@@ -11561,7 +12299,7 @@ Cloning into 'consensus-specs'...
 > python3 -m venv .
 > source bin/activate
 (consensus-specs) > python --version
-Python 3.8.10
+Python 3.10.6
 ```
 
 Now we install and build all the dependencies required for the actual specs.
@@ -11570,7 +12308,7 @@ Now we install and build all the dependencies required for the actual specs.
 (consensus-specs) > python setup.py install
 ... tons of output ...
 (consensus-specs) > make install_test
-... some initial failures reported but it installs cytoolz and sorts itself out ...
+... lots more output ...
 (consensus-specs) > python setup.py pyspecdev
 running pyspecdev
 running build_py command
@@ -11616,20 +12354,23 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
     "min_size": 464,
     "max_size": 33232
   },
+  "BLSToExecutionChange": {
+    "size": 76
+  },
   "BeaconBlock": {
-    "min_size": 976,
-    "max_size": 1125899911195288
+    "min_size": 984,
+    "max_size": 1125899911198752
   },
   "BeaconBlockBody": {
-    "min_size": 892,
-    "max_size": 1125899911195204
+    "min_size": 900,
+    "max_size": 1125899911198668
   },
   "BeaconBlockHeader": {
     "size": 112
   },
   "BeaconState": {
-    "min_size": 2737169,
-    "max_size": 152832656016433
+    "min_size": 2737221,
+    "max_size": 152833729758309
   },
   "Checkpoint": {
     "size": 40
@@ -11653,12 +12394,12 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
     "size": 72
   },
   "ExecutionPayload": {
-    "min_size": 508,
-    "max_size": 1125899911037468
+    "min_size": 512,
+    "max_size": 1125899911038176
   },
   "ExecutionPayloadHeader": {
-    "min_size": 536,
-    "max_size": 568
+    "min_size": 568,
+    "max_size": 600
   },
   "Fork": {
     "size": 16
@@ -11669,21 +12410,32 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
   "HistoricalBatch": {
     "size": 524288
   },
+  "HistoricalSummary": {
+    "size": 64
+  },
   "IndexedAttestation": {
     "min_size": 228,
     "max_size": 16612
   },
   "LightClientBootstrap": {
-    "size": 24896
+    "min_size": 25600,
+    "max_size": 25632
   },
   "LightClientFinalityUpdate": {
-    "size": 584
+    "min_size": 1992,
+    "max_size": 2056
+  },
+  "LightClientHeader": {
+    "min_size": 812,
+    "max_size": 844
   },
   "LightClientOptimisticUpdate": {
-    "size": 280
+    "min_size": 984,
+    "max_size": 1016
   },
   "LightClientUpdate": {
-    "size": 25368
+    "min_size": 26776,
+    "max_size": 26840
   },
   "PendingAttestation": {
     "min_size": 149,
@@ -11699,9 +12451,12 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
     "min_size": 437,
     "max_size": 693
   },
+  "SignedBLSToExecutionChange": {
+    "size": 172
+  },
   "SignedBeaconBlock": {
-    "min_size": 1076,
-    "max_size": 1125899911195388
+    "min_size": 1084,
+    "max_size": 1125899911198852
   },
   "SignedBeaconBlockHeader": {
     "size": 208
@@ -11735,6 +12490,9 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
   },
   "VoluntaryExit": {
     "size": 16
+  },
+  "Withdrawal": {
+    "size": 44
   }
 }
 ```

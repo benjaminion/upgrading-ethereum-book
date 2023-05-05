@@ -5,7 +5,9 @@
 # Github severely rate limits unless you use your access creds.
 github_secret=$(cat $(dirname "$0")/../priv/github.txt)
 
-for x in $(grep -Pho '\(\Khttp[^)]+' $1 | sed 's/#.*$//g' | sort -u)
+selfserver=https://eth2book.info
+
+for x in $(cat $1 | sed "s|(/\.\.|($selfserver|g" | grep -Pho '\(\Khttp[^)]+' | sed 's/#.*$//g' | sort -u)
 do
     echo $x;
 

@@ -3,12 +3,14 @@ ADSL
 API
 ASICs
 Accessors
+Aditya
 Ailuropoda
 Alexandros
 Algorand
 Alin
 Anders
 Arvind
+Asgaonkar
 Attenborough
 Attestant
 AttestationData
@@ -76,6 +78,7 @@ Feist
 Flashbots
 ForkDigest
 Francesco
+Gamlum
 Gasper
 Giga
 GitCoin
@@ -167,6 +170,7 @@ SSF
 SSLE
 SSZ
 STARKs
+Saltini
 Satoshi
 Schwarz
 Serialization
@@ -175,6 +179,7 @@ Shacham
 Shapovalov
 Shostak
 Signedness
+Slashability
 Slashings
 Sompolinsky
 Stakers
@@ -197,6 +202,7 @@ Verkle
 Vitalik
 WASM
 WB
+WithdrawalIndex
 YP
 ZK
 Zamfir
@@ -232,7 +238,6 @@ cryptographic
 cryptographically
 crystallized
 das
-de
 decentralization
 decrementing
 deduplication
@@ -298,7 +303,6 @@ misconfigured
 misconfiguring
 modularity
 monocultures
-nd
 ommers
 parallelise
 parallelising
@@ -319,12 +323,14 @@ rds
 repo
 reserialise
 roadmap
+rollups
 scalability
 scalable
 secp
 serialiser
 sharding
 shufflings
+slashability
 slashable
 slashings
 staker
