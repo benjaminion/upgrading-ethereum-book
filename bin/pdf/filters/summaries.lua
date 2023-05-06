@@ -2,9 +2,9 @@
 --
 -- Find summary boxes in the text and wrap them in a `summarybox` environment.
 
-local function find(list, elem)
-   for i=1,#list do
-      if list[i] == elem then
+local function is_summary(div)
+   for _, class in pairs(div.classes) do
+      if class == 'summary' then
          return true
       end
    end
@@ -13,7 +13,7 @@ end
 
 function Div (div)
 
-   if div.classes and find(div.classes, 'summary') then
+   if is_summary(div) then
       return {
          pandoc.RawInline('latex', '\\begin{summarybox}'),
          div,

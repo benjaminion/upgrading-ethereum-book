@@ -34,7 +34,7 @@ end
 --  (1) Remove any `-` or `-digit` that may have been introduced by pandoc to deduplicate headers
 --  (2) Convert all `_` to `-`
 local function norm(id)
-   return string.gsub(string.gsub(id, '%-+%d*$', ''), '_', '-')
+   return id:gsub('%-+%d*$', ''):gsub('_', '-')
 end
 
 local function is_header(block)
@@ -44,7 +44,7 @@ end
 local function is_anchor_inline(inline)
    return inline.t == 'RawInline'
       and inline.format == 'html'
-      and string.match(inline.text, '^<a id=".*">$')
+      and inline.text:match('^<a id=".*">$')
 end
 
 local function is_anchor_block(block)
@@ -52,17 +52,15 @@ local function is_anchor_block(block)
 end
 
 local function get_page(header)
-   if header.content[#header.content].t == 'RawInline' then
-      return norm(string.gsub(
-         string.match(header.content[#header.content].text,
-                      '<!%-%- /([^*]+)%*? %-%->'),
-         '/', '-'))
+   local header_last = header.content[#header.content]
+   if header_last.t == 'RawInline' then
+      return norm(header_last.text:match('<!%-%- /([^*]+)%*? %-%->'):gsub('/', '-'))
    end
    return nil
 end
 
 local function get_target(text)
-   return norm(string.match(text, '^<a id="(.*)">$'))
+   return norm(text:match('^<a id="(.*)">$'))
 end
 
 local function get_header_id(header)
@@ -73,17 +71,17 @@ local function update_links(block, page)
    return block:walk {
       Link = function(link)
          local s, t = link.target, ''
-         if string.match(s, '^/%.%.') then
+         if s:match('^/%.%.') then
             -- Link to a different spec version
-            t = website .. string.sub(s, 4)
-         elseif string.match(s, '^/') then
+            t = website .. s:sub(4)
+         elseif s:match('^/') then
             -- Link to another internal page
-            t = '#' .. norm(string.gsub(string.sub(s, 2), '[/#]', '-'))
-            links[string.sub(t, 2)] = true
-         elseif string.match(s, '^#') then
+            t = '#' .. norm(s:sub(2):gsub('[/#]', '-'))
+            links[t:sub(2)] = true
+         elseif s:match('^#') then
             -- Link within a page
-            t = '#' .. page .. '-' .. norm(string.sub(s, 2))
-            links[string.sub(t, 2)] = true
+            t = '#' .. page .. '-' .. norm(s:sub(2))
+            links[t:sub(2)] = true
          else
             -- External link
             t = s
