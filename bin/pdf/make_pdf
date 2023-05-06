@@ -44,6 +44,7 @@ pandoc \
     --variable geometry:a4paper \
     --variable geometry:margin=2.54cm \
     --variable block-headings \
+    --variable monofont:'DejaVu Sans Mono' \
     --include-before-body $path/inc/title-page.tex \
     --include-in-header $path/inc/header.tex \
     --toc \
