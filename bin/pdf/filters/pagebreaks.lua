@@ -1,5 +1,3 @@
-local logging = require 'logging'
-
 -- Pagebreaks filter
 --
 -- Inserts a LaTeX `\newpage` before certain headers.
@@ -17,7 +15,7 @@ end
 function Header (header)
 
    if should_insert_break(header) then
-      return {pandoc.RawBlock('tex', '\\newpage{}'), header}
+      return {pandoc.RawBlock('latex', '\\newpage{}'), header}
    else
       return header
    end
