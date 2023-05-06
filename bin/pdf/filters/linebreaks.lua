@@ -1,5 +1,3 @@
-local logging = require 'logging'
-
 -- Linebreaks filter
 --
 -- Converts html <br/> into pandoc linebreaks

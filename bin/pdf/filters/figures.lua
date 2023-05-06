@@ -11,7 +11,7 @@ local logging = require 'logging'
 local function is_tag(block, tag)
    return block and block.t == 'RawBlock'
       and block.format == 'html'
-      and string.sub(block.text, 1, #tag) == tag
+      and block.text:sub(1, #tag) == tag
 end
 
 -- True if the block matches the HTML tag `<figure`
@@ -79,7 +79,7 @@ end
 -- Get the image width from the starting figure html block
 local function get_figure_width(block)
    assert(is_figure_tag(block), "Figures filter: called get_figure_width on non figure tag")
-   return string.match(block.text, 'width:[^%d]*(%d+%%)')
+   return block.text:match('width:[^%d]*(%d+%%)')
 end
 
 -- The figure might be wrapped in a div, so extract it as necessary
@@ -118,7 +118,7 @@ function Blocks (blocks)
          local caption_idx = find_caption(blocks, i)
          local caption = blocks[caption_idx].content
          local src = get_src_from_figure(blocks[figure_idx])
-         
+
          -- Sanity checks
          if caption_idx <= figure_idx then
             logging.temp('block', blocks[i-1])

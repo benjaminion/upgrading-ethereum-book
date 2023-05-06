@@ -13,10 +13,10 @@ local langs = {
 
 function CodeBlock (block)
    local lang_string = '[]'
-   local lang_source = block.classes[1] 
+   local lang_source = block.classes[1]
    local lang = langs[lang_source]
    if lang ~= nil then
-      if (string.len(lang) > 0) then
+      if (#lang > 0) then
          lang_string = '[language=' .. lang .. ']'
       end
    else
@@ -26,7 +26,7 @@ function CodeBlock (block)
          print('Codeblocks filter: language not specified')
       end
    end
-   return pandoc.RawBlock('tex',
+   return pandoc.RawBlock('latex',
                           "\\begin{lstlisting}" .. lang_string .. "\n"
                           .. block.text .. "\n"
                           .. "\\end{lstlisting}")

@@ -12,11 +12,13 @@ pandoc 3.1.2
 ...
 ```
 
-Install LaTeX and the SVG utility. The `xetex` version is not mandatory, but seems to be more reliable for me.
+Install LaTeX and the SVG library. The `xetex` version of LaTeX is not mandatory, but seems to be more reliable for me.
 
 ```
 sudo apt install librsvg2-bin texlive-xetex
 ```
+
+The build uses the "DejaVu Sans Mono" font for code display. If you are on Linux you should have this already. If you are not on Linux, I can't help you. Changing it to a different mono-spaced font in _make\_pdf_ shouldn't break anything too badly.
 
 ## Building the PDF
 
@@ -38,13 +40,12 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 ### Significant known issues
 
-- A couple of pages with diagrams overflow off the bottom.
+- Intermittent: sometimes a couple of pages with diagrams overflow off the bottom.
 
 ### Pending improvements
 
 - Keep all headings with their next lines on page breaks.
   - Mostly working, but headings before summary boxes are a problem.
-- Better table styling
+- Better table styling - seems quite difficult.
 - `<details>` blocks need some styling.
-- Code line wrapping is good, but not perfect.
 - Heading numbers?
