@@ -40,12 +40,11 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 ### Significant known issues
 
-- Intermittent: sometimes a couple of pages with diagrams overflow off the bottom.
+- Intermittent: sometimes pages with diagrams overflow off the bottom.
 
 ### Pending improvements
 
 - Keep all headings with their next lines on page breaks.
   - Mostly working, but headings before summary boxes are a problem.
-- Better table styling - seems quite difficult.
 - `<details>` blocks need some styling.
 - Heading numbers?
