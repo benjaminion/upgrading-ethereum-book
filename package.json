@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "gatsby": "^5.9.0",
+    "gatsby": "^5.9.1",
     "gatsby-plugin-catch-links": "^5.9.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.15.2",
