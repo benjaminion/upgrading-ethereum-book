@@ -22,6 +22,9 @@ export UE_GIT_COMMIT=$(git log -1 --format="%h" 2>/dev/null)
 # For finding the logging script
 export LUA_PATH="$path/filters/?.lua;;"
 
+# For finding the Soldity highlighting
+export TEXINPUTS="$path/inc/:"
+
 cd $srcdir
 
 pandoc \
