@@ -95,6 +95,7 @@
 
 \definecolor{codecomment}{rgb}{0,0.4,0}
 \definecolor{codekeyword}{rgb}{0.6,0,0.8}
+\definecolor{codetype}{rgb}{0,0.5,0.5}
 \definecolor{codestring}{rgb}{0,0,0.8}
 
 \lstdefinestyle{mystyle}{
@@ -114,6 +115,10 @@
 }
 
 \lstset{style=mystyle}
+
+% Import highlighting for specific language code blocks
+\input{solidity-highlighting.tex}
+\input{json-highlighting.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tables

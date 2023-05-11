@@ -7,6 +7,8 @@
 local langs = {
    ['python'] = 'Python',
    ['bash'] = 'bash',
+   ['solidity'] = 'Solidity',
+   ['json'] = 'JSON',
    ['code'] = '',
    ['none'] = ''
 }
