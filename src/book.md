@@ -11506,6 +11506,8 @@ Here, in the `on_block()` handler, is where the block's timeliness is assessed a
 
 The `store.proposer_boost_root` field can only be set during the first four seconds of a slot, and it is cleared at the start of the next slot by the [`on_tick()`](#on_tick) handler. It is used in the [`get_weight()`](#get_weight) function to determine whether to add the extra proposer boost weight or not.
 
+Note that, if there is a proposer equivocation in the slot, this code will apply proposer boost to the second block received rather than to the first block received. This becomes important for the security of third-party block production with [MEV-Boost](https://github.com/flashbots/mev-boost/) - it can [allow a proposer](https://lighthouse-blog.sigmaprime.io/mev-unbundling-rpc.html) to "steal" the transactions in a block builder's block (at the cost of getting slashed), which is deemed to be a Bad Thing. It would be better to apply the proposer boost only to the first block received, and a [small patch](https://github.com/ethereum/consensus-specs/pull/3352) to `on_block()` has been proposed to implement this.
+
 ##### Update justified and finalised
 
 ```none
