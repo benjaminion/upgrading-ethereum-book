@@ -322,6 +322,8 @@ randao
 rds
 repo
 reserialise
+restake
+restaking
 roadmap
 rollups
 scalability
