@@ -1445,7 +1445,9 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 #### Introduction
 
-If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) (4) epochs, then it enters "inactivity leak" mode.
+If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset#min_epochs_to_inactivity_penalty) (4) epochs, then it enters "inactivity leak" mode[^fn-inactivity-leak-mainnet].
+
+[^fn-inactivity-leak-mainnet]: The Ethereum mainnet had nine consecutive epochs of non-finality from epoch 200,750 to 200,758 on the 12th of May, 2023. This was the first sufficiently long period of non-finality on mainnet to trigger the inactivity leak.
 
 The inactivity leak is a kind of emergency state in which rewards and penalties are modified as follows.
 
