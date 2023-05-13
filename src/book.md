@@ -1475,11 +1475,11 @@ At each epoch, the offline validator will be penalised an amount proportional to
 
 The effective balance $B$ will remain constant for a while, by design, during which time the total amount of the penalty after $t$ epochs would be $t(t+1)B / 2\alpha$: the famous "quadratic leak". If $B$ were continuously variable, the penalty would satisfy $\frac{dB}{dt}=-\frac{tB}{\alpha}$, which can be solved to give the exponential $B(t)=B_0e^{-t^2/2\alpha}$. The actual behaviour is somewhere between these two (piecewise quadratic) since the effective balance is neither constant nor continuously variable but decreases in a step-wise fashion.
 
-In the continuous approximation, the inactivity penalty quotient, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` at `2**24`, this equates to 4096 epochs, or 18.2 days.
+In the continuous approximation, the inactivity penalty quotient, $\alpha$, is the square of the time it takes to reduce the balance of a non-participating validator to $1 / \sqrt{e}$, or around 60.7% of its initial value. With the value of `INACTIVITY_PENALTY_QUOTIENT_BELLATRIX` at $2^{24}$, this equates to 4096 epochs, or 18.2 days.
 
 For Phase&nbsp;0 of the beacon chain, the value of `INACTIVITY_PENALTY_QUOTIENT` [was increased](https://github.com/ethereum/consensus-specs/commit/157f7e8ef4be3675543980e68581eb4b73284763) by a factor of four from $2^{24}$ to $2^{26}$, so that validators would be penalised less severely if there were non-finalisation due to implementation problems in the early days. As it happens, there were no instances of non-finalisation during the whole eleven months of Phase&nbsp;0 of the beacon chain.
 
-The value was decreased by one quarter in the Altair upgrade from `2**26` (`INACTIVITY_PENALTY_QUOTIENT`) to `3 * 2**24` (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of `2**24` (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the [Bellatrix upgrade](/part4/history/bellatrix). Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
+The value was decreased by one quarter in the Altair upgrade from $2^{26}$ (`INACTIVITY_PENALTY_QUOTIENT`) to $3 \cdot 2^{24}$ (`INACTIVITY_PENALTY_QUOTIENT_ALTAIR`), and to its final value of $2^{24}$ (`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`) in the [Bellatrix upgrade](/part4/history/bellatrix). Decreasing the inactivity penalty quotient speeds up recovery of finalisation in the event of an inactivity leak.
 
 #### Inactivity scores
 
