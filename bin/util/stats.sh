@@ -10,8 +10,8 @@ words=$($here/../build/checks/spellcheck_prep.pl $src/book.md | wc -w)
 pages=$(pdfinfo $pdf | grep '^Pages' | awk '{print $2}')
 external=$(cat $src/book.md | grep -Pho '\(\Khttp[^)]+' | sed 's/#.*$//g' | sort -u | wc -l)
 internal=$(cat $src/book.md | grep -Pho '\(\K/[^)]+' | wc -l)
-charts=$(ls $src/images/charts/*.svg | wc -l)
-diagrams=$(ls $src/images/diagrams/*.svg | wc -l)
+charts=$(ls $src/md/images/charts/*.svg | wc -l)
+diagrams=$(ls $src/md/images/diagrams/*.svg | wc -l)
 
 echo Words: $words
 echo Pages: $pages
