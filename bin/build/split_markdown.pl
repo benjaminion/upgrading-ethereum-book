@@ -48,7 +48,11 @@ while (<>)  {
 
         $sequence++;
 
-        my $outFile = $outFilePrefix . $path . '.md';
+        my $file = $path;
+        if ($file ne '/') {
+            chop($file)
+        }
+        my $outFile = $outFilePrefix . $file . '.md';
         my $outDirectory = $outFile =~ s|/[^/]+$||gr;
 
         unless(-e $outDirectory or make_path($outDirectory)) {
@@ -83,7 +87,7 @@ while (<>)  {
         print $ofh
             "---",
             "hide: $hide",
-            "path: $path/",
+            "path: $path",
             "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]",
             "index: [$idx]",
             "sequence: $sequence",
