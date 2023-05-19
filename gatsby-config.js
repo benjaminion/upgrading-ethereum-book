@@ -23,6 +23,7 @@ module.exports = {
     licence: 'CC BY-SA 4.0',
   },
   pathPrefix: '/' + version,
+  trailingSlash: 'always',
   plugins: [
     {
       resolve: 'gatsby-source-filesystem',

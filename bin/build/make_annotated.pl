@@ -22,11 +22,11 @@ print
 
 while(<>)  {
 
-    last if /<!-- \/part4 -->/;
+    last if /<!-- \/part4\/ -->/;
     
     chomp;
 
-    if (/<!-- \/part3 -->/) {
+    if (/<!-- \/part3\/ -->/) {
         $inPart3 = 1;
         print
             "# One Page Annotated Spec\n",
