@@ -2,6 +2,8 @@ const execSync = require('child_process').execSync;
 
 const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
 const version = 'altair';
+const server = 'https://eth2book.info';
+const canonical = server + '/latest';
 
 function getGitHash() {
   try {
@@ -21,6 +23,7 @@ module.exports = {
     date: date,
     licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
     licence: 'CC BY-SA 4.0',
+    canonical: canonical,
   },
   pathPrefix: '/' + version,
   trailingSlash: 'always',
@@ -81,8 +84,8 @@ module.exports = {
       resolve: 'gatsby-plugin-matomo',
       options: {
         siteId: '1',
-        matomoUrl: 'https://eth2book.info/matomo',
-        siteUrl: 'https://eth2book.info/' + version,
+        matomoUrl: server + '/matomo',
+        siteUrl: server + '/' + version,
         matomoPhpScript: 'matomo.php',
         matomoJsScript: 'matomo.js',
         disableCookies: true,

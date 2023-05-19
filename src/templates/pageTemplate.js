@@ -40,8 +40,12 @@ export function Head({ data }) {
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
 
+  var canonical = site.siteMetadata.canonical + frontmatter.path
   return (
-    <title>{pageTitle}</title>
+    <>
+      <title>{pageTitle}</title>
+      <link rel="canonical" href={canonical} />
+    </>
   )
 }
 
@@ -94,6 +98,7 @@ export const pageQuery = graphql`
     site {
       siteMetadata {
         title
+        canonical
       }
     }
   }
