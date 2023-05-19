@@ -12,7 +12,7 @@ const Banner = ({path}) => {
 
     return (
       <div id="banner">
-        <p>This version is old (Capella). The latest book is <a href="/latest">here</a>, and the updated page may be <a href={newPage}>here</a>.</p>
+        <p>This version is old (Capella). The latest book is <a href="/latest/">here</a>, and the updated page may be <a href={newPage}>here</a>.</p>
       </div>  
     )
 
