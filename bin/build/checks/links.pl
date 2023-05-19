@@ -35,8 +35,8 @@ my $pagePath;
 my $inCode;
 
 my %anchors = (
-    '/contents' => 1,
-    '/annotated-spec' => 1,
+    '/contents/' => 1,
+    '/annotated-spec/' => 1,
     );
 my %fns;
 

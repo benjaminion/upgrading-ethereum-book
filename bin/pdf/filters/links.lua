@@ -76,7 +76,7 @@ local function update_links(block, page)
             t = website .. s:sub(4)
          elseif s:match('^/') then
             -- Link to another internal page
-            t = '#' .. norm(s:sub(2):gsub('[/#]', '-'))
+            t = '#' .. norm(s:sub(2):gsub('[/#]', '-'):gsub('%-%-', '-'))
             links[t:sub(2)] = true
          elseif s:match('^#') then
             -- Link within a page
