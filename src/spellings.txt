@@ -17,6 +17,7 @@ AttestationData
 Attester
 AttesterSlashing
 Attesters
+BIP
 BLS
 BLSPubkey
 BLSSignature
@@ -25,6 +26,7 @@ Barreto
 Baz
 BeaconBlockHeader
 BeaconState
+Beaconcha
 Biasability
 Bitlists
 Bitvectors
@@ -33,7 +35,10 @@ Blockchains
 Blst
 Boneh
 Booleans
+Bugrara
+CLI
 Casper
+Cassez
 ChainSafe
 Chia
 Christos
@@ -45,6 +50,7 @@ D'Amato
 DAO
 DAOs
 DVT
+Dafny
 Dankrad
 Danksharding
 DeFi
@@ -59,6 +65,8 @@ ECDLP
 ECDSA
 EIP
 EIPs
+EOA
+ERC
 ETC
 ETH
 ETHconomics
@@ -68,6 +76,7 @@ Endianness
 Eth
 EthStaker
 Ethereum
+Etherscan
 Ethresear
 ExecutionAddress
 FFG
@@ -102,8 +111,12 @@ Iteratively
 Iykyk
 JSON
 Jacek
+KDF
+KEVM
 Kalinin
 Keccak
+Keystore
+Keystores
 Kyne
 LMD
 Lamport
@@ -133,6 +146,7 @@ Natale
 Neven
 Oisín
 PBFT
+PBKDF
 PRNG
 Parametrizing
 ParticipationFlags
@@ -173,6 +187,7 @@ STARKs
 Saltini
 Satoshi
 Schwarz
+Scrypt
 Serialization
 Serialize
 Shacham
@@ -183,6 +198,7 @@ Slashability
 Slashings
 Sompolinsky
 Stakers
+Suhabe
 Szilágyi
 TBD
 TODO
@@ -200,8 +216,10 @@ Validators
 Vasiliy
 Verkle
 Vitalik
+Vyper
 WASM
 WB
+WikiLeaks
 WithdrawalIndex
 YP
 ZK
@@ -228,6 +246,7 @@ blockchain
 blockchains
 bls
 boolean
+bytecode
 creds
 crosslink
 crosslinked
@@ -238,9 +257,12 @@ cryptographic
 cryptographically
 crystallized
 das
+de
 decentralization
 decrementing
+decrypt
 deduplication
+deployer
 deserialisation
 deserialise
 deserialised
@@ -264,6 +286,8 @@ extractable
 fastssz
 finalization
 finalized
+gapped
+gasless
 getter
 hackery
 hexary
@@ -317,12 +341,14 @@ piecewise
 piechart
 pre
 precompile
+programmatically
 quadratically
 randao
 rds
 repo
 reserialise
 restake
+restakes
 restaking
 roadmap
 rollups
@@ -361,6 +387,7 @@ underflows
 unforgeability
 unpartitioned
 unslashed
+unstake
 unviable
 uptime
 validator

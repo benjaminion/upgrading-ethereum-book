@@ -537,35 +537,1047 @@ TODO
 
 TODO
 
-## Deposit Handling <!-- /part2/deposits/* -->
+## Deposits and Withdrawals <!-- /part2/deposits-withdrawals/ -->
 
-### Introduction
+<div class="summary">
 
-TODO
+  - Deposits are transfers of Ether from the execution layer to the consensus layer.
+  - Withdrawals are transfers of Ether from the consensus layer to the execution layer.
+  - Accounting on each layer is completely separate.
+  - Stakers send transactions to the deposit contract in order to stake.
+  - Staking is permissionless.
+  - Withdrawals are periodic and automatic.
+  - Withdrawals are either partial or full.
 
-### The Deposit Contract <!-- /part2/deposits/contract/* -->
+</div>
 
-TODO
+### Overview
 
-### Deposit Receipts <!-- /part2/deposits/receipts/* -->
+As a proof of stake protocol, Ethereum depends on stakers locking up capital within the protocol (deposits), and, eventually, receiving that capital back along with the rewards they have earned (withdrawals).
 
-TODO
+The form of capital that is staked is Ether (ETH), Ethereum's native currency. Ether on the consensus layer exists separately, and is accounted for separately, from Ether in normal Ethereum accounts and contracts. Ether on the consensus layer is in the form of balances of validator accounts. Validator accounts are extremely limited: they have a balance that increases due to deposits and rewards, and decreases due to withdrawals and penalties. You cannot make transfers between validator accounts or run any kind of transaction on them. Validator account balances are tracked as part of the [beacon state](/part3/containers/state/), and do not form part of the normal Ethereum execution state. Note that execution balances are denominated in Wei ($10^{-18}$ ETH), whereas validator balances are denominated in Gwei ($10^{-9}$ ETH).
 
-### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting/* -->
+The basic architecture (that we'll cover thoroughly in the following sections) is that stakers make a deposit by sending an Ethereum transaction to the deposit contract, which is a standard Ethereum smart contract on the execution layer. It is important that staking is completely permissionless. Anybody may stake and gain the right to run a validator by sending 32&nbsp;ETH to the deposit contract in a normal Ethereum transaction.
 
-TODO
+On receiving a deposit, the deposit contract emits a receipt. After a while, this receipt is picked up by the consensus layer, and a validator account is created and credited with the deposit amount. The staker can then run an Ethereum validator.
 
-### Merkle Proofs <!-- /part2/deposits/merkleproofs/* -->
+All being well, the validator will earn rewards. These will be periodically, and automatically, debited from the validator's balance and credited to the Eth1 account specified in the withdrawal credentials, the withdrawal address.
 
-TODO
+When the validator finally signals that it wants to exit the protocol (or is slashed), then any remaining balance is debited from the validator account and credited to the withdrawal address.
 
-### Deposit Processing <!-- /part2/deposits/processing/* -->
+The whole flow is illustrated in the following diagram.
 
-TODO
+<a id="img_deposits_withdrawals_overview"></a>
+<figure class="diagram" style="width: 98%">
 
-### Withdrawal Credentials <!-- /part2/deposits/credentials/* -->
+![A sketch of the flows of deposits and withdrawals between the execution and consensus layers.](images/diagrams/deposits-withdrawals-overview.svg)
 
-TODO
+<figcaption>
+
+A sketch of the flows of deposits and withdrawals for a validator. Time runs roughly from top to bottom. Top-up deposits are optional, but shown for completeness. Accounts 1 and 2 may be the same, and may be contracts. Account 2 is the withdrawal address.
+
+</figcaption>
+</figure>
+
+An amusing observation from the diagram is that there is no minus sign attached to the deposit contract: the deposit contract's balance is "up-only" as validators exit and restake. When a validator exits and restakes, the deposit contract's balance increases by 32&nbsp;ETH while everything else is essentially unchanged. If this were to happen 3.2 million times (not inconceivable with well over half a million validators currently staked) then the balance of the deposit contract would exceed the total amount of Ether that's ever circulated, roughly 120 million ETH. This is of no importance, except to underline that the balance of the deposit contract should be considered burned, and counted as zero when totting up Ethereum's total supply[^fn-deposit-contract-balance].
+
+[^fn-deposit-contract-balance]: Now that the Engine API is available, we could in principle reduce the deposit contract's balance whenever a receipt is processed on the consensus layer, but the added complexity is undesirable only to fix this quirk.
+
+More importantly, there are two types of deposit and two types of withdrawals. A validator is created when its first deposit is processed by the consensus layer (which may or may not be enough to activate it). Any subsequent deposits for the same validator are top-up deposits and have a slightly different workflow with less validation.
+
+As for withdrawals, partial withdrawals are regular transfers of anything above 32&nbsp;ETH from the validator's balance to the execution layer. A full withdrawal occurs when the validator has exited the protocol and has become "withdrawable", at which point the whole of the validator's remaining balance will be transferred. Both types of withdrawal occur automatically and periodically.
+
+In the following sections, we will look first at the mechanics of [making a deposit](/part2/deposits-withdrawals/staking/), followed by an in-depth study of [the deposit contract](/part2/deposits-withdrawals/contract/). We will close by looking at the consensus layer mechanics for processing [deposits](/part2/deposits-withdrawals/deposit-processing/) and [withdrawals](/part2/deposits-withdrawals/withdrawal-processing/).
+
+A constant theme of the next sections is that much of the complexity in the current deposit and withdrawal processes has arisen due to Ethereum's peculiar history. The deposit contract's incremental Merkle tree, the Eth1Data voting period, the Eth1 follow distance - all these are due to the execution layer remaining on proof of work while we built a separate beacon chain on proof of stake. The whole BLS withdrawal credentials saga arose from our uncertainty about the roadmap at the time.
+
+Another theme is that, post-Merge, we have the opportunity to clean some of this up. [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) is a proposal for significantly streamlining deposit handling. Nevertheless, some of the complexity will be with us forever.
+
+### Making a Deposit <!-- /part2/deposits-withdrawals/staking/ -->
+
+<div class="summary">
+
+  - Initial deposits create a validator's record.
+  - Top-up deposits increase an existing validator's balance.
+  - Making a deposit involves sending a transaction to the deposit contract.
+  - The Ethereum Launchpad provides a nice interface for this, although alternatives exist.
+  - The deposit CLI tool, among others, can create deposit data and BLS keystores.
+
+</div>
+
+#### Introduction
+
+This is not a how-to guide, so I'll only consider the main tools and workflows as an introduction to the ideas.
+
+The Ethereum Foundation's [Staking Launchpad](https://launchpad.ethereum.org/) is the entry point for many solo stakers. Large operations might use smart contracts to submit deposits [in batches](https://github.com/stakefish/eth2-batch-deposit), but we will focus on a single deposit of 32&nbsp;ETH.
+
+The Launchpad will guide you towards using the [staking deposit CLI tool](https://github.com/ethereum/staking-deposit-cli)[^fn-eth-staking-smith]. It is strongly recommended that you run the deposit CLI tool offline, possibly air-gapped and on a live-booted machine. This is to keep your mnemonic seed phrase as safe as possible[^fn-safe-mnemonic].
+
+[^fn-eth-staking-smith]: [Eth-staking-smith](https://github.com/ChorusOne/eth-staking-smith) is an alternative. I have not used it and cannot vouch for it, though the source is legit. It has the interesting feature of being able to use PBKDF2 as the key derivation function - see [below](#keystores).
+
+[^fn-safe-mnemonic]: It used to be more important to protect your mnemonic as it controlled your withdrawal credentials as well as your signing key. Nowadays it will normally be used only for your signing key - an attacker can do you less harm with that than with the withdrawal credentials.
+
+#### Initial deposits
+
+When making an initial deposit &ndash; that is, for a validator that does not exist yet &ndash; the staking CLI can be run interactively as follows.
+
+```bash
+./deposit new-mnemonic --execution_address '0x00....09'
+```
+
+By default, without the `--execution-address` parameter, the staking CLI will generate old-style [BLS withdrawal credentials](/part2/deposits-withdrawals/withdrawal-processing/#bls-withdrawal-credentials). You'll want to be using the new-style [Eth1 withdrawal credentials](/part2/deposits-withdrawals/withdrawal-processing/#eth1-withdrawal-credentials), so specify the address of an Ethereum account that you control here. If you don't do it now, you will need to [change it later](/part2/deposits-withdrawals/withdrawal-processing/#credential-changes) to receive your rewards and retrieve your stake.
+
+The tool will generate a new 256 bit seed using your machine's randomness and convert it into a 24 word mnemonic phrase based on the [BIP-39 standard](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki). A single mnemonic seed phrase can be used to generate a large number of BLS12-381 [private&ndash;public key pairs](/part2/building_blocks/signatures/#key-pairs), and hence a large number of validators. Keep this mnemonic phrase very safely somewhere, and never online. You will need it if you ever need to recreate your validator keys, and when you exit your validator.
+
+You can generate keystores for multiple validators at once, based on the same mnemonic. Just tell the deposit CLI how many. Each will need its own 32&nbsp;ETH stake, however.
+
+After running through all the prompts and confirmations, the deposit CLI will generate some files. There will be a single `deposit_data-xxx.json` file and one `keystore-m_12381_3600_0_0_n_xxx.json` files per validator you generated.
+
+##### Deposit data
+
+The `deposit_data-xxx.json` file is part of the Launchpad's workflow; other tools may have different ways to do this. When you submit the deposit data file to the Launchpad, it will create a deposit transaction for each validator, which you sign with your normal Ethereum wallet, thereby sending 32&nbsp;ETH to the deposit contract.
+
+The file contains a section like this for each validator (I've truncated some lines for convenience).
+
+```json
+{
+  "pubkey": "a70d57e5fd4615bd3110a709be82be7a8b966fe881290f2738e4d8d0b38f39fe...",
+  "withdrawal_credentials": "0100000000000000000000000001020304050607080900010203040506070809",
+  "amount": 32000000000,
+  "signature": "a6821877521df6ea65e7458fd599ef6430d23f64789cf7d89a75658eccdaf841...",
+  "deposit_message_root": "047eb9f043b4cd464084c44db76ddb937e3fda11a63fde59a6149f74b8c50685",
+  "deposit_data_root": "5a05c42ace9518a92c5ec950e6f58a6fd490a06b7619370d1b700d8d93b2cbbe",
+  "fork_version": "00000000",
+  "network_name": "mainnet",
+  "deposit_cli_version": "2.5.0"
+}
+```
+
+The fields are as follows.
+
+  - `pubkey` is generated from the secret key that was generated from your mnemonic. It is the unique identity of the validator on the consensus layer. You can look it up on the [Beaconcha.in](https://beaconcha.in) explorer, for example.
+  - `withdrawal_credentials` will begin with `01` if you specified the `execution_address`, and end with the 40 hexadecimal digits of the Ethereum account that withdrawals will go to. If you did not specify an `execution_address`, then `withdrawal_credentials` will begin `00` and be followed by a BLS withdrawal commitment.
+  - `amount` is in Gwei. `32000000000` is 32&nbsp;ETH.
+  - `signature` is a [BLS signature](/part2/building_blocks/signatures/) over the previous three fields, using your secret signing key.
+  - `deposit_message_root` is the actual data that is signed with `signature`. It is the [hash tree root](/part2/building_blocks/merkleization/) of the [`DepositMessage`](/part3/containers/dependencies/#depositmessage) object. It's technically redundant as it can be recalculated easily, but the Launchpad uses it as a checksum to validate that the submitted data and signature all validate correctly.
+  - `deposit_data_root` is the hash tree root of the [`DepositData`](/part3/containers/dependencies/#depositdata) object created from the first four fields above (i.e. deposit message plus its signature). This is used as a checksum by the deposit contract.
+  - `fork_version` specifies which chain the deposit is for. The `fork_version` is encoded into the signature so that deposits are valid only on the intended chain. The chain's [`GENESIS_FORK_VERSION`](/part3/config/configuration/#genesis_fork_version) is always used when signing deposits.
+
+The remaining fields are just administrative records.
+
+##### Keystores
+
+Also generated by the deposit CLI is a keystore file for each validator. This contains the validator's encrypted secret key. The keystore will be used by the staker's client software and needs to be installed as per the client's instructions. The keystore contents are protected by the password provided when the deposit CLI was run, which also needs to be provided to the staking client. Each client handles this differently, so consult the docs.
+
+<details>
+<summary>Example keystore</summary>
+
+A keystore file has contents like the below. You can see that the `pubkey` matches the `pubkey` in the deposit data file, above. I won't go into the details of this, but the format is described in [ERC-2335](https://eips.ethereum.org/EIPS/eip-2335). The derivation `path` parameter is discussed in [ERC-2334](https://eips.ethereum.org/EIPS/eip-2334).
+
+```json
+{
+  "crypto": {
+    "kdf": {
+      "function": "scrypt",
+      "params": {
+        "dklen": 32,
+        "n": 262144,
+        "r": 8,
+        "p": 1,
+        "salt": "d6679024b3693066eba27bbe7c2269fc62c98a1accf225c916d6eafb24abcdae"
+      },
+      "message": ""
+    },
+    "checksum": {
+      "function": "sha256",
+      "params": {},
+      "message": "402eb9c5d6042f354bb8013ed19019b9d8cfa7deed1ed44eb2c0680615df1b13"
+    },
+    "cipher": {
+      "function": "aes-128-ctr",
+      "params": {
+        "iv": "4ced4174acc07417f34106eb1cb5c685"
+      },
+      "message": "e7adc1ab79c2870fccd87b9cbd09830fcf0654cccca944ff3c9c26a1f6fb10b5"
+    }
+  },
+  "description": "",
+  "pubkey": "a70d57e5fd4615bd3110a709be82be7a8b966fe881290f2738e4d8d0b38f39fe..."
+  "path": "m/12381/3600/0/0/0",
+  "uuid": "7b25b4a7-9241-4ad8-9540-f0ed096f30cd",
+  "version": 4
+}
+```
+
+</details>
+
+A key derivation function (KDF) is used to protect the secret key with a password. The KDF is designed to make it computationally infeasible to decrypt the secret key by brute-force.
+
+The deposit CLI uses the [Scrypt KDF](https://en.wikipedia.org/wiki/Scrypt) which, by design, is slow and uses a lot of memory, about 300MB per key. This is fine for a solo-staker loading one or two keys, but can become a significant bottleneck for large staking services loading hundreds or thousands of keys at startup.
+
+ERC-2335 keystores also support [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2) as the KDF, which is much faster and less memory intensive. Depending on one's appetite for trading key security for loading speed, PBKDF2 may be preferable. The [`ethdo`](https://github.com/wealdtech/ethdo) and [`eth-staking-smith`](https://github.com/ChorusOne/eth-staking-smith) tools are able to generate keystores using PBKDF2.
+
+#### Top-up deposits
+
+Top-ups are deposits for validators that already exist. You might want to top-up a validator if its [effective balance](/part2/incentives/balances/) falls below 32&nbsp;ETH in order to restore it to maximum effectiveness.
+
+The Staking Launchpad provides a [top-up](https://launchpad.ethereum.org/en/top-up) interface. You don't need access to your keystore or mnemonic to make a top-up deposit. In fact, anyone can top-up any validator at any time.
+
+The transaction that gets sent to the deposit contract for a top-up is essentially the same as the transaction for an initial deposit, with the following differences:
+
+  - the public key must match the public key of an existing validator,
+  - the signature is not checked, and can be an "empty" dummy signature[^fn-top-up-signature], and
+  - the withdrawal credentials are ignored.
+
+[^fn-top-up-signature]: It seems that block explorers [do not know this](https://github.com/ConsenSys/teku/issues/7060) and can incorrectly mark top-up transactions as invalid.
+
+It is possible to build up a validator's stake over time, with an initial deposit that's less than 32&nbsp;ETH, followed by one or more top-up deposits. The validator will become active when its effective balance reaches 32&nbsp;ETH. However, if you plan to do this, watch out for a tricky [edge case](/part2/incentives/balances/#an-edge-case) involving hysteresis when the final top-up is 1&nbsp;ETH.
+
+##### See also
+
+The [Ethereum.org website](https://ethereum.org/en/staking/solo/) has more information about solo staking, with a comparison of alternatives to the deposit CLI tool.
+
+If you want to play around with consensus layer keys and wallets, the [`ethdo`](https://github.com/wealdtech/ethdo) tool is extremely useful. It has been [audited](https://www.wealdtech.com/articles/ethdo-audit/), and has a huge range of features as well as [handling the basics](https://medium.com/coinmonks/creating-ethereum-2-withdrawal-keys-using-ethdo-6e41b14ddd7b).
+
+Three ERC standards have been proposed in relation to key handling for the consensus layer.
+
+  - [ERC-2333: BLS12-381 Key Generation](https://eips.ethereum.org/EIPS/eip-2333).
+  - [ERC-2334: BLS12-381 Deterministic Account Hierarchy](https://eips.ethereum.org/EIPS/eip-2334).
+  - [ERC-2335: BLS12-381 Keystore](https://eips.ethereum.org/EIPS/eip-2335).
+
+### The Deposit Contract <!-- /part2/deposits-withdrawals/contract/ -->
+
+<div class="summary">
+
+  - The deposit contract is the protocol's entry point for staking.
+  - Anybody may permissionlessly stake 32&nbsp;ETH via the contract.
+  - On receiving a valid deposit the contract emits a receipt.
+  - An incremental Merkle tree maintains a Merkle root of all deposits.
+  - The deposit contract cannot verify a deposit's BLS signature.
+  - The balance of the deposit contract never decreases.
+  - Ether sent to the deposit contract should be considered burned.
+
+</div>
+
+#### Overview
+
+The deposit contract is the means by which stakers commit their Ether to the protocol in order to gain the right to run a validator.
+
+The source code for the contract is available in the [specs repo](https://github.com/ethereum/consensus-specs/tree/dev/solidity_deposit_contract), and the verified byte code is [deployed on-chain](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code).
+
+##### Functionality
+
+The deposit contract is a normal Ethereum smart contract running on the execution (Eth1) layer. Anyone wishing to place a stake in order to run a validator may send 32&nbsp;ETH to the deposit contract via a normal Ethereum transaction.
+
+In addition to the Ether transferred, the deposit transaction must contain further data as follows.
+
+First, the public key of the validator. A validator's public key is derived from its secret signing key, and is its primary identity on the consensus layer. The staker will provide the secret signing key separately to the consensus client for normal operational use.
+
+Second, withdrawal credentials specifying which Ethereum account rewards earned will be sent to. This will also be the address that receives the validator's full balance when it eventually exits. Withdrawal credentials come in two forms, which we will discuss [later](/part2/deposits-withdrawals/withdrawal-processing/#withdrawal-credentials).
+
+Third, a signature over the public key, the withdrawal credentials, and the deposit amount, using the normal signing key. This signature's main role is to serve as a "proof of possession" of the secret key of the validator, which side-steps a nasty [rogue public key attack](/part2/building_blocks/signatures/#proof-of-possession).
+
+Fourth, the deposit data root, which is an [SSZ Merkleization](/part2/building_blocks/merkleization/) of all of the above data that serves as a kind of checksum that the contract can verify.
+
+The deposit contract does some verification on these parameters. In particular, the deposit amount is subject to checks, and the deposit data root is verified. If either of these fails then the deposit will be rejected - that is, the deposit transaction will be reverted.
+
+However, the deposit contract does not validate the signature - the EVM does not yet have the elliptic curve apparatus to do this, and it would be prohibitively expensive to do in normal bytecode. The signature will be validated later by the consensus layer, and if found to be incorrect (for new validators) the deposit will fail, and the Ether will be lost.
+
+Once the deposit contract is as satisfied as it can be that the deposit is valid, it issues [a receipt](#deposit-receipts) (an EVM log event) containing the deposit data. This receipt will later be picked up by the consensus layer for processing.
+
+##### Development
+
+The original deposit contract [was written in Vyper](https://github.com/ethereum/deposit_contract), a Python-like smart contract language. Work on the contract code began in January 2018, some months before the beacon chain was conceived of: it is one of the very few carry-overs from earlier Ethereum proof of stake designs. The pre-beacon chain version, however, omitted all the of the Merkle tree apparatus as it was not required[^fn-6110-no-merkle]. Using the incremental (also called progressive) Merkle tree was [suggested by Vitalik](https://github.com/ethereum/consensus-specs/pull/490) in January 2019.
+
+[^fn-6110-no-merkle]: With [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) we might end up going back in that direction, with the Merkle root no longer needed.
+
+Around April 2020, work began to rewrite the deposit contract in Solidity, a more mainstream smart contract language. The stated reason in the [new repo](https://github.com/ethereum/consensus-specs/tree/dev/solidity_deposit_contract) is the following, which relates to formally verifying the contract.
+
+> The original motivation was to run the SMTChecker and the new Yul IR generator option (`--ir`) in the compiler.
+
+Runtime Verification's [verification work](https://github.com/runtimeverification/deposit-contract-verification/blob/master/deposit-contract-verification.pdf) cites "community concerns about the [then] current Vyper compiler" as the motivation for the rewrite. These concerns are captured in Suhabe Bugrara's initial [review of the Vyper contract](https://github.com/suhabe/eth-deposit-contract-vyper-review/blob/master/EthDepositContractVyperReview.pdf), and discussed in the Ethereum Foundation's [blog entry](https://blog.ethereum.org/2020/06/23/eth2-quick-update-no-12#solidity-deposit-contract-and-formal-verification).
+
+The deployed deposit contract was compiled from [Solidity source code](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code).
+
+##### Verification work
+
+Since Ethereum contracts are immutable once deployed, it was crucial that the deposit contract be correct: its balance would come to be a large fraction of all Ether. To this end, various analyses and formal verification activities were performed.
+
+In June 2020 Runtime Verification performed a [formal verification](https://github.com/runtimeverification/deposit-contract-verification) covering two aspects.
+
+1. Verification that the incremental Merkle tree algorithm is equivalent to a full Merkle tree construction.
+2. Verification that the bytecode was correctly generated from the Solidity source code, using the KEVM verifier.
+
+Just prior to the deployment of the contract, Franck Cassez of ConsenSys performed some further work as described in his paper, [Verification of the Incremental Merkle Tree Algorithm with Dafny](https://arxiv.org/pdf/2105.06009.pdf), and [GitHub repository](https://github.com/ConsenSys/deposit-sc-dafny). This goes further than Runtime Verification's work by fully mechanically verifying the incremental Merkle tree algorithm, using the Dafny formal verification language.
+
+##### Deployment
+
+The deposit contract was [deployed](https://etherscan.io/tx/0xe75fb554e433e03763a1560646ee22dcb74e5274b34c5ad644e7c0f619a7e1d0) on October the 14th, 2020, at 09:22:52 UTC to Ethereum address [`0x00000000219ab540356cbb839cbe05303d7705fa`](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa).
+
+The [deploying account](https://etherscan.io/address/0xb20a608c624ca5003905aa834de7156c68b2e1d0) was presumably generated by grinding for a key whose first transaction would deploy the contract to an address with the distinctive eight zero prefix: Ethereum contract addresses [are computed](https://ethereum.org/en/developers/docs/accounts/#contract-accounts) from the deployer's account address and nonce value. This would have taken on the order of $2^{32}$ (4.3 billion) key generation attempts.
+
+Ignoring spam, there are only three transactions associated with the deploying account.
+
+  - The account was funded with 1&nbsp;ETH (minus fee) via [a transfer from Tornado Cash](https://etherscan.io/tx/0x1956761ad42396786160cb4cbca845409dadc5366c46a2b4e178d63dc0f17578).
+    - As a result, we have no way of identifying the deployer. Since the contract bytecode was publicly available, it could have been anybody.
+  - The [deposit contract deployment](https://etherscan.io/tx/0xe75fb554e433e03763a1560646ee22dcb74e5274b34c5ad644e7c0f619a7e1d0) cost 0.31478286&nbsp;ETH.
+  - The leftover ETH was transferred [to the WikiLeaks donation address](https://etherscan.io/tx/0x8aa30f7d95cd5f22dd02e59434c0e66794c6e370ed2659ea532ed6fe49f9cce5).
+
+#### Code
+
+The following exposition is based on the Solidity source code as [verified on Etherscan](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa#code), which ought to match the source code in the [consensus specs repository](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol).
+
+For brevity, I've omitted the interface boilerplate and some lengthy comments.
+
+##### `DepositContract`
+
+```solidity
+contract DepositContract is IDepositContract, ERC165 {
+    uint constant DEPOSIT_CONTRACT_TREE_DEPTH = 32;
+    // NOTE: this also ensures `deposit_count` will fit into 64-bits
+    uint constant MAX_DEPOSIT_COUNT = 2**DEPOSIT_CONTRACT_TREE_DEPTH - 1;
+
+    bytes32[DEPOSIT_CONTRACT_TREE_DEPTH] branch;
+    uint256 deposit_count;
+
+    bytes32[DEPOSIT_CONTRACT_TREE_DEPTH] zero_hashes;
+
+    constructor() public {
+        // Compute hashes in empty sparse Merkle tree
+        for (uint height = 0; height < DEPOSIT_CONTRACT_TREE_DEPTH - 1; height++)
+            zero_hashes[height + 1] = sha256(abi.encodePacked(zero_hashes[height], zero_hashes[height]));
+    }
+```
+
+After declaring its interfaces &ndash; we will look at ERC165 [below](#supportsinterface) &ndash; comes constants and storage.
+
+The `DEPOSIT_CONTRACT_TREE_DEPTH` specifies the number of levels in the internal Merkle tree. With a depth of 32, it can have $2^{32}$ leaves, allowing for up to 4.3 billion deposits (`MAX_DEPOSIT_COUNT`[^fn-max-deposit-count])[^fn-eip-6110-max-deposits]. A deposit is a minimum of one ETH, so there's sufficient space for every ETH in existence to be deposited 35 times over.
+
+[^fn-max-deposit-count]: Regarding the comment on `MAX_DEPOSIT_COUNT`, it will of course fit into 32 bits, which is definitely less than 64. The point is that `uint`s on the consensus layer are standardised at a size of 64 bits, and we don't want to overflow that.
+
+[^fn-eip-6110-max-deposits]:  With the proposed mechanism in [EIP-6110](https://github.com/ethereum/consensus-specs/pull/3177) for deposit handling, we would no longer need the Merkle proofs and could in principle lift this limit. However, it is immutably encoded into the deposit contract, so would not be possible in practice.
+
+The underlying data structure of the deposit contract is an incremental Merkle tree. This is a Merkle tree that supports only two operations, (1) appending a leaf, and (2) calculating the root. Constraining the data like this allows us to avoid storing the entire Merkle tree, which would be huge. Instead the contract stores only the last `branch` &ndash; a mere 32 nodes &ndash; which is all the information that's needed to calculate the Merkle root.
+
+To gain this efficiency, we need an array of `zero_hashes`. At any given level of the tree, the zero hash is the value the node would have if all of the leaves under it were zero. Since we assign leaves sequentially, huge parts of the tree can be represented by the zero hashes.
+
+The `constructor()` (which takes no arguments) only initialises the `zero_hashes` structure, taking advantage of the EVM's default that the uninitialised `zero_hashes[0]` storage value will be zero.
+
+<a id="img_deposits_withdrawals_zero_hashes"></a>
+<figure class="diagram" style="width: 75%">
+
+![Diagram showing how the zero_hashes array is constructed.](images/diagrams/deposits-withdrawals-zero-hashes.svg)
+
+<figcaption>
+
+To construct $Z_n$, we start with $Z_0 = 0$ and define $Z_{i+1} = \text{Hash}(Z_i, Z_i)$.
+
+</figcaption>
+</figure>
+
+##### `get_deposit_root`
+
+```solidity
+    function get_deposit_root() override external view returns (bytes32) {
+        bytes32 node;
+        uint size = deposit_count;
+        for (uint height = 0; height < DEPOSIT_CONTRACT_TREE_DEPTH; height++) {
+            if ((size & 1) == 1)
+                node = sha256(abi.encodePacked(branch[height], node));
+            else
+                node = sha256(abi.encodePacked(node, zero_hashes[height]));
+            size /= 2;
+        }
+        return sha256(abi.encodePacked(
+            node,
+            to_little_endian_64(uint64(deposit_count)),
+            bytes24(0)
+        ));
+    }
+```
+
+Calculating the deposit root on demand saves us from having to use a storage slot to save it in. Local execution of `view` functions is free, while writing to blockchain state is very expensive.
+
+The algorithm works as follows. In a binary Merkle tree, a node is either a left child or a right child.
+
+  - If a node is a left child (`size & 1 == 0`), we know its sibling must be a zero hash, since the tree is incremental.
+  - If a node is a right child, we take its sibling from `branch`. Thus, the important elements of `branch` are those that store the left-child nodes for the current value of `deposit_count`.
+
+In effect, we are using the `zero_hashes`, $Z_n$, and the `branch` values, $B_n$, to summarise large parts of the tree. $Z_n$ is the root of a subtree whose $2^n$ leaves are all zero, with $Z_0 = 0$. $B_n$ is the root of a subtree, all of whose $2^n$ leaves were previously assigned, with $B_0$ being the last left-leaf that was inserted. By the time we reach the root, we will have effectively included all the leaves in the calculation.
+
+This being an incremental Merkle tree, we know that the value of the leaf at `deposit_count` is zero: the count is zero-based, so leaf `deposit_count` has not yet been assigned; it will be the next leaf to be assigned.
+
+To calculate the parent node, we hash together the value of its left and right children. Solidity's [`abi.encodePacked()`](https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#non-standard-packed-mode) function is used to concatenate the 32 bytes of each sibling.
+
+Note that we don't use any of the $B_n$ for $n > \log_2 i$, where $i$ is `deposit count` - any nodes we visit higher than this will be left nodes only. We make use of this when [updating `branch`](#updating_branch) after a new deposit.
+
+###### Toy example
+
+The beauty of the incremental Merkle tree is that we can calculate a root for a tree with up to $N$ leaves by maintaining just $\log_2 N$ values in storage, plus the `deposit_count`, with a further $\log_2 N$ constants.
+
+<a id="img_deposits_withdrawals_deposit_root"></a>
+<figure class="diagram" style="width: 75%">
+
+![A diagram illustrating how the root of an incremental Merkle tree is calculated.](images/diagrams/deposits-withdrawals-deposit-root.svg)
+
+<figcaption>
+
+Finding the root of a three-level incremental Merkle tree. Five leaves have been assigned, $v_0$ to $v_4$, although we don't store their values. In the algorithm, `node` visits the dashed nodes from the leaf at the top to the root at the bottom. The $B_n$ are `branch` values maintained by `deposit()`, and the $Z_n$ are the pre-computed `zero_hashes`.
+
+</figcaption>
+</figure>
+
+The diagram shows an incremental Merkle tree with three levels. We have filled up five of the leaves with values $v_0$ to $v_4$, but the only things that we actually store are the three $B_n$ values of `branch`, and the three $Z_n$ values of `zero_hashes`. At each level $n$ we will use either $B_n$ or $Z_n$ to calculate the parent.
+
+The `deposit_count` is 5, so we start with `node` at the leaf labelled "5", which we know will be zero since it has not yet been assigned. This is a right child, therefore we combine it with $B_0$ as its left sibling. We know that $B_0$ will be equal to the last leaf value inserted, $v_4$. (If it were a left child, we would combine it with $Z_0 = 0$.)
+
+Moving to level 1, `node` is now a left child, so we combine it with the level 1 zero hash, $Z_1$. We know that all the leaves descended from that $Z_1$ node are zero.
+
+On level 2, `node` is again a right child, so we combine it with our stored value of $B_2$ to obtain the value at the root of the tree.
+
+###### Why do we need the deposit root?
+
+As we shall see later, each staking node separately maintains its own Merkle tree of deposits, independently of the deposit contract, which it builds using the deposit receipts from the execution layer. Why, then, do we need to put all this complex apparatus into the deposit contract in order to calculate the root?
+
+Using the deposit root provides a self-contained way to verify that the deposit data in a block is correct. In the early stages of Eth2, it was not at all clear that all beacon chain nodes would be connected to Eth1 clients. In fact, pre-Merge, it was perfectly fine for a non-staking node not to be connected to an Eth1 client. Those nodes needed some way to be able to reject blocks with fake deposits. Putting the evidence on-chain via a Merkle proof allowed them to do so.
+
+By means of the voting process [described below](/part2/deposits-withdrawals/deposit-processing/#eth1-voting-and-follow-distance), validators periodically import a deposit root from the contract onto the beacon chain. When a proposer includes deposits in its block, it must add a proof that the deposits are included in that deposit root. This allows every node that processes the chain to verify every deposit without having to consult the Eth1 chain.
+
+Interestingly, post-Merge, all nodes (whether running validators or not) are required to comprise both consensus and execution clients, and execution payloads are included in beacon blocks. Therefore, nowadays, the data we need to validate deposits is on-chain as a matter of course, and we no longer strictly need to mess about with all this deposit root stuff. In fact, [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) proposes to explicitly expose validator deposits on-chain, after which the deposit contract code for maintaining the root will be redundant. Although, being immutable, it will continue to exist forever.
+
+##### `get_deposit_count`
+
+```solidity
+    function get_deposit_count() override external view returns (bytes memory) {
+        return to_little_endian_64(uint64(deposit_count));
+    }
+```
+
+The only wrinkle here is the endianness transformation. The consensus layer uses little-endian format to serialise integers, whereas the EVM uses big-endian. The consensus layer calls this function to find out about new deposits, so it's convenient to get the output in the right format.
+
+##### `deposit`
+
+```solidity
+    function deposit(
+        bytes calldata pubkey,
+        bytes calldata withdrawal_credentials,
+        bytes calldata signature,
+        bytes32 deposit_data_root
+    ) override external payable {
+        // Extended ABI length checks since dynamic types are used.
+        require(pubkey.length == 48, "DepositContract: invalid pubkey length");
+        require(withdrawal_credentials.length == 32, "DepositContract: invalid withdrawal_credentials length");
+        require(signature.length == 96, "DepositContract: invalid signature length");
+
+        // Check deposit amount
+        require(msg.value >= 1 ether, "DepositContract: deposit value too low");
+        require(msg.value % 1 gwei == 0, "DepositContract: deposit value not multiple of gwei");
+        uint deposit_amount = msg.value / 1 gwei;
+        require(deposit_amount <= type(uint64).max, "DepositContract: deposit value too high");
+```
+
+This is the business part of the contract - where stakers' deposits are made.
+
+A deposit comprises the following items.
+
+  - The public key of the validator: `pubkey` is the 48 byte (compressed) BLS public key derived from the staker's secret signing key.
+  - The withdrawal credentials: `withdrawal_credentials` is 32 bytes of either `0x00` [BLS credentials](/part3/config/constants/#bls_withdrawal_prefix) or `0x01` [Eth1 credentials](/part3/config/constants/#eth1_address_withdrawal_prefix). Apart from their length, the withdrawal credentials are not validated anywhere in the contract, or even on the consensus layer.
+  - The `signature` is a 96 Byte [BLS signature](/part2/building_blocks/signatures/). It is generated by signing the hash tree root of a [`DepositMessage`](/part3/containers/dependencies/#depositmessage) object (`public_key`, `withdrawal_credentials`, and `deposit_amount`), with the validator's signing key.
+  - The `deposit_data_root` is basically a form of checksum. See below for how it is verified.
+  - Finally, a `msg.value`. The message value is the amount of Ether (denominated in Wei, which are $10^{-18}$ ETH) that was sent with the transaction. This will normally be 32&nbsp;ETH for a new validator, but can be more or less. It must be,
+    - at least one ETH,
+    - a whole number of ETH, and
+    - less than $2^{64}$ Gwei[^fn-gwei], which is 18.4 Billion ETH.
+
+The very last condition is formally to avoid overflowing a consensus layer `uint64`, but seems kind of redundant in practice.
+
+[^fn-gwei]: A Gwei is $10^9$ Wei, or $10^{-9}$ ETH, and is the unit of account on the consensus layer.
+
+```solidity
+        // Emit `DepositEvent` log
+        bytes memory amount = to_little_endian_64(uint64(deposit_amount));
+        emit DepositEvent(
+            pubkey,
+            withdrawal_credentials,
+            amount,
+            signature,
+            to_little_endian_64(uint64(deposit_count))
+        );
+```
+
+The contract now emits an event log (receipt). These receipts are how information about new deposits is picked up by the consensus layer. It looks a bit weird to emit the log before finishing all the checks (we have a couple more `require`s to pass yet), but if the transaction reverts, the beacon chain will also revert the event log, so no real harm is done emitting it early.
+
+See [below](#deposit-receipts) for more detail on the receipt.
+
+```solidity
+        // Compute deposit data root (`DepositData` hash tree root)
+        bytes32 pubkey_root = sha256(abi.encodePacked(pubkey, bytes16(0)));
+        bytes32 signature_root = sha256(abi.encodePacked(
+            sha256(abi.encodePacked(signature[:64])),
+            sha256(abi.encodePacked(signature[64:], bytes32(0)))
+        ));
+        bytes32 node = sha256(abi.encodePacked(
+            sha256(abi.encodePacked(pubkey_root, withdrawal_credentials)),
+            sha256(abi.encodePacked(amount, bytes24(0), signature_root))
+        ));
+
+        // Verify computed and expected deposit data roots match
+        require(node == deposit_data_root, "DepositContract: reconstructed DepositData does not match supplied deposit_data_root");
+```
+
+Here we have a "by hand" implementation of the [hash tree root](/part2/building_blocks/merkleization/) for a consensus layer [`DepositData`](/part3/containers/dependencies/#depositdata) object.
+
+```none
+class DepositData(Container):
+    pubkey: BLSPubkey
+    withdrawal_credentials: Bytes32
+    amount: Gwei
+    signature: BLSSignature  # Signing over DepositMessage
+```
+
+Using the same style as in the [Merkleization](/part2/building_blocks/merkleization/) chapter, we can illustrate the process in the following diagram. With a bit of head-scratching it's not too difficult to map it onto the mess of `sha256` calls in the code.
+
+<a id="img_deposits_withdrawals_deposit_data_root"></a>
+<figure class="diagram" style="width: 100%">
+
+![A diagram showing how the hash tree root of a `DepositData` object is calculated from its members. ](images/diagrams/deposits-withdrawals-deposit-data-root.svg)
+
+<figcaption>
+
+Each box is a 32 byte chunk, possibly padded with zeros (in the cases of $S(Pubkey)_2$ and $S(Amount)$). Merkleization is the process of finding the hash tree root by iteratively hashing together pairs of chunks, in the form of binary trees, until the root is reached.
+
+</figcaption>
+</figure>
+
+The only reason for doing this here is as a kind of checksum. The staker provides `deposit_data_root`, which is their independent calculation of the deposit root from the input data. The contract recalculates it to ensure that it matches the supplied data.
+
+The `deposit_data_root` is the quantity (`node`) that will be inserted as a new leaf in the Merkle tree and forms part of the verification of a deposit on the consensus layer.
+
+```solidity
+        // Avoid overflowing the Merkle tree (and prevent edge case in computing `branch`)
+        require(deposit_count < MAX_DEPOSIT_COUNT, "DepositContract: merkle tree full");
+
+        // Add deposit data root to Merkle tree (update a single `branch` node)
+        deposit_count += 1;
+        uint size = deposit_count;
+        for (uint height = 0; height < DEPOSIT_CONTRACT_TREE_DEPTH; height++) {
+            if ((size & 1) == 1) {
+                branch[height] = node;
+                return;
+            }
+            node = sha256(abi.encodePacked(branch[height], node));
+            size /= 2;
+        }
+        // As the loop should always end prematurely with the `return` statement,
+        // this code should be unreachable. We assert `false` just to be safe.
+        assert(false);
+    }
+```
+
+<a id="updating_branch"></a>
+
+Finally, we must update the Merkle tree.
+
+A very cool feature of the incremental Merkle tree is that, not only can we continuously maintain its root by maintaining only the 32 values in `branch`, but when we insert a new leaf value, we need to update only a _single value_ of `branch`.
+
+This is not obvious, but we can deduce it as follows. For a more formal explanation and analysis, see Franck Cassez's paper, [Verification of the Incremental Merkle Tree Algorithm with Dafny](https://arxiv.org/pdf/2105.06009).
+
+Consider paths from adjacent leaves to the root: path $P$ from leaf $j - 1$, and path $Q$ from leaf $j$, where $j$ is `deposit_count`. Beyond some level $i$, paths $P$ and $Q$ will converge and visit the same nodes. At level $i$, path $P$ will visit a left node, having visited only right nodes previously, and path $Q$ will visit a right node, having visited only left nodes previously[^fn-binary-arithmetic].
+
+[^fn-binary-arithmetic]: If it's not clear from thinking about paths, then consider binary numbers. If $j-1$ is `0111`, then $j$ is `1000`. The zeros represent left nodes, and the ones represent right nodes.
+
+In short,
+
+  - Path $P$ will comprise $(i-1)$ right nodes, followed by a left node, followed by some tail shared with $Q$.
+  - Path $Q$ will comprise $(i-1)$ left nodes, followed by a right node, followed by some tail shared with $P$.
+
+Path $Q$ is that path that will be used in the [`get_deposit_root()`](#get_deposit_root) algorithm.
+
+Now, by construction, the $B_n$ (the `branch` values) always represent left nodes in the tree, and are needed only when path $Q$ visits a right node.
+
+For levels greater than or equal to $i$ &ndash; where paths $P$ and $Q$ coincide &ndash; either the nodes visited are left nodes, in which case the $B_n$ value is irrelevant, or they are right nodes, in which case the $B_n$ value is unchanged since it is calculated from a sub tree whose leaves have not changed. So, no update is required to $B_n$ for $n > i$.
+
+As for levels $n < i$, all the $Q_n$ are left nodes, and thus the $B_n$ are irrelevant. Therefore the sole $B_n$ that needs to be updated is $B_i$. The intuition is that, due to the way binary increments work, every time we need a new $B_n$, it have been be updated by the previous insertion, "just in time".
+
+<a id="img_deposits_withdrawals_update_branch"></a>
+<figure class="diagram" style="width: 100%">
+
+![A diagram showing how `branch` is updated when a new leaf is appended.](images/diagrams/deposits-withdrawals-update-branch.svg)
+
+<figcaption>
+
+We've just inserted a leaf at position $j$. Next time `get_deposit_root()` is called, it will traverse path $Q$ from $j+1$, having previously traversed $P$ from $j$ . The paths converge at height $i + 1$. For $n < i$ path $Q$ is entirely left nodes, so $B_n$ is irrelevant. For $n > i$, $B_n$ is either unchanged or irrelevant. So we need only to updated $B_i$ to $B_i'$.
+
+</figcaption>
+</figure>
+
+##### `supportsInterface`
+
+```solidity
+    function supportsInterface(bytes4 interfaceId) override external pure returns (bool) {
+        return interfaceId == type(ERC165).interfaceId || interfaceId == type(IDepositContract).interfaceId;
+    }
+```
+
+This is standard code based on [ERC-165](https://eips.ethereum.org/EIPS/eip-165) that allows calling applications to detect programmatically whether the contract supports a function interface based on the given function selector, `interfaceID`.
+
+For example, according to the [Ethereum ABI](https://docs.soliditylang.org/en/develop/abi-spec.html#function-selector), the function selector for `get_deposit_count()` is `0x621fd130`. Therefore, calling `supportsInterface(0x621fd130)` will return `true`.
+
+I don't know of any reason for implementing this for the deposit contract, but I suppose it's considered good practice to do so.
+
+##### `to_little_endian_64`
+
+```solidity
+    function to_little_endian_64(uint64 value) internal pure returns (bytes memory ret) {
+        ret = new bytes(8);
+        bytes8 bytesValue = bytes8(value);
+        // Byteswapping during copying to bytes.
+        ret[0] = bytesValue[7];
+        ret[1] = bytesValue[6];
+        ret[2] = bytesValue[5];
+        ret[3] = bytesValue[4];
+        ret[4] = bytesValue[3];
+        ret[5] = bytesValue[2];
+        ret[6] = bytesValue[1];
+        ret[7] = bytesValue[0];
+    }
+```
+
+This is used in `get_deposit_root()`, `get_deposit_count()` and when emitting the `DepositEvent` log. All of these will be consumed by the consensus layer, which [uses little-endian](/part3/config/constants/#endianness) encoding for SSZ integers.
+
+```solidity
+}
+```
+
+And we're done.
+
+#### Deposit Receipts
+
+For every deposit accepted by the deposit contract it issues a receipt (also called a log or event[^fn-receipts-naming]), which is generated via an EVM `LOG1` opcode.
+
+[^fn-receipts-naming]: Naming of these things is really messed up. I believe that Eth1 logs, events, and receipts are all the same thing. Etherscan hedges its bets by calling them "Transaction Receipt Event Logs".
+
+The receipt has a single topic, which is the `DepositEvent` signature: `0x649bbc62d0e31342`<wbr/>`afea4e5cd82d4049`<wbr/>`e7e1ee912fc0889a`<wbr/>`a790803be39038c5`, equal to `keccak256("DepositEvent(bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes)")`.
+
+The receipt's data is the 576 byte ABI encoding of `pubkey`, `withdrawal_credentials`, `amount`, `signature`, and `deposit_count`, converted to little-endian where required. Here's [an example](https://etherscan.io/tx/0xa41ae80276c837f3855e109c3bbba89bb6078215f86ccc4b981a4930858d3f3a#eventlog).
+
+<details>
+<summary>Example receipt data</summary>
+
+The first column is the hexadecimal byte position of the start of the data in the second column.
+
+```none
+# Pointer to pubkey: 0x0a0
+000  00000000000000000000000000000000000000000000000000000000000000a0
+
+# Pointer to withdrawal_credentials: 0x100
+020  0000000000000000000000000000000000000000000000000000000000000100
+
+# Pointer to amount: 0x140
+040  0000000000000000000000000000000000000000000000000000000000000140
+
+# Pointer to signature: 0x180
+060  0000000000000000000000000000000000000000000000000000000000000180
+
+# Pointer to deposit_count: 0x200
+080  0000000000000000000000000000000000000000000000000000000000000200
+
+# Length of pubkey: 48 bytes
+0a0  0000000000000000000000000000000000000000000000000000000000000030
+
+# Pubkey data, padded with 16 zero bytes
+0c0  b73fe99acbf91f0032ae95c3ed0d663ea246d02332373e101ff5c7ed520ce098
+0e0  652de3eab056a9889bb3d05d734be21400000000000000000000000000000000
+
+# Length of withdrawal_credentials: 32 bytes
+100  0000000000000000000000000000000000000000000000000000000000000020
+
+# Withdrawal credentials (0x01 type)
+120  010000000000000000000000e637a2acbc531531700fcb7d2ed7e6d96ed8bbe8
+
+# Length of amount: 8 bytes
+140  0000000000000000000000000000000000000000000000000000000000000008
+
+# Amount, little-endian encoded. 0x0773594000 = 32,000,000,000
+160  0040597307000000000000000000000000000000000000000000000000000000
+
+# Length of signature: 96 bytes
+180  0000000000000000000000000000000000000000000000000000000000000060
+
+# Signature data
+1a0  b4a7e1546b13be69d31849b4302d870a04867b9de73a973794f8be88c25dc71f
+1c0  c3440141c33cf3fbf2dea328179c89550f4e19cad118dd962b07a7c40a3aa8ac
+1e0  eaded660edb6e030df48074ddfbe70b26d0e9db1c3be28afc0b47096aab7a616
+
+# Length of deposit_count: 8 bytes
+200  0000000000000000000000000000000000000000000000000000000000000008
+
+# Deposit count, little-endian. 0x0a7b1a = 686,874
+220  1a7b0a0000000000000000000000000000000000000000000000000000000000
+```
+
+</details>
+
+A consensus client can request these receipts from its attached execution client via the standard [`eth_getLogs`](https://docs.infura.io/infura/networks/ethereum/json-rpc-methods/eth_getlogs) RPC method, filtering by the deposit contract address, block numbers, and event topic. This is how the consensus layer becomes aware of the details of new deposits.
+
+The use of event logs here is an optimisation. The deposit contract could instead store all the Merkle tree's leaves and make them available via an `eth_call` method. However, since logs are not stored in the chain's state, only in block history, it is much cheaper to use them than it would be to store the leaves in the contract's state. However, this places a constraint on the amount of history we must keep around - we cannot now discard block history from before the deployment of the deposit contract. A newly activated consensus client needs access to the full receipt history in order to rebuild its internal view of the Merkle tree, even if it is able to checkpoint sync its beacon state. For convenience, some clients now support starting from a [deposit snapshot](https://github.com/ConsenSys/teku/pull/5954) of the Merkle tree that can be shared with other clients in much the same way as [checkpoint states](https://eth-clients.github.io/checkpoint-sync-endpoints/). This allows aggressive pruning of block history for those who want to do that.
+
+### Deposit Processing <!-- /part2/deposits-withdrawals/deposit-processing/ -->
+
+<div class="summary">
+
+  - The consensus layer commits to the state of the deposit contract after an 8 hour delay, with a 2048 slot voting period.
+  - The delay and voting are no longer necessary post-Merge and may be removed in future.
+  - When a new deposit root is voted in, proposers must include deposits in blocks.
+  - The block proposer makes an inclusion proof of the deposit against the contract's deposit root that all nodes can verify.
+  - Deposits for new public keys create new validator records.
+  - Deposits for existing public keys top up validators' balances.
+
+</div>
+
+#### Overview
+
+The previous section on [the deposit contract](/part2/deposits-withdrawals/contract/) covered how deposits are handled on the execution layer. Now we shall look at how they get handed off to the consensus layer where the business of staking actually happens. A (valid) deposit into the execution layer deposit contract will either create a new validator on the consensus layer, or top up the balance of an existing validator.
+
+There are two ways in which deposit information is transferred over from the execution layer to the consensus layer. One is the voting process by which the consensus layer comes to agreement on the state of the deposit contract at a particular execution block height. The other is validators directly importing deposit receipts from their attached Eth1 clients, which they will include in blocks and use to maintain their own copies of the deposit Merkle tree.
+
+<a id="img_deposits_withdrawals_eth_calls"></a>
+<figure class="diagram" style="width: 90%">
+
+![A diagram showing how block proposers obtain and use data from the deposit contract.](images/diagrams/deposits-withdrawals-eth-calls.svg)
+
+<figcaption>
+
+Only block proposers directly need information from the deposit contract. They acquire this by making calls to the execution layer via the standard JSON RPC interface. Proposers rely on deposit receipts for including deposits in blocks, and for maintaining a copy of the deposit Merkle tree to make proofs for those deposits. Proposers also cast a vote for a recent state of the deposit contract.
+
+</figcaption>
+</figure>
+
+Both of these mechanisms are somewhat legacy, post-Merge, although still in place for now. There is a proposal to overhaul the whole consensus layer deposit handling workflow at some point, in the form of [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110).
+
+#### Eth1 Voting and Follow Distance
+
+As mentioned above, Eth1 voting is a legacy of the pre-Merge era of the consensus layer. It is the means by which the beacon chain comes to agreement on a common view of the Ethereum 1.0 chain, and in particular, a common view of the state of the deposit contract. Post-Merge, execution payloads are included in beacon blocks, and by definition all correct beacon nodes now have a common view of the Eth1 chain.
+
+The consensus layer's common view of the deposit contract is formed by a majority vote of beacon block proposers over a repeating cycle of 2048 slots (about 6.8 hours, see [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset/#epochs_per_eth1_voting_period)). Each proposer includes in its block an [`Eth1Data`](/part3/containers/dependencies/#eth1data) vote as follows.
+
+```python
+class Eth1Data(Container):
+    deposit_root: Root
+    deposit_count: uint64
+    block_hash: Hash32
+```
+
+The last field, `block_hash`, identifies a particular block on the execution chain. The `deposit_root` and `deposit_count` fields are set by calling the deposit contract's [`get_deposit_root()`](/part2/deposits-withdrawals/contract/#get_deposit_root) method at that block. The consensus client does this via normal JSON RPC [`eth_call`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call) invocations on the execution client.
+
+During block processing, the beacon chain's [`process_eth1_data()`](/part3/transition/block/#def_process_eth1_data) function counts up the votes for each instance of Eth1Data seen in the current period. The first set of Eth1Data to be supported by more than 1024 validators (more than half of the period's block proposers) is adopted by immediately updating `state.eth1_data`. If no Eth1Data vote reaches the threshold during the voting period, then `state.eth1_data` is not updated. A fresh voting period begins only when the earlier one has run its full course of 2048 slots, even if new Eth1Data was voted in early.
+
+##### Eth1 voting
+
+Block proposers choose their Eth1 votes as described in the [honest validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#eth1-data). Here's a summary of the process. We set $S$ to be the wall clock time of the start of the current voting period. The $8\ \text{hours}$ comes from [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration/#eth1_follow_distance) (2048 Eth1 blocks) multiplied by [`SECONDS_PER_ETH1_BLOCK`](/part3/config/configuration/#seconds_per_eth1_block) (set to 14 as an approximate average value under proof of work)[^fn-28672-seconds].
+
+[^fn-28672-seconds]: This is actually 28,672 seconds, but 8 hours is close enough for explanatory purposes. What's 128 seconds between friends?
+
+1. First, ask the Eth1 client for all the Eth1 blocks with timestamps $t$ in the interval, $(S - 2\times 8\ \text{hours}) \le t \le (S - 8\ \text{hours})$.
+2. Filter out any blocks that have a deposit count less than `state.eth1_data.deposit_count`: we've already seen these.
+3. The proposer's default vote will be the Eth1Data from last block in this period, or if the list is empty (because Eth1 has stalled), then the winning vote from the previous voting period.
+4. We're seeking to find agreement as quickly as possible, so an honest proposer will discard any Eth1Data that has not been voted for by other proposers already during the current period.
+5. Finally, the honest proposer will cast a vote for the Eth1Data that already has the greatest support in the list that remains. If that list is empty (for example, if it is the first proposer in a voting period), it casts its default vote.
+
+This algorithm has been refined considerably over time. Anecdotally, Eth1 data voting has been the source of significant numbers of issues on testnets over the years. It seems to be difficult to get right, probably because it is difficult to test. Getting Eth1Data voting correct is also not incentivised by the protocol. Rather, it is mildly disincentivised, since on-boarding new validators dilutes existing validators' rewards. In any case, it will be good to see the whole thing gone.
+
+##### Eth1 follow distance
+
+Appearing in the above is an 8 hour delay, [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration/#eth1_follow_distance) ` * ` [`SECONDS_PER_ETH1_BLOCK`](/part3/config/configuration/#seconds_per_eth1_block), before the consensus layer will even consider the state of the deposit contract.
+
+This delay serves two functions. Under proof of work there was always a chance that blocks near the tip of the chain could be reorged out. It would be very bad for the beacon chain to include deposits that were later reverted - people might even try to "double spend" the consensus layer.
+
+For all practical purposes, a delay of a few blocks would probably have been sufficient to counter this, since Ethereum under proof of work never suffered reversions longer than two or three blocks. Setting the follow distance as long as 8 hours is more about providing devs with enough time to respond if there were to be an incident on the Eth1 chain that might affect the deposit process, such as a chain split. In any case, this delay is now redundant as, post-Merge, the beacon chain and the execution chain move in lock-step.
+
+The upshot of all of this is that the absolute minimum time interval between sending a deposit to the deposit contract and the consensus layer processing that deposit is around 11.4 hours: 8 hours due to the follow distance, and 3.4 hours being half of the voting period, the least required to get a majority vote. Assuming that voting is working well, the average time will be just over 17 hours. This doesn't include subsequent time waiting for the deposit to be included in a block, the validator sitting in the activation queue, etc.
+
+For an in-depth analysis of the Eth1 follow distance and the Eth1 voting period length, see Mikhail Kalinin's Ethresear.ch article, [On the way to Eth1 finality](https://ethresear.ch/t/on-the-way-to-eth1-finality/7041?u=benjaminion). Note that both the follow distance and the voting period have been doubled in length since the article was written.
+
+#### Deposit inclusion
+
+Let's say that new Eth1Data has been voted in, with the `deposit_count`, $n$, replacing the previous count, $m < n$, in the beacon state. This means that subsequent block proposers have $n - m$ fresh deposits to include in blocks.
+
+The `deposit_root` in the Eth1Data is the root of the deposit Merkle after $n$ deposits. Block proposers must construct proofs that deposits $m + 1$, $m + 2$, $\dots$, and $n$ are included in that Merkle root: proofs of inclusion in the Merkle tree.
+
+In order to do this, each validator maintains its own deposit Merkle tree based on the deposit receipts it has downloaded from its attached Eth1 client. To construct a proof that deposit $m + 1$ is included in the tree, I need to have already built the tree that has all $n$ deposits. Then I can easily provide the [Merkle branch](https://pangea.cloud/docs/audit/merkle-trees) from leaf $m + 1$ to the known value of `deposit_root`.
+
+Beacon block proposers must include all available deposits, in consecutive order, along with their Merkle proofs of inclusion, up to a maximum of [`MAX_DEPOSITS`](/part3/config/preset/#max-operations-per-block). If a block fails to include all available deposits in the correct order then the entire block is invalid.
+
+The actual data that will be included in the proposer's beacon block for each deposit is a [`Deposit`](/part3/containers/operations/#deposit) object,
+
+```python
+class Deposit(Container):
+    proof: Vector[Bytes32, DEPOSIT_CONTRACT_TREE_DEPTH + 1]  # Merkle path to deposit root
+    data: DepositData
+```
+
+where [`DepositData`](/part3/containers/dependencies/#depositdata) is as follows,
+
+```python
+class DepositData(Container):
+    pubkey: BLSPubkey
+    withdrawal_credentials: Bytes32
+    amount: Gwei
+    signature: BLSSignature
+```
+
+Up to [`MAX_DEPOSITS`](/part3/config/preset/#max-operations-per-block) (16) of these can be included per block.
+
+#### Deposit verification
+
+Deposits are verified by all nodes during block processing in [`process_deposit()`](/part3/transition/block/#def_process_deposit) and [`apply_deposit()`](/part3/transition/block/#def_apply_deposit). In addition, the check that the block contains the expected number of deposits (the lesser of `MAX_DEPOSITS` and the remaining number of deposits to be processed) is done in [`process_operations()`](/part3/transition/block/#def_process_operations).
+
+For each deposit, the first thing to be checked is its Merkle proof of inclusion. The [verification is performed](/part3/helper/predicates/#def_is_valid_merkle_branch) against the deposit root from the Eth1Data that was voted in. If a deposit passes the check, it proves that it was included in the deposit contract's tree at the same leaf position. If this check fails for any deposit, then the whole block is invalid.
+
+When the deposit is for a new validator &ndash; that is, its public key does not already exist in the validator set &ndash; then the deposit's signature is verified. Signature verification proves that the public key belongs to a genuine, known secret key in the possession of the depositor. Importantly, a deposit with an invalid signature does not invalidate the whole block. It is just ignored and processing moves on. This is because the deposit contract was not able to validate the signature, so it is possible for invalid deposits to be present in its Merkle tree.
+
+#### New Validators
+
+If the public key in the deposit data does not already exist in the [validator registry](/part3/containers/state/#registry) then a new validator record is created, and the deposit amount is credited to the validator's account. The deposit amount will usually be the full 32&nbsp;ETH needed to activate a validator, but need not be. Later, at the end of the epoch, the validator's [effective balance](/part2/incentives/balances/) will be calculated - when the effective balance first becomes 32&nbsp;ETH then the validator will be queued for activation, otherwise the account will just sit there inactive until the effective balance is raised to 32&nbsp;ETH via a top-up deposit.
+
+The validator's withdrawal credentials will also be set at this point. If they are `0x01` Eth1 withdrawal credentials, then they are permanent and cannot be changed in future. If they are `0x00` BLS withdrawal credentials then they may later be changed once to `0x01` credentials. See [the next section](/part2/deposits-withdrawals/withdrawal-processing/#withdrawal-credentials) for more on this.
+
+#### Validator Top-ups
+
+It is also possible to make top-up deposits for pre-existing validators. Anyone may do this for any validator. Top-up deposits have exactly the same structure as normal deposits, except that the top-up deposit's BLS signature is not checked, and the withdrawal credentials are ignored.
+
+The minimum top-up amount is 1&nbsp;ETH. One might wish to send a top-up if a validator's effective balance has dropped below the maximum of 32&nbsp;ETH. Since most rewards are proportional to effective balance, such a validator will be under-performing. For example, with a 31&nbsp;ETH effective balance your expected rewards will be reduced by around 3%, and topping up to maintain a 32&nbsp;ETH effective balance might be worthwhile. Not many top-ups have been performed to date, but there are a some [examples](https://etherscan.io/tx/0x3e68702566edee0061344eb99c484b4fac8800db082980bb6027d1dca09f5812).
+
+As noted earlier, it is possible to build up a validator's stake over time, with an initial deposit that's less than 32&nbsp;ETH, followed by one or more top-up deposits. The validator will become active when its effective balance reaches 32&nbsp;ETH. However, if you plan to do this, watch out for a tricky [edge case](/part2/incentives/balances/#an-edge-case) involving hysteresis when the final top-up is 1&nbsp;ETH.
+
+#### See also
+
+Largely of historic interest now, Mikhail Kalinin's article [On the way to Eth1 finality](https://ethresear.ch/t/on-the-way-to-eth1-finality/7041?u=benjaminion) is an exemplary analysis of the deposit bridge from the Eth1 to Eth2.
+
+The relevant spec functions and data structures for deposits are as follows.
+
+  - The [deposit contract](/part2/deposits-withdrawals/contract/).
+  - Constants [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration/#eth1_follow_distance), [`SECONDS_PER_ETH1_BLOCK`](/part3/config/configuration/#seconds_per_eth1_block), [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset/#epochs_per_eth1_voting_period), and [`MAX_DEPOSITS`](/part3/config/preset/#max-operations-per-block).
+  - The [`Eth1Data`](/part3/containers/dependencies/#eth1data), [`DepositData`](/part3/containers/dependencies/#depositdata), and [`Deposit`](/part3/containers/operations/#deposit) containers.
+  - Functions, [`process_eth1_data()`](/part3/transition/block/#def_process_eth1_data), [`process_deposit()`](/part3/transition/block/#def_process_deposit), [`is_valid_merkle_branch()`](/part3/helper/predicates/#def_is_valid_merkle_branch), and [`apply_deposit()`](/part3/transition/block/#def_apply_deposit), all part of [block processing](/part3/transition/block/).
+  - Eth1 data handling in the [honest validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#eth1-data).
+
+### Withdrawals <!-- /part2/deposits-withdrawals/withdrawal-processing/ -->
+
+<div class="summary">
+
+  - Consensus layer withdrawals were enabled in the Capella upgrade.
+  - A validator must have Eth1 withdrawal credentials to benefit from withdrawals.
+  - A one-time update from BLS credentials to Eth1 credentials is possible.
+  - Withdrawals are automatic and periodic.
+  - Up to 16 withdrawals per block can be processed.
+  - A withdrawal might be partial (for active validators) or full (for exited validators).
+
+</div>
+
+#### Background
+
+The ability to make withdrawals from the consensus layer was enabled in the [Capella upgrade](/part4/history/capella/), the first upgrade after the Merge.
+
+Clearly, a fully-functioning proof of stake system needs ways both to stake and to unstake. However, for the first 29 months of the beacon chain's life, only staking was possible. All stakes, and all rewards earned, were locked within the consensus layer.
+
+To have made withdrawals available pre-Merge would have needed [a bridge](https://ethresear.ch/t/two-way-bridges-between-eth1-and-eth2/6286?u=benjaminion) from the beacon chain to Ethereum's proof of work chain, perhaps via some kind of beacon chain light-client implementation on the Eth1 side. This was deemed to be a complex project that would only have delayed the Merge.
+
+For similar reasons, we didn't enable withdrawals at the time of the Merge, either. The Merge on its own was complex and carried risk. We did what we could to simplify and de-risk it as much as we could, which included postponing withdrawals once again.
+
+Eventually, fulfilling the core devs' soft commitment to the Ethereum community, withdrawals were successfully enabled in the first post-Merge upgrade, Capella, on April the 12th, 2023.
+
+Two approaches were considered for enabling beacon chain Ether to be recovered on the execution chain.
+
+The first design was for [pull withdrawals](https://github.com/ethereum/consensus-specs/pull/2759). After a validator had exited, the consensus layer would create a receipt that the staker could manually submit to the execution layer as a normal Ethereum transaction in order to recover the staked Ether and rewards. In a kind of mirroring of deposits, the consensus layer would maintain a Merkle tree of withdrawal receipts, exposing its root to the execution layer so that the withdrawal receipts could be validated when submitted there. Partial withdrawals were not really addressed in that work.
+
+The adopted design, though, was for [push withdrawals](https://github.com/ethereum/consensus-specs/pull/2836), as described below. Push withdrawals happen automatically and do not require any action by the staker. This approach provides a better user experience, and required barely any increase to the beacon state size. It takes advantage of the post-Merge [Engine API](https://github.com/ethereum/execution-apis/blob/main/src/engine/common.md) as a bridge between the execution and consensus layers.
+
+#### Withdrawal Credentials
+
+When the beacon chain was conceived, it was to be only the first phase (Phase&nbsp;0) of the much larger Ethereum 2.0 project. It wasn't at all clear at that time what would happen to the existing Ethereum 1.0 chain, what kind of accounts would be implemented in Eth2.0, what kind of signature schemes would be used, and so on.
+
+In view of the unknowns, we decided to implement withdrawal credentials as a commitment to being able to withdraw _somehow_ in the future, even though we had little idea what that might look like. The staker would keep a BLS withdrawal key, and, via the BLS withdrawal credentials, would be able to prove ownership of the validator's balance.
+
+The beacon chain launched with only BLS withdrawal credentials, and all the early validators used these. Eth1 withdrawal credentials were [committed to](https://github.com/ethereum/consensus-specs/pull/2149) in the specs in February, 2021, only three months or so into the beacon chain's life. Since no validation is done on withdrawal credentials when a deposit is made, stakers continue to be free to use whichever they prefer. At the point of the Capella upgrade, 322,491 validators (56.9%) had BLS credentials, and 244,653 (43.1%) had Eth1 credentials[^fn-check-your-creds].
+
+[^fn-check-your-creds]: You can check what type of credentials your validator has via its page on the [Beaconcha.in](https://beaconcha.in) explorer. Go to the "Deposits" tab. If your credentials begin `0x00` then they are BLS, if they begin `0x01` then they are Eth1.
+
+##### BLS withdrawal credentials
+
+BLS withdrawal credentials are often called `0x00` credentials due to their [prefix](/part3/config/constants/#withdrawal-prefixes). You can think of them as version zero credentials. A BLS withdrawal credential is the 32-byte hash of a 48-byte BLS public key, with the first byte replaced by `0x00`.
+
+Here's [validator zero](https://beaconcha.in/validator/0#deposits)'s original BLS withdrawal credential. Note the initial `0x00` byte.
+
+```none
+0x00f50428677c60f997aadeab24aabf7fceaef491c96a52b463ae91f95611cf71
+```
+
+The idea is that the staker has a second BLS secret key, a withdrawal key, in addition to their usual signing key. The commitment from the protocol devs was that the withdrawal key could be used in future to sign a credential change message. The BLS withdrawal credential ensures that the claimed public key on that message matches the deposit that was initially made, so only the original depositor can access the stake and the rewards.
+
+Separating the withdrawal key from the normal signing key has a number of benefits. Primarily, it separates ownership of the stake (controlled by the withdrawal key) from management of the stake (controlled by the signing key). This has allowed "non-custodial" staking services to appear, in which the staking service uses the signing key for day-to-day operations, but they have no ownership of the stake or rewards since the individual staker retains the withdrawal key. It also allows the withdrawal key to be kept offline, in cold storage, while the signing key remains online and "hot".
+
+For ease of recovery, the BLS withdrawal key can be generated from the same mnemonic as the signing key by using a slightly different derivation path, as described in [ERC-2334](https://eips.ethereum.org/EIPS/eip-2334#validator-keys). This is what the [`staking-deposit-cli` tool](https://github.com/ethereum/staking-deposit-cli) does.
+
+##### Eth1 withdrawal credentials
+
+Unless you want to keep your Ether locked up on the consensus layer for some reason, everybody should now use Eth1 withdrawal credentials. These are set either when staking[^fn-cli-tool-eth1-creds], or by sending a BLS to execution change message.
+
+[^fn-cli-tool-eth1-creds]: Take care when using the [`staking-deposit-cli`](https://github.com/ethereum/staking-deposit-cli) to make a deposit. It (silently) defaults to BLS withdrawal credentials unless you specify the `--eth1_withdrawal_address` command line parameter.
+
+An Eth1 (execution) withdrawal credential has the [prefix](/part3/config/constants/#withdrawal-prefixes) `0x01`, followed by eleven zero bytes, followed by the 20 bytes of a normal Ethereum address. That address is where all Ether from withdrawals will be sent.
+
+Here's [validator zero](https://beaconcha.in/validator/0#deposits)'s current Eth1 withdrawal credential. Note the initial `0x01` byte.
+
+```none
+0x0100000000000000000000000d369bb49efa5100fd3b86a9f828c55da04d2d50
+```
+
+The withdrawal address may be a normal Ethereum account (an EOA) or a smart contract. However, when it is a smart contract, no code will be executed on receiving a withdrawal payout. This differs from receiving Ether via a transfer, which can cause a fallback function to be called.
+
+##### Credential changes
+
+Only validators that have Eth1 withdrawal credentials are eligible for withdrawals. Validators with BLS withdrawal credentials need to send a withdrawal credential change message to update to Eth1 credentials. Until they do this, their stake and rewards remain locked on the consensus layer.
+
+Changing withdrawal credentials is a one-time operation. Once a validator has Eth1 credentials, no further change is possible. The only way to change your withdrawal payout address once it has been set is to exit your validator and re-stake with the new credentials.
+
+###### Making a credential change
+
+A staker whose validator has BLS withdrawal credentials, who wishes to change to Eth1 credentials, must send a message to the beacon chain, signed with the validator's withdrawal key. The [`staking-deposit-cli`](https://github.com/ethereum/staking-deposit-cli) and the [`ethdo`](https://github.com/wealdtech/ethdo) tool are both able to generate this message. It is a straightforward process, requiring the validator's public key, the mnemonic used when staking, and the validator's existing withdrawal credentials as a checksum. It is recommended that generating the message be done offline as the BLS withdrawal key remains highly valuable to hackers until after the credential change has been completed.
+
+Once the credential change message has been generated, it needs to be uploaded to a beacon node to be broadcast to the network. This can be done via any beacon node's [REST API](https://ethereum.github.io/beacon-APIs/#/Beacon/submitPoolBLSToExecutionChange), or via the Beaconcha.in explorer's handy signed message [submission service](https://beaconcha.in/tools/broadcast).
+
+Some time after the message has been uploaded and broadcast, a block proposer should include the credential change message in a beacon block for processing by the consensus layer. Up to [`MAX_BLS_TO_EXECUTION_CHANGES`](/part3/config/preset/#max_bls_to_execution_changes) (16) such messages can be included per block.
+
+For reference, a BLS to Eth1 credential change message has the [following contents](/part3/containers/operations/#blstoexecutionchange).
+
+```python
+class BLSToExecutionChange(Container):
+    validator_index: ValidatorIndex
+    from_bls_pubkey: BLSPubkey
+    to_execution_address: ExecutionAddress
+```
+
+###### Processing a credential change
+
+Credential change messages are handled during block processing by the [`process_bls_to_execution_change()`](/part3/transition/block/#def_process_bls_to_execution_change) function.
+
+It checks that,
+
+1. the validator currently has `0x00` BLS credentials,
+2. the hash of the public withdrawal key (generated from the secret withdrawal key) matches the withdrawal credentials created when the deposit was made, and
+3. the signature on the message verifies against the public withdrawal key provided.
+
+Once satisfied that all is correct, the validator's withdrawal credentials are irrevocably updated to Eth1 withdrawal credentials. The validator is now eligible for automatic push withdrawals that will be made to the `to_execution_address` provided in the `BLSToExecutionChange` data.
+
+To reiterate, changing withdrawal credentials is a one-time process. You can only change from BLS to Eth1 credentials. It is not possible to change Eth1 credentials without exiting the validator and re-staking.
+
+#### Withdrawal processing
+
+As mentioned above, we decided to adopt a "push" mechanism for withdrawals. Push withdrawals happen automatically, with no intervention from the staker. Up to [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset/#max_withdrawals_per_payload) (16) consensus layer withdrawals are made per block.
+
+<!-- Number of validators -->
+
+Validator withdrawals are processed in a round-robin fashion. Starting from validator 0 at the Capella upgrade, with each block, the consensus layer sweeps through the validator set in validator index order until it has found 16 withdrawals to include. The next block proposer will pick up where the previous proposer left off in the validator set and scan for 16 further withdrawals, and so on. If every validator were eligible for a withdrawal, and if the beacon chain is performing perfectly, then a full sweep of 576,000 validators would take 5 days. That is, a validator could expect to receive a partial withdrawal payout every 5 days.
+
+##### Finding withdrawals
+
+To find the withdrawals it must include, the block proposer calls the [`get_expected_withdrawals()`](/part3/transition/block/#def_get_expected_withdrawals) function. This will return a list of up to `MAX_WITHDRAWALS_PER_PAYLOAD` [`Withdrawal`](/part3/containers/dependencies/#withdrawal) objects, each containing the following information.
+
+```python
+class Withdrawal(Container):
+    index: WithdrawalIndex
+    validator_index: ValidatorIndex
+    address: ExecutionAddress
+    amount: Gwei
+```
+
+The `index` field is the number of previous withdrawals ever made. It is populated from `state.next_withdrawal_index` and increases by one for each withdrawal. It is used only for uniquely indexing withdrawals in the execution layer. The `validator_index` is, of course, the validator whose beacon chain balance will be decreased, and whose Eth1 withdrawal address balance (the `address` field here) will be increased.
+
+The list of withdrawals is generated deterministically. The block proposer starts from the current value of `state.next_withdrawal_validator_index` and considers validators in turn. If a validator is eligible for a withdrawal then it is added to the list, otherwise it is skipped. When either `MAX_WITHDRAWALS_PER_PAYLOAD` withdrawals have been added, or `MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP` have been considered, the list is returned. If the end of the validator registry is hit, the search wraps around again to validator 0.
+
+To be eligible for a withdrawal, a validator must have [Eth1 withdrawal credentials](#eth1-withdrawal-credentials) set, and one of the following must also apply:
+
+  - The validator has exited, has become withdrawable, and has a non-zero balance. Such a validator is eligible for a [full withdrawal](#full-withdrawals).
+  - The validator has an [effective balance](/part2/incentives/balances/) of [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset/#max_effective_balance) (32&nbsp;ETH), and an actual balance higher than that. Such a validator is eligible for a [partial withdrawal](#partial-withdrawals).
+
+Both of these may be true at once, in which case the first takes priority and a full withdrawal will be made for the validator.
+
+Usually, a full list of 16 withdrawals will be generated. However, the search is bounded by considering a maximum of [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset/#max_validators_per_withdrawals_sweep) validators. If this limit is hit, fewer than 16 withdrawals will be generated.
+
+The reason for [limiting the search](https://github.com/ethereum/consensus-specs/pull/3095), rather than making a full sweep through the whole validator set, is to bound the computational load on consensus nodes. Accessing the validator registry can be quite costly; an unbounded sweep could become a performance bottleneck.
+
+There are two scenarios in which the bound might become relevant. The first is if there were long sections of the validator registry in which no validator had upgraded to Eth1 withdrawal credentials. This was more of a concern at the point of the Capella upgrade, when all early validators necessarily had BLS withdrawal credentials. More interesting is the possibility of an [inactivity leak](/part2/incentives/inactivity/), which occurs when the chain stops finalising in a timely way. During an inactivity leak, no validator receives attestation rewards, and many validators receive extra inactivity penalties. Very few balances will be increasing - only block proposers and sync committee members, perhaps. During a prolonged inactivity leak it is possible that large sections of the validator registry would be ineligible for a withdrawal, and the bound on the withdrawals sweep would be enforced.
+
+##### Performing withdrawals
+
+The consensus layer and the execution layer must coordinate carefully in order to process a withdrawal, which makes the full round-trip a little convoluted. The steps are as follows.
+
+1. The beacon block proposer assembles a list of withdrawals by calling [`get_expected_withdrawals()`](/part3/transition/block/#def_get_expected_withdrawals) as detailed above.
+2. The beacon block proposer sends the withdrawals list to its attached execution client via the Engine API. See [`prepare_execution_payload()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/capella/validator.md#executionpayload) in the Honest Validator spec. The relevant Engine API data structure is [`PayloadAttributesV2`](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#payloadattributesv2).
+3. The execution client returns an [execution payload](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2) that includes the list of withdrawals, along with everything else.
+4. The block proposer incorporates the execution payload into its beacon block and broadcasts it to the network.
+5. On receiving the block, all consensus nodes extract the withdrawals list from the [execution payload](/part3/containers/execution/#executionpayload) and call [`process_withdrawals()`](/part3/transition/block/#def_process_withdrawals) to deduct the withdrawal amounts from the validators' balances. Each node calls [`get_expected_withdrawals()`](/part3/transition/block/#def_get_expected_withdrawals) independently, and the beacon block is valid only if its withdrawals list matches.
+6. The consensus node sends the execution payload to its attached execution client. The execution client will process the withdrawals alongside all the other transactions in the payload, incrementing the Eth1 withdrawal addresses as required.
+
+The execution layer mechanics of withdrawal processing are described in [EIP-4895](https://eips.ethereum.org/EIPS/eip-4895). Withdrawal transactions are processed after all the normal transactions in the block.
+
+As mentioned above, withdrawal transactions don't trigger smart contract processing when the Eth1 account balance is incremented. This is primarily to avoid failures (EVM transaction reversions) that would complicate the entire process. It also avoids placing an unknown load on the execution client. The benefit of this is that withdrawals are gasless and therefore free. The receiving account's balance will increase by precisely the same amount of ETH as is deducted from the validator's beacon chain balance.
+
+##### Partial and full withdrawals
+
+A validator might be eligible for a partial withdrawal or for a full withdrawal. Neither type is prioritised over the other; they both occur alongside each other as validators are considered during the withdrawals sweep. If a validator is eligible for both, a full withdrawal will be performed.
+
+In both cases, there is no minimum withdrawal amount - it could be a single Gwei, the beacon chain's smallest unit of account. Withdrawals are not created for zero amounts.
+
+###### Partial withdrawals
+
+Partial withdrawals make up the majority of withdrawals processed. Partial withdrawals periodically skim excess balance from validators as they earn rewards.
+
+To be eligible for a partial withdrawal, all of the following must be true. The second and third criteria are checked in the [`is_partially_withdrawable_validator()`](/part3/helper/predicates/#is_partially_withdrawable_validator) predicate.
+
+  - The validator has [Eth1 withdrawal credentials](#eth1-withdrawal-credentials).
+  - The validator's effective balance is [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset/#max_effective_balance) (32&nbsp;ETH).
+  - The validator's actual balance exceeds `MAX_EFFECTIVE_BALANCE`.
+
+The amount of the partial withdrawal will be the validator's balance in excess of `MAX_EFFECTIVE_BALANCE`.
+
+The condition on the validator's effective balance eliminates an edge case where a validator has an effective balance of 31&nbsp;ETH, but an actual balance of over 32&nbsp;ETH, which can arise due to [hysteresis](/part2/incentives/balances/#hysteresis). If the condition on effective balance were not applied, it might become impossible for a validator ever to regain a full effective balance of 32 ETH (without a top-up deposit), due to its balance being continually skimmed.
+
+###### Full withdrawals
+
+A full withdrawal takes place after a validator has exited the validator set and subsequently become withdrawable. A validator normally becomes withdrawable about [27 hours](/part3/config/configuration/#min_validator_withdrawability_delay) after making its way through the exit queue, but a slashed validator will take [much longer](/part3/config/preset/#epochs_per_slashings_vector).
+
+The precise criteria are in the [`is_fully_withdrawable_validator()`](/part3/helper/predicates/#is_fully_withdrawable_validator) predicate. All of the following must apply.
+
+  - The validator has [Eth1 withdrawal credentials](#eth1-withdrawal-credentials).
+  - The validator is withdrawable (the current epoch is greater than or equal to its withdrawable epoch).
+  - The validator has a non-zero balance.
+
+The amount of the full withdrawal will be the validator's entire balance.
+
+Note that there is [no flag](https://github.com/ethereum/consensus-specs/pull/2836#discussion_r817657925) to indicate that a validator has been withdrawn. This in principle allows a top-up deposit to be made for a validator after a full withdrawal has occurred, in which case another full withdrawal will occur, and the top-up amount will be returned to the execution layer.
+
+#### See also
+
+The Ethereum.org pages have a [section on withdrawals](https://ethereum.org/en/staking/withdrawals/), and there is a separate [withdrawals FAQ](https://notes.ethereum.org/@launchpad/withdrawals-faq). They both have plenty of links to further resources.
+
+The relevant spec functions and data structures for withdrawals are as follows.
+
+  - The constants [`MAX_WITHDRAWALS_PER_PAYLOAD`](/part3/config/preset/#max_withdrawals_per_payload), [`MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP`](/part3/config/preset/#max_validators_per_withdrawals_sweep), and [`MAX_EFFECTIVE_BALANCE`](/part3/config/preset/#max_effective_balance).
+  - `next_withdrawal_index`, and `next_withdrawal_validator_index` in the [beacon state](/part3/containers/state/#withdrawals).
+  - The [`Withdrawal`](/part3/containers/dependencies/#withdrawal) container, and the `withdrawals` list in the [`ExecutionPayload`](/part3/containers/execution/#executionpayload) container.
+  - [`get_expected_withdrawals()`](/part3/transition/block/#def_get_expected_withdrawals), [`process_withdrawals()`](/part3/transition/block/#def_process_withdrawals) in [block processing](/part3/transition/block/).
+  - [`is_fully_withdrawable_validator()`](/part3/helper/predicates/#def_is_fully_withdrawable_validator), [`is_partially_withdrawable_validator()`](/part3/helper/predicates/#def_is_partially_withdrawable_validator) in [predicates](/part3/helper/predicates/).
+  - Preparing the `ExecutionPayload` in the Capella [honest validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/capella/validator.md#executionpayload), and `PayloadAttributesV2` in the [Execution API](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#payloadattributesv2).
+  - [EIP-4895](https://eips.ethereum.org/EIPS/eip-4895), "Beacon chain push withdrawals as operations", covers the execution layer side.
+
+And for credential changes.
+
+  - [Withdrawal prefixes](/part3/config/constants/#withdrawal-prefixes) in [constants](/part3/config/constants/).
+  - The [`BLSToExecutionChange`](/part3/containers/operations/#blstoexecutionchange) and [`SignedBLSToExecutionChange`](/part3/containers/envelopes/#signedblstoexecutionchange) containers.
+  - [`process_bls_to_execution_change()`](/part3/transition/block/#def_process_bls_to_execution_change) in [block processing](/part3/transition/block/).
+  - The `submitPoolBLSToExecutionChange` method of the [Beacon API](https://ethereum.github.io/beacon-APIs/#/Beacon/submitPoolBLSToExecutionChange).
 
 ## The Incentive Layer <!-- /part2/incentives/ -->
 
@@ -588,7 +1600,7 @@ By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of d
 7. [Slashings](/part2/incentives/slashing/) are punishments for breaking the protocol rules in very specific ways that look like attacks.
 8. Finally, we close with a note on how aspects of these incentives combine to make [diversity](/part2/incentives/diversity/) of deployment of beacon chain infrastructure the safest strategy.
 
-Be aware that the discussion in these sections considers the consensus layer in isolation. Now that we are post-Merge, this is no longer the whole picture. In addition to protocol-generated rewards, Ethereum stakers can now profit from transaction fee tips, and [MEV](https://ethereum.org/en/developers/docs/mev/) (maximal extractable value). In future, they might be able to profit from [restaking](https://docs.eigenlayer.xyz/overview/readme). All of these can modify the protocol incentives. For example, a validator behaved economically rationally when it got itself [slashed](https://beaconcha.in/validator/552061) (at a cost of 1 ETH) to [gain around $20 million](https://collective.flashbots.net/t/post-mortem-april-3rd-2023-mev-boost-relay-incident-and-related-timing-issue/1540) of MEV income, although it acted dishonestly by the protocol rules in doing so. The effects of these things are the subject of much discussion, development and debate, and merit an entire book to themselves. Nevertheless, for the purposes of this work, I am focusing only on the consensus layer cryptoeconomic stack.
+Be aware that the discussion in these sections considers the consensus layer in isolation. Now that we are post-Merge, this is no longer the whole picture. In addition to protocol-generated rewards, Ethereum stakers can now profit from transaction fee tips, and [MEV](https://ethereum.org/en/developers/docs/mev/) (maximal extractable value). In future, they might be able to profit from [restaking](https://docs.eigenlayer.xyz/overview/readme). All of these can modify the protocol incentives. For example, a validator behaved economically rationally when it got itself [slashed](https://beaconcha.in/validator/552061) (at a cost of 1&nbsp;ETH) to [gain around $20 million](https://collective.flashbots.net/t/post-mortem-april-3rd-2023-mev-boost-relay-incident-and-related-timing-issue/1540) of MEV income, although it acted dishonestly by the protocol rules in doing so. The effects of these things are the subject of much discussion, development and debate, and merit an entire book to themselves. Nevertheless, for the purposes of this work, I am focusing only on the consensus layer cryptoeconomic stack.
 
 #### See also
 
@@ -608,7 +1620,7 @@ Much of the material in the following sections is also covered in the more recen
 
 #### Introduction
 
-A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract/) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
+A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits-withdrawals/contract/) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
 In Ethereum&nbsp;2 the stake has three key roles.
 
@@ -699,7 +1711,7 @@ This turns out to be easy to quantify. To quote Vitalik's [Parametrizing Casper]
 
 Ethereum's proof of stake protocol has this property. In order to finalise a checkpoint ($H_1$), two-thirds of the validators must have attested to it. To finalise a conflicting checkpoint ($H_2$) requires two-thirds of validators to attest to that as well. Thus, at least one-third of validators must have attested to both checkpoints. Since individual validators sign their attestations, this is both detectable and attributable: it's easy to submit the evidence on-chain that those validators contradicted themselves, and they can be punished by the protocol.
 
-If one-third of validators were to be slashed simultaneously, they would have their entire effective balances burned (up to 32&nbsp;ETH each). At that point with, say, fifteen million Ether staked in total, the cost of reverting a finalised block would be five million of the attackers' Ether being permanently burned and the attackers being expelled from the network.
+If one-third of validators were to be slashed simultaneously, they would have their entire effective balances burned (up to 32&nbsp;ETH each). At that point with, say, fifteen million ETH staked in total, the cost of reverting a finalised block would be five million of the attackers' ETH being permanently burned and the attackers being expelled from the network.
 
 It is obligatory at this point to quote (or paraphrase) Vlad Zamfir: comparing proof of stake to proof of work, "it's as though your ASIC farm burned down if you participated in a 51% attack".
 
@@ -729,7 +1741,7 @@ The beacon chain maintains two separate records of each validator's balance: its
 
 A validator's actual balance is straightforward. It is the sum of any deposits made for it via the deposit contract, plus accrued beacon chain rewards, minus accrued penalties and withdrawals. The actual balance is rapidly changing, being updated at least once per epoch for all active validators, and every slot for sync committee participants. It is also fine-grained: units of the actual balance are Gwei, that is, $10^{-9}$&nbsp;ETH.
 
-A validator's effective balance is derived from its actual balance in such a way that it changes much more slowly. To achieve this, the units of effective balance are whole Ether (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset/#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
+A validator's effective balance is derived from its actual balance in such a way that it changes much more slowly. To achieve this, the units of effective balance are whole ETH (see [`EFFECTIVE_BALANCE_INCREMENT`](/part3/config/preset/#effective_balance_increment)), and changes to the effective balance are subject to [hysteresis](#hysteresis).
 
 Using the effective balance achieves two goals, one to do with economics, the other purely engineering.
 
@@ -5233,7 +6245,7 @@ The inactivity penalty is discussed [below](#inactivity_penalty_quotient). This 
 
 In order to safely onboard new validators, the beacon chain needs to take a view on what the Eth1 chain looks like. This is done by collecting votes from beacon block proposers - they are expected to consult an available Eth1 client in order to construct their vote.
 
-`EPOCHS_PER_ETH1_VOTING_PERIOD` ` * ` `SLOTS_PER_EPOCH` is the total number of votes for Eth1 blocks that are collected. As soon as half of this number of votes are for the same Eth1 block, that block is adopted by the beacon chain and deposit processing can continue.
+`EPOCHS_PER_ETH1_VOTING_PERIOD` ` * ` `SLOTS_PER_EPOCH` is the total number of votes for Eth1 blocks that are collected. As soon as half of this number of votes are for the same Eth1 block, that block is adopted by the beacon chain and deposit processing can continue. This processing is done in [`process_eth1_data()`](/part3/transition/block/#def_process_eth1_data).
 
 Rules for how validators select the right block to vote for are set out in the [validator guide](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#get_eth1_data). [`ETH1_FOLLOW_DISTANCE`](/part3/config/configuration/#eth1_follow_distance) is the (approximate) minimum depth of block that can be considered.
 
@@ -5698,7 +6710,7 @@ Client implementations in different languages will obviously use their own parad
 Two notes directly from the spec:
 
   - The definitions are ordered topologically to facilitate execution of the spec.
-  - Fields missing in container instantiations default to their [zero value](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md#default-values).
+  - Fields missing in container instantiations default to their [zero value](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#default-values).
 
 ### Misc dependencies <!-- /part3/containers/dependencies/ -->
 
@@ -5869,7 +6881,7 @@ class Eth1Data(Container):
 
 Proposers include their view of the Ethereum&nbsp;1 chain in blocks, and this is how they do it. The beacon chain stores these votes up in the [beacon state](/part3/containers/state/#beaconstate) until there is a simple majority consensus, then the winner is committed to beacon state. This is to allow the [processing](/part3/transition/block/#deposits) of Eth1 deposits, and creates a simple "honest-majority" one-way bridge from Eth1 to Eth2. The 1/2 majority assumption for this (rather than 2/3 for committees) is considered safe as the number of validators voting each time is large: [`EPOCHS_PER_ETH1_VOTING_PERIOD`](/part3/config/preset/#epochs_per_eth1_voting_period) `*` [`SLOTS_PER_EPOCH`](/part3/config/preset/#slots_per_epoch) = 64 `*` 32 = 2048.
 
-  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (sparse) Merkle tree of deposits.
+  - `deposit_root` is the result of the [`get_deposit_root()`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L80) method of the Eth1 deposit contract after executing the Eth1 block being voted on - it's the root of the (incremental) [Merkle tree of deposits](/part2/deposits-withdrawals/contract/#get_deposit_root).
   - `deposit_count` is the number of deposits in the deposit contract at that point, the result of the [`get_deposit_count`](https://github.com/ethereum/consensus-specs/blob/v1.3.0/solidity_deposit_contract/deposit_contract.sol#L97) method on the contract. This will be equal to or greater than (if there are pending unprocessed deposits) the value of `state.eth1_deposit_index`.
   - `block_hash` is the hash of the Eth1 block being voted for. This doesn't have any current use within the Eth2 protocol, but is "too potentially useful to not throw in there", to quote Danny Ryan.
 
@@ -6275,7 +7287,7 @@ The values of these two fields is fixed for the life of the chain. For the mainn
 |||
 |-|-|
 | `genesis_time` | 1606824023 |
-| `genesis_validators_root` | `0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95` |
+| `genesis_validators_root` | `0x4b363db9`<wbr/>`4e286120`<wbr/>`d76eb905`<wbr/>`340fdd4e`<wbr/>`54bfe9f0`<wbr/>`6bf33ff6`<wbr/>`cf5ad27f`<wbr/>`511bfe95` |
 
 The `fork` [object](/part3/containers/dependencies/#fork) is manually updated as part of beacon chain upgrades, also called hard forks. This invalidates blocks and attestations from validators not following the new fork.
 
@@ -6381,6 +7393,8 @@ Sync committees were introduced in the Altair upgrade. The next sync committee i
 ```
 
 Since the Merge, the [header](/part3/containers/execution/#executionpayloadheader) of the most recent execution payload is cached in the beacon state. This serves two functions for now, though possibly more in future. First, it allows the chain to check whether the Merge has been completed or not. See [`is_merge_transition_complete()`](/part3/helper/predicates/#is_merge_transition_complete). Second, it allows the beacon chain to check that the execution chain is unbroken when processing a new execution payload. See [`process_execution_payload()`](/part3/transition/block/#process_execution_payload).
+
+<a id="withdrawals"></a>
 
 ```code
     # Withdrawals
@@ -6673,7 +7687,7 @@ At first sight, this all looks quite inefficient. Twice as much data needs to be
 
 The breakthrough insight was realising that much of the re-hashing work can be cached: if part of the state data structure has not changed, that part does not need to be re-hashed: the whole subtree can be replaced with its cached hash. This turns out to be a huge efficiency boost, allowing the previous design, with cumbersome separate crystallised and active state, to be [simplified](https://github.com/ethereum/consensus-specs/pull/122) into a single state object.
 
-Merkleization, the process of calculating the `hash_tree_root()` of an object, is defined in the [SSZ specification](https://github.com/ethereum/consensus-specs/blob/dev/ssz/simple-serialize.md), and explained further in the [section on SSZ](/part2/building_blocks/ssz/).
+Merkleization, the process of calculating the `hash_tree_root()` of an object, is defined in the [SSZ specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md), and explained further in the [section on SSZ](/part2/building_blocks/ssz/).
 
 #### BLS signatures
 
@@ -6948,7 +7962,7 @@ This is the classic algorithm for [verifying a Merkle branch](https://blog.ether
 
 In this way we prove that we know that `leaf` is the value at position `index` in the list of leaves, and that we know the whole structure of the rest of the tree, as summarised in `branch`.
 
-We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/contract/). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
+We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits-withdrawals/contract/). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. If any deposit fails Merkle branch verification then the entire block is invalid.
 
 |||
 |-|------|
@@ -9566,7 +10580,7 @@ Where $I_A$ is the total maximum reward per epoch for attesters, calculated in [
 
 ##### Deposits
 
-The code in this section handles deposit transactions that were included in a block. A deposit is created when a user transfers one or more ETH to the [deposit contract](/part2/deposits/contract/). We need to check that the data sent with the deposit is valid. If it is, we either create a new validator record (for the first deposit for a validator) or update an existing record.
+The code in this section handles deposit transactions that were included in a block. A deposit is created when a user transfers one or more ETH to the [deposit contract](/part2/deposits-withdrawals/contract/). We need to check that the data sent with the deposit is valid. If it is, we either create a new validator record (for the first deposit for a validator) or update an existing record.
 
 <a id="def_get_validator_from_deposit"></a>
 
@@ -9762,6 +10776,12 @@ For [BLS credentials](/part3/config/constants/#bls_withdrawal_prefix) the withdr
 Once we are satisfied that the public key is the same on previously committed to, then we can use it to verify the signature on the withdrawal transaction. Again, this transaction must be signed with the validator's withdrawal private key, not its usual signing key.
 
 Having verified the signature, we can finally, and irrevocably, update the validator's withdrawal credentials from BLS style to Eth1 style.
+
+|||
+|-|------|
+| Used&nbsp;by | [`process_operations()`](/part3/transition/block/#def_process_operations) |
+| Uses | [`compute_signing_root()`](/part3/helper/misc/#def_compute_signing_root), [`compute_domain()`](/part3/helper/misc/#def_compute_domain), [`bls.Verify()`](/part3/helper/crypto/#bls-signatures) |
+| See&nbsp;also | [`BLS_WITHDRAWAL_PREFIX`](/part3/config/constants/#bls_withdrawal_prefix), [`BLSToExecutionChange`](/part3/containers/operations/#blstoexecutionchange) |
 
 #### Sync aggregate processing
 
@@ -10063,7 +11083,7 @@ After reading the spec you may be puzzled by the "ease of understanding" claim. 
 | -------------------- | ----------- |
 | `INTERVALS_PER_SLOT` | `uint64(3)` |
 
-Only blocks that arrive during the first `1 /` `INTERVALS_PER_SLOT` of a slot's duration are eligible to have the [proposer score boost](#proposer-boost) added. This moment is the point in the slot at which validators are expected to [publish attestations](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/validator.md#attesting) declaring their view of the head of the chain.
+Only blocks that arrive during the first `1 /` `INTERVALS_PER_SLOT` of a slot's duration are eligible to have the [proposer score boost](#proposer-boost) added. This moment is the point in the slot at which validators are expected to [publish attestations](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#attesting) declaring their view of the head of the chain.
 
 In the Ethereum consensus specification `INTERVALS_PER_SLOT` neatly divides `SECONDS_PER_SLOT`, and all time quantities are strictly `uint64` numbers of seconds. However, other chains that run the same basic protocol as Ethereum might not have this property. For example, the [Gnosis Beacon Chain](https://docs.gnosischain.com/specs) has five-second slots. We [changed](https://github.com/ConsenSys/teku/pull/5321) Teku's internal clock from seconds to milliseconds to support this, which is technically off-spec, but nothing broke.
 
