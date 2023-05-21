@@ -40,7 +40,12 @@ module.exports = {
       options: {
         gfm: true,
         plugins: [
-          'gatsby-remark-autolink-headers',
+          {
+            resolve: 'gatsby-remark-autolink-headers',
+            options: {
+              elements: ['h3', 'h4', 'h5', 'h6'],
+            },
+          },
           'gatsby-remark-numbered-footnotes',
           'gatsby-remark-katex',
           {
