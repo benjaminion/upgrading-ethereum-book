@@ -129,6 +129,7 @@ exports.createPages = async (
         index: frontmatter.index,
         titles: frontmatter.titles,
         sequence: frontmatter.sequence,
+        hide: frontmatter.hide,
       },
       chunks: chunks,
       html: $.html(),
@@ -152,6 +153,7 @@ exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
       index: [Int]
       titles: [String]
       sequence: Int
+      hide: Boolean
     }
 
     type mySearchData implements Node {
