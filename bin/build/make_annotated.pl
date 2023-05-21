@@ -30,7 +30,7 @@ while(<>)  {
         $inPart3 = 1;
         print
             "# One Page Annotated Spec\n",
-            "**Note:** This page is automatically generated from the chapters in [Part 3](/part3). You may find that some internal links are broken.";
+            "**Note:** This page is automatically generated from the chapters in [Part 3](/part3/). You may find that some internal links are broken.";
         next;
     }
 
