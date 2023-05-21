@@ -40,13 +40,19 @@ export function Head({ data }) {
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
 
-  var canonical = site.siteMetadata.canonical + frontmatter.path
-  return (
-    <>
+  if (frontmatter.hide) {
+    return (
       <title>{pageTitle}</title>
-      <link rel="canonical" href={canonical} />
-    </>
-  )
+    )
+  } else {
+    var canonical = site.siteMetadata.canonical + frontmatter.path
+    return (
+        <>
+        <title>{pageTitle}</title>
+        <link rel="canonical" href={canonical} />
+        </>
+    )
+  }
 }
 
 export default function Template({ data }) {
@@ -92,6 +98,7 @@ export const pageQuery = graphql`
         path
         sequence
         titles
+        hide
       }
       html
     }
