@@ -40,19 +40,13 @@ export function Head({ data }) {
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
 
-  if (frontmatter.hide) {
-    return (
+  const canonical = site.siteMetadata.canonical + (frontmatter.hide ? '/' : frontmatter.path)
+  return (
+    <>
       <title>{pageTitle}</title>
-    )
-  } else {
-    var canonical = site.siteMetadata.canonical + frontmatter.path
-    return (
-        <>
-        <title>{pageTitle}</title>
-        <link rel="canonical" href={canonical} />
-        </>
-    )
-  }
+      <link rel="canonical" href={canonical} />
+    </>
+  )
 }
 
 export default function Template({ data }) {
