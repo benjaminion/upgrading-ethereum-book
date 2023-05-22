@@ -28,8 +28,8 @@ function postProcessHast($) {
 
 export function Head({ data }) {
 
-  const { mySearchData, site } = data
-  const frontmatter = mySearchData.frontmatter
+  const { mySearchData, markdownRemark, site } = data
+  const frontmatter = markdownRemark.frontmatter
 
   const indexArray = frontmatter.index
 
@@ -57,7 +57,8 @@ export function Head({ data }) {
 
 export default function Template({ data }) {
 
-  const { html, frontmatter } = data.mySearchData
+  const html = data.mySearchData.html
+  const frontmatter = data.markdownRemark.frontmatter
   const indexArray = frontmatter.index
   const path = frontmatter.path
 
@@ -93,6 +94,9 @@ export default function Template({ data }) {
 export const pageQuery = graphql`
   query($path: String!) {
     mySearchData(frontmatter: { path: { eq: $path } }) {
+      html
+    }
+    markdownRemark(frontmatter: { path: { eq: $path } }) {
       frontmatter {
         index
         path
@@ -100,7 +104,6 @@ export const pageQuery = graphql`
         titles
         hide
       }
-      html
     }
     site {
       siteMetadata {

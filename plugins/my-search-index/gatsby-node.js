@@ -126,10 +126,7 @@ exports.createPages = async (
     const nodeData = {
       frontmatter: {
         path: frontmatter.path,
-        index: frontmatter.index,
         titles: frontmatter.titles,
-        sequence: frontmatter.sequence,
-        hide: frontmatter.hide,
       },
       chunks: chunks,
       html: $.html(),
@@ -150,10 +147,7 @@ exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
   createTypes(`
     type Frontmatter {
       path: String!
-      index: [Int]
       titles: [String]
-      sequence: Int
-      hide: Boolean
     }
 
     type mySearchData implements Node {
