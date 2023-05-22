@@ -12,9 +12,11 @@ export default function HTML(props) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
+        <meta property="og:site-name" content="Upgrading Ethereum" />
         <meta property="og:image" content="https://eth2book.info/f/android-icon-192x192.png" />
-        <meta property="og:title" content="Upgrading Ethereum" />
         <meta property="og:description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_GB" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:site" content="eth2book.info" />
         <meta name="twitter:creator" content="@benjaminion_xyz" />
