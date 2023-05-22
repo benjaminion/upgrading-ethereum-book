@@ -30,21 +30,25 @@ export function Head({ data }) {
 
   const { mySearchData, markdownRemark, site } = data
   const frontmatter = markdownRemark.frontmatter
+  const metadata = site.siteMetadata
 
   const indexArray = frontmatter.index
 
-  var pageTitle = site.siteMetadata.title
+  var pageTitle = metadata.title
   if (frontmatter.titles !== null) {
     const titles = frontmatter.titles.filter(x => x !== '')
     const number = (indexArray.length >= 2) ? indexArray.join('.') : ''
     pageTitle += ' | ' + number + ' ' + titles[titles.length - 1]
   }
 
-  const canonical = site.siteMetadata.canonical + (frontmatter.hide ? '/' : frontmatter.path)
+  const pageUrl = metadata.hostname + '/' + metadata.version + frontmatter.path
+  const canonical = metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path)
   return (
     <>
       <title>{pageTitle}</title>
       <link rel="canonical" href={canonical} />
+      <meta property="og:title" content={pageTitle} />
+      <meta property="og:url" content={pageUrl} />
     </>
   )
 }
@@ -102,6 +106,8 @@ export const pageQuery = graphql`
     site {
       siteMetadata {
         title
+        hostname
+        version
         canonical
       }
     }
