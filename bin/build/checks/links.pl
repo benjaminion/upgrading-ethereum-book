@@ -50,6 +50,7 @@ while(<$fh>) {
     # Add pages
     if (/$newPagePath/) {
         $pagePath = $2;
+        $pagePath =~ /\/$/ || print "Page missing trailing /: $pagePath, line $.";
         $anchors{$pagePath} = 1;
     }
 
