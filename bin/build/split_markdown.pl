@@ -49,9 +49,7 @@ while (<>)  {
         $sequence++;
 
         my $file = $path;
-        if ($file ne '/') {
-            chop($file)
-        }
+        chop($file) if ($file ne '/');
         my $outFile = $outFilePrefix . $file . '.md';
         my $outDirectory = $outFile =~ s|/[^/]+$||gr;
 

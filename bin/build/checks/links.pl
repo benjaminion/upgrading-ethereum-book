@@ -29,7 +29,7 @@ my ($file) = @ARGV;
 die "Usage: $0 FILE\n" if not $file;
 open my $fh, '<', $file or die "Can't open $file: $!";
 
-my $newPagePath = qr/^(# |## |### ).* <!-- ([^*]+)\*? -->$/;
+my $newPagePath = qr/^(#{1,3} ).* <!-- ([^*]+)\*? -->$/;
 my $filePath = $file =~ s|[^/]+$||r;
 my $pagePath;
 my $inCode;
@@ -44,13 +44,13 @@ my %fns;
 $inCode = 0;
 while(<$fh>) {
 
-    /^```/ and $inCode = 1 - $inCode;
+    $inCode = 1 - $inCode if /^```/;
     next if $inCode;
 
     # Add pages
     if (/$newPagePath/) {
         $pagePath = $2;
-        $pagePath =~ /\/$/ || print "Page missing trailing /: $pagePath, line $.";
+        $pagePath =~ /\/$/ or print "Page missing trailing /: $pagePath, line $.";
         $anchors{$pagePath} = 1;
     }
 
@@ -69,9 +69,7 @@ while(<$fh>) {
     }
 
     # Add footnote definitions
-    if (/^\[\^(.+?)\]:/) {
-        $fns{$1} = $.;
-    }
+    $fns{$1} = $. if /^\[\^(.+?)\]:/;
 }
 
 $inCode and die "Error: unbalanced code block markers!";
@@ -85,16 +83,12 @@ while(<$fh>) {
     /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
 
-    /$newPagePath/ and $pagePath = $2;
+    $pagePath = $2 if /$newPagePath/;
 
     # Footnote references
     while (/.\[\^(.+?)\]/g) {
         my $fn = $1;
-        if (exists($fns{$fn})) {
-            delete $fns{$fn};
-        } else {
-            print "Missing footnote: $fn, line $.";
-        }
+        exists($fns{$fn}) and delete $fns{$fn} or print "Missing footnote: $fn, line $.";
     }
 
     while (/(!{0,1})\[.+?\]\((.*?)\)/g) {
