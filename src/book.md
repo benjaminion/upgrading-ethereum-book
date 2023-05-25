@@ -172,7 +172,15 @@ Our aim is to understand that sentence in all its parts. There's a lot to unpack
 
 #### Introduction
 
-In this section we'll cover the basics of consensus, fork choice, and finality. Most of this section is not specific to Ethereum and is for general background understanding.
+This section covers the basics of consensus, fork choice, and finality. Most of it is not specific to Ethereum and is for general background understanding.
+
+The challenge a consensus protocol seeks to solve is that of building a reliable distributed system on top of unreliable infrastructure. Consensus protocol research goes back to the 1970s and beyond, but the scale of the challenges we seek to solve in Ethereum are orders of magnitude more ambitious.
+
+Our goal in Ethereum's consensus layer is to enable tens of thousands of independent nodes around the world to proceed completely in lockstep with each other. Each node maintains a ledger containing the state of every account, and every ledger must match every other ledger. There must be no discrepancies; the nodes must agree, and they must come to agreement swiftly. This is what I mean by "a reliable distributed system".
+
+These nodes often run on [consumer grade hardware](https://stakefromhome.com/). They communicate over Internet connections that might be low bandwidth, or high latency, that lose packets, or drop out for indefinite periods of time. Node operators sometimes misconfigure their software, or don't keep it up to date. And, to make it all the more exciting, there is the possibility of large numbers of bad actors running rogue nodes or tampering with communications for their own gain. This is what I mean by "unreliable infrastructure".
+
+An explicit design goal for Ethereum is that it doesn't only run well when every node is running well and communicating well. We have tried to design a system that will do its best to continue running even when the world beneath it is falling apart.
 
 #### Coming to consensus
 
@@ -182,7 +190,7 @@ Users submit transactions to this network of nodes, and the goal of the consensu
 
 A consensus protocol is the process by which this agreement on the ordering of transactions comes about.
 
-The consensus protocol in Ethereum&nbsp;2 actually "bolts together" two different consensus protocols. One is called [Casper FFG](/part2/consensus/casper_ffg/), the other [LMD GHOST](/part2/consensus/lmd_ghost/). The combination has become known as [Gasper](/part2/consensus/gasper/). In subsequent pages we will be looking at these both separately and in combination.
+Ethereum's consensus protocol actually "bolts together" two different consensus protocols. One is called [LMD GHOST](/part2/consensus/lmd_ghost/), the other [Casper FFG](/part2/consensus/casper_ffg/). The combination has become known as [Gasper](/part2/consensus/gasper/). In subsequent sections we will be looking at these both separately and in combination.
 
 #### Byzantine generals
 
@@ -218,7 +226,7 @@ The loyal generals need a method that reliably delivers an outcome on the follow
 >
 > B. A small number of traitors cannot cause the loyal generals to adopt a bad plan.
 
-Achieving consensus in such a Byzantine distributed system is not an easy problem to solve, but there have been several successful approaches over the years.
+Achieving consensus in such a Byzantine distributed system is not an easy problem to solve, but there have been several reasonably successful approaches over the years.
 
 The first mainstream solution was the [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) (PBFT) algorithm published by Liskov and Castro in 1999. This relies on a relatively small and limited set of known consensus participants (called _replicas_). PBFT is always "safe", in the terms discussed [below](#safety) and does not have forks.
 
@@ -230,9 +238,11 @@ Many, many variants of these and other novel alternatives, such as the [Avalanch
 
 This is a good point at which to mention that neither proof of work nor proof of stake is a consensus protocol in itself. They are often (lazily) referred to as consensus protocols, but each is merely an enabler for consensus protocols.
 
-For the main part, both proof of work and proof of stake are [Sybil resistance](/part2/incentives/staking/#introduction) mechanisms that place a cost on participating in the protocol. This prevents attackers from overwhelming the protocol at low or zero cost.
+For the most part, both proof of work and proof of stake are [Sybil resistance](/part2/incentives/staking/#introduction) mechanisms that place a cost on participating in the protocol. This prevents attackers from overwhelming the protocol at low or zero cost.[^fn-types-of-proof]
 
-Nevertheless, both proof of work and proof of stake are often fairly tightly coupled, via the [fork choice rule](#fork-choice-rules), to the consensus mechanisms that they support. They provide a useful way to assign a weight, or a score, to a chain of blocks: in proof of work, the total work done; in proof of stake, the amount of value that supports a particular chain.
+[^fn-types-of-proof]: In proof of work, the "proof" you bring is a number that makes the block hash a certain value. This proves that you did the work to calculate it. In proof of stake, your proof is a private key that is associated with a deposit of stake on the blockchain. Other proof mechanisms are available, such as [proof of space and time](https://en.wikipedia.org/wiki/Proof_of_space#Proof_of_space-time).
+
+Nevertheless, both proof of work and proof of stake are often fairly tightly coupled, via [fork choice rules](#fork-choice-rules), to the consensus mechanisms that they support. They provide a useful way to assign a weight, or a score, to a chain of blocks: in proof of work, the total work done; in proof of stake, the amount of value that supports a particular chain.
 
 Beyond these basic factors, both proof of work and proof of stake enable many kinds of different consensus protocols to be built on them, each with its own dynamics and trade-offs. Once again, the survey in section 7, Related Work, of the [Avalanche white paper](https://arxiv.org/pdf/1906.08936) is instructive.
 
@@ -242,10 +252,10 @@ The basic primitive that underlies blockchain technology is, of course, the bloc
 
 A block comprises a set of transactions that a leader (the block proposer) has assembled. A block's contents (its payload) may vary according to the protocol.
 
-  - The payload of a block on Ethereum's proof of work chain is a list of user transactions.
+  - The payload of a block on Ethereum's execution chain is a list of user transactions.
   - The payload of a block on the pre-Merge proof of stake beacon chain was (mostly) a set of attestations made by other validators.
   - Post-Merge beacon chain blocks also contain the execution payload (the user transactions).
-  - As and when [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum then blocks will contain opaque blobs of data alongside the ordered list of user transactions.
+  - As and when [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) is implemented on Ethereum, blocks will contain commitments to opaque blobs of data alongside the ordered list of user transactions.
 
 Except for the special Genesis block, every block builds on and points to a parent block. Thus, we end up with a chain of blocks: a blockchain. Whatever the contents of blocks, the goal of the protocol is for all nodes on the network to agree on the same history of the blockchain.
 
@@ -265,7 +275,7 @@ The chain grows as nodes add their blocks to its tip. This is accomplished by te
 
 The leader (usually known as the block proposer) adds a single block to the chain, and has full responsibility for selecting and ordering the contents of that block.
 
-The use of blocks is an optimisation. Each addition to the chain could in principle be a single transaction, but that would add a huge consensus overhead. So blocks are batches of transactions, and sometimes [people argue](https://www.bitrawr.com/bitcoin-block-size-debate-explained) about how big those blocks should be. In Bitcoin, the block size is limited by the number of bytes of data in the block. In Ethereum's proof of work chain, the block size is limited by the block gas limit (that is, the amount of work needed to run the transactions in the block). [Beacon block](/part3/containers/blocks/#beaconblockbody) sizes are limited by hard-coded constants.
+The use of blocks is an optimisation. In principle we could add individual transactions to the chain one by one, but that would add a huge consensus overhead. So blocks are batches of transactions, and sometimes [people argue](https://www.bitrawr.com/bitcoin-block-size-debate-explained) about how big those blocks should be. In Bitcoin, the block size is limited by the number of bytes of data in the block. In Ethereum's execution chain, the block size is limited by the block gas limit (that is, the amount of work needed to run the transactions in the block). [Beacon block](/part3/containers/blocks/#beaconblockbody) sizes are limited by hard-coded constants.
 
 #### Block trees
 
@@ -303,7 +313,7 @@ The existence of forking in a consensus protocol is a consequence of prioritisin
 
 #### Fork choice rules
 
-As we've seen, for all sorts of reasons &ndash; network delays, network outages, messages received out of order, malicious behaviour by peers &ndash; nodes across the network end up with different views of the network's state. Eventually, we want every correct node on the network to agree on an identical linear view of history and hence a common view of the state of the system. The protocol's fork choice rule brings about this agreement.
+As we've seen, for all sorts of reasons &ndash; network delays, network outages, messages received out of order, malicious behaviour by peers &ndash; nodes across the network end up with different views of the network's state. Eventually, we want every correct node on the network to agree on an identical linear view of history and hence a common view of the state of the system. It is the role of the protocol's _fork choice rule_ to bring about this agreement.
 
 Given a block tree and some decision criteria based on a node's local view of the network, the fork choice rule is designed to select, from all the available branches, the one that is most likely to eventually end up in the final linear, canonical chain. That is, it will choose the branch least likely to be later pruned out of the block tree as nodes attempt to converge on a canonical view.
 
@@ -337,7 +347,7 @@ You can perhaps see that each of these fork choice rules is a way to assign a nu
 
 #### Reorgs and reversions
 
-As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block will be a child of the block that it currently views as the head block. In this case the new block automatically becomes the updated head block (as long as it is valid).
+As a node receives new blocks (and, under proof of stake, new votes for blocks) it will re-evaluate the fork choice rule in the light of the new information. Most commonly, a new block will be a child of the block that the node currently views as the head block, and the new block will become the head block.
 
 However, sometimes the new block might be a descendent of some other block in the block tree. (Note that, if the node doesn't already have the parent block of the new block, it will need to ask its peers for it, and so on for any blocks it knows that it is missing.)
 
@@ -359,9 +369,9 @@ At this point, the node believes that block $F$ is the best head, and therefore 
 
 Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore $G$. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
 
-Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain must be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
+Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain will be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
 
-After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. After doing this, the node will have completed the reorganisation of its chain.
+After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. Once done, the node will have completed the reorganisation of its chain.
 
 <a id="img_consensus_reversion_2"></a>
 <figure class="diagram" style="width: 70%">
@@ -429,19 +439,31 @@ In summary, the CAP theorem means that we cannot hope to design a consensus prot
 
 ##### Ethereum prioritises liveness
 
-The Ethereum&nbsp;2 consensus protocol prioritises liveness: in the case of a network partition the nodes on each side of the partition will continue to produce blocks. However, finality (a safety property) will no longer occur on both sides of the partition. Depending on the proportion of stake managed by each side, either one side or neither side will continue to finalise.
+The Ethereum consensus protocol offers both safety and liveness in good network conditions, but prioritises liveness when things are not running so smoothly. In the case of a network partition the nodes on each side of the partition will continue to produce blocks. However, finality (a safety property) will no longer occur on both sides of the partition. Depending on the proportion of stake managed by each side, either one side or neither side will continue to finalise.
 
-Eventually, unless the partition is resolved, both sides will regain finality due to the novel [inactivity leak](/part2/incentives/inactivity/) mechanism. But this results in the ultimate safety failure. Each chain will finalise a different history and will become irreconcilable and independent forever.
-
-It's worth noting that typical proof of work based algorithms also prioritise liveness over safety. In fact, Bitcoin and Ethereum's proof of work offer no safety guarantee at all; they have no concept of finality. At any time somebody might reveal a heavier chain that rewrites history. Even under non-adversarial conditions, minor forks happen frequently and there is no guarantee that different nodes will give you the same answer. Exchanges typically use a proxy for safety that requires waiting for a certain number of blocks to be built on top of a transaction before it is considered final, but that's only a statistical guarantee, and is no guarantee at all in the face of a 51% attack.[^fn-cdc-40k]
-
-[^fn-cdc-40k]: At the time of writing, at least one exchange requires [40000 confirmations](https://www.reddit.com/r/Crypto_com/comments/w9qmbx/40000_confirmations_and_7_days_to_send_etc_to_cdc/) for deposits from the Ethereum Classic network. That means that forty thousand blocks must be built on top of a block containing the deposit transaction before the exchange will process it, which takes about six days. The requirement reflects concern about the vulnerability of ETC's low hash rate proof of work chain to 51% attacks - it is relatively easy for an attacker to revert blocks at will. The reality is that, in the face of a well-crafted 51% attack, no number of confirmations is truly safe.
+Eventually, unless the partition is resolved, both sides will regain finality due to the novel [inactivity leak](/part2/incentives/inactivity/) mechanism. But this results in the ultimate safety failure. Each chain will finalise a different history and the two chains will become irreconcilable and independent forever.
 
 #### Finality
 
-Ethereum's proof of stake mechanism prioritises liveness, but unlike proof of work it also strives to offer a safety guarantee under favourable circumstances.
+We're going to be discussing finality a good deal over the following sections, which is a safety property of the chain.
 
-Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper FFG mechanism that we'll explore shortly. The idea is that, as the blockchain progresses, all honest validators agree on blocks that they will never revert. That block (a checkpoint) and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer. Thus, finality is a safety property: once finality has been conferred, nothing bad ever happens.
+Finality is the idea that there are blocks that will never be reverted. When a block has been finalised, all the honest nodes on the network have agreed that the block will forever remain part of the chain's history, and therefore that all of its ancestors will remain in the chain's history. Finality makes your payment for pizza as irrevocable as if you'd handed over cash. It is the ultimate protection against double-spending.[^fn-finality-not-absolute]
+
+[^fn-finality-not-absolute]: It's worth noting that finality is never absolute. Whatever any protocol claims, if a supermajority of nodes agrees (for example via a software upgrade) to revert a bunch of finalised blocks, then that's going to happen. Ultimately, as in all things, the concept of finality is subservient to social consensus.
+
+Some consensus protocols, like classical PBFT, or Tendermint, finalise every round (every block). As soon as a round's worth of transactions has been included on the chain, all the nodes agree that it will be there forever. On the one hand, these protocols are very "safe": once a transaction has been included on-chain, it will never be reverted. On the other hand, they are vulnerable to liveness failures: if the nodes cannot come to agreement &ndash; for example, if more than one third of them are down or unavailable &ndash; then no transactions can be added to the chain and it will stop dead.
+
+Other consensus protocols, such as Bitcoin's Nakamoto consensus, do not have any finality mechanism at all. There is always the possibility that someone will reveal an alternative, heavier chain. When this happens, all honest nodes must reorg their chains accordingly, reverting whatever transactions they previously processed. Heuristics such as how many confirmations your block has are only approximations to finality, they are not guarantees.[^fn-cdc-40k]
+
+[^fn-cdc-40k]: At the time of writing, at least one exchange requires [40000 confirmations](https://www.reddit.com/r/Crypto_com/comments/w9qmbx/40000_confirmations_and_7_days_to_send_etc_to_cdc/) for deposits from the Ethereum Classic network. That means that forty thousand blocks must be built on top of a block containing the deposit transaction before the exchange will process it, which takes about six days. The requirement reflects concern about the vulnerability of ETC's low hash rate proof of work chain to 51% attacks - it is relatively easy for an attacker to revert blocks at will. The reality is that, in the face of a well-crafted 51% attack, no number of confirmations is truly safe.
+
+Ethereum's consensus layer prioritises liveness, but also strives to offer a safety guarantee in the form of finality when circumstances are favourable. This is an attempt to gain the best of both worlds. Vitalik has [defended this](https://ethresear.ch/t/explaining-the-liveness-guarantee/4228/8?u=benjaminion) as follows.
+
+> The general principle is that you want to give users "as much consensus as possible": if there’s $>2/3$ then we get regular consensus, but if there's $<2/3$ then there’s no excuse to just stall and offer nothing, when clearly it’s still possible for the chain to keep growing albeit at a temporarily lower level of security for the new blocks. If an individual application is unhappy with that lower level of security, it’s free to ignore those blocks until they get finalized.[^fn-liveness-during-nonfinality]
+
+[^fn-liveness-during-nonfinality]: The value of this was evident when the beacon chain [stopped finalising](https://offchain.medium.com/post-mortem-report-ethereum-mainnet-finality-05-11-2023-95e271dfd8b2) for around an hour on the 12th of May, 2023. Participation in consensus dropped from over 99% of validators to around 40% for the duration. Ordinary Ethereum users and applications, however, would have barely noticed. Blocks continued to be produced (albeit fewer than normal) and transactions continued to be executed.
+
+Finality in Ethereum's consensus layer is delivered by the Casper FFG mechanism that we'll exploring soon. The idea is that, periodically, all honest validators agree on fairly recent checkpoint blocks that they will never revert. That block and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer.
 
 <a id="img_consensus_finality"></a>
 <figure class="diagram" style="width: 80%">
@@ -455,17 +477,17 @@ The honest nodes have agreed that the checkpoint and all its ancestor blocks are
 </figcaption>
 </figure>
 
-Finality in Ethereum&nbsp;2 is "economic finality". It is theoretically possible for the protocol to finalise two conflicting checkpoints, that is, two contradictory views of the chain's history. However, it is possible only at enormous and quantifiable cost. For all but the most extreme attack or failure scenarios, final means final.
+Ethereum's finality is "economic finality". It is theoretically possible for the protocol to finalise two conflicting checkpoints, that is, two contradictory views of the chain's history. However, it is possible only at enormous and quantifiable cost. For all but the most extreme attack or failure scenarios, final means final.
 
-The next section, on Casper FFG, dives into the detail of how this finality mechanism works.
+The [section on Casper FFG](/part2/consensus/casper_ffg/) dives into the detail of how this finality mechanism works.
 
 #### See also
 
-It's always worth reading anything that Leslie Lamport has had a hand in, and the original paper by Lamport, Shostak, and Pease on [The Byzantine Generals Problem](https://lamport.azurewebsites.net/pubs/byz.pdf) contains many insights. While the algorithm they propose is hopelessly inefficient in modern terms, the paper is a good introduction to reasoning about consensus protocols in general. The same is true of Castro and Liskov's seminal paper [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) which significantly influenced the design of Ethereum's Casper FFG protocol. However, you might like to contrast these "classical" approaches with the elegant simplicity of proof of work, as described by Satoshi Nakamoto in the [Bitcoin white paper](https://bitcoinpaper.org/bitcoin.pdf). If proof of work has just one thing in its favour, it is its simplicity.
+It's always worth reading anything that Leslie Lamport has had a hand in, and the original 1982 paper by Lamport, Shostak, and Pease on [The Byzantine Generals Problem](https://lamport.azurewebsites.net/pubs/byz.pdf) contains many insights. While the algorithm they propose is hopelessly inefficient in modern terms, the paper is a good introduction to reasoning about consensus protocols in general. The same is true of Castro and Liskov's seminal 1999 paper [Practical Byzantine Fault Tolerance](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf) which significantly influenced the design of Ethereum's Casper FFG protocol. However, you might like to contrast these "classical" approaches with the elegant simplicity of proof of work, as described by Satoshi Nakamoto in the 2008 [Bitcoin white paper](https://bitcoinpaper.org/bitcoin.pdf). If proof of work has just one thing in its favour, it is its simplicity.
 
 We've referred above to Gilbert and Lynch's 2012 paper, [Perspectives on the CAP Theorem](https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf). It is a very readable exploration of the concepts of consistency and availability (or safety and liveness in our context).
 
-The Eth2 beacon chain underwent a seven block reorg in May 2022 due to differences between client implementations of the fork choice rule. These differences were known at the time and thought to be harmless. That proved to be not so. Barnabé Monnot's [write-up](https://barnabe.substack.com/p/pos-ethereum-reorg) of the incident is very instructive.
+The Ethereum beacon chain underwent a seven block reorg in May 2022 due to differences between client implementations of the fork choice rule. These differences were known at the time and thought to be harmless. That proved to be not so. Barnabé Monnot's [write-up](https://barnabe.substack.com/p/pos-ethereum-reorg) of the incident is very instructive.
 
 Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality/) provides a deeper and more nuanced exploration of the concept of finality.
 

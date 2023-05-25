@@ -323,6 +323,7 @@ mempool
 middleware
 misbehaviours
 misconfiguration
+misconfigure
 misconfigured
 misconfiguring
 modularity
