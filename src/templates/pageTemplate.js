@@ -60,26 +60,28 @@ export default function Template({ data }) {
   const indexArray = frontmatter.index
   const path = frontmatter.path
 
+  const prevNext = <PrevNext seq={frontmatter.sequence} />
+  
   const pageExtras = path.startsWith('/search')
         ? <Search />
         : <Subsections indexArray={indexArray} />
 
   const htmlPostProcessed = postProcessHast(cheerio.load(html, null, false)).html()
 
-  return (
+    return (
       <React.StrictMode>
         <div id="page">
           <Sidebar index={frontmatter.index} />
           <div id="main-content" className="scrollable">
             <Banner path={path} />
             <div id="padded-content">
-              <PrevNext seq={frontmatter.sequence} />
+              {prevNext}
               <main
                 dangerouslySetInnerHTML={{ __html: htmlPostProcessed }}
               />
               {pageExtras}
               <Footer />
-              <PrevNext seq={frontmatter.sequence} />
+              {prevNext}
             </div>
           </div>
           <PageNavi path={path} />
