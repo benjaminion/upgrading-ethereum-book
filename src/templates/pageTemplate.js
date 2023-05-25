@@ -28,7 +28,7 @@ function postProcessHast($) {
 
 export function Head({ data }) {
 
-  const { mySearchData, markdownRemark, site } = data
+  const { markdownRemark, site } = data
   const frontmatter = markdownRemark.frontmatter
   const metadata = site.siteMetadata
 
