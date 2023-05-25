@@ -2,6 +2,9 @@ import React from "react"
 import { graphql } from "gatsby"
 import cheerio from "cheerio"
 
+import "katex/dist/katex.min.css"
+import "../css/page.css"
+
 import Banner from "../components/banner"
 import Sidebar from "../components/sidebar"
 import Subsections from "../components/subsections"
@@ -10,9 +13,6 @@ import Footer from "../components/footer"
 import PageNavi from "../components/pagenavi"
 import FootnoteTooltips from "../components/footnote-tooltips"
 import Search from "../components/search"
-
-import "katex/dist/katex.min.css"
-import "../css/page.css"
 
 function postProcessHast($) {
 
