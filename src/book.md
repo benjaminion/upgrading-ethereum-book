@@ -9059,7 +9059,7 @@ Let `genesis_block = BeaconBlock(state_root=hash_tree_root(genesis_state))`.
 
 TODO
 
-## Altair Fork Logic <!-- /part3/altair-fork/ -->
+## Altair Fork Logic <!-- /part3/altair-fork/* -->
 
 ### Introduction
 
