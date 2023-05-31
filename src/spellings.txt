@@ -219,6 +219,7 @@ Vitalik
 Vyper
 WASM
 WB
+Whitepaper
 WikiLeaks
 WithdrawalIndex
 YP
@@ -342,6 +343,7 @@ piecewise
 piechart
 pre
 precompile
+probabilistically
 programmatically
 quadratically
 randao

@@ -343,7 +343,7 @@ We will properly unpack the second and third of these later in their respective 
 
 You can perhaps see that each of these fork choice rules is a way to assign a numeric score to a block. The winning block, the head block, has the highest score. The idea is that all correct nodes, when they eventually see a certain block, will unambiguously agree that it is the head and choose to follow its branch whatever else is going on in their own views of the network. Thus, all correct nodes will eventually agree on a common view of a single canonical chain going back to genesis.
 
-[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [did not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. I really don't know why this misconception is so persistent - I eventually asked Vitalik about it, and he confirmed to me (verbally) that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It served us well.
+[^fn-no-ghost]: Contrary to popular belief, Ethereum's proof of work protocol [did not use](https://ethereum.stackexchange.com/a/50693) any form of GHOST in its fork choice. This misconception is very persistent, probably due to the [Ethereum Whitepaper](https://ethereum.org/en/whitepaper/#modified-ghost-implementation). I eventually asked Vitalik about it, and he confirmed to me that although GHOST had been planned under PoW it was never implemented due to concerns about some unspecified attacks. The heaviest chain rule was simpler and well tested. It served us well.
 
 #### Reorgs and reversions
 
@@ -12271,7 +12271,7 @@ This is a utility function for the [`on_attestation()`](#on_attestation) handler
         validate_target_epoch_against_current_time(store, attestation)
 ```
 
-First, we check the attestation's timeliness: newly received attestations are considered for the fork choice only if they came from the [current or previous epoch](#validate_target_epoch_against_current_time).
+First, we check the attestation's timeliness. Newly received attestations are considered for insertion into the Store only if they came from the [current or previous epoch](#validate_target_epoch_against_current_time) at the time when we heard about them.
 
 This check [was introduced](https://github.com/ethereum/consensus-specs/pull/1466) to defend against a ["decoy flip-flop attack"](https://ethresear.ch/t/decoy-flip-flop-attack-on-lmd-ghost/6001?u=benjaminion) on LMD GHOST. The attack depends on two competing branches having emerged due to some network failure. An adversary with some fraction of the stake (but less than 33%) can store up votes from earlier epochs and release them at carefully timed moments to switch the winning branch (according to the LMD GHOST fork choice) so that neither branch can gain the necessary 2/3 weight for finalisation. The attack can continue until the adversary runs out of stored votes.
 
@@ -12342,13 +12342,11 @@ The check [was introduced](https://github.com/ethereum/consensus-specs/pull/1742
     assert get_current_slot(store) >= attestation.data.slot + 1
 ```
 
-I guess this is an obvious criterion. It was [added to the spec](https://github.com/ethereum/consensus-specs/pull/1198) without further comment during a refactor to correctly calculate checkpoint states in the presence of skipped slots.
+This criterion is discussed in section 8.4 of the [Gasper paper](https://arxiv.org/abs/2003.03052): only attestations from slots up to and including slot $N-1$ may appear in the Store at slot $N$.
 
-As a point of style, I'd prefer to see the following, but I won't be bike-shedding it.
+If attestations were included in the Store as soon as being received, an adversary with a number of dishonest validators could use that to probabilistically split the votes of honest validators. The dishonest validators would attest early in the slot, dividing their votes between competing head blocks. Due to network delays, when honest validators run their own fork choices prior to attesting at the proper time, they are likely to see different weights for each of the candidates, based on the subset of dishonest attestations they have received by then. In which case the vote of the honest validators could end up being split. This might keep the chain from converging on a single head block.
 
-```none
-    assert get_current_slot(store) > attestation.data.slot
-```
+Introducing this one slot lag for considering attestations makes it much more likely that honest validators will all vote for the same head block in slot $N$, as they will have all seen a similar set of attestations up to slot $N-1$, and cannot be influenced by an adversary's early attestations in the current slot.
 
 |||
 |-|------|
@@ -12600,7 +12598,7 @@ Attestations may be useful no matter how we heard about them: they might have be
 
 [^fn-view-merge-attestations]: This would change were we to adopt [view-merge](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion). Only attestations that had been processed by specifically designated aggregators would be considered in the fork choice.
 
-If the attestation was unpacked from a block then the flag `is_from_block` should be set to `True`. This causes the timeliness check in [`validate_on_attestation()`](#validate_on_attestation) to be skipped: attestations not from blocks must be from the current or previous epoch in order to influence the fork choice. (So, a carrier pigeon would need to be fairly swift.)
+If the attestation was unpacked from a block then the flag `is_from_block` should be set to `True`. This causes the timeliness check in [`validate_on_attestation()`](#validate_on_attestation) to be skipped: attestations not from blocks must be received in the epoch they were produced in, or the next epoch, in order to influence the fork choice. (So, a carrier pigeon would need to be fairly swift.)
 
 The [`validate_on_attestation()`](#validate_on_attestation) function performs a comprehensive set of validity checks on the attestation to defend against various attacks.
 
