@@ -29,6 +29,7 @@ my ($file) = @ARGV;
 die "Usage: $0 FILE\n" if not $file;
 open my $fh, '<', $file or die "Can't open $file: $!";
 
+my $domainMatch = qr/(localhost|eth2book.info|upgrading-ethereum.info)/;
 my $newPagePath = qr/^(#{1,3} ).* <!-- ([^*]+)\*? -->$/;
 my $filePath = $file =~ s|[^/]+$||r;
 my $pagePath;
@@ -112,8 +113,8 @@ while(<$fh>) {
                 }
             } elsif ($link eq '') {
                 print "Empty link, line $.";
-            } elsif ($link =~ /localhost/) {
-                print "Link to localhost, line $."
+            } elsif ($link =~ $domainMatch) {
+                print "Link to $1, line $."
             } elsif ($link =~ /^http:/) {
                 print "HTTP link, line $.";
             } elsif (not $link =~ /^https:\/\//) {
