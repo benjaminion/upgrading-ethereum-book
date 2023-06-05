@@ -9,6 +9,7 @@ const lintSplitMarkdown = require('./checks/lint_split_md').lintSplitMarkdown
 //  - Spellcheck
 //  - Repeated words check
 //  - Trailing whitespace check
+//  - Linting of LaTeX expressions
 //  - Lints the source markdown
 //  - Splits the source markdown into individual pages
 //  - Lints the split markdown
@@ -18,6 +19,7 @@ const doHtmlCheck = true
 const doSpellCheck = true
 const doRepeatCheck = true
 const doWhitespaceCheck = true
+const doLatexCheck = true
 const doSourceLint = true
 const doSplitLint = true
 
@@ -26,6 +28,7 @@ const htmlChecker = 'bin/build/checks/html.pl'
 const spellChecker = 'bin/build/checks/spellcheck.sh'
 const repeatChecker = 'bin/build/checks/repeats.sh'
 const whitespaceChecker = 'bin/build/checks/whitespace.sh'
+const latexChecker = 'bin/build/checks/latex.pl'
 const mdSplitter = 'bin/build/process_markdown.sh'
 
 const sourceMarkdown = 'src/book.md'
@@ -119,6 +122,16 @@ module.exports.runChecks = (reporter = customReporter, exitToShell = true) => {
     'Found trailing whitespace:',
     'Unable to perform whitespace check:',
     'Skipping whitespace check',
+    reporter
+  )
+
+  allOk &= runCheck(
+    doLatexCheck,
+    () => execSync(`${latexChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
+    'Performing trailing LaTeX check...',
+    'Found LaTeX issues:',
+    'Unable to perform LaTeX check:',
+    'Skipping LaTeX check',
     reporter
   )
 
