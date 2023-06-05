@@ -925,7 +925,7 @@ Maximum annual protocol issuance on the beacon chain as a function of the number
 
 #### Validator rewards
 
-The goal is to distribute these rewards evenly among validators (continuing to assume that things are running optimally), so that, on a long term average, each validator $i$ earns $n_ib$ Gwei per epoch, where $n_i$ is the number of increments it possesses, equivalently its effective balance in Ether. In these terms $T = \sum^{N-1}_{i=0}{n_i}$.
+The goal is to distribute these rewards evenly among validators (continuing to assume that things are running optimally), so that, on a long term average, each validator $i$ earns $n_{i}b$ Gwei per epoch, where $n_i$ is the number of increments it possesses, equivalently its effective balance in Ether. In these terms $T = \sum^{N-1}_{i=0}{n_i}$.
 
 Thus, a well-performing validator with a 32&nbsp;ETH effective balance can expect to earn a long-term average of $32b$ Gwei per epoch. Of course, $b$ changes over time as the total active balance changes, but absent a mass slashing event that change will be slow.
 
@@ -1526,8 +1526,8 @@ The penalty for validator $i$ is calculated as
 
 $$
 \begin{split}
-s_iB_i / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) \\
-= \frac{s_iB_i}{4 \times 50{,}331{,}648}
+s_{i}B_{i} / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_ALTAIR}) \\
+= \frac{s_{i}B_{i}}{4 \times 50{,}331{,}648}
 \end{split}
 $$
 
@@ -1940,7 +1940,7 @@ Pairings are usually denoted $e(P,Q)$ and have very special properties. In parti
 From this, we can deduce that all of the following identities hold:
 
 $$
-e([a]P,[b]Q)=e(P,[b]Q)^a=e(P,Q)^{ab}=e(P,[a]Q)^b=e([b]P,[a]Q)
+e([a]P,[b]Q)={e(P,[b]Q)}^a={e(P,Q)}^{ab}={e(P,[a]Q)}^b=e([b]P,[a]Q)
 $$
 
 Armed with our pairing, verifying a signature is straightforward. The signature is valid if and only if
@@ -1954,7 +1954,7 @@ That is, given the message $m$, the public key $pk$, the signature $\sigma$, and
 This identity comes directly from the properties of pairings described above.
 
 $$
-e(pk,H(m)) = e([sk]g_1,H(m)) = e(g_1,H(m))^{(sk)} = e(g_1,[sk]H(m)) = e(g_1,\sigma)
+e(pk,H(m)) = e([sk]g_1,H(m)) = {e(g_1,H(m))}^{(sk)} = e(g_1,[sk]H(m)) = e(g_1,\sigma)
 $$
 
 Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
@@ -2039,11 +2039,11 @@ This miracle is due to the bilinearity of the pairing operation. With an aggrega
 
 $$
 \begin{aligned}
-e(pk_{agg},H(m)) &= e(pk_1 + pk_2 + \ldots + pk_n,H(m)) \\
-                 &= e([sk_1 + sk_2 + \ldots + sk_n]g_1,H(m)) \\
-                 &= e(g_1,H(m))^{(sk_1 + sk_2 + \ldots + sk_n)} \\
-                 &= e(g_1,[sk_1 + sk_2 + \ldots + sk_n]H(m)) \\
-                 &= e(g_1,\sigma_1 + \sigma_2 + \ldots + \sigma_n) \\
+e(pk_{agg},H(m)) &= e(pk_1 + pk_2 + \cdots + pk_n,H(m)) \\
+                 &= e([sk_1 + sk_2 + \cdots + sk_n]g_1,H(m)) \\
+                 &= {e(g_1,H(m))}^{(sk_1 + sk_2 + \cdots + sk_n)} \\
+                 &= e(g_1,[sk_1 + sk_2 + \cdots + sk_n]H(m)) \\
+                 &= e(g_1,\sigma_1 + \sigma_2 + \cdots + \sigma_n) \\
                  &= e(g_1,\sigma_{agg})
 \end{aligned}
 $$
@@ -2546,7 +2546,7 @@ Consider the case where I have a tail of length $k = 1$ in some epoch. This give
 The probability, $p^{(1)}_j$, of gaining a tail of exactly length $j$ as a result of having a tail of length 1 is,
 
 $$
-p^{(1)}_j =  2\sum_{i=0}^{j-1}q_jq_i + q_jq_j = q_j \left( 2\sum_{i=0}^{j-1}q_i + q_j \right)
+p^{(1)}_j =  2\sum_{i=0}^{j-1}q_{j}q_{i} + q_{j}q_{j} = q_j \left( 2\sum_{i=0}^{j-1}q_i + q_j \right)
 $$
 
 We can think about this as follows. With $k = 1$ we get two attempts, therefore $q$ appears twice in each product. To calculate $p^{(1)}_j$ we need the sum over the all the combinations of the probability of getting a tail of length exactly $j$ (that is, $q_j$) multiplied by the probability of getting a tail of $j$ or less (that is, not getting a tail longer than $j$, otherwise we would have chosen that length instead of $j$).
@@ -2686,7 +2686,7 @@ Once again, I control a proportion $r$ of the stake. I will only be considering 
 Let $q_j$ be my probability of getting exactly $j$ proposals in an epoch without any manipulation of the RANDAO (different from the $q$ in the first example, but related):
 
 $$
-q_j = r^j(1-r)^{32-j}{32 \choose j}
+q_j = r^j{(1-r)}^{32-j}{32 \choose j}
 $$
 
 My expected number of proposals per epoch when acting honestly is simple to compute,
@@ -2715,7 +2715,7 @@ $$
 
 As before, we can illustrate this by considering the matrix of probabilities. With a tail of one I have two choices: to propose or to withhold. To achieve a net number of exactly $j$ proposals we are looking for the combinations where either of the following holds.
 
- 1. Proposing gives me exactly $j$ proposals and withholding gives no more than $j+1$ (that is, $\sum_{i=0}^{j+1}q_iq_j$). These are the elements in the horizontal bar in the diagram below.
+ 1. Proposing gives me exactly $j$ proposals and withholding gives no more than $j+1$ (that is, $\sum_{i=0}^{j+1}q_{i}q_{j}$). These are the elements in the horizontal bar in the diagram below.
  2. Proposing gives me no more than $j$ proposals and withholding gives me exactly $j + 1$ (that is, $\sum_{i=0}^{j}q_{j+1}q_i$).[^fn-hyper-hurts-head] These are the elements in the vertical bar in the diagram below.
 
 Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be included only once.
@@ -3238,7 +3238,7 @@ Given a proportion of the validator set controlled by an attacker, what is the p
 If an attacker has a proportion $p$ of the validator set, then the probability of selecting a committee of $n$ validators that has $k$ or more validators belonging to the attacker is,
 
 $$
-\sum_{i=k}^{n} p^i(1-p)^{n-i}{n\choose i}
+\sum_{i=k}^{n} p^i{(1-p)}^{n-i}{n\choose i}
 $$
 
 Using this we can calculate that, in fact, 109 members is sufficient to give only a $2^{-40}$ chance of an attacker with one third of the validators gaining a two-thirds majority by chance.
@@ -3373,7 +3373,7 @@ What about the size criterion?
 
 Assuming that BLS signatures are uniformly random, then in a committee of size $N$ each validator will have a probability of being selected of `TARGET_AGGREGATORS_PER_COMMITTEE` `/` $N$ (ignoring the integer arithmetic). So in expectation we will have `TARGET_AGGREGATORS_PER_COMMITTEE` (16) aggregators per committee.
 
-The probability of having zero aggregators is $(1 - \frac{16}{N})^N$. For the minimum target committee size of $N = 128$ this is 1 in 26 million, and for the maximum committee size of $N = 2048$, 1 in 9.5 million. So we would expect to see a beacon committee with no aggregators about once every 13,000 epochs (8 weeks) in the former case and once every 5000 epochs (3 weeks) in the latter. Each committee comprises only a fraction $1/2048$ of the total validator set, so occasionally having no aggregator is insignificant for the protocol, but it is unfortunate for those in that committee who will most likely not have their attestations included in a block as a result.
+The probability of having zero aggregators is ${(1 - \frac{16}{N})}^N$. For the minimum target committee size of $N = 128$ this is 1 in 26 million, and for the maximum committee size of $N = 2048$, 1 in 9.5 million. So we would expect to see a beacon committee with no aggregators about once every 13,000 epochs (8 weeks) in the former case and once every 5000 epochs (3 weeks) in the latter. Each committee comprises only a fraction $1/2048$ of the total validator set, so occasionally having no aggregator is insignificant for the protocol, but it is unfortunate for those in that committee who will most likely not have their attestations included in a block as a result.
 
 <a id="img_committee_aggregators"></a>
 <figure class="chart">
