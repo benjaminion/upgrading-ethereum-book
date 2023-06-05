@@ -128,7 +128,7 @@ module.exports.runChecks = (reporter = customReporter, exitToShell = true) => {
   allOk &= runCheck(
     doLatexCheck,
     () => execSync(`${latexChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Performing trailing LaTeX check...',
+    'Performing LaTeX check...',
     'Found LaTeX issues:',
     'Unable to perform LaTeX check:',
     'Skipping LaTeX check',
