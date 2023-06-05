@@ -2,9 +2,9 @@
 
 This is my book about Ethereum&nbsp;2.0: Ethereum on proof of stake and beyond.
 
-You can read it at [eth2book.info](https://eth2book.info/latest) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/latest)).
+You can read it at [eth2book.info](https://eth2book.info/latest/) (also available at [upgrading-ethereum.info](https://upgrading-ethereum.info/latest/)).
 
-It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/latest/preface).
+It is a work in progress. There's more about the roll-out plan in the [preface](https://eth2book.info/latest/preface/).
 
 ## Licence
 
@@ -30,7 +30,7 @@ v18.14.2
 > npm --version
 9.5.0
 > gatsby --version
-Gatsby CLI version: 5.8.0
+Gatsby CLI version: 5.10.0
 ```
 
 `gatsby-cli` can be installed with,
@@ -39,7 +39,7 @@ Gatsby CLI version: 5.8.0
 npm install -g gatsby-cli
 ```
 
-You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document.
+You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document. To run the LaTex linting you'll need to install `libipc-run3-perl` and `chktex`, or you can just disable that check in _bin/build/prebuild.js_.
 
 ### Building
 
@@ -82,6 +82,7 @@ There are various npm script commands to help with building and testing:
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
   - `npm run spell` can be used to maintain the list of spellings.
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
+  - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
 
 ## How to
 
