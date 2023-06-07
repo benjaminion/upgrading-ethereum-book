@@ -23,6 +23,12 @@ function postProcessHast($) {
   // columnspacing="" on <mtable> is not allowed
   $('mtable[columnspacing=""]').removeAttr('columnspacing')
 
+  // Add target="_blank" and rel="external noopener" to external links
+  $('a[href^=http]').each(function (i, e) {
+    $(e).attr('target', '_blank')
+    $(e).attr('rel', 'external noopener')
+  })
+
   return $
 }
 
