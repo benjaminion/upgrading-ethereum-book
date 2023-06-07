@@ -27,7 +27,7 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
     const type = chunkTypes[idx]
     if ($(node).is(type.query)) {
 
-      const tagName = $(node).get(0).tagName
+      const tagName = $(node).prop('tagName').toLowerCase()
       let id = $(node).attr('id')
       if ( id === undefined) {
         id = tagName + '_' + counts[idx]
