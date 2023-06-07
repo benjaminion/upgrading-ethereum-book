@@ -40,8 +40,8 @@
     "webpack": "^5.85.1"
   },
   "overrides": {
-    "babel-plugin-lodash": {
-      "@babel/types": "~7.20.0"
+    "react-server-dom-webpack@0.0.0-experimental-c8b778b7f-20220825": {
+      "react": "^18.0.0"
     }
   }
 }
