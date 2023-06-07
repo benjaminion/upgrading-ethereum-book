@@ -64,13 +64,6 @@ module.exports = {
           },
           'my-strip-html-comments',
           {
-            resolve: 'gatsby-remark-external-links',
-            options: {
-              target: '_blank',
-              rel: 'external noopener',
-            }
-          },
-          {
             resolve: 'gatsby-remark-prismjs',
             options: {
               noInlineHighlight: true,
