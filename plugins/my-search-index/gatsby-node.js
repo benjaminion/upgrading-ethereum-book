@@ -6,11 +6,9 @@ const cheerio = require('cheerio')
 
 // Concatenate all text in child nodes while respecting exclusions
 const getText = ($, node, exclude) => {
-  let text = ''
-  $(node).contents().not(exclude.ignore).each(function (i, e) {
-    text += (e.type === 'text') ? e.data : getText($, e, exclude)
-  })
-  return text
+  return [...$(node).contents().not(exclude.ignore)]
+    .map(e => (e.type === 'text') ? e.data : getText($, e, exclude))
+    .join('')
 }
 
 // Recurse until we find an element we want to treat as a chunk, then get all its text content.
@@ -49,12 +47,9 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
     }
   }
 
-  const chunks = []
-  $(node).children().not(exclude.ignore).each(function (i, e) {
-    chunks.push(...getChunks($, e, chunkTypes, exclude, counts))
-  })
-
-  return chunks
+  return [...$(node).children().not(exclude.ignore)]
+    .map(e => getChunks($, e, chunkTypes, exclude, counts))
+    .flat()
 }
 
 const isExcludedFrontmatter = (frontmatter, exclude) => {
