@@ -20,46 +20,39 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
     counts = Array(chunkTypes.length).fill(0)
   }
 
-  const chunks = []
-  let matchedChunk = false;
-
   for (let idx = 0; idx < chunkTypes.length; idx++) {
 
     const type = chunkTypes[idx]
+
     if ($(node).is(type.query)) {
-
-      matchedChunk = true
-
-      const tagName = $(node).prop('tagName').toLowerCase()
-      let id = $(node).attr('id')
-      if ( id === undefined) {
-        id = tagName + '_' + counts[idx]
-        $(node).attr('id', id)
-        ++counts[idx]
-      }
 
       const text = getText($, node, exclude)
       if (text !== '') {
-        chunks.push(
-          {
-            type: tagName,
-            label: type.label,
-            id: id,
-            text: text,
-            weight: type.weight === undefined ? 1 : type.weight,
-          })
+
+        const tagName = $(node).prop('tagName').toLowerCase()
+        let id = $(node).attr('id')
+        if ( id === undefined) {
+          id = tagName + '_' + counts[idx]
+          $(node).attr('id', id)
+          ++counts[idx]
+        }
+
+        return [{
+          type: tagName,
+          label: type.label,
+          id: id,
+          text: text,
+          weight: type.weight === undefined ? 1 : type.weight,
+        }]
       }
 
-      break
     }
   }
 
-  // We shouldn't recurse into chunks that we've already done
-  if (!matchedChunk) {
-    $(node).children().not(exclude.ignore).each(function (i, e) {
-      chunks.push(...getChunks($, e, chunkTypes, exclude, counts))
-    })
-  }
+  const chunks = []
+  $(node).children().not(exclude.ignore).each(function (i, e) {
+    chunks.push(...getChunks($, e, chunkTypes, exclude, counts))
+  })
 
   return chunks
 }
