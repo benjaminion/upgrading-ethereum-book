@@ -21,11 +21,14 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
   }
 
   const chunks = []
+  let matchedChunk = false;
 
   for (let idx = 0; idx < chunkTypes.length; idx++) {
 
     const type = chunkTypes[idx]
     if ($(node).is(type.query)) {
+
+      matchedChunk = true
 
       const tagName = $(node).prop('tagName').toLowerCase()
       let id = $(node).attr('id')
@@ -46,13 +49,17 @@ const getChunks = ($, node, chunkTypes, exclude, counts) => {
             weight: type.weight === undefined ? 1 : type.weight,
           })
       }
+
       break
     }
   }
 
-  $(node).children().not(exclude.ignore).not(exclude.dedup).each(function (i, e) {
-    chunks.push(...getChunks($, e, chunkTypes, exclude, counts))
-  })
+  // We shouldn't recurse into chunks that we've already done
+  if (!matchedChunk) {
+    $(node).children().not(exclude.ignore).each(function (i, e) {
+      chunks.push(...getChunks($, e, chunkTypes, exclude, counts))
+    })
+  }
 
   return chunks
 }
@@ -82,7 +89,7 @@ exports.createPages = async (
   const {
     enabled = true,
     chunkTypes = [],
-    exclude = {frontmatter: [], pages: [], ignore: '', dedup: ''},
+    exclude = {frontmatter: [], pages: [], ignore: ''},
   } = pluginOptions
 
   const result = await graphql(`

@@ -112,8 +112,6 @@ module.exports = {
           pages: [],
           // Elements matching this query are ignored completely, including their text:
           ignore: 'svg, details, mtable, mrow, [aria-hidden="true"], .footnote-ref',
-          // Chunks matching this query are excluded as duplicates (to handle nested matches):
-          dedup: '[id^="fn-"] *, figcaption *, li *',
         }
       },
     }
