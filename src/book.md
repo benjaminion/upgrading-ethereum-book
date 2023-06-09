@@ -970,15 +970,11 @@ TODO
 
 ### Gasper <!-- /part2/consensus/gasper/* -->
 
-<div class="summary">
-
-  - TODO
-
-</div>
-
 TODO
 
 #### Safety and liveness in Gasper
+
+TODO
 
 ##### Heads and tails
 
@@ -988,17 +984,17 @@ TODO
 
 #### LMD GHOST
 
-[RLMD GHOST paper](https://arxiv.org/pdf/2302.11326.pdf).
+<!-- [RLMD GHOST paper](https://arxiv.org/pdf/2302.11326.pdf). -->
 
 TODO
 
 ##### Attestation consideration delay
 
-TODO - 1 slot delay in consideration
+TODO <!-- 1 slot delay in consideration -->
 
 ##### Attestation recency
 
-TODO - current or previous epoch
+TODO <!-- current or previous epoch -->
 
 ##### Attestation equivocation
 
@@ -1019,8 +1015,6 @@ TODO
 ##### Proposer boost
 
 TODO
-
-#### Notes
 
 ### Weak Subjectivity <!-- /part2/validator/weak_subjectivity/* -->
 
