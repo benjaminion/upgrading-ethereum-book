@@ -87,6 +87,7 @@ Feist
 Flashbots
 ForkDigest
 Francesco
+GHOST
 Gamlum
 Gasper
 Giga
@@ -111,6 +112,7 @@ Iteratively
 Iykyk
 JSON
 Jacek
+Joachim
 KDF
 KEVM
 Kalinin
@@ -143,6 +145,7 @@ Nakamoto
 Namib
 Narayanan
 Natale
+Neu
 Neven
 Oisín
 PBFT
@@ -201,6 +204,7 @@ Stakers
 Suhabe
 Szilágyi
 TBD
+TFG
 TODO
 TTD
 Teku
@@ -248,6 +252,7 @@ blockchains
 bls
 boolean
 bytecode
+costless
 creds
 crosslink
 crosslinked
@@ -305,6 +310,7 @@ initializing
 injective
 instantiations
 interop
+interoperate
 invertible
 involutive
 ish
@@ -332,6 +338,7 @@ monocultures
 ommers
 parallelise
 parallelising
+parameterisable
 parameterises
 performant
 permalink
@@ -348,6 +355,7 @@ programmatically
 quadratically
 randao
 rds
+recency
 repo
 reserialise
 restake

@@ -25,7 +25,7 @@ The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 pro
   - in-protocol data sharding, and
   - an array of potential future enhancements.
 
-I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, and there is no point in duplicating it. Although rollups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 system, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
+I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, though rather out of date now. Although rollups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 system, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
 It's a chunky list of exclusions, but there's still [plenty to talk about](/contents/).
 
@@ -153,7 +153,11 @@ Here's the opening sentence of [a paper](https://arxiv.org/abs/2110.10086) about
 
 If that makes perfect sense to you then feel free to skip this chapter entirely. Otherwise, read on!
 
-Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. We'll begin with some [Preliminaries](/part2/consensus/preliminaries/) covering the basics of consensus. Then we will look in turn at each of the two consensus mechanisms used by Ethereum's proof of stake protocol, starting with [Casper FFG](/part2/consensus/casper_ffg/), which is used to achieve finality, and then [LMD GHOST](/part2/consensus/lmd_ghost/) which provides slot by slot liveness. After considering them individually we will look at how they work together as the combined consensus protocol that's become known as [Gasper](/part2/consensus/gasper/).
+Our aim is to understand that sentence in all its parts. There's a lot to unpack, but we'll take time over it. We'll begin with some [preliminaries](/part2/consensus/preliminaries/) covering basics of consensus that are not particularly specific to Ethereum.
+
+After a high-level [overview](/part2/consensus/overview/) of the how the whole consensus protocol fits together, we will dive down into its component parts, first [LMD GHOST](/part2/consensus/lmd_ghost/), then [Casper FFG](/part2/consensus/casper_ffg/). In the [Gasper](/part2/consensus/gasper/) section we will see how these two are combined together.
+
+Enough subtleties and edge cases arise from the way that the LMD GHOST and Casper FFG protocols interoperate that I've dedicated the closing section of this chapter to discussing these [issues](/part2/consensus/issues/).
 
 ### Preliminaries <!-- /part2/consensus/preliminaries/ -->
 
@@ -180,7 +184,7 @@ Our goal in Ethereum's consensus layer is to enable tens of thousands of indepen
 
 These nodes often run on [consumer grade hardware](https://stakefromhome.com/). They communicate over Internet connections that might be low bandwidth, or high latency, that lose packets, or drop out for indefinite periods of time. Node operators sometimes misconfigure their software, or don't keep it up to date. And, to make it all the more exciting, there is the possibility of large numbers of bad actors running rogue nodes or tampering with communications for their own gain. This is what I mean by "unreliable infrastructure".
 
-An explicit design goal for Ethereum is that it doesn't only run well when every node is running well and communicating well. We have tried to design a system that will do its best to continue running even when the world beneath it is falling apart.
+An explicit design goal for Ethereum is that it doesn't only run well when every node is running well and communicating well. We have done our best to design a system that will do its best to continue running even when the world beneath it is falling apart.
 
 #### Coming to consensus
 
@@ -273,7 +277,7 @@ A blockchain. Time moves from left to right and, except for the Genesis block, e
 
 The chain grows as nodes add their blocks to its tip. This is accomplished by temporarily selecting a "leader", an individual node that has the right to extend the chain. In proof of work the leader is the miner that first solves the proof of work puzzle for its block. In Ethereum's proof of stake the leader is selected pseudo-randomly from the pool of active stakers.
 
-The leader (usually known as the block proposer) adds a single block to the chain, and has full responsibility for selecting and ordering the contents of that block.
+The leader (usually known as the block proposer) adds a single block to the chain, and has full responsibility for selecting and ordering the contents of that block, though its block must be valid according to the protocol rules otherwise the rest of the network will simply ignore it.
 
 The use of blocks is an optimisation. In principle we could add individual transactions to the chain one by one, but that would add a huge consensus overhead. So blocks are batches of transactions, and sometimes [people argue](https://www.bitrawr.com/bitcoin-block-size-debate-explained) about how big those blocks should be. In Bitcoin, the block size is limited by the number of bytes of data in the block. In Ethereum's execution chain, the block size is limited by the block gas limit (that is, the amount of work needed to run the transactions in the block). [Beacon block](/part3/containers/blocks/#beaconblockbody) sizes are limited by hard-coded constants.
 
@@ -355,10 +359,10 @@ In any case, running the fork choice rule on the updated block tree might indica
 
 In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
-<a id="img_consensus_reversion_1"></a>
+<a id="img_consensus_reversion_0"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain prior to a reversion.](images/diagrams/consensus-reversion_1.svg)
+![A diagram of a blockchain prior to a reversion.](images/diagrams/consensus-reversion-0.svg)
 
 <figcaption>
 
@@ -373,10 +377,10 @@ Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed fr
 
 After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. Once done, the node will have completed the reorganisation of its chain.
 
-<a id="img_consensus_reversion_2"></a>
+<a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain after a reversion.](images/diagrams/consensus-reversion_2.svg)
+![A diagram of a blockchain after a reversion.](images/diagrams/consensus-reversion-1.svg)
 
 <figcaption>
 
@@ -493,23 +497,538 @@ Vitalik's blog post [On Settlement Finality](https://blog.ethereum.org/2016/05/0
 
 Our ideal for the systems we are building is that they are _politically_ decentralised (for permissionlessness and censorship resistance), _architecturally_ decentralised (for resilience, with no single point of failure), but _logically_ centralised (so that they give consistent results). These criteria strongly influence how we design our consensus protocols. Vitalik explores these issues in his article, [The Meaning of Decentralization](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274).
 
+### Overview <!-- /part2/consensus/overview/ -->
+
+<div class="summary">
+
+  - Nodes and validators are the actors of the consensus system.
+  - Slots and epochs regulate consensus time.
+  - Blocks and attestations are the currency of consensus.
+  - Ethereum's consensus protocol combines two separate consensus protocols.
+  - "LMD GHOST" essentially provides liveness.
+  - "Casper FFG" provides finality.
+  - Together they are sometimes known as "Gasper".
+
+</div>
+
+#### Introduction
+
+The last section gave a broad view of blockchain consensus; in this section we will tighten the focus to Ethereum's proof of stake consensus. I've tried to follow a path that gives enough information to make sense of things, without wandering off into the detailed technical weeds on either side. All those weeds are well explored in the [annotated specification](/part3/) and other chapters, and I've included some links for those who want to branch off and go exploring.
+
+The first thing we must cover is the Ethereum-specific terminology that we will be using throughout.
+
+##### Nodes and Validators
+
+The main participants in the Ethereum network are _nodes_. A node's role is to validate consensus and form the communication backbone with other nodes.
+
+Consensus is formed by _validators_, which (in true Ethereum style) are horribly misnamed, as they don't really validate anything - that's done by the nodes. Each validator represents an initial 32 ETH stake. It has its own [secret key](/part2/building_blocks/signatures/#key-pairs), and the related public key that is its identity in the protocol. Validators are attached to nodes, and a single node can host anything from zero to hundreds or thousands of validators. Validators attached to the same node do not act independently, they share the same view of the world.[^fn-validators-nodes]
+
+[^fn-validators-nodes]: It would serve us well to be mindful of this when making claims about the decentralisation of Ethereum. Having, say, 600,000 validators active on the network is a long way from having 600,000 independent actors. Looking at the number of nodes, and the distribution of validators across nodes, will give more useful metrics for Ethereum's decentralisation.
+
+A interesting feature of proof of stake that sets it apart from proof of work is that, under PoS, we know our validator set. We have a complete list of all the public keys that we expect to be active at any time. Knowing our validator set enables us to achieve finality, as we can identify when we have achieved a majority vote of participants.[^fn-accountable-safety-jargon]
+
+[^fn-accountable-safety-jargon]: In consensus jargon, we can have "accountable safety".
+
+##### Slots and Epochs
+
+Time is strictly regimented in Ethereum's proof of stake consensus, which is a major change from proof of work, which only had casual relationship with time - PoW makes some attempt to keep block intervals constant on average, but that's all.
+
+The two most important intervals are the _slot_, which is [12 seconds](/part3/config/configuration/#seconds_per_slot) exactly, and the _epoch_, which is [32 slots](/part3/config/preset/#slots_per_epoch), or 6.4 minutes. Slots and epochs progress regularly and relentlessly, whatever else may be happening on the network.
+
+##### Blocks and Attestations
+
+Every slot, exactly one validator is [selected](/part3/helper/accessors/#get_beacon_proposer_index) to propose a _block_. The block [contains](/part3/containers/blocks/#beaconblockbody) updates to the beacon state, including attestations that the proposer knows about, as well as the [execution payload](/part3/containers/execution/#executionpayload) containing Ethereum user transactions. The proposer shares its block with the whole network via a gossip protocol.
+
+A slot can be empty: a block proposer might be offline, or propose an invalid block, or have its block subsequently reorged out of the chain. These things should not happen often in a well-running beacon chain, but the protocol is intended to be robust when empty slots occur.
+
+Every epoch, every validator gets to share its view of the world exactly once, in the form of an _attestation_. An attestation [contains](/part3/containers/dependencies/#attestationdata) votes for the _head_ of the chain that will be used by the LMD GHOST protocol, and votes for _checkpoints_ that will be used by the Casper FFG protocol. Attestations are also gossiped to the whole network. Like blocks, attestations can be missing for all sorts of reasons, and the protocol can tolerate this to various extents - crudely, the quality of consensus will decrease as the participation rate of attesters decreases.[^fn-attestation-rate]
+
+[^fn-attestation-rate]: The [Beaconcha.in](https://beaconcha.in/) site shows attestation participation rate (also called Voting Participation) on a per epoch basis. It is a good measure of network health. The rate often exceeds 99%, which is an outstanding level of performance for a massively distributed consensus protocol.
+
+The function of the epoch is to spread out the workload of handling all those attestations. By attesting, every validator is informing every other validator of its view of the world, which could amount to an immense amount of network traffic and processing load if it were all done at once. Spreading the attestation workload across all 32 slots of an epoch keeps resource usage low. In each slot, committees comprising only $\frac{1}{32}$ of the validators make attestations.
+
+The protocol incentivises block and attestation production and accuracy via a system of rewards and penalties for validators. We don't need to go into these now; there is a whole [separate chapter](/part2/incentives/) on all of that.
+
+##### Slashing
+
+In proof of work, producing a block is expensive. This is a strong incentive for miners to behave well, in line with the protocol's goals, to ensure that their blocks are included.
+
+In proof of stake, creating blocks and attestations is almost free[^fn-nothing-at-stake]. We need a way to prevent attackers from exploiting this to disrupt the network. This is the role of _slashing_. Validators that equivocate over blocks or attestations are subject to being [slashed](/part2/incentives/slashing/), which means that they are ejected from the validator set and fined some portion of their stake. Simply put, equivocation means saying two contradictory things. It might be proposing two different blocks for the same slot, or making two attestations that are inconsistent with each other, that no validator honestly following the protocol would have made.
+
+[^fn-nothing-at-stake]: This is sometimes called the "nothing at stake problem".
+
+#### The Shape of Gasper
+
+With some terminology behind us we can begin to outline Ethereum's actual consensus mechanism.
+
+Ethereum's proof of stake consensus protocol is actually a combination of two separate consensus protocols, known individually as LMD GHOST[^fn-lmd-name], and Casper FFG[^fn-ffg-name]. These two have been "bolted together" to form the consensus protocol we have implemented for Eth2 - the combined protocol is sometimes known by the portmanteau "Gasper".
+
+[^fn-lmd-name]: "Latest Message Driven, Greedy Heaviest Observed Subtree". I will unpack the naming in the specific [LMD GHOST chapter](/part2/consensus/lmd_ghost/#naming).
+
+[^fn-ffg-name]: "Casper the Friendly Finality Gadget". Again, I will unpack this slightly curious naming when we get to the specific [Casper FFG chapter](/part2/consensus/casper_ffg/#naming).
+
+Combining the two in Gasper is an attempt to get the best of both worlds in terms of liveness and safety. In essence, LMD GHOST provides slot-by-slot liveness (it keeps the chain running), while Casper FFG provides safety (it protects the chain from long reversions). LMD GHOST allows us to keep churning out blocks on top of one-another, but is forkful and therefore not formally safe. Casper FFG modifies the LMD GHOST fork choice rule to periodically bless the chain with finality. Nevertheless, as [previously discussed](/part2/consensus/preliminaries/#ethereum-prioritises-liveness), Ethereum prioritises liveness. Therefore, in situations in which Casper FFG is unable to confer finality, the chain still continues to grow via the LMD GHOST mechanism.
+
+This bolted-together consensus mechanism is not always pretty. We can sometimes see the joins, and the interaction between the two has led to subtle issues that we will discuss [later](/part2/consensus/issues/). However, in the spirit of Ethereum, it is a workable engineering solution that serves us well in practice.
+
+##### History
+
+The detailed history of Gasper is bound up with the development of the individual components, LMD GHOST and Casper FFG, which we will review in their respective sections. But we note here that Casper FFG was never designed to be a standalone consensus mechanism.
+
+As stated in the [Casper FFG paper](https://arxiv.org/abs/1710.09437),
+
+> Casper the Friendly Finality Gadget is an overlay atop a _proposal mechanism_ &ndash; a mechanism which proposes blocks.
+
+So, there is an underlying block proposal mechanism &ndash; which implies an underlying consensus mechanism &ndash; which Casper FFG sits on top of, delivering a kind of meta-consensus that confers finality on the blockchain.
+
+The original plan was to apply Casper FFG as a proof of stake overlay on top of Ethereum's proof of work consensus. Casper FFG would confer finality &ndash; a property that proof of work chains lack &ndash; on the chain on a periodic basis, say, every 100 blocks. This was intended to be the first step in weaning Ethereum off proof of work. With the finality guarantee, we could have reduced the proof of work block reward, and thereby reduced the overall hash power as an interim step towards replacing mining with full proof of stake at some future date.
+
+By the end of 2017, this plan had become quite advanced. [EIP-1011](https://eips.ethereum.org/EIPS/eip-1011), Hybrid Casper FFG, describes the architecture in detail, and there was even a [testnet](https://hackmd.io/@aTTDQ4GiRVyyce6trnsfpg/Hk6UiFU7z?type=view) that [went live](https://twitter.com/karl_dot_tech/status/947503029166546946) on the 31st of December, 2017.
+
+In early 2018, however, that plan was superseded. The limited bandwidth of the Ethereum Virtual Machine constrained the size of the validator set that EIP-1011 could support, in turn leading to a minimum stake of 1500&nbsp;ETH, which was seen as undesirable. Around the same time, paths towards a full, much more scalable proof of stake protocol became clearer, and we began working on the design that became Ethereum&nbsp;2.0.
+
+Due to its generic nature, Casper FFG was able to survive the redesign and was adopted into Ethereum&nbsp;2.0, not as an overlay on proof of work, but as an overlay on a new proof of stake protocol called LMD GHOST.
+
+##### A finality gadget
+
+When we say that Casper FFG overlays an existing block proposal mechanism, we mean that it takes an existing block tree and prunes it in a specific way. Casper FFG modifies the fork choice of the underlying block tree by making some of its branches inaccessible.
+
+Consider this block tree produced by some underlying consensus mechanism, whether it be proof of work, or LMD GHOST in proof of stake.
+
+<a id="img_gasper_blocktree"></a>
+<figure class="diagram" style="width: 70%">
+
+![A Diagram of a block tree with three forks.](images/diagrams/gasper-blocktree.svg)
+
+<figcaption>
+
+An arbitrary block tree with three forks (branches). Any of blocks $I$, $E$, or $M$ could be the tip of the chain. (The block labels are for convenience and do not imply a particular ordering.)
+
+</figcaption>
+</figure>
+
+In this situation, I have three candidate head blocks, $I$, $E$, and $M$. Under proof of work's longest chain rule, the choice of head block is obvious: I must choose M since it has the greatest block height, or (almost) equivalently the greatest amount of work done. Under LMD GHOST we can't choose a head block from this information alone, we'd need to see the votes from the other validators in order to make a choice.
+
+The challenge is that the chain from blocks $J$ to $M$ might be from an attacker. The attacker might have mined that chain in secret and revealed it later in a so-called 51% attack. Proof of work nodes would have no choice but to reorg to make $M$ the head, thereby favouring the attacker's chain and potentially becoming vulnerable to double-spends.
+
+The value that Casper FFG brings is that it confers finality. Let's say that block $D$ is marked as final by Casper FFG (which automatically finalises blocks $A$, $B$, and $C$). Finalisation modifies the fork choice rule of the underlying protocol so that any branch with blocks that competes with block $D$ &ndash; that is, any block not descended from $D$ &ndash; is excluded. Equivalently, branches are pruned so that there are no forks prior to the finalised block.
+
+<a id="img_gasper_blocktree_finalised"></a>
+<figure class="diagram" style="width: 70%">
+
+![A diagram of the same block tree after a block on one of the branches has been finalised.](images/diagrams/gasper-blocktree_finalised.svg)
+
+<figcaption>
+
+We have the same block tree as above, but now block $D$ has been finalised. The Casper FFG fork choice says that any chain not including block $D$ is ignored, so our head block is now unambiguously $E$.
+
+</figcaption>
+</figure>
+
+When block $D$ is finalised, the fork choice must ignore the branches that begin with blocks $F$ and $J$. We end up with a single candidate head block, $E$.
+
+Essentially, the finality delivered by Casper FFG prevents long reorganisations (reversions). No finalised block, or ancestor of a finalised block, will ever be reverted. In Ethereum's Casper FFG implementation we must qualify "ever", with, "without burning at least 1/3 of the entire amount of staked Ether". This is the economic finality that the proof of stake chain provides.
+
+#### Conclusion
+
+As a reminder, [this](/part2/consensus/) is the sentence we are trying to understand in all its parts.
+
+> The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant's most recent vote (Latest Message Driven, LMD).
+
+We've spent some time on what a consensus protocol is and does, and touched a little on proof of stake. We talked about finality, and at a high level I've illustrated how Casper FFG forms a "finality gadget" applied on top of LMD GHOST as a block proposal mechanism.
+
+Much work remains, however. In the next sections we will take deeper dives into [LMD GHOST](/part2/consensus/lmd_ghost/), [Casper FFG](/part2/consensus/casper_ffg/), and how they combine to form the [Gasper](/part2/consensus/gasper/) protocol.
+
+#### See also
+
+On the history of how everything came together, Vitalik made a terrific [tweet storm](https://twitter.com/VitalikButerin/status/1029900695925706753). Consolidated versions are available [here](https://www.trustnodes.com/2018/08/16/vitalik-buterin-tells-story-race-vlad-zamfir-implement-proof-stake-casper) and [here](https://hackmd.io/@liangcc/BJZDR1mIX?type=view). He discusses weak subjectivity a little, which we will deal with [later](/part2/validator/weak_subjectivity/).
+
+Joachim Neu's presentation, [The Why and How of PoS Ethereum's Consensus Problem](https://www.youtube.com/watch?v=2nMS-TK_tMw) (at ETHconomics, Devconnect 2022), is a very accessible insight into the availability&ndash;finality trade-off, and how Ethereum seeks to manage it. We'll pick up again on the idea of "nested ledgers" when we get to the [Gasper protocol](/part2/consensus/gasper/).
+
+### LMD Ghost <!-- /part2/consensus/lmd_ghost/ -->
+
+<div class="summary">
+
+  - LMD GHOST is a fork choice rule used by nodes to determine the best chain.
+  - It assigns weights to branches based on votes from all active validators.
+  - LMD GHOST does not provide finality, but does support a confirmation rule.
+  - Slashing is used to solve the "nothing at stake" problem.
+
+</div>
+
+#### Introduction
+
+In this section we will consider LMD GHOST in isolation, ignoring completely the Casper FFG finality overlay[^fn-casper-and-gasper-next]. LMD GHOST is the essence of a consensus mechanism in itself &ndash; it is a fork choice rule, just as the heaviest chain rule in Nakamoto consensus is &ndash; and has its own sets of properties and trade-offs.
+
+[^fn-casper-and-gasper-next]: The next section covers [Casper FFG](/part2/consensus/casper_ffg/), and the one after that the combination of the two into [Gasper](/part2/consensus/gasper/).
+
+For now, we will be considering only the "how it works" part of the story - the happy flow. We will look at the "how it can go wrong" part later, in the [Issues and Fixes](/part2/consensus/issues/) section.
+
+#### Naming
+
+The name LMD GHOST comprises two acronyms, for "Latest Message Driven", and "Greedy Heaviest-Observed Sub-Tree". We'll unpack GHOST first, then LMD.
+
+##### GHOST
+
+The GHOST protocol comes from a 2013 [paper by Sompolinsky and Zohar](https://eprint.iacr.org/2013/881) about how to safely improve transaction throughput on Bitcoin. Increasing the block size, or decreasing the interval between blocks, makes the chain more susceptible to forking in a network that has uncontrolled latency (delays), like the Internet. Chains that fork have more reorgs, and reorgs are bad for transaction security. Replacing Bitcoin's longest chain fork choice rule with the GHOST fork choice was shown to be more stable in the presence of latency, allowing block production to be more frequent.
+
+The name GHOST stands for "Greedy Heaviest-Observed Sub-Tree", which describes how the algorithm works. We will expand on that [below](#finding-the-head-block). In short, GHOST's fork choice doesn't follow the heaviest chain, but the heaviest subtree. It recognises that a vote for a block is not only for that block, but implicitly a vote for each of its ancestors as well, so whole subtrees have an associated weight.
+
+Bitcoin never adopted GHOST, and (despite that paper stating otherwise) neither did Ethereum under proof of work, although it had [originally](https://ethereum.org/en/whitepaper/#modified-ghost-implementation) been planned, and the old proof of work "uncle" rewards were related to it.
+
+##### LMD
+
+The GHOST protocol that we are using in Ethereum's proof of stake has been extended to be able to handle attestations. In proof of work, the voters are the block proposers. They vote for a branch by building their own block on top of it. In our proof of stake, all validators are voters, and each casts a vote for its view of the network once every 6.4 minutes on average by publishing an attestation. So, under PoS, we have a lot more information available about participants' views of the network.
+
+This is what it means to be "message driven", giving us the MD in LMD. The fork choice is driven not by blocks added by proposers, but by messages (attestations, votes) published by all validators.
+
+The "L" stands for "latest": LMD GHOST takes into account only the _latest_ message from each validator, that is, the most recent attestation that we have received from that validator. All a validator's earlier messages are discarded, but its latest vote is retained and has weight indefinitely.
+
+As a side note, other versions of message-driven GHOST are available. Vitalik [initially favoured](https://twitter.com/VitalikButerin/status/1029906757512966144) IMD, "Immediate Message Driven", GHOST. As far as I can tell[^fn-imd-tricky], this retains all attestations indefinitely, and the fork choice chooses based on the whatever attestation was current at the time. Then there's [FMD](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion), "Fresh Message Driven", GHOST, which considers attestations only from the current and previous epochs. And [RLMD](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "Recent Latest Message Driven", GHOST which remembers validators' latest attestations only for a parameterisable number of epochs.
+
+[^fn-imd-tricky]: I've yet to find a lucid exposition of IMD GHOST. Looking back through the history on the [original mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) gives some information, but it's hard to understand what was really happening. It was first known as ["recursive proximity to justification"](https://twitter.com/VitalikButerin/status/1029906887376961536), since it was bound up with Casper FFG in a way that LMD GHOST is not.
+
+#### How it works
+
+LMD GHOST, above all, is a [fork choice rule](/part2/consensus/preliminaries/#fork-choice-rules). Given a tree of blocks and a collection of votes, LMD GHOST will tell me which block I should consider to be the best head, thereby giving me a linear view of history from that head all the way back to genesis. The decision is based on my local view of the chain, based on the messages (blocks and attestations) that my node has received - remember, there is no "God's eye view", my local view is all that I have to work with, and it may well differ from other nodes' local views. The idea is that honest validators will build their blocks on the best head that they see, and will in turn cast their votes according the best head block they see.
+
+Some things that a good fork choice rule will deliver are as follows.[^fn-good-fork-choice-rule]
+
+[^fn-good-fork-choice-rule]: I've adapted this from an old post of Vitalik's, [PoS fork choice rule desiderata](https://ethresear.ch/t/pos-fork-choice-rule-desiderata/2636?u=benjaminion). I'm postponing his finality point for now. I am not aware of much formal analysis of LMD GHOST with respect to properties like these; in fact, our implementation of LMD GHOST [may not do too well](https://arxiv.org/pdf/2302.11326.pdf) in some respects. But these goals are worth bearing in mind as we explore how the mechanism works.
+
+  - Majority honest progress: if over 50% of nodes build blocks by following the fork choice rule, the chain progresses and is (exponentially) unlikely to revert older blocks.
+  - Stability: the fork choice is a good prediction of the future fork choice.
+  - Manipulation resistance: even if an attacker captures a temporary supermajority of some small set of participants, the attacker is unlikely to be able to revert blocks.
+
+All these points are interrelated. Stability, in particular, is important for block proposers. When I propose a block, I want to be as sure as I possibly can be that the block will remain in the chain forever. Equivalently, that it will not be reorged out. Finding the head block means finding the block that most likely will make my new block the head in the views of other nodes when I build on it.
+
+We'll divide our exploration of how LMD GHOST works in two. We'll look first at the LMD part, storing latest messages, and then at the GHOST part, finding the head.
+
+##### Storing latest messages
+
+Messages, in this context, are the head block votes found in attestations. In an attestation's [data](/part3/containers/dependencies/#attestationdata), the head vote is the `beacon_block_root` field:
+
+```python
+class AttestationData(Container):
+    slot: Slot
+    index: CommitteeIndex
+    # LMD GHOST vote
+    beacon_block_root: Root
+    # FFG vote
+    source: Checkpoint
+    target: Checkpoint
+```
+
+Every honest validator makes an attestation exactly once per epoch, containing its vote for the best head block. Within each epoch, the validator set is split into committees, so that at each slot only $1/32$ of the validators are attesting.
+
+Nodes receive attestations both directly, via attestation gossip, and indirectly, contained in blocks. In principle, a node could receive attestations through other means &ndash; I could type an attestation in at the keyboard if I wished &ndash; but in practice votes propagate only via attestation gossip and within blocks.
+
+On receiving an attestation, by whatever means, the node calls the fork choice's [`on_attestation()`](/part3/forkchoice/phase0/#on_attestation) handler. Before proceeding, the `on_attestation()` handler performs some basic [validity checks](/part3/forkchoice/phase0/#validate_on_attestation) on the attestation:
+
+  - Is it too old?
+    - It must be from the current or previous epoch. See [Attestation consideration delay](/part2/consensus/issues/#attestation-consideration-delay).
+  - Is it too new?
+    - It must be from no later than the previous slot. See [Attestation recency](/part2/consensus/issues/#attestation-recency).
+  - Do we know about the block that it is voting for, the `beacon_block_root`?
+    - We must have received that block already. If not we might try to fetch it from a peer.
+  - Is its signature correct?
+    - Validators sign attestations and are accountable for them.
+  - Is the attestation slashable?
+    - We must ignore attestations that conflict with other attestations. See [Attestation equivocation](/part2/consensus/issues/#attestation-equivocation).
+
+After passing these and some other checks, the attestation is considered for insertion into the node's Store, which is its repository of information about the state of the chain: its view. This is done in [`update_latest_messages()`](/part3/forkchoice/phase0/#update_latest_messages). If we don't already have a head block vote for the validator, then this one is stored for it. If we have a head block vote for the validator, then this one replaces it if it is more recent.
+
+Over time, then, a node's Store builds up a list containing a single latest vote for each validator that it has heard from.
+
+Note that a vote can be inserted in the store only if we heard about it in the same epoch or the epoch after it was made. However, once it is in the store it remains there indefinitely, and continues to contribute to the fork choice until it is updated with a more recent vote. This is a key difference between LMD GHOST and, say, the [Goldfish protocol](https://arxiv.org/pdf/2209.03255.pdf), or [RLMD GHOST](https://arxiv.org/pdf/2302.11326.pdf).
+
+##### Finding the head block
+
+In essence, the LMD GHOST fork choice rule is a function $\text{GetHead}(\text{Store}) \rightarrow \text{HeadBlock}$. As we've seen, a node's Store is its view of the world: all the relevant information it has received that could affect the fork choice. For the pure LMD GHOST algorithm we are looking at here, the relevant parts of the [Store](/part3/forkchoice/phase0/#store) are the following.
+
+  - The block tree, which is just a list of blocks. The blocks' parent links join them logically into a tree.
+  - The list of latest messages (votes) from validators.
+  - The validators' [effective balances](/part2/incentives/balances/) (based on some state) as these provide the weights used in the algorithm.
+
+The goal of the GHOST algorithm is to select a single leaf block from the given block tree, where a leaf is a block without any descendants. This will be our chosen head block.
+
+We are going to assume that all the blocks in our block tree descend from a single root block. In a pure GHOST algorithm, that would be the genesis block: by definition, all blocks must descend from genesis. In our full consensus implementation, that root block will be the last justified checkpoint block. For our present purposes, all we need to know is that the GHOST algorithm starts from a given block, and ignores all blocks not descended from that block.
+
+###### Get weight
+
+The first thing we do is calculate the "weight" of each branch in the tree. A branch's weight is its score, in some sense.
+
+The weight of a vote is the [effective balance](/part2/incentives/balances/) of the validator that made the vote. This will usually be 32 ETH, the maximum effective balance, but could be less. A vote, recall, is the latest message we have from that validator.
+
+The weight of a branch is the weight of the votes for the block that roots it, plus the weights of that block's child branches. By including the weights of child branches, we are acknowledging that a vote for a block is also a vote for each of the ancestors of that block. The weight of a branch consisting of only a leaf block will be just the weight of the votes for that block.
+
+<a id="img_annotated_forkchoice_get_weight_0"></a>
+<figure class="diagram" style="width: 90%">
+
+![Diagram of a block tree with branch weights and vote weights shown for each block.](images/diagrams/annotated-forkchoice-get-weight-0.svg)
+
+<figcaption>
+
+$B_N$ is the sum of the effective balances of the validators whose most recent head vote was for block $N$, and $W_N$ is the weight of the branch rooted at block $N$.
+
+</figcaption>
+</figure>
+
+Some obvious relationships apply between the weights, $W_x$, of branches, and $B_x$, the weights of the votes for blocks.
+
+  - For a branch comprising only a leaf block, $L$, $W_L = B_L$.
+  - The weight of a branch is the weight of the votes for the block at its root plus the sum of the weights of all branches below it. So, in the diagram, $W_1 = B_1 + W_2 + W_3$.
+  - The weight of a branch is the sum of the weights of all votes for blocks in the subtree that forms the branch.
+
+Since votes always carry a positive weight, no block will have a greater weight than the root block, and the root block's weight is the sum of the weights of all the votes for blocks in the tree. Every validator has at most one latest message &ndash; that is, one vote &ndash;, so that weight is bounded above by the total effective balance of all active validators.[^fn-ignoring-proposer-boost]
+
+[^fn-ignoring-proposer-boost]: Ignoring proposer boost, which we shall deal with [later](/part2/consensus/issues/#proposer-boost).
+
+###### Get head
+
+Once we have the weight of each branch or subtree, the algorithm proceeds recursively. Given a block, we select the heaviest branch descending from it. We then repeat the process with the block at that branch's root. If a block has only one child, then the choice is obvious and there is no work to do. If two or more branches have equal weight, we arbitrarily choose the branch rooted at the child block with the highest block hash value. Eventually we will reach a block with no children. This is a leaf block and will be the output of the algorithm.
+
+Unpacking the GHOST name, we see that the algorithm: is Greedy, meaning that it takes the Heaviest-Observed branch immediately, without looking further; and deals with Sub-Trees, the weight of a branch being the sum of all the weights of votes for blocks in the subtree.
+
+Here's a simple example. In the diagrams, I've distinguished between (1) the weight of the votes for a particular block, which are the numbers attached to each block, and (2) the weights of branches, which I've added to the lines joining the blocks to their parents.
+
+First, from the latest messages in the Store, we calculate the weight of votes for each block in the tree.
+
+<a id="img_annotated_forkchoice_lmd_ghost_0"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the weight of votes for each block.](images/diagrams/annotated-forkchoice-lmd-ghost-0.svg)
+
+<figcaption>
+
+`get_head()` starts from the root block, $A$, of a block tree. The numbers show the weights of the votes for each block.
+
+</figcaption>
+</figure>
+
+Second, from the weights of votes for each block, we can calculate the weight of each branch or subtree.
+
+<a id="img_annotated_forkchoice_lmd_ghost_1"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the weight of each block and the weight of each branch, or subtree.](images/diagrams/annotated-forkchoice-lmd-ghost-1.svg)
+
+<figcaption>
+
+The `get_weight()` function when applied to a block returns the total weight of the subtree of the block and all its descendants. These weights are shown on the lines between child and parent blocks.
+
+</figcaption>
+</figure>
+
+Third, we move recursively through the blocks at the roots of the subtrees, always choosing the branch or subtree with the highest weight. Eventually, we will reach a leaf, which is our chosen head block.
+
+<a id="img_annotated_forkchoice_lmd_ghost_2"></a>
+<figure class="diagram" style="width: 85%">
+
+![Diagram of a block tree showing the branch chosen by the GHOST rule.](images/diagrams/annotated-forkchoice-lmd-ghost-2.svg)
+
+<figcaption>
+
+At block $A$, branch $C$ is heavier. At $C$, branch $E$ is heavier. Block $E$ is a leaf block, so it is GHOST's choice for the head of the chain. Our blockchain is $[A \leftarrow C \leftarrow E]$. A "longest chain" rule would have chosen block $G$, although that branch has minority support from validators.
+
+</figcaption>
+</figure>
+
+If, say, the subtrees rooted at $B$ and $C$ had equal weight, we would choose according to which of blocks $B$ and $C$ had the greatest block hash - this is a completely arbitrary tie-break mechanism.
+
+###### The specification
+
+The code that implements all this in the specification is [`get_head()`](/part3/forkchoice/phase0/#get_head), which walks up through the tree from the root, taking the heaviest branch at each fork. The code for calculating the weight of a subtree is [`get_weight()`](/part3/forkchoice/phase0/#get_weight).
+
+If you look at the [`get_weight()`](/part3/forkchoice/phase0/#get_weight), you'll find that it is more complex than what we've covered here, due to something called "proposer boost". We shall discuss proposer boost in detail in the [Issues and Fixes](/part2/consensus/issues/) section.
+
+#### Intuition
+
+Having seen how the GHOST protocol works, it's perhaps easier to gain some intuition for why we prefer it to a longest chain rule. The occurrence of forks suggests that block propagation time has become of similar order to, or exceeds, block production intervals (slots). In short, not all validators are seeing all the blocks in time to attest to them or to build on them.
+
+In these circumstances, we want to take advantage of the maximum amount of information available. Votes for two different children of the same parent block should be taken as confirmation that all those validators favour the parent block's branch, even if there is disagreement about the child blocks. GHOST achieves this simply by allowing a vote for a child block to add weight to all of its ancestors. Thus, when faced with a choice, we favour the branch with the greatest total support from validators. I've illustrated this in the [diagram above](#img_annotated_forkchoice_lmd_ghost_2): branch $C$ is favoured over branch $B$, even though block $B$ has more direct votes than block $C$, since more validators overall made latest votes for branch $C$.
+
+The longest chain rule discards all this information, and can allow a branch to win even if only a minority of validators has been working on it.
+
+#### Confirmation rule
+
+In proof of work, the only data available for input into the fork choice comes from block production, which represents the view of a single miner at the time of publishing the block.
+
+In Ethereum's proof of stake protocol, we have vastly more information available to us, in the form of head block votes from $\frac{1}{32}$ of the validator set every 12 seconds, in addition to the block proposer's view.
+
+In principle, all this extra information ought to allow us to be very sure, very quickly, about whether blocks will remain canonical or are in danger of being reverted. Proof of work chains tend to use a heuristic around the number of confirmations that a block has received. That is, blocks are assumed to be exponentially less likely to be reverted the more blocks have been built on top of them. This is generally true, but can fail badly in high-latency environments (such as an attacker making a longer chain in secret).
+
+Proof of stake's ultimate answer to this is finality, which we shall look at in the next section. LMD GHOST on its own does not provide finality. However, it's interesting to consider whether there is some heuristic analogous to proof of work's confirmations rule that we can use, and it turns out that [there is](https://ethresear.ch/t/confirmation-rule-for-ethereum-pos/15454?u=benjaminion). In fact, it improves on the PoW confirmation rule by giving a "yes/no" statement about the safety of a block, rather than a probability.
+
+The details of the confirmation rule are described by Aditya Asgaonkar in a [blog post](https://www.adiasg.me/confirmation-rule-for-ethereum/) and an accompanying paper. The general idea is that, for a block $b$, we calculate two values $q$ and $q_\text{min}$. When $q > q_\text{min}$, _and_ the network remains close to synchronous, then that block is confirmed as "safe". We can be fully confident that it will not be reorged.
+
+The quantity $q^n_b$ is defined as the weight of the subtree rooted at $b$ at slot $n$ divided by the total weight of votes cast since $b$ was produced. Simply put, if, in the slots since $b$ was proposed, 80% of validators voted for $b$ or a descendant of $b$, then $q^n_b$ would be $0.8$.
+
+$q_\text{min}$ is defined as $\frac{1}{2} + \beta$, where $\beta$ is the fraction of stake we believe is controlled by an adversary. This fraction is unknown, but is assumed to be less than one third, otherwise we have big problems.
+
+Now, if $q^n_{b'} > q_\text{min}$ for $b$ and all its (non-finalised) ancestors, $b'$, then $b$ is considered to be confirmed, or "safe".
+
+The idea is that, once a branch up to block $b$ has accumulated a simple majority of the available voting weight, then all honest validators will continue to vote for that branch, so it will maintain its majority indefinitely. One way this can fail is if dishonest validators swap their votes to another branch, giving that branch a majority instead. That's why we add a fraction $\beta$ to the basic majority safety parameter of $\frac{1}{2}$, so that, even if all the dishonest validators swap branches, our branch maintains a majority. The other way this can fail is if the network begins to suffer delays or partitions (loses synchrony), so that some honest validators cannot see other honest validators' votes, hence the reliance on the network remaining sufficiently synchronous.
+
+While this seems very intuitive, there are some important subtleties and complications related to the integration with Casper FFG that modify the confirmation rule, so anyone dealing with this should consult the [full paper](https://ethresear.ch/uploads/short-url/fV7zyTggJtMn8xlUUNVXTOB532G.pdf) (which remains a draft). In addition, [proposer boost](/part2/consensus/issues/#proposer-boost) makes it easier for an adversarial block proposer to reorg a block, so we need to account for that as well.
+
+The table below summarises the differences between the confirmation rule and finality for a block.
+
+| &nbsp;   | Confirmation      | Finality |
+| ----     | --------          | -------- |
+| Time | One slot in ideal circumstances, less than a minute more generally. | At least two epochs / 13 minutes. |
+| Assumptions | Network remains synchronous until finality. | No synchrony assumption. |
+| Breakage | A confirmed block can be reorged if the network does not remain synchronous. | A conflicting block can be finalized if more than $\frac{1}{3}$ of the validators commit a slashable action. |
+
+The confirmation rule is not yet implemented in client software as I write, but should be available in due course via the [safe block](/part3/safe-block/) specification.
+
+#### Slashing in LMD GHOST
+
+One of the big breakthroughs in proof of stake design was the adoption of slashing as a way around the ["nothing at stake" problem](https://ethereum.stackexchange.com/questions/2402/what-exactly-is-the-nothing-at-stake-problem). The problem, in essence, is that under proof of stake it is almost costless for a validator to equivocate by publishing multiple contradictory messages.
+
+The solution turns out to be rather elegant. We detect when a validator has equivocated and punish it. The punishment is called ["slashing"](/part2/incentives/slashing/), and entails removing a proportion of the validator's stake, and ejecting the validator from the protocol. Since validators digitally sign their messages, finding two contradictory signed messages is absolute proof of misbehaviour, so we can slash with confidence.
+
+The name "slashing" comes from Vitalik's [Slasher](https://blog.ethereum.org/2014/01/15/slasher-a-punitive-proof-of-stake-algorithm) algorithm from early 2014. That was a very early proposal for solving the nothing at stake problem. Our current design doesn't look much like Slasher, but some things have carried over, not least the name.
+
+##### Proposer slashing
+
+When it is a validator's turn to produce a block in a particular slot, the validator is supposed to run the [fork choice rule](/part2/consensus/preliminaries/#fork-choice-rules) in order to decide which existing block it will build its own block on. Its goal is to identify the fork that is most likely, based on the evidence it has, to be the one that eventually becomes canonical. That is, the one that the whole set of correct validators will converge on.
+
+<a id="img_consensus_nas_0"></a>
+<figure class="diagram" style="width: 70%">
+
+![Diagram of a block tree with a fork in which the proposer has a choice of head block to build on.](images/diagrams/consensus-nas-0.svg)
+
+<figcaption>
+
+The proposer of a block needs to choose which block to build on. The best strategy is to build on the block least likely to be reorged, as indicated by the fork choice rule.
+
+</figcaption>
+</figure>
+
+However, why choose? Under proof of stake &ndash; unlike under proof of work &ndash; it is almost costless for validators to produce blocks. Therefore, a good strategy would seem to be to propose multiple blocks, one built on each possible head, then at least one of my blocks is guaranteed to become part of the eventual canonical chain.
+
+<a id="img_consensus_nas_1"></a>
+<figure class="diagram" style="width: 70%">
+
+![Diagram of a block tree with a fork in which the proposer builds on both head blocks.](images/diagrams/consensus-nas-1.svg)
+
+<figcaption>
+
+In the absence of punishment, a lazy or dishonest proposer might choose to extend both sides of the fork.
+
+</figcaption>
+</figure>
+
+This is undesirable because it prolongs any fork and prevents the network from converging on a linear history. Users of the chain may not be able to work out which fork is correct, and that makes them vulnerable to double spend attacks, the very thing we wish to avoid.
+
+This illustrates the [nothing at stake problem](https://ethereum.stackexchange.com/questions/2402/what-exactly-is-the-nothing-at-stake-problem). As outlined above, the solution is to detect the two contradictory blocks and slash the validator that proposed them.
+
+Proposer equivocation is not detected in-protocol, but relies on a third-party constructing a proof of equivocation in the form of a [`ProposerSlashing`](/part3/containers/operations/#proposerslashing) object. The proof comprises just two signed beacon block headers: that's enough to prove that the proposer signed off on two blocks in the same slot. A subsequent block proposer will include the proof in a block (and be well rewarded for it), and the protocol will slash the offending validator's balance and eject it from the active validator set.
+
+##### Attester slashing
+
+Similarly, when it is a validator's turn to publish an attestation, it is supposed to run its fork choice rule and vote for the head block that it thinks is best. The issue here is that an attacker could make multiple contradictory attestations in order to provoke or prolong forks and prevent the network from converging on a single chain. Even a mostly-honest validator might be tempted to make two attestations for a borderline late block: one voting for the block, one voting for an empty slot. If it weren't punishable behaviour, this would hedge the chance of voting the wrong way and missing out on a reward.
+
+The remedy is the same: detect and punish contradictory attestations. That is, attestations made in by the same validator in the same slot for different head blocks.
+
+#### History
+
+The LMD GHOST fork choice in Ethereum has its origin's in Vlad Zamfir's work on the Casper CBC protocol (then known as Casper TFG, and not to be confused with Casper FFG, which is something quite different[^fn-naming-in-ethereum]). The [initial announcement](https://blog.ethereum.org/2015/08/01/introducing-casper-friendly-ghost) of Casper TFG was in 2015, and in his 2017 [Casper the Friendly Ghost](https://raw.githubusercontent.com/vladzamfir/research/master/papers/CasperTFG/CasperTFG.pdf) paper, Zamfir describes combining Sompolinsky and Zohar's [GHOST](https://eprint.iacr.org/2013/881) protocol with a "latest message" construction.
+
+[^fn-naming-in-ethereum]: Welcome to the joy of naming things in Ethereum.
+
+In August 2018, Vitalik [still favoured](https://twitter.com/VitalikButerin/status/1029906887376961536?s=20) a fork choice called [IMD GHOST](https://ethresear.ch/t/immediate-message-driven-ghost-as-ffg-fork-choice-rule/2561) (formerly known as Recursive Proximity to Justification), that was more aware of finalisation and justification than the pure LMD GHOST that we have today. As the [Eth2 consensus mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) evolved, IMD GHOST was changed to LMD GHOST in November 2018[^fn-see-the-changes]. This was due to concerns about the [stability properties](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) of IMD GHOST.
+
+[^fn-see-the-changes]: You can view the history of changes to the [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) by clicking on the pencil icon near the title.
+
+That November 2018 description of LMD GHOST in the [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) is essentially what we are using today.
+
+#### See also
+
+Bear in mind that this section has covered only the pure form of LMD GHOST. In Ethereum's full consensus protocol, LMD GHOST is modified by being integrated with Casper FFG, as we shall see in the [Gasper](/part2/consensus/gasper/) section. It is also modified by [proposer boost](/part2/consensus/issues/#proposer-boost), which we shall also discuss later.
+
+The [fork choice](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/fork-choice.md) document in the consensus specs repo contains the relevant specifications. They are covered in my annotated specification in the following places.
+
+  - [`get_head()`](/part3/forkchoice/phase0/#get_head) is the entry point to the fork choice when we want to get an opinion on the best current head block.
+  - [`get_weight()`](/part3/forkchoice/phase0/#get_weight) is where the LMD GHOST algorithm is implemented.
+  - The [`on_attestation()`](/part3/forkchoice/phase0/#on_attestation) handler is where the fork choice learns about LMD GHOST votes.
+    - Validating those votes is mostly taken care of in [`validate_on_attestation()`](/part3/forkchoice/phase0/#validate_on_attestation).
+    - [`update_latest_messages()`](/part3/forkchoice/phase0/#update_latest_messages) takes care of the record keeping around latest messages.
+
+The introduction to Vitalik's [annotated fork choice](https://github.com/ethereum/annotated-spec/blob/master/phase0/fork-choice.md) is an excellent overview (though some of the details in the spec itself are now outdated). The LMD GHOST part of Vitalik's [CBC Casper tutorial](https://vitalik.ca/general/2018/12/05/cbc_casper.html) has a nice explainer. Ignore the later stuff about finality in Casper CBC - that does not concern us.
+
+Some weaknesses of LMD GHOST as it is currently implemented in Ethereum are reviewed in the [RLMD GHOST](https://arxiv.org/pdf/2302.11326.pdf) paper. For example, LMD GHOST does not handle dynamic participation securely &ndash; that is, when large numbers of validators go offline &ndash; among other things. We will consider some of the issues [later](/part2/consensus/issues/), but the introduction to that paper is a good read if you want to get a head start.
+
 ### Casper FFG <!-- /part2/consensus/casper_ffg/* -->
 
 TODO
 
-### LMD Ghost <!-- /part2/consensus/lmd_ghost/* -->
+#### Naming
 
 TODO
 
 ### Gasper <!-- /part2/consensus/gasper/* -->
 
+<div class="summary">
+
+  - TODO
+
+</div>
+
 TODO
 
-### Weak Subjectivity <!-- /part2/consensus/weak_subjectivity/* -->
+#### Safety and liveness in Gasper
+
+##### Heads and tails
 
 TODO
 
-### Issues <!-- /part2/consensus/issues/* -->
+### Issues and Fixes <!-- /part2/consensus/issues/* -->
+
+#### LMD GHOST
+
+[RLMD GHOST paper](https://arxiv.org/pdf/2302.11326.pdf).
+
+TODO
+
+##### Attestation consideration delay
+
+TODO - 1 slot delay in consideration
+
+##### Attestation recency
+
+TODO - current or previous epoch
+
+##### Attestation equivocation
+
+TODO
+
+##### Reorgs and Reversions
+
+TODO
+
+###### Ex ante reorgs
+
+TODO
+
+###### Ex post reorgs
+
+TODO
+
+##### Proposer boost
+
+TODO
+
+#### Notes
+
+### Weak Subjectivity <!-- /part2/validator/weak_subjectivity/* -->
+
+The two great problems that had to be solved in order for proof of stake to be a sound foundation for the world's economic activity were (1) the nothing at stake problem, and (2) long range attacks.
+
+Ethereum's consensus solves the nothing at stake problem &ndash; that it is costless for a proof of stake validator to equivocate on every block proposal, building on every fork rather than picking one &ndash; with a slashing mechanism. The long range attack problem is solved by [embracing weak subjectivity](https://blog.ethereum.org/2014/11/25/proof-stake-learned-love-weak-subjectivity).
+
+<!-- Vlad's earlier post has a good viewpoint on weak subjectvity: https://blog.ethereum.org/2015/08/01/introducing-casper-friendly-ghost -->
 
 TODO
 
@@ -1066,7 +1585,7 @@ Using the same style as in the [Merkleization](/part2/building_blocks/merkleizat
 
 <figcaption>
 
-Each box is a 32 byte chunk, possibly padded with zeros (in the cases of ${S(Pubkey)}_2$ and $S(Amount)$). Merkleization is the process of finding the hash tree root by iteratively hashing together pairs of chunks, in the form of binary trees, until the root is reached.
+Each box is a 32 byte chunk, possibly padded with zeros (in the cases of $S{(Pubkey)}_2$ and $S(Amount)$). Merkleization is the process of finding the hash tree root by iteratively hashing together pairs of chunks, in the form of binary trees, until the root is reached.
 
 </figcaption>
 </figure>
@@ -2670,7 +3189,9 @@ For the original description of the mechanics of the inactivity leak, see the [C
 
 #### Introduction
 
-Slashing occurs when validators make attestations or block proposals that break very specific protocol rules. It applies to behaviour that could potentially be part of an attack on the chain. Getting slashed means losing a significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty". The good news is that stakers can take simple precautions to protect against ever being slashed.
+Slashing occurs when validators make attestations or block proposals that break very specific protocol rules. It applies to behaviour that could potentially be part of an attack on the chain. Getting slashed means losing a significant amount of stake and being ejected from the protocol. It is more "punishment" than "penalty"[^fn-slashing-punitive]. The good news is that stakers can take simple precautions to protect against ever being slashed.
+
+[^fn-slashing-punitive]: The concept of slashing has its roots in Vitalik's [Slasher](https://blog.ethereum.org/2014/01/15/slasher-a-punitive-proof-of-stake-algorithm) algorithm from early 2014. Our current design looks quite different, but some things remain. In particular, he says that, "we are calling [it] Slasher to express its harshly punitive nature", and we retail the name "slashing" for the same reason.
 
 The behaviours that lead to slashing are as follows.
 
@@ -2691,7 +3212,7 @@ All of these slashable behaviours relate to "equivocation", which is when a vali
 
 The slashing conditions related to Casper FFG underpin Ethereum&nbsp;2.0's [economic finality](/part2/incentives/staking/#economic-finality) guarantee. They effectively impose a well-determined price on reverting finality.
 
-The slashing conditions related to LMD GHOST are less robustly supported by consensus theory, and are not directly related to economic finality. Nonetheless, they punish bad behaviour that could lead to serious issues such as the [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion). Since we already had the slashing mechanism available for use with Casper FFG, it was simple enough to extend it to LMD GHOST.
+The slashing conditions related to LMD GHOST are designed to combat the [nothing at stake](https://ethereum.stackexchange.com/questions/2402/what-exactly-is-the-nothing-at-stake-problem) problem, and are not directly related to economic finality. They punish bad behaviour that could lead to serious issues such as the [balancing attack](https://ethresear.ch/t/a-balancing-attack-on-gasper-the-current-candidate-for-eth2s-beacon-chain/8079?u=benjaminion). Since we already had the slashing mechanism available for use with Casper FFG, it was simple enough to extend it to LMD GHOST.
 
 As with penalties, any amount removed from validators' beacon chain accounts due to slashing is effectively burned, reducing the overall net issuance of the beacon chain.
 
@@ -11024,7 +11545,7 @@ Where we discuss attestations, they can be a single attestation from one validat
 
 Proof of Stake Ethereum has a long history that we shall review elsewhere. The following milestones are significant for the current Casper FFG plus LMD GHOST implementation.
 
-Vitalik published the original [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) for the beacon chain's proof of stake consensus on July 31st 2018, shortly after we had abandoned prior designs for moving Ethereum to PoS. The initial design used IMD GHOST (Immediate Message Driven GHOST) in which attestations have a limited lifetime in the fork choice[^fn-imd-ghost]. IMD GHOST [was changed](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) to LMD GHOST (Latest Message Driven GHOST) in November 2018 due to concerns about the convergence properties of IMD.
+Vitalik published the original [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) for the beacon chain's proof of stake consensus on July 31st 2018, shortly after we had abandoned prior designs for moving Ethereum to PoS. The initial design used IMD GHOST (Immediate Message Driven GHOST) in which attestations have a limited lifetime in the fork choice[^fn-imd-ghost]. IMD GHOST [was changed](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) to LMD GHOST (Latest Message Driven GHOST) in November 2018 due to concerns about the stability property of IMD.
 
 [^fn-imd-ghost]: If I've understood correctly. Traces of IMD GHOST are difficult to find these days, and that's probably for the better.
 
@@ -11860,7 +12381,7 @@ If the block is not a viable head by the first criterion, it might still be a vi
 
 We know that any Casper FFG vote we make at this point will have `voting_source.epoch` strictly less than `store.justified_checkpoint.epoch`, by property 1, and since we already dealt with the equality case.
 
-Line `D` in the source code says that it is safe to allow votes where `voting_source.epoch == current_epoch - 2` and `voting_source.epoch == current_epoch - 1`. Any honest vote's target epoch will be `current_epoch`, so the gap between source and target is at most two epochs, which is not enough to surround a previous vote. That is, a vote $[s_2 \rightarrow t_2]$ that surrounds a previous vote $[s_1 \rightarrow t_1]$ requires that $s_2 < s_1 < t_1 < t_2$. This is not possible if $t_2 - s_2 \le 2$.
+Line `D` in the source code says that it is safe to allow votes where `voting_source.epoch == current_epoch - 2` and `voting_source.epoch == current_epoch - 1`. Any honest vote's target epoch will be `current_epoch`, so the gap between source and target is at most two epochs, which is not enough to surround a previous vote. That is, a vote $[s_2 \rightarrow t_2]$ that surrounds a previous vote $[s_1 \rightarrow t_1]$ requires that $s_2 < s_1 < t_1 < t_2$. This is not possible if $t_2 - s_2 \le 2$. This exception is required for the analysis of the [safe block confirmation rule](/part3/safe-block/), and is discussed in section 3.3 of the [Confirmation Rule paper](https://ethresear.ch/uploads/short-url/fV7zyTggJtMn8xlUUNVXTOB532G.pdf).
 
 <a id="img_annotated_forkchoice_correct_justified_1"></a>
 <figure class="diagram" style="width: 85%">
@@ -12955,9 +13476,7 @@ def get_safe_beacon_block_root(store: Store) -> Root:
 
 > _Note_: Currently safe block algorithm simply returns `store.justified_checkpoint.root` and is meant to be improved in the future.
 
-Since the protocol handles many attestations per slot, it ought to be possible to use the Store's `latest_messages` table to identify a very recent block as safe. [Some work](https://notes.ethereum.org/@adiasg/safe-head) has been done in this direction, but is incomplete. Meanwhile, the algorithm simply returns the most recently justified checkpoint. This is certainly safe under the assumptions above, but we could probably do better in finding a more recent safe block[^fn-safe-block-wip].
-
-[^fn-safe-block-wip]: Substantial progress has been made recently towards providing a more useful safe block. See the [blog post](https://www.adiasg.me/confirmation-rule-for-ethereum/), the article [Confirmation Rule for Ethereum PoS](https://ethresear.ch/t/confirmation-rule-for-ethereum-pos/15454?u=benjaminion) on Ethresear.ch, and the linked [draft paper](https://ethresear.ch/uploads/short-url/fV7zyTggJtMn8xlUUNVXTOB532G.pdf).
+Returning the justified checkpoint is certainly safe under the assumptions above, but we can almost certainly do better. Substantial progress has been made recently towards providing a more useful safe block. There's more on this in the [Confirmation rule](/part2/consensus/lmd_ghost/#confirmation-rule) section of the Consensus chapter.
 
 #### `get_safe_execution_payload_hash`
 
