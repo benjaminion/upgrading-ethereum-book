@@ -882,6 +882,20 @@ The table below summarises the differences between the confirmation rule and fin
 
 The confirmation rule is not yet implemented in client software as I write, but should be available in due course via the [safe block](/part3/safe-block/) specification.
 
+#### Incentives in LMD GHOST
+
+One of the ways cryptoeconomic systems secure themselves is by rewarding good behaviour and penalising bad behaviour. In our implementation of LMD GHOST, both proposers and attesters are rewarded in different ways for accurately finding the head of the chain.
+
+The incentive for a block proposer to build on the best head is clear. If it doesn't, then there's a good chance that its block will not be included in the eventual canonical chain &ndash; it will be orphaned &ndash; in which case the proposer will not receive any of its block rewards. This is an implicit incentive rather than explicit; miners in proof of work are in a similar situation.
+
+By contrast, validators are directly rewarded for voting accurately. When a validator makes an accurate head vote, and its attestation is included in a block in the very next slot, it receives [a micro reward](/part2/incentives/rewards/#introduction). A perfectly performing validator will gain about 22% of its total protocol rewards from making accurate head votes. Proposers, in turn, are incentivised to include such attestations in blocks as they receive a proportionate micro, micro reward for each one they manage to get in.
+
+A vote is accurate if it matches what ends up in the canonical chain. So if the validator voted for a block at the previous slot, and the canonical chain has a matching block there, then it receives its reward. If it voted for a block from a previous slot, indicating a skipped slot, and the canonical chain has skipped slots between that block and the present, then it will also receive its reward.
+
+There is no penalty if a validator makes an inaccurate head vote, or their head vote is not included on chain within one slot. Getting the head vote right is difficult when the beacon chain is under stress, and there are late and missing blocks. This is often no fault of the validator itself, and it was felt unfair to penalise them in such circumstances.[^fn-head-block-penalty]
+
+[^fn-head-block-penalty]: The original Phase 0 specification [did have a penalty](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/#components-of-attestation-deltas) for a missed head vote. This was removed in the [Altair upgrade](/part4/history/altair/)'s accounting reforms.
+
 #### Slashing in LMD GHOST
 
 One of the big breakthroughs in proof of stake design was the adoption of slashing as a way around the ["nothing at stake" problem](https://ethereum.stackexchange.com/questions/2402/what-exactly-is-the-nothing-at-stake-problem). The problem, in essence, is that under proof of stake it is almost costless for a validator to equivocate by publishing multiple contradictory messages.
