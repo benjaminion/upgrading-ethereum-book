@@ -61,7 +61,7 @@ const plugins = [
   },
 ]
 
-var addTitleSettings =  {
+const addTitleSettings =  {
   name: addTitle.name,
   type: addTitle.type,
   active: addTitle.active,
@@ -69,7 +69,7 @@ var addTitleSettings =  {
   params: undefined,
 }
 
-var addAttributes = {
+const addAttributes = {
     name: 'addAttributesToSVGElement',
     params: undefined,
 }
