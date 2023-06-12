@@ -2,9 +2,7 @@ import React from "react"
 import { graphql } from "gatsby"
 import cheerio from "cheerio"
 
-import "katex/dist/katex.min.css"
 import "../css/page.css"
-
 import Banner from "../components/banner"
 import Sidebar from "../components/sidebar"
 import Subsections from "../components/subsections"
