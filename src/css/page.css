@@ -173,6 +173,18 @@ main li {
   padding-bottom: 3px;
 }
 
+main ol {
+  list-style-type: decimal;
+}
+
+main ol ol {
+  list-style-type: lower-alpha;
+}
+
+main ol ol ol {
+  list-style-type: lower-roman;
+}
+
 blockquote {
   margin-left: 0;
   padding-left: 2em;
