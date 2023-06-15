@@ -1,0 +1,22 @@
+  "overrides": {
+
+    // See https://github.com/lodash/babel-plugin-lodash/issues/259#issuecomment-1438592335
+    //
+    // Gets rid of:
+    // warn `isModuleDeclaration` has been deprecated,
+    //      please migrate to `isImportOrExportDeclaration`
+    "babel-plugin-lodash": {
+      "@babel/types": "~7.20.0"
+    },
+
+    // https://github.com/gatsbyjs/gatsby/issues/37242#issuecomment-1396620944
+    //
+    // Gets rid of this when using npm:
+    // ERESOLVE overriding peer dependency
+    // While resolving: react-server-dom-webpack@0.0.0-experimental-c8b778b7f-20220825
+    //
+    // This is ok as I am not using Partial Hydration.
+    "react-server-dom-webpack@0.0.0-experimental-c8b778b7f-20220825": {
+      "react": "$react"
+    }
+  }
