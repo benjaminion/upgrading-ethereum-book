@@ -26,11 +26,11 @@ while(<$fh>) {
 
     chomp;
 
-    if ($inMath and !(/^\$\$/)) {
+    if ($inMath and !(/^\$\$$/)) {
         $latex .= $_ . " % Source line $.\n";
     }
 
-    if (/^\$\$/) {
+    if (/^\$\$$/) {
         $inMath = !$inMath;
         $latex .=  $inMath ? "\\[\n" : "\\]\n";
         next;
@@ -42,6 +42,9 @@ while(<$fh>) {
             $latex .= $ltx . " % Source line $.\n";
         }
     }
+
+    pos = 0;
+    print "Unbalanced \$ on line $." if (() = /(^|[^\\])\$/g) % 2;
 }
 
-run3 @command, \$latex;
+$inMath and print "Unbalanced \$\$ detected" or run3 @command, \$latex;
