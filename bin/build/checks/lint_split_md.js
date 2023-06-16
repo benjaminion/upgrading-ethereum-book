@@ -40,6 +40,10 @@ module.exports.lintSplitMarkdown = (files) => {
         'style': 'underscore',
       },
 
+      //
+      // Disabled rules
+      //
+      
       // Trailing blank lines are hard to avoid when doing the split
       'MD012': false,
 
