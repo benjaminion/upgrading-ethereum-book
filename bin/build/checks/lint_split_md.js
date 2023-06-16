@@ -32,7 +32,7 @@ module.exports.lintSplitMarkdown = (files) => {
 
       // We fence all block code with backticks
       'MD046': {
-        "style": "fenced",
+        'style': 'fenced',
       },
 
       // Emphasis style
@@ -49,6 +49,9 @@ module.exports.lintSplitMarkdown = (files) => {
 
       // We have long lines
       'MD013': false,
+
+      // Some lists begin with other index than 1
+      'MD029': false,
 
       // We have inline html
       'MD033': false,

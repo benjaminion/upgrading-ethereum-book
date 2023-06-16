@@ -31,7 +31,7 @@ module.exports.lintSourceMarkdown = (file) => {
 
       // We fence all block code with backticks
       'MD046': {
-        "style": "fenced",
+        'style': 'fenced',
       },
 
       // Emphasis style
@@ -51,6 +51,9 @@ module.exports.lintSourceMarkdown = (file) => {
 
       // Multiple top-level titles are ok (they appear on different pages after pre-processing)
       'MD025': false,
+
+      // Some lists begin with other index than 1
+      'MD029': false,
 
       // We have inline html
       'MD033': false,

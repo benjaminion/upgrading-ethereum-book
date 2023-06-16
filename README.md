@@ -83,6 +83,7 @@ There are various npm script commands to help with building and testing:
   - `npm run spell` can be used to maintain the list of spellings.
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
   - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
+  - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
 
 ## How to
 
