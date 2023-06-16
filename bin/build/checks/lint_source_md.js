@@ -39,6 +39,10 @@ module.exports.lintSourceMarkdown = (file) => {
         'style': 'underscore',
       },
 
+      //
+      // Disabled rules
+      //
+      
       // We have long lines
       'MD013': false,
 
