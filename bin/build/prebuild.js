@@ -27,7 +27,7 @@ const linkChecker = 'bin/build/checks/links.pl'
 const htmlChecker = 'bin/build/checks/html.pl'
 const spellChecker = 'bin/build/checks/spellcheck.sh'
 const repeatChecker = 'bin/build/checks/repeats.sh'
-const whitespaceChecker = 'bin/build/checks/whitespace.sh'
+const whitespaceChecker = 'bin/build/checks/whitespace.pl'
 const latexChecker = 'bin/build/checks/latex.pl'
 const mdSplitter = 'bin/build/process_markdown.sh'
 
