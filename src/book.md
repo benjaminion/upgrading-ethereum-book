@@ -453,7 +453,7 @@ We're going to be discussing finality a good deal over the following sections, w
 
 Finality is the idea that there are blocks that will never be reverted. When a block has been finalised, all the honest nodes on the network have agreed that the block will forever remain part of the chain's history, and therefore that all of its ancestors will remain in the chain's history. Finality makes your payment for pizza as irrevocable as if you'd handed over cash. It is the ultimate protection against double-spending.[^fn-finality-not-absolute]
 
-[^fn-finality-not-absolute]: It's worth noting that finality is never absolute. Whatever any protocol claims, if a supermajority of nodes agrees (for example via a software upgrade) to revert a bunch of finalised blocks, then that's going to happen. Ultimately, as in all things, the concept of finality is subservient to social consensus.
+[^fn-finality-not-absolute]: It's worth noting that finality is never absolute. Whatever any protocol claims, if a supermajority of nodes agrees (for example via a software upgrade) to revert a bunch of finalised blocks, then that's going to happen. Ultimately, as in all things, the concept of finality is subservient to social consensus. See [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality) for further discussion.
 
 Some consensus protocols, like classical PBFT, or Tendermint, finalise every round (every block). As soon as a round's worth of transactions has been included on the chain, all the nodes agree that it will be there forever. On the one hand, these protocols are very "safe": once a transaction has been included on-chain, it will never be reverted. On the other hand, they are vulnerable to liveness failures: if the nodes cannot come to agreement &ndash; for example, if more than one third of them are down or unavailable &ndash; then no transactions can be added to the chain and it will stop dead.
 
@@ -702,11 +702,15 @@ Some things that a good fork choice rule will deliver are as follows.[^fn-good-f
 
 All these points are interrelated. Stability, in particular, is important for block proposers. When I propose a block, I want to be as sure as I possibly can be that the block will remain in the chain forever. Equivalently, that it will not be reorged out. Finding the head block means finding the block that most likely will make my new block the head in the views of other nodes when I build on it.
 
-We'll divide our exploration of how LMD GHOST works in two. We'll look first at the LMD part, storing latest messages, and then at the GHOST part, finding the head.
+We'll divide our exploration of how LMD GHOST works in two. We'll look first at the LMD part, latest messages, and then at the GHOST part, finding the head.
 
-##### Storing latest messages
+##### Latest messages
 
-Messages, in this context, are the head block votes found in attestations. In an attestation's [data](/part3/containers/dependencies/#attestationdata), the head vote is the `beacon_block_root` field:
+Messages, in this context, are the head block votes found in attestations.
+
+###### Votes in LMD GHOST
+
+In an attestation's [data](/part3/containers/dependencies/#attestationdata), the head vote is the `beacon_block_root` field:
 
 ```python
 class AttestationData(Container):
@@ -719,9 +723,11 @@ class AttestationData(Container):
     target: Checkpoint
 ```
 
-Every honest validator makes an attestation exactly once per epoch, containing its vote for the best head block. Within each epoch, the validator set is split into committees, so that at each slot only $1/32$ of the validators are attesting.
+Every honest validator makes an attestation exactly once per epoch, containing its vote for the best head block in its view at the moment that it attests. Within each epoch, the validator set is split into committees, so that at each slot only $1/32$ of the validators are attesting.
 
 Nodes receive attestations both directly, via attestation gossip, and indirectly, contained in blocks. In principle, a node could receive attestations through other means &ndash; I could type an attestation in at the keyboard if I wished &ndash; but in practice votes propagate only via attestation gossip and within blocks.
+
+###### Storing latest messages
 
 On receiving an attestation, by whatever means, the node calls the fork choice's [`on_attestation()`](/part3/forkchoice/phase0/#on_attestation) handler. Before proceeding, the `on_attestation()` handler performs some basic [validity checks](/part3/forkchoice/phase0/#validate_on_attestation) on the attestation:
 
@@ -844,7 +850,9 @@ If you look at the [`get_weight()`](/part3/forkchoice/phase0/#get_weight), you'l
 
 #### Intuition
 
-Having seen how the GHOST protocol works, it's perhaps easier to gain some intuition for why we prefer it to a longest chain rule. The occurrence of forks suggests that block propagation time has become of similar order to, or exceeds, block production intervals (slots). In short, not all validators are seeing all the blocks in time to attest to them or to build on them.
+Having seen how the GHOST protocol works, it's perhaps easier to gain some intuition for why we prefer it to a longest chain rule. The occurrence of forks suggests that block propagation time has become of similar order to, or exceeds, block production intervals (slots). In short, not all validators are seeing all the blocks in time to attest to them or to build on them.[^fn-toward-12s]
+
+[^fn-toward-12s]: See Vitalik's [Toward a 12-second block time](https://blog.ethereum.org/2014/07/11/toward-a-12-second-block-time) for a fascinating analysis of this in a proof of work context. However, not much of it carries over to our PoS implementation, except that GHOST helps to make sense of a forkful network.
 
 In these circumstances, we want to take advantage of the maximum amount of information available. Votes for two different children of the same parent block should be taken as confirmation that all those validators favour the parent block's branch, even if there is disagreement about the child blocks. GHOST achieves this simply by allowing a vote for a child block to add weight to all of its ancestors. Thus, when faced with a choice, we favour the branch with the greatest total support from validators. I've illustrated this in the [diagram above](#img_annotated_forkchoice_lmd_ghost_2): branch $C$ is favoured over branch $B$, even though block $B$ has more direct votes than block $C$, since more validators overall made latest votes for branch $C$.
 
@@ -3008,7 +3016,7 @@ The detailed penalty calculations are defined in the spec in these functions:
 
 If the beacon chain hasn't finalised a checkpoint for longer than [`MIN_EPOCHS_TO_INACTIVITY_PENALTY`](/part3/config/preset/#min_epochs_to_inactivity_penalty) (4) epochs, then it enters "inactivity leak" mode[^fn-inactivity-leak-mainnet].
 
-[^fn-inactivity-leak-mainnet]: The Ethereum mainnet had nine consecutive epochs of non-finality from epoch 200,750 to 200,758 on the 12th of May, 2023. This was the first sufficiently long period of non-finality on mainnet to trigger the inactivity leak.
+[^fn-inactivity-leak-mainnet]: The Ethereum mainnet had nine consecutive epochs of delayed finality from epoch 200,750 to 200,758 on the 12th of May, 2023. This was the first sufficiently long period of delayed finality on mainnet to trigger the inactivity leak.
 
 The inactivity leak is a kind of emergency state in which rewards and penalties are modified as follows.
 
