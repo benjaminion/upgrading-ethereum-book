@@ -40,13 +40,16 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 ### Significant known issues
 
-- Intermittent: sometimes a couple of pages with diagrams overflow off the bottom.
-- Intermittent: footnotes sometimes vanish.
+- Intermittent: sometimes pages with diagrams overflow off the bottom.
+- Footnotes can vanish.
+  - Specifically, footnote 7 in Consensus - Preliminaries - Finality.
+  - This seems to be due to the footnote being referenced from inside block-quoted text.
+  - It looks to be due to the code that adds a side-bar using `framed`.
+  - Indeed, the [framed manual](https://anorien.csc.warwick.ac.uk/mirrors/CTAN/macros/latex/contrib/framed/framed.pdf) says that footnotes are not supported.
 
 ### Pending improvements
 
 - Keep all headings with their next lines on page breaks.
   - Mostly working, but headings before summary boxes are a problem.
-- Better table styling - seems quite difficult.
 - `<details>` blocks need some styling.
 - Heading numbers?
