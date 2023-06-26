@@ -1,6 +1,7 @@
+personal_ws-1.1 en 442 utf-8
 ABI
 ADSL
-API
+API's
 ASICs
 Accessors
 Aditya
@@ -11,8 +12,9 @@ Alin
 Anders
 Arvind
 Asgaonkar
+Asgaonkar's
 Attenborough
-Attestant
+Attestant's
 AttestationData
 Attester
 AttesterSlashing
@@ -35,10 +37,11 @@ Blockchains
 Blst
 Boneh
 Booleans
-Bugrara
+Bugrara's
 CLI
 Casper
 Cassez
+Cassez's
 ChainSafe
 Chia
 Christos
@@ -58,6 +61,7 @@ Decentralization
 Devcon
 Devconnect
 Dfinity
+Dfinity's
 DoS
 DomainType
 Drijvers
@@ -67,19 +71,23 @@ EIP
 EIPs
 EOA
 ERC
-ETC
+ETC's
 ETH
 ETHconomics
 EVM
+EVM's
 Elowsson
+Elowsson's
 Endianness
 Eth
 EthStaker
 Ethereum
+Ethereum's
 Etherscan
 Ethresear
 ExecutionAddress
 FFG
+FFG's
 FLP
 FMD
 FastAggregateVerify
@@ -87,7 +95,7 @@ Feist
 Flashbots
 ForkDigest
 Francesco
-GHOST
+GHOST's
 Gamlum
 Gasper
 Giga
@@ -111,20 +119,23 @@ IndexedAttestations
 Iteratively
 Iykyk
 JSON
-Jacek
+Jacek's
 Joachim
 KDF
 KEVM
 Kalinin
+Kalinin's
 Keccak
 Keystore
 Keystores
-Kyne
+Kyne's
 LMD
 Lamport
+Lamport's
 Lifecycle
 Liscon
 Liskov
+Liskov's
 Liveness
 Lookahead
 MEV
@@ -138,6 +149,7 @@ Merkleized
 Merkleizing
 MiMC
 Monnot
+Monnot's
 Multiprocess
 Mutators
 NFTs
@@ -145,7 +157,7 @@ Nakamoto
 Namib
 Narayanan
 Natale
-Neu
+Neu's
 Neven
 Oisín
 PBFT
@@ -158,7 +170,7 @@ PegaSys
 Permissionless
 Peta
 Piecharts
-Pintail
+Pintail's
 PoS
 PoW
 Potuz
@@ -173,6 +185,7 @@ Pythonic
 Pythonistas
 Péter
 RANDAO
+RANDAO's
 REPL
 RLMD
 RLP
@@ -186,6 +199,7 @@ SHA
 SSF
 SSLE
 SSZ
+SSZ's
 STARKs
 Saltini
 Satoshi
@@ -208,6 +222,7 @@ TFG
 TODO
 TTD
 Teku
+Teku's
 Tendermint
 TiB
 Tomescu
@@ -220,6 +235,7 @@ Validators
 Vasiliy
 Verkle
 Vitalik
+Vitalik's
 Vyper
 WASM
 WB
@@ -229,8 +245,10 @@ WithdrawalIndex
 YP
 ZK
 Zamfir
+Zamfir's
 Zcash
 Zohar
+Zohar's
 Ztyp
 activations
 additively
@@ -238,6 +256,7 @@ aggregatable
 al
 asynchrony
 attester
+attester's
 attesters
 biasability
 biasable
@@ -269,6 +288,7 @@ decrementing
 decrypt
 deduplication
 deployer
+deployer's
 deserialisation
 deserialise
 deserialised
@@ -281,7 +301,7 @@ devs
 discretisation
 disincentivise
 disincentivised
-else
+else's
 endian
 endianness
 equivocaters
@@ -373,6 +393,7 @@ slashability
 slashable
 slashings
 staker
+staker's
 stakers
 stateful
 subnet
@@ -402,6 +423,7 @@ unstake
 unviable
 uptime
 validator
+validator's
 validators
 verifiability
 verifiably
