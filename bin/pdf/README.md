@@ -46,6 +46,8 @@ The generated PDF will be written to your current directory as _book.pdf_.
   - This seems to be due to the footnote being referenced from inside block-quoted text.
   - It looks to be due to the code that adds a side-bar using `framed`.
   - Indeed, the [framed manual](https://anorien.csc.warwick.ac.uk/mirrors/CTAN/macros/latex/contrib/framed/framed.pdf) says that footnotes are not supported.
+  - Using `mdframed` or other solutions places the footnote with the quote rather than at the bottom of the page.
+  - As a workaround, I've moved the footnote, but it would be good to fix this somehow.
 
 ### Pending improvements
 
