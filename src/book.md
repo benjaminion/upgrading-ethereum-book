@@ -3153,6 +3153,7 @@ GWEI = 10 ** 9
 EJECTION_BALANCE = 16 * GWEI
 MAX_EFFECTIVE_BALANCE = 32 * GWEI
 HYSTERESIS_QUOTIENT = 4
+INACTIVITY_SCORE_BIAS = 4
 INACTIVITY_PENALTY_QUOTIENT = 2 ** 24
 
 # Simplified hysteresis for monotonically decreasing balance
@@ -3160,12 +3161,14 @@ def calc_effective_balance(balance):
     return min(MAX_EFFECTIVE_BALANCE, (balance + GWEI // HYSTERESIS_QUOTIENT) // GWEI * GWEI)
 
 epoch = 0
+score = 0
 balance = 32 * GWEI
 effective_balance = calc_effective_balance(balance)
 
 while effective_balance > EJECTION_BALANCE:
-    balance -= effective_balance * epoch // INACTIVITY_PENALTY_QUOTIENT
+    balance -= effective_balance * score // (INACTIVITY_SCORE_BIAS * INACTIVITY_PENALTY_QUOTIENT)
     effective_balance = calc_effective_balance(balance)
+    score += INACTIVITY_SCORE_BIAS
     epoch += 1
 
 print(balance / GWEI)
