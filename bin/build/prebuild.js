@@ -32,7 +32,7 @@ const latexChecker = 'bin/build/checks/latex.pl'
 const mdSplitter = 'bin/build/process_markdown.sh'
 
 const sourceMarkdown = 'src/book.md'
-const ourSpellings = 'src/spellings.txt'
+const ourSpellings = 'src/spellings.en.pws'
 
 const customReporter = {
   // https://tintin.mudhalla.net/info/xterm/
