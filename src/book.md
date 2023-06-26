@@ -371,7 +371,7 @@ At this point, the node believes that block $F$ is the best head, and therefore 
 </figcaption>
 </figure>
 
-Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore $G$. But in this case we will imagine that the fork choice rule indicates that $G$ is the better head block.
+Some time later the node receives block $G$ which is not built on its current head block $F$, but on block $C$ on a different branch. Depending on the details of the fork choice rule, the node might still evaluate $F$ to be a better head than $G$ and therefore ignore $G$. But in this case we will assume that the fork choice rule indicates that $G$ is the better head block.
 
 Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed from the node's canonical chain. Any transactions or information those blocks contain will be reverted, as if they were never received. The node must perform a full rewind to the state that it was in after processing block $B$.
 
@@ -678,13 +678,13 @@ Bitcoin never adopted GHOST, and (despite that paper stating otherwise) neither 
 
 ##### LMD
 
-The GHOST protocol that we are using in Ethereum's proof of stake has been extended to be able to handle attestations. In proof of work, the voters are the block proposers. They vote for a branch by building their own block on top of it. In our proof of stake, all validators are voters, and each casts a vote for its view of the network once every 6.4 minutes on average by publishing an attestation. So, under PoS, we have a lot more information available about participants' views of the network.
+The GHOST protocol that we are using in Ethereum's proof of stake has been extended to be able to handle attestations. In proof of work, the voters are the block proposers. They vote for a branch by building their own block on top of it. In our proof of stake protocol, all validators are voters, and each casts a vote for its view of the network once every 6.4 minutes on average by publishing an attestation. So, under PoS, we have a lot more information available about participants' views of the network.
 
 This is what it means to be "message driven", giving us the MD in LMD. The fork choice is driven not by blocks added by proposers, but by messages (attestations, votes) published by all validators.
 
 The "L" stands for "latest": LMD GHOST takes into account only the _latest_ message from each validator, that is, the most recent attestation that we have received from that validator. All a validator's earlier messages are discarded, but its latest vote is retained and has weight indefinitely.
 
-As a side note, other versions of message-driven GHOST are available. Vitalik [initially favoured](https://twitter.com/VitalikButerin/status/1029906757512966144) IMD, "Immediate Message Driven", GHOST. As far as I can tell[^fn-imd-tricky], this retains all attestations indefinitely, and the fork choice chooses based on the whatever attestation was current at the time. Then there's [FMD](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion), "Fresh Message Driven", GHOST, which considers attestations only from the current and previous epochs. And [RLMD](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "Recent Latest Message Driven", GHOST which remembers validators' latest attestations only for a parameterisable number of epochs.
+As a side note, other versions of message-driven GHOST are available. Vitalik [initially favoured](https://twitter.com/VitalikButerin/status/1029906757512966144) IMD, "Immediate Message Driven", GHOST. As far as I can tell[^fn-imd-tricky], this retains all attestations indefinitely, and the fork choice chooses based on whatever attestation was current at the time. Then there's [FMD](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion), "Fresh Message Driven", GHOST, which considers attestations only from the current and previous epochs. And [RLMD](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "Recent Latest Message Driven", GHOST which remembers validators' latest attestations only for a parameterisable number of epochs.
 
 [^fn-imd-tricky]: I've yet to find a lucid exposition of IMD GHOST. Looking back through the history on the [original mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) gives some information, but it's hard to understand what was really happening. It was first known as ["recursive proximity to justification"](https://twitter.com/VitalikButerin/status/1029906887376961536), since it was bound up with Casper FFG in a way that LMD GHOST is not.
 
