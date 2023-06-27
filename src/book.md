@@ -1136,7 +1136,7 @@ A sketch of the flows of deposits and withdrawals for a validator. Time runs rou
 </figcaption>
 </figure>
 
-An amusing observation from the diagram is that there is no minus sign attached to the deposit contract: the deposit contract's balance is "up-only" as validators exit and restake. When a validator exits and restakes, the deposit contract's balance increases by 32&nbsp;ETH while everything else is essentially unchanged. If this were to happen 3.2 million times (not inconceivable with well over half a million validators currently staked) then the balance of the deposit contract would exceed the total amount of Ether that's ever circulated, roughly 120 million ETH. This is of no importance, except to underline that the balance of the deposit contract should be considered burned, and counted as zero when totting up Ethereum's total supply[^fn-deposit-contract-balance].
+An amusing observation from the diagram is that there is no minus sign attached to the deposit contract: the deposit contract's balance is "up-only" as validators exit and restake. When a validator exits and restakes, the deposit contract's balance increases by 32&nbsp;ETH while everything else is essentially unchanged. If this were to happen 3.2 million times (not inconceivable with well over half a million validators currently staked) then the balance of the deposit contract would exceed the total amount of Ether that's ever circulated, roughly 120 million ETH. This is of no importance, except to underline that the balance of the deposit contract should be considered burned, and counted as zero when totting up Ethereum's total supply.[^fn-deposit-contract-balance]
 
 [^fn-deposit-contract-balance]: Now that the Engine API is available, we could in principle reduce the deposit contract's balance whenever a receipt is processed on the consensus layer, but the added complexity is undesirable only to fix this quirk.
 
@@ -1146,7 +1146,7 @@ As for withdrawals, partial withdrawals are regular transfers of anything above 
 
 In the following sections, we will look first at the mechanics of [making a deposit](/part2/deposits-withdrawals/staking/), followed by an in-depth study of [the deposit contract](/part2/deposits-withdrawals/contract/). We will close by looking at the consensus layer mechanics for processing [deposits](/part2/deposits-withdrawals/deposit-processing/) and [withdrawals](/part2/deposits-withdrawals/withdrawal-processing/).
 
-A constant theme of the next sections is that much of the complexity in the current deposit and withdrawal processes has arisen due to Ethereum's peculiar history. The deposit contract's incremental Merkle tree, the Eth1Data voting period, the Eth1 follow distance - all these are due to the execution layer remaining on proof of work while we built a separate beacon chain on proof of stake. The whole BLS withdrawal credentials saga arose from our uncertainty about the roadmap at the time.
+A constant theme of the next sections is that much of the complexity in the current deposit and withdrawal processes has arisen due to Ethereum's peculiar history. The deposit contract's incremental Merkle tree, the Eth1Data voting period, the Eth1 follow distance - all these are due to the execution layer having remained on proof of work while we built a separate beacon chain on proof of stake. The whole BLS withdrawal credentials saga arose from our uncertainty about the roadmap at the time.
 
 Another theme is that, post-Merge, we have the opportunity to clean some of this up. [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) is a proposal for significantly streamlining deposit handling. Nevertheless, some of the complexity will be with us forever.
 
@@ -3571,9 +3571,11 @@ Signature verification can be treated as a black-box: we send the message, the p
 
 More formally, signatures are verified using elliptic curve pairings.
 
-With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a pairing $e$, $e:G_1\times G_2\rightarrow G_T$.
+With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a pairing $e$, $e:G_1\times G_2\rightarrow G_T$.[^fn-pairing-multiplication]
 
-Pairings are usually denoted $e(P,Q)$ and have very special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
+[^fn-pairing-multiplication]: If it helps, you can loosely think of a pairing as being a way to "multiply" a point in $G_1$ by a point in $G_2$. If we were to write all the groups additively then the arithmetic would work out very nicely. However, we conventionally write $G_T$ multiplicatively, so the notation isn't quite right.
+
+Pairings are usually denoted $e(P,Q)$ and have special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
 
   - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
   - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
@@ -4079,7 +4081,7 @@ We could have mixed in the reveal by hashing it directly with the RANDAO accumul
 
 > Using `xor` in `process_randao` is (slightly) more secure than using `hash`. To illustrate why, imagine an attacker can grind randomness in the current epoch such that two of his validators are the last proposers, in a different order, in two resulting samplings of the next epochs. The commutativity of `xor` makes those two samplings equivalent, hence reducing the attacker's grinding opportunity for the next epoch versus `hash` (which is not commutative). The strict security improvement may simplify the derivation of RANDAO security formal lower bounds.
 
-We will see [shortly](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. Justin's [point](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457546253) is that, under the current scheme, the attacker having validators $V_0, V_1$ in the two last slots of an epoch is equivalent to it having $V_1, V_0$ with respect to the `randao_reveal`s. This fractionally reduces an attackers choices when it comes to influencing the RANDAO. If we used `hash` rather than `xor`, or if we signed over the slot number rather than the epoch number, these orderings would result in different outcomes from each other, giving an attacker more choice and therefore more power.
+We will see [shortly](#randao-biasability) that it can be advantageous to an attacker to have control of the last slots of an epoch. Justin's [point](https://github.com/ethereum/consensus-specs/pull/496#issuecomment-457546253) is that, under the current scheme, the attacker having validators $V_0, V_1$ in the two last slots of an epoch is equivalent to it having $V_1, V_0$ with respect to the `randao_reveal`s. This fractionally reduces an attacker's choices when it comes to influencing the RANDAO. If we used `hash` rather than `xor`, or if we signed over the slot number rather than the epoch number, these orderings would result in different outcomes from each other, giving an attacker more choice and therefore more power.
 
 #### Lookahead
 
