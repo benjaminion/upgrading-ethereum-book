@@ -10,9 +10,10 @@ use IPC::Run3;
 
 $\ = "\n"; # set output record separator
 
-my ($file) = @ARGV;
-die "Usage: $0 FILE\n" if not $file;
-open my $fh, '<', $file or die "Can't open $file: $!";
+my $fh = *STDIN;
+if (my $file = shift) {
+    open $fh, '<', $file or die "Can't open $file: $!";
+}
 
 # Add any exclusions here by adding "-n#" where # is the warning number
 my @command = ["chktex", "-q"];

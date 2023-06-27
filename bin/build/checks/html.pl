@@ -10,9 +10,10 @@ $\ = "\n"; # set output record separator
 my @html_entities = ('ndash', 'nbsp');
 my %entities = map { $_ => 1 } @html_entities;
 
-my ($file) = @ARGV;
-die "Usage: $0 FILE\n" if not $file;
-open my $fh, '<', $file or die "Can't open $file: $!";
+my $fh = *STDIN;
+if (my $file = shift) {
+    open $fh, '<', $file or die "Can't open $file: $!";
+}
 
 my @tags = ();
 
