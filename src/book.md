@@ -53,7 +53,7 @@ You will also notice that I unapologetically use British English spelling, punct
 
 ## Acknowledgements
 
-First and foremost, I want to thank my employer, ConsenSys. Much of the work has been in my own time, but ConsenSys has also been very cool with me working on this in the course of my day job. ConsenSys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
+First and foremost, I want to thank my employer, [Consensys](https://consensys.io/). Much of the writing has been done in my own time, but Consensys has been increasingly supportive of me working on this in the course of my day job. In particular, during Q2 2023, the company granted me three months of writing leave to work full-time on the book. They also allowed me to put a liberal licence on everything. All this is extremely cool of them, and I am deeply grateful. Consensys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
@@ -61,7 +61,7 @@ Thank you to the many GitCoin grant supporters who donated in support of the ori
 
 Shout-out to the EthStaker community: you rock!
 
-Finally, to circle back to ConsenSys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past five-plus years. It is where I helped establish the fabulous Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
+Finally, to circle back to Consensys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past five-plus years. It is where I helped establish the fabulous Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
 
 # Part 1: Building <!-- /part1/ -->
 
@@ -1365,7 +1365,7 @@ In June 2020 Runtime Verification performed a [formal verification](https://gith
 1. Verification that the incremental Merkle tree algorithm is equivalent to a full Merkle tree construction.
 2. Verification that the bytecode was correctly generated from the Solidity source code, using the KEVM verifier.
 
-Just prior to the deployment of the contract, Franck Cassez of ConsenSys performed some further work as described in his paper, [Verification of the Incremental Merkle Tree Algorithm with Dafny](https://arxiv.org/pdf/2105.06009.pdf), and [GitHub repository](https://github.com/ConsenSys/deposit-sc-dafny). This goes further than Runtime Verification's work by fully mechanically verifying the incremental Merkle tree algorithm, using the Dafny formal verification language.
+Just prior to the deployment of the contract, Franck Cassez of Consensys performed some further work as described in his paper, [Verification of the Incremental Merkle Tree Algorithm with Dafny](https://arxiv.org/pdf/2105.06009.pdf), and [GitHub repository](https://github.com/ConsenSys/deposit-sc-dafny). This goes further than Runtime Verification's work by fully mechanically verifying the incremental Merkle tree algorithm, using the Dafny formal verification language.
 
 ##### Deployment
 
@@ -12362,7 +12362,7 @@ The newer, more complex, `correct_justified` evaluation from the Capella update 
 
 I'm not going to pretend that I understand this fully - it seems very far from intuitive, and its correctness far from obvious[^fn-fc-fv]. For now I will quote some explanation that Aditya shared with me directly.
 
-[^fn-fc-fv]: Some evidence for how challenging the fork choice is to reason about is provided by the [formal proofs of correctness](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) created by Roberto Saltini and team at ConsenSys. [One of the proofs alone](https://docs.google.com/document/d/1V0sabk-DKnIl3BKgt-GkEFSFq-K-Ie8gmuezHRnVn0c/edit#) is 28 pages long when printed.
+[^fn-fc-fv]: Some evidence for how challenging the fork choice is to reason about is provided by the [formal proofs of correctness](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) created by Roberto Saltini and team at Consensys. [One of the proofs alone](https://docs.google.com/document/d/1V0sabk-DKnIl3BKgt-GkEFSFq-K-Ie8gmuezHRnVn0c/edit#) is 28 pages long when printed.
 
 > The `correct_justified` condition ensures that:
 > (a) we pick a head block that has a "good" justification in its chain, and
@@ -12438,7 +12438,7 @@ The `correct_finalized` check might appear redundant at first sight since we are
 
 ###### Formal proofs
 
-As referenced in the Ethereum Foundation's [disclosure](https://notes.ethereum.org/@djrtwo/2023-fork-choice-reorg-disclosure) on the Capella fork choice spec updates, some properties of the new fork choice have been [formally verified](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) by Roberto Saltini and his team at ConsenSys.
+As referenced in the Ethereum Foundation's [disclosure](https://notes.ethereum.org/@djrtwo/2023-fork-choice-reorg-disclosure) on the Capella fork choice spec updates, some properties of the new fork choice have been [formally verified](https://docs.google.com/document/d/1PnhDMij6w_fjLGicSF-I9sQcSWgaj5fjtGlRPIgYnVA/edit) by Roberto Saltini and his team at Consensys.
 
 This formal verification process involves selecting some properties that we wish to be true for the fork choice, and manually constructing proofs that they are always preserved by the specification. It is a much more robust and rigorous process than manual testing, fuzz testing, or general hand-waving that have hitherto been the main approaches.
 
