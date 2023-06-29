@@ -7184,6 +7184,8 @@ The whole follow distance concept has been made redundant by the Merge and may b
 
 If a validator's effective balance falls to 16 Ether or below then it is exited from the system. This is most likely to happen as a result of the ["inactivity leak"](/part3/config/preset/#inactivity_penalty_quotient), which gradually reduces the balances of inactive validators in order to maintain the liveness of the beacon chain.
 
+This mechanism is intended to protect stakers who no longer have access to their keys. If a validator has been offline for long enough to lose half of its balance, it is unlikely to be coming back. To save the staker from losing everything, we choose to eject the validator before its balance reaches zero.
+
 Note that the dependence on effective balance means that the validator is queued for ejection as soon as its actual balance falls to 16.75 Ether.
 
 ##### `MIN_PER_EPOCH_CHURN_LIMIT`
