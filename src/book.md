@@ -3850,7 +3850,7 @@ One relatively simple defence against this &ndash; the one we are using in Ether
 
 In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/2020/03/12/scalable-bls-threshold-signatures.html). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
 
-Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However, they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $M-N$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
+Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However, they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $N-M$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
 
 Threshold signatures also find a place in Distributed Validator Technology, which I will write about in a different chapter.
 
