@@ -88,9 +88,9 @@ module.exports.runChecks = (reporter = customReporter, exitToShell = true) => {
   allOk &= runCheck(
     doHtmlCheck,
     () => execSync(`${htmlChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Checking HTML tags...',
-    'Found unbalanced HTML tags:',
-    'Unable to check HTML tags:',
+    'Checking HTML...',
+    'Found HTML issues:',
+    'Unable to check HTML:',
     'Skipping HTML check',
     reporter
   )
