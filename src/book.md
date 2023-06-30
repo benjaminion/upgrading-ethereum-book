@@ -1734,7 +1734,7 @@ There are no good outcomes here, which is why it is critical that we never have 
 
 [^fn-approaches-67]: If the share is less than 67% the incorrect chain won't finalise immediately, but very soon the inactivity leak will raise the proportion above 67% on that chain and it will then finalise.
 
-[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appears to have](https://twitter.com/sproulM_/status/1481109509544513539) 68.1% of the validators.
+[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appeared to have](https://nitter.it/sproulM_/status/1481109509544513539) 68.1% of the validators.
 
 #### Slashing
 
@@ -2295,7 +2295,7 @@ A protocol that is fully predictable could work well in a benign environment. Bu
 
 An attacker with advance knowledge of which validators will be active in different roles has a significant foothold for mounting an attack. For example, to selectively mount denial of service attacks against future proposers, or to bribe members of a particular committee, or to register especially advantageous validator numbers for themselves allowing them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
 
-[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://twitter.com/paulhauner/status/1509677010448121856).
+[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://nitter.it/paulhauner/status/1509677010448121856).
 
 To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al,[^fn-unpredictability-paper]
 
@@ -4017,7 +4017,7 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 <!-- markdownlint-disable code-block-style -->
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
-    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://twitter.com/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://twitter.com/benjaminion_xyz/status/1266049966163857408).
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://nitter.it/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.1.1/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://nitter.it/benjaminion_xyz/status/1266049966163857408).
 <!-- markdownlint-enable code-block-style -->
 
 Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
