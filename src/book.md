@@ -1803,7 +1803,7 @@ There are no good outcomes here, which is why it is critical that we never have 
 
 [^fn-approaches-67]: If the share is less than 67% the incorrect chain won't finalise immediately, but very soon the inactivity leak will raise the proportion above 67% on that chain, and it will then finalise.
 
-[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appeared to have](https://nitter.it/sproulM_/status/1481109509544513539) 68.1% of the validators.
+[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appeared to have](https://web.archive.org/web/20230630135447/https://nitter.it/sproulM_/status/1481109509544513539) 68.1% of the validators.
 
 #### Slashing
 
@@ -2365,7 +2365,7 @@ A protocol that is fully predictable could work well in a benign environment. Bu
 
 An attacker with advance knowledge of which validators will be active in different roles has a significant foothold for mounting an attack. For example, to selectively mount denial of service attacks against future proposers, or to bribe members of a particular committee, or to register especially advantageous validator numbers for themselves allowing them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
 
-[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://nitter.it/paulhauner/status/1509677010448121856).
+[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://web.archive.org/web/20230630135550/https://nitter.it/paulhauner/status/1509677010448121856).
 
 To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al[^fn-unpredictability-paper],
 
@@ -4085,7 +4085,7 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 <!-- markdownlint-disable code-block-style -->
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
-    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://nitter.it/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://nitter.it/benjaminion_xyz/status/1266049966163857408).
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://web.archive.org/web/20230630135623/https://nitter.it/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.2.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://web.archive.org/web/20230630135649/https://nitter.it/benjaminion_xyz/status/1266049966163857408).
 <!-- markdownlint-enable code-block-style -->
 
 Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
@@ -9695,7 +9695,7 @@ The value of `PROPOSER_SCORE_BOOST` has changed over time as the balancing attac
 
 The basic trade-off in choosing a value for `PROPOSER_SCORE_BOOST` is between allowing an adversary to perform "ex-ante" or "ex-post" reorgs. Setting `PROPOSER_SCORE_BOOST` too high makes it easier for an adversarial proposer to perform ex-post reorgs - it gives the proposer disproportionate power compared with the votes of validators. Setting `PROPOSER_SCORE_BOOST` too low makes it easier for an adversary to perform ex-ante reorgs. Caspar Schwarz-Schilling covers these trade-offs nicely in his Liscon talk, [The game of reorgs in PoS Ethereum](https://vimeo.com/637529564).[^fn-ex-ante-ex-post]
 
-[^fn-ex-ante-ex-post]: "Ex-post" reorgs occur when a proposer orphans the block in the previous slot by building on an ancestor. "Ex-ante" reorgs occur when a proposer arranges to orphan the next block by submitting its own proposal late. Caspar Schwarz-Schilling made a nice [Twitter thread](https://nitter.it/casparschwa/status/1454511850821931017) explainer.
+[^fn-ex-ante-ex-post]: "Ex-post" reorgs occur when a proposer orphans the block in the previous slot by building on an ancestor. "Ex-ante" reorgs occur when a proposer arranges to orphan the next block by submitting its own proposal late. Caspar Schwarz-Schilling made a nice [Twitter thread](https://web.archive.org/web/20230630135719/https://nitter.it/casparschwa/status/1454511850821931017) explainer.
 
 ### Helpers
 
@@ -10010,7 +10010,7 @@ Some changes to, or replacements for, LMD GHOST have been suggested that do not 
 
 [View-merge](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion)[^fn-view-merge-first] is a mechanism in which attesters freeze their fork choice some time $\Delta$ before the end of a slot. The next proposer does not freeze its fork choice, however. The assumed maximum network delay is $\Delta$, so the proposer will see all votes in time, and it will circulate a summary of them to all validators, contained within its block. This allows the whole network to synchronise on a common view. Balancing attacks rely on giving two halves of the network different views, and would be prevented by view-merge.
 
-[^fn-view-merge-first]: View-merge, though not by that name, was first proposed for Ethereum in October 2021 in the Ethresear.ch post, [Change fork choice rule to mitigate balancing and reorging attacks](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion). See also [this Twitter thread](https://nitter.it/fradamt/status/1572884967461474306) for more explanation of view-merge.
+[^fn-view-merge-first]: View-merge, though not by that name, was first proposed for Ethereum in October 2021 in the Ethresear.ch post, [Change fork choice rule to mitigate balancing and reorging attacks](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion). See also [this Twitter thread](https://web.archive.org/web/20230630135730/https://nitter.it/fradamt/status/1572884967461474306) for more explanation of view-merge.
 
 The Goldfish protocol, described in the paper [No More Attacks on Proof-of-Stake Ethereum?](https://arxiv.org/abs/2209.03255), builds on view-merge (called "message buffering" there) and adds vote expiry so that head block votes expire almost immediately (hence the name - rightly or wrongly, goldfish are famed for their short memories). The resulting protocol is provably reorg resilient and supports fast confirmations.
 
@@ -11161,7 +11161,7 @@ The [`is_merge_transition_block()`](/part3/helper/predicates/#def_is_merge_trans
 
 To ensure consistency between the execution chain and the beacon chain at the Merge, this first merged beacon block requires some extra processing. We must check that the PoW block its execution payload is derived from has indeed met the [criteria for the merge](#is_valid_terminal_pow_block). Essentially, its total difficulty must exceed the terminal total difficulty and its parent's total difficulty must not. If this test fails then something has gone wrong and the beacon block must be excluded from the fork choice.
 
-There might be several candidate execution blocks that meet this criterion in the event of PoW forks at the point of the Merge &ndash; [this occurred](https://nitter.it/vdWijden/status/1557555377314701312) when merging one of the testnets[^fn-teku-besu-goerli-merge] &ndash; but that's fine. The proposer of the first merged beacon block[^fn-first-merged-beacon-block] that becomes canonical gets to decide which terminal execution block wins.
+There might be several candidate execution blocks that meet this criterion in the event of PoW forks at the point of the Merge &ndash; [this occurred](https://web.archive.org/web/20230630134924/https://nitter.it/vdWijden/status/1557555377314701312) when merging one of the testnets[^fn-teku-besu-goerli-merge] &ndash; but that's fine. The proposer of the first merged beacon block[^fn-first-merged-beacon-block] that becomes canonical gets to decide which terminal execution block wins.
 
 [^fn-teku-besu-goerli-merge]: And triggered [an issue](https://hackmd.io/@ajsutton/SJJYWezC9) with some client implementations.
 
