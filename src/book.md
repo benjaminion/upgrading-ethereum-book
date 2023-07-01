@@ -583,7 +583,7 @@ So, there is an underlying block proposal mechanism &ndash; which implies an und
 
 The original plan was to apply Casper FFG as a proof of stake overlay on top of Ethereum's proof of work consensus. Casper FFG would confer finality &ndash; a property that proof of work chains lack &ndash; on the chain on a periodic basis, say, every 100 blocks. This was intended to be the first step in weaning Ethereum off proof of work. With the finality guarantee, we could have reduced the proof of work block reward, and thereby reduced the overall hash power as an interim step towards replacing mining with full proof of stake at some future date.
 
-By the end of 2017, this plan had become quite advanced. [EIP-1011](https://eips.ethereum.org/EIPS/eip-1011), Hybrid Casper FFG, describes the architecture in detail, and there was even a [testnet](https://hackmd.io/@aTTDQ4GiRVyyce6trnsfpg/Hk6UiFU7z?type=view) that [went live](https://nitter.it/karl_dot_tech/status/947503029166546946) on the 31st of December, 2017.
+By the end of 2017, this plan had become quite advanced. [EIP-1011](https://eips.ethereum.org/EIPS/eip-1011), Hybrid Casper FFG, describes the architecture in detail, and there was even a [testnet](https://hackmd.io/@aTTDQ4GiRVyyce6trnsfpg/Hk6UiFU7z?type=view) that [went live](https://web.archive.org/web/20230630135033/https://nitter.it/karl_dot_tech/status/947503029166546946) on the 31st of December, 2017.
 
 In early 2018, however, that plan was superseded. The limited bandwidth of the Ethereum Virtual Machine constrained the size of the validator set that EIP-1011 could support, in turn leading to a minimum stake of 1500&nbsp;ETH, which was seen as undesirable. Around the same time, paths towards a full, much more scalable proof of stake protocol became clearer, and we began working on the design that became Ethereum&nbsp;2.0.
 
@@ -641,7 +641,7 @@ Much work remains, however. In the next sections we will take deeper dives into 
 
 #### See also
 
-On the history of how everything came together, Vitalik made a terrific [tweet storm](https://nitter.it/VitalikButerin/status/1029900695925706753). Consolidated versions are available [here](https://www.trustnodes.com/2018/08/16/vitalik-buterin-tells-story-race-vlad-zamfir-implement-proof-stake-casper) and [here](https://hackmd.io/@liangcc/BJZDR1mIX?type=view). He discusses weak subjectivity a little, which we will deal with [later](/part2/validator/weak_subjectivity/).
+On the history of how everything came together, Vitalik made a terrific [tweet storm](https://web.archive.org/web/20230630135150/https://nitter.it/VitalikButerin/status/1029900695925706753). Consolidated versions are available [here](https://www.trustnodes.com/2018/08/16/vitalik-buterin-tells-story-race-vlad-zamfir-implement-proof-stake-casper) and [here](https://hackmd.io/@liangcc/BJZDR1mIX?type=view). He discusses weak subjectivity a little, which we will deal with [later](/part2/validator/weak_subjectivity/).
 
 Joachim Neu's presentation, [The Why and How of PoS Ethereum's Consensus Problem](https://www.youtube.com/watch?v=2nMS-TK_tMw) (at ETHconomics, Devconnect 2022), is a very accessible insight into the availability&ndash;finality trade-off, and how Ethereum seeks to manage it. We'll pick up again on the idea of "nested ledgers" when we get to the [Gasper protocol](/part2/consensus/gasper/).
 
@@ -684,9 +684,9 @@ This is what it means to be "message driven", giving us the MD in LMD. The fork 
 
 The "L" stands for "latest": LMD GHOST takes into account only the _latest_ message from each validator, that is, the most recent attestation that we have received from that validator. All a validator's earlier messages are discarded, but its latest vote is retained and has weight indefinitely.
 
-As a side note, other versions of message-driven GHOST are available. Vitalik [initially favoured](https://nitter.it/VitalikButerin/status/1029906757512966144#m) IMD, "Immediate Message Driven", GHOST. As far as I can tell[^fn-imd-tricky], this retains all attestations indefinitely, and the fork choice chooses based on whatever attestation was current at the time. Then there's [FMD](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion), "Fresh Message Driven", GHOST, which considers attestations only from the current and previous epochs. And [RLMD](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "Recent Latest Message Driven", GHOST which remembers validators' latest attestations only for a parameterisable number of epochs.
+As a side note, other versions of message-driven GHOST are available. Vitalik [initially favoured](https://web.archive.org/web/20230630135311/https://nitter.it/VitalikButerin/status/1029906757512966144#m) IMD, "Immediate Message Driven", GHOST. As far as I can tell[^fn-imd-tricky], this retains all attestations indefinitely, and the fork choice chooses based on whatever attestation was current at the time. Then there's [FMD](https://ethresear.ch/t/saving-strategy-and-fmd-ghost/6226?u=benjaminion), "Fresh Message Driven", GHOST, which considers attestations only from the current and previous epochs. And [RLMD](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion), "Recent Latest Message Driven", GHOST which remembers validators' latest attestations only for a parameterisable number of epochs.
 
-[^fn-imd-tricky]: I've yet to find a lucid exposition of IMD GHOST. Looking back through the history on the [original mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) gives some information, but it's hard to understand what was really happening. It was first known as ["recursive proximity to justification"](https://nitter.it/VitalikButerin/status/1029906887376961536#m), since it was bound up with Casper FFG in a way that LMD GHOST is not.
+[^fn-imd-tricky]: I've yet to find a lucid exposition of IMD GHOST. Looking back through the history on the [original mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) gives some information, but it's hard to understand what was really happening. It was first known as ["recursive proximity to justification"](https://web.archive.org/web/2/https://nitter.it/VitalikButerin/status/1029906887376961536#m), since it was bound up with Casper FFG in a way that LMD GHOST is not.
 
 #### How it works
 
@@ -960,7 +960,7 @@ The LMD GHOST fork choice in Ethereum has its origin's in Vlad Zamfir's work on 
 
 [^fn-naming-in-ethereum]: Welcome to the joy of naming things in Ethereum.
 
-In August 2018, Vitalik [still favoured](https://nitter.it/VitalikButerin/status/1029906887376961536#m) a fork choice called [IMD GHOST](https://ethresear.ch/t/immediate-message-driven-ghost-as-ffg-fork-choice-rule/2561) (formerly known as Recursive Proximity to Justification), that was more aware of finalisation and justification than the pure LMD GHOST that we have today. As the [Eth2 consensus mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) evolved, IMD GHOST was changed to LMD GHOST in November 2018[^fn-see-the-changes]. This was due to concerns about the [stability properties](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) of IMD GHOST.
+In August 2018, Vitalik [still favoured](https://web.archive.org/web/20230630135358/https://nitter.it/VitalikButerin/status/1029906887376961536#m) a fork choice called [IMD GHOST](https://ethresear.ch/t/immediate-message-driven-ghost-as-ffg-fork-choice-rule/2561) (formerly known as Recursive Proximity to Justification), that was more aware of finalisation and justification than the pure LMD GHOST that we have today. As the [Eth2 consensus mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) evolved, IMD GHOST was changed to LMD GHOST in November 2018[^fn-see-the-changes]. This was due to concerns about the [stability properties](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) of IMD GHOST.
 
 [^fn-see-the-changes]: You can view the history of changes to the [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) by clicking on the pencil icon near the title.
 
@@ -3379,7 +3379,7 @@ There are no good outcomes here, which is why it is critical that we never have 
 
 [^fn-approaches-67]: If the share is less than 67% the incorrect chain won't finalise immediately, but very soon the inactivity leak will raise the proportion above 67% on that chain, and it will then finalise.
 
-[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appeared to have](https://nitter.it/sproulM_/status/1481109509544513539) 68.1% of the validators.
+[^fn-client-diversity-220112]: As of 2022-01-12, the Prysm client [appeared to have](https://web.archive.org/web/20230630135447/https://nitter.it/sproulM_/status/1481109509544513539) 68.1% of the validators.
 
 #### Slashing
 
@@ -3943,7 +3943,7 @@ A protocol that is fully predictable could work well in a benign environment. Bu
 
 An attacker with advance knowledge of which validators will be active in different roles has a significant foothold for mounting an attack. For example, to selectively mount denial of service attacks against future proposers, or to bribe members of a particular committee, or to register especially advantageous validator numbers for themselves allowing them to take over a future committee, or simply to censor transactions.[^fn-initial-shuffling]
 
-[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://nitter.it/paulhauner/status/1509677010448121856).
+[^fn-initial-shuffling]: For a cute illustration of the perils of insufficient unpredictability, see [Issue 1446](https://github.com/ethereum/consensus-specs/issues/1446) on the specs repo: Manipulating deposit contract to gain an early majority. Hat-tip to [Paul Hauner](https://web.archive.org/web/20230630135550/https://nitter.it/paulhauner/status/1509677010448121856).
 
 To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al[^fn-unpredictability-paper],
 
@@ -5663,7 +5663,7 @@ Ultimately, the split state approach was abandoned in favour of a method called 
 <!-- markdownlint-disable code-block-style -->
 [^fn-merkleization-name]: The name Merkleization derives from [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree), which in turn are named for the computer scientist [Ralph Merkle](https://en.wikipedia.org/wiki/Ralph_Merkle).
 
-    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://nitter.it/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://nitter.it/benjaminion_xyz/status/1266049966163857408).
+    I believe the noun "Merkleization", though, is ours. I've adopted the [majority](https://web.archive.org/web/20230630135623/https://nitter.it/sina_mahmoodi/status/1266026711512162305) preferred spelling, which is also the version that made it into the [SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#merkleization). The ugly version won despite my [best efforts](https://web.archive.org/web/20230630135649/https://nitter.it/benjaminion_xyz/status/1266049966163857408).
 <!-- markdownlint-enable code-block-style -->
 
 Tree hashing brings two significant advantages over other methods of creating a beacon state digest.
@@ -11674,7 +11674,7 @@ The value of `PROPOSER_SCORE_BOOST` has changed over time as the balancing attac
 
 The basic trade-off in choosing a value for `PROPOSER_SCORE_BOOST` is between allowing an adversary to perform "ex-ante" or "ex-post" reorgs. Setting `PROPOSER_SCORE_BOOST` too high makes it easier for an adversarial proposer to perform ex-post reorgs - it gives the proposer disproportionate power compared with the votes of validators. Setting `PROPOSER_SCORE_BOOST` too low makes it easier for an adversary to perform ex-ante reorgs. Caspar Schwarz-Schilling covers these trade-offs nicely in his Liscon talk, [The game of reorgs in PoS Ethereum](https://vimeo.com/637529564).[^fn-ex-ante-ex-post]
 
-[^fn-ex-ante-ex-post]: "Ex-post" reorgs occur when a proposer orphans the block in the previous slot by building on an ancestor. "Ex-ante" reorgs occur when a proposer arranges to orphan the next block by submitting its own proposal late. Caspar Schwarz-Schilling made a nice [Twitter thread](https://nitter.it/casparschwa/status/1454511850821931017) explainer.
+[^fn-ex-ante-ex-post]: "Ex-post" reorgs occur when a proposer orphans the block in the previous slot by building on an ancestor. "Ex-ante" reorgs occur when a proposer arranges to orphan the next block by submitting its own proposal late. Caspar Schwarz-Schilling made a nice [Twitter thread](https://web.archive.org/web/20230630135719/https://nitter.it/casparschwa/status/1454511850821931017) explainer.
 
 ### Helpers
 
@@ -12007,7 +12007,7 @@ Some changes to, or replacements for, LMD GHOST have been suggested that do not 
 
 [View-merge](https://ethresear.ch/t/view-merge-as-a-replacement-for-proposer-boost/13739?u=benjaminion)[^fn-view-merge-first] is a mechanism in which attesters freeze their fork choice some time $\Delta$ before the end of a slot. The next proposer does not freeze its fork choice, however. The assumed maximum network delay is $\Delta$, so the proposer will see all votes in time, and it will circulate a summary of them to all validators, contained within its block. This allows the whole network to synchronise on a common view. Balancing attacks rely on giving two halves of the network different views, and would be prevented by view-merge.
 
-[^fn-view-merge-first]: View-merge, though not by that name, was first proposed for Ethereum in October 2021 in the Ethresear.ch post, [Change fork choice rule to mitigate balancing and reorging attacks](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion). See also [this Twitter thread](https://nitter.it/fradamt/status/1572884967461474306) for more explanation of view-merge.
+[^fn-view-merge-first]: View-merge, though not by that name, was first proposed for Ethereum in October 2021 in the Ethresear.ch post, [Change fork choice rule to mitigate balancing and reorging attacks](https://ethresear.ch/t/change-fork-choice-rule-to-mitigate-balancing-and-reorging-attacks/11127?u=benjaminion). See also [this Twitter thread](https://web.archive.org/web/20230630135730/https://nitter.it/fradamt/status/1572884967461474306) for more explanation of view-merge.
 
 The Goldfish protocol, described in the paper [No More Attacks on Proof-of-Stake Ethereum?](https://arxiv.org/abs/2209.03255), builds on view-merge (called "message buffering" there) and adds vote expiry so that head block votes expire almost immediately (hence the name - rightly or wrongly, goldfish are famed for their short memories). The resulting protocol is provably reorg resilient and supports fast confirmations.
 
@@ -13471,7 +13471,7 @@ The [`is_merge_transition_block()`](/part3/helper/predicates/#def_is_merge_trans
 
 To ensure consistency between the execution chain and the beacon chain at the Merge, this first merged beacon block requires some extra processing. We must check that the PoW block its execution payload is derived from has indeed met the [criteria for the merge](#is_valid_terminal_pow_block). Essentially, its total difficulty must exceed the terminal total difficulty and its parent's total difficulty must not. If this test fails then something has gone wrong and the beacon block must be excluded from the fork choice.
 
-There might be several candidate execution blocks that meet this criterion in the event of PoW forks at the point of the Merge &ndash; [this occurred](https://nitter.it/vdWijden/status/1557555377314701312) when merging one of the testnets[^fn-teku-besu-goerli-merge] &ndash; but that's fine. The proposer of the first merged beacon block[^fn-first-merged-beacon-block] that becomes canonical gets to decide which terminal execution block wins.
+There might be several candidate execution blocks that meet this criterion in the event of PoW forks at the point of the Merge &ndash; [this occurred](https://web.archive.org/web/20230630134924/https://nitter.it/vdWijden/status/1557555377314701312) when merging one of the testnets[^fn-teku-besu-goerli-merge] &ndash; but that's fine. The proposer of the first merged beacon block[^fn-first-merged-beacon-block] that becomes canonical gets to decide which terminal execution block wins.
 
 [^fn-teku-besu-goerli-merge]: And triggered [an issue](https://hackmd.io/@ajsutton/SJJYWezC9) with some client implementations.
 
