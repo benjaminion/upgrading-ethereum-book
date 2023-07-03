@@ -2144,9 +2144,9 @@ Permissionless blockchains are cryptoeconomic systems: cryptography enforces cor
 
 This chapter describes the economic tools the beacon chain uses to incentivise its participants; the cryptography side is covered elsewhere. Broadly speaking, the tools available to help us meet these goals are (1) rewards for behaviour that helps the protocol, (2) penalties for behaviour that hinders the protocol, and (3) punishments for behaviour that looks like an attack on the protocol.
 
-One of the few attractive aspects of Proof of Work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penalties or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
+One of the few attractive aspects of proof of work is the simplicity of its economic model. Miners receive block rewards for creating blocks that get included on chain, and receive fees for including transactions in their blocks. The block rewards come from newly created coins (issuance), and transaction fees are from previously issued coins. There are no explicit in-protocol penalties or punishments. Combined with the "heaviest chain" fork choice rule, this simple model has proved to be incredibly robust. Ethereum&nbsp;1 added a little complexity with uncle rewards for miners and the EIP-1559 fee burning mechanism, but it remains fundamentally simple and fairly easy to reason about.
 
-By contrast, the Ethereum&nbsp;2.0 Proof of Stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
+By contrast, the Ethereum&nbsp;2.0 proof of stake protocol employs an array of different economic incentives. We will break things down into the following elements over the next sections.
 
 1. The most fundamental economic component is the [stake](/part2/incentives/staking/) itself.
 2. Within the protocol, the stake is represented in validator [balances](/part2/incentives/balances/), in particular a quantity called the "effective balance" that is the actual measure of the influence a particular validator has on the protocol.
@@ -2181,9 +2181,9 @@ A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol m
 
 In Ethereum&nbsp;2 the stake has three key roles.
 
-First, the stake is an anti-Sybil mechanism. Ethereum&nbsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to allocate influence among their participants. There must be some cost to creating an identity in the protocol, otherwise individuals could cheaply create vast numbers of duplicate identities and overwhelm the chain. In Proof of Work chains a participant's influence is proportional to its hash power, a limited resource[^fn-one-cpu-one-vote]. In Proof of Stake chains participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
+First, the stake is an anti-Sybil mechanism. Ethereum&nbsp;2 is a permissionless system that anyone can participate in. Permissionless systems must find a way to allocate influence among their participants. There must be some cost to creating an identity in the protocol, otherwise individuals could cheaply create vast numbers of duplicate identities and overwhelm the chain. In proof of work chains a participant's influence is proportional to its hash power, a limited resource[^fn-one-cpu-one-vote]. In proof of stake chains participants must stake some of the chain's coin, which is again a limited resource. The influence of each staker in the protocol is proportional to the stake that they lock up.
 
-[^fn-one-cpu-one-vote]: In the Bitcoin white paper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of Stake is one-stake-one-vote.
+[^fn-one-cpu-one-vote]: In the Bitcoin white paper, Satoshi wrote that, "Proof-of-work is essentially one-CPU-one-vote", although ASICs and mining farms have long subverted this. Proof of stake is one-stake-one-vote.
 
 Second, the stake provides accountability. There is a direct cost to acting in a harmful way in Ethereum&nbsp;2. Specific types of harmful behaviour can be uniquely attributed to the stakers that performed them, and their stakes can be reduced or taken away entirely in a process called [slashing](/part2/incentives/slashing/). This allows us to quantify the [economic security](#economic-finality) of the protocol in terms of what it would cost an attacker to do something harmful.
 
@@ -3953,9 +3953,9 @@ To quote from a [paper](https://arxiv.org/abs/1809.06528) by Brown-Cohen et al[^
 
 Unpredictability, arising from randomness, is an excellent first line of defence against many attacks.
 
-Unpredictability in Proof of Work comes from the process used to mine blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in Proof of Work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar to the odds of rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other Giga hash per second (although there are other sources of unfairness in Proof of Work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
+Unpredictability in proof of work comes from the process used to mine blocks. A block is valid only if it satisfies a [certain condition](https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/), and the only way to satisfy that condition is through trial and error. Miners make a random guess, test it, and try again if it's not correct - this is the "work" in proof of work. Only if the guess is correct is the block valid and the miner gets to extend the chain. As I write, the difficulty of the Ethereum PoW chain is around 12.5 Peta hashes. That means that mining an Ethereum block requires $1.25 \times 10^{16}$ guesses on average. This is similar to the odds of rolling 21 dice until they all come up six on the same roll. It is fabulously unlikely, yet somewhere on the Ethereum network somebody manages to do it every 13 seconds or so. Since the process is uniform &ndash; nobody is better at guessing (rolling dice) than anyone else &ndash; it provides fairness. Every Giga hash per second is equivalent to every other Giga hash per second (although there are other sources of unfairness in proof of work). And since guessing is random it provides unpredictability, which mitigates the attacks mentioned above.
 
-Randomness[^fn-pseudo-random] in Ethereum's Proof of Stake protocol is used to bring unpredictability to the selection of block proposers, and to the membership of the committees that attest to blocks and sign sync data.
+Randomness[^fn-pseudo-random] in Ethereum's proof of stake protocol is used to bring unpredictability to the selection of block proposers, and to the membership of the committees that attest to blocks and sign sync data.
 
 [^fn-pseudo-random]: I'm not going to distinguish the niceties of randomness and pseudo-randomness in this section. We are actually using pseudo-randomness seeded with (presumed) genuine randomness. It must be the case as it is impossible to come to consensus on genuine randomness. However, I will just call it "randomness" throughout.
 
@@ -4728,7 +4728,7 @@ This property is important for light clients. Light clients are observers of the
 
 One of the challenges of building a highly scalable consensus protocol is organising the work involved so as not to overwhelm the network or individual nodes.
 
-A goal of the Ethereum&nbsp;2 Proof of Stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validator set, and we must do this twice: once to justify an epoch, and once again to finalise it.
+A goal of the Ethereum&nbsp;2 proof of stake protocol is to achieve economic finality. In the current design (though see [below](#see-also) for discussion of single slot finality) this requires us to gather votes from at least two-thirds of the validator set, and we must do this twice: once to justify an epoch, and once again to finalise it.
 
 If the whole validator set were to attest simultaneously, the number of messages on the network would be immense, and the amount of work required of beacon nodes too much for modest hardware. This is where committees help. The work of attesting is divided among subsets of the validator set (committees) and spread across an epoch (6.4 minutes). Each validator participates in only one of the committees.
 
@@ -11431,7 +11431,7 @@ Before the Ethereum beacon chain genesis has been triggered, and for every Ether
   - `eth1_timestamp` is the Unix timestamp corresponding to `eth1_block_hash`
   - `deposits` is the sequence of all deposits, ordered chronologically, up to (and including) the block with hash `eth1_block_hash`
 
-Proof-of-work blocks must only be considered once they are at least `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` seconds old (i.e. `eth1_timestamp` ` + ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` ` <= ` `current_unix_time`). Due to this constraint, if `GENESIS_DELAY` ` < ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE`, then the `genesis_time` can happen before the time/state is first known. Values should be configured to avoid this case.
+Proof of work blocks must only be considered once they are at least `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` seconds old (i.e. `eth1_timestamp` ` + ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE` ` <= ` `current_unix_time`). Due to this constraint, if `GENESIS_DELAY` ` < ` `SECONDS_PER_ETH1_BLOCK` ` * ` `ETH1_FOLLOW_DISTANCE`, then the `genesis_time` can happen before the time/state is first known. Values should be configured to avoid this case.
 
 ### Initialisation
 
@@ -11566,7 +11566,7 @@ Where we discuss attestations, they can be a single attestation from one validat
 
 [TODO: insert link to history of PoS]::
 
-Proof of Stake Ethereum has a long history that we shall review elsewhere. The following milestones are significant for the current Casper FFG plus LMD GHOST implementation.
+Proof of stake Ethereum has a long history that we shall review elsewhere. The following milestones are significant for the current Casper FFG plus LMD GHOST implementation.
 
 Vitalik published the original [mini-spec](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) for the beacon chain's proof of stake consensus on July 31st 2018, shortly after we had abandoned prior designs for moving Ethereum to PoS. The initial design used IMD GHOST (Immediate Message Driven GHOST) in which attestations have a limited lifetime in the fork choice[^fn-imd-ghost]. IMD GHOST [was changed](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760/17?u=benjaminion) to LMD GHOST (Latest Message Driven GHOST) in November 2018 due to concerns about the stability property of IMD.
 
