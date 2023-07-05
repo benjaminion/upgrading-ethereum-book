@@ -3,6 +3,7 @@ const svgo = require('svgo')
 const fs = require('fs')
 const path = require('path')
 const { getHashDigest } = require('loader-utils')
+const { md5 } = require('gatsby-core-utils')
 
 // Inline SVG files into the Markdown AST
 
@@ -82,14 +83,18 @@ module.exports = ({ markdownAST, cache }, pluginOptions) => {
         const image = node.children[0]
 
         if (image.url.endsWith('.svg')) {
+
+          const originalSvg = await fs.readFileSync(pluginOptions.directory + image.url, 'utf8')
+          const fileHash = await md5(originalSvg)
           const basename = path.basename(image.url, '.svg')
 
           var svgString
-          cache.get(basename).then(ret => {
+          cache.get(fileHash).then(ret => {
             if (ret) {
+
               svgString = ret
+
             } else {
-              const originalSvg = fs.readFileSync(pluginOptions.directory + image.url, 'utf8')
 
               // We need to distinguish multiple SVGs on the same page by using "prefixIds"
               const digest = getHashDigest(basename, 'md5', 'base52', 4)
@@ -109,7 +114,7 @@ module.exports = ({ markdownAST, cache }, pluginOptions) => {
               )
 
               svgString = svg.data
-              cache.set(basename, svgString)
+              cache.set(fileHash, svgString)
             }
 
             // Modify the current node in-place
