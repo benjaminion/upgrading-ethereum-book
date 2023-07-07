@@ -44,12 +44,20 @@ Historical and current versions of Upgrading Ethereum are available online:
 
 My original annotated specification for the Phase&nbsp;0 version is [also available](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/), though largely of historical interest and now subsumed into this book.
 
-## A note on Terminology
+## In defence of "Eth2"
 
-The "Ethereum 2.0" terminology is out of favour in some circles, but I don't really care. I will be happily using the terms "Ethereum 2.0", "Ethereum 2", "Ethereum 1", "Eth1", and "Eth2" throughout this book where it makes sense to me, and I'm pretty sure you'll know what I mean. I have more to say about this in [the first chapter](/part1/introduction/).
+When I started this writing project, Ethereum on proof of stake was universally known as Ethereum&nbsp;2.0, Eth2 for short, as it had been since 2014. This reflects the fact that the Ethereum&nbsp;2.0 vision differed from the original Ethereum&nbsp;1.0 chain in many respects. The direction of travel was well-captured in the [Ethereum.org 2.0 Mauve Paper](https://docs.google.com/document/d/1maFT3cpHvwn29gLvtY4WcQiI6kRbN_nbCf3JlgR3m_8/edit#) in 2016. The details of our eventual implementation differ considerably from what's presented there, but the elements were all in place even then. Eth2 was to deliver not only proof of stake, but new cryptography, new peer-to-peer networking, new cryptoeconomics, and new directions in scalability, among other things. This is what we achieved.
+
+In 2022, the Ethereum Foundation [declared](https://blog.ethereum.org/2022/01/24/the-great-eth2-renaming) that we must emphasise continuity over discontinuity by rebranding Ethereum&nbsp;2.0 back to plain old Ethereum. With the way that the Merge was coming together, that made some sense from an Ethereum user's point of view. The user and developer experience was to be almost unchanged by the move to proof of stake.
+
+However, I am not writing primarily as a user of Ethereum or as a developer on Ethereum. From the point of view of a _protocol engineer_, the Merge was a moment of profound discontinuity. Ethereum on proof of stake is utterly different from Ethereum on proof of work - the size and complexity of this book is ample testimony to that. With Ethereum's new architecture we have delivered a good chunk of what the Mauve Paper laid out all those years ago.
+
+This is why I often continue to refer to Ethereum on proof of stake as Ethereum&nbsp;2.0 or Eth2[^fn-ef-overreach], and I make no apology for that. I am confident that you will understand what I mean, and that it will help clarify rather than confuse.
+
+[^fn-ef-overreach]: That, and being a bloody-minded reactionary who dislikes being told what to do and say by a centralised authority. The EF's claim that, "As of late 2021, core developers stopped using the terminology" is laughably untrue.
 
 <a id="british-english"></a>
-You will also notice that I unapologetically use British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
+While we're here, another thing I won't be apologising for is using British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
 ## Acknowledgements
 
