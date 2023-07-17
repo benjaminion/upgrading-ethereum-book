@@ -44,7 +44,7 @@ Historical and current versions of Upgrading Ethereum are available online:
 
 My original annotated specification for the Phase&nbsp;0 version is [also available](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/), though largely of historical interest and now subsumed into this book.
 
-## In defence of "Eth2"
+## In defence of &ldquo;Eth2&rdquo;
 
 When I started this writing project, Ethereum on proof of stake was universally known as Ethereum&nbsp;2.0, Eth2 for short, as it had been since 2014. This reflects the fact that the Ethereum&nbsp;2.0 vision diverged from the original Ethereum&nbsp;1.0 implementation in many respects. The direction of travel was well-captured in the [Ethereum.org 2.0 Mauve Paper](https://docs.google.com/document/d/1maFT3cpHvwn29gLvtY4WcQiI6kRbN_nbCf3JlgR3m_8/edit#) in 2016. The details of our eventual implementation differ from what's presented there, but the elements were all in place even then. Eth2 was to deliver not only proof of stake, but new cryptography, new peer-to-peer networking, new cryptoeconomics, and new directions in scalability, among other things. This is what we achieved.
 

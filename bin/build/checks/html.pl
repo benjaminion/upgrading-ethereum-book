@@ -7,7 +7,7 @@ use warnings;
 
 $\ = "\n"; # set output record separator
 
-my @html_entities = ('ndash', 'nbsp', 'trade');
+my @html_entities = ('ndash', 'nbsp', 'trade', 'ldquo', 'rdquo');
 my %entities = map { $_ => 1 } @html_entities;
 
 my $fh = *STDIN;
