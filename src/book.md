@@ -565,7 +565,7 @@ In proof of stake, creating blocks and attestations is almost free[^fn-nothing-a
 
 [^fn-nothing-at-stake]: This is sometimes called the "nothing at stake problem".
 
-#### The Shape of Gasper
+#### The Ghosts in the Machine
 
 With some terminology behind us we can begin to outline Ethereum's actual consensus mechanism.
 
@@ -587,7 +587,7 @@ As stated in the [Casper FFG paper](https://arxiv.org/abs/1710.09437),
 
 > Casper the Friendly Finality Gadget is an overlay atop a _proposal mechanism_ &ndash; a mechanism which proposes blocks.
 
-So, there is an underlying block proposal mechanism &ndash; which implies an underlying consensus mechanism &ndash; which Casper FFG sits on top of, delivering a kind of meta-consensus that confers finality on the blockchain.
+So, there is an underlying block proposal mechanism &ndash; which implies an underlying consensus mechanism &ndash; that Casper FFG sits on top of, delivering a kind of meta-consensus that confers finality on the blockchain.
 
 The original plan was to apply Casper FFG as a proof of stake overlay on top of Ethereum's proof of work consensus. Casper FFG would confer finality &ndash; a property that proof of work chains lack &ndash; on the chain on a periodic basis, say, every 100 blocks. This was intended to be the first step in weaning Ethereum off proof of work. With the finality guarantee, we could have reduced the proof of work block reward, and thereby reduced the overall hash power as an interim step towards replacing mining with full proof of stake at some future date.
 
