@@ -1,3 +1,5 @@
+local logging = require 'logging'
+
 -- Pagebreaks filter
 --
 -- Inserts a LaTeX `\newpage` before certain headers.
@@ -5,7 +7,11 @@
 
 -- New pages are signalled in the markdown source by appending a HTML comment to a heading.
 local function is_new_page(header)
-   return string.match(header.content[#header.content].text, '<!%-%- .* %-%->')
+   if (header.content[#header.content].text) then
+      return string.match(header.content[#header.content].text, '<!%-%- .* %-%->')
+   end
+   print('Pagebreaks filter: unable to parse header')
+   logging.temp('Header', header)
 end
 
 local function should_insert_break(header)
