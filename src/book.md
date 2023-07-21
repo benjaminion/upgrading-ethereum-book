@@ -14305,7 +14305,8 @@ A summary of upgrades to date is below, with more detailed descriptions in the f
 | [Altair](/part4/history/altair/)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |  The Great Machine |
 | [Bellatrix](/part4/history/bellatrix/) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) | Ailuropoda melanoleuca[^fn-giant-panda] |
 | [Capella](/part4/history/capella/)     | 194048 | 2023-04-12 22:27:35 | Withdrawals enabled | [v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0)  | Gamlum[^fn-gamlum] |
-| [Deneb](/part4/history/deneb/)         | TBD    | TBD                 | TBD | TBD  | TBD |
+| [Deneb](/part4/history/deneb/)         | TBD    | TBD                 | EIP-4844 data availability | TBD  | TBD |
+| [Electra](/part4/history/deneb/)       | TBD    | TBD                 | TBD | TBD  | TBD |
 
 [^fn-giant-panda]: Ailuropoda melanoleuca is the formal name of the [giant panda](https://en.wikipedia.org/wiki/Giant_panda).
 
@@ -14434,7 +14435,13 @@ The full description of the changes between Bellatrix and Capella is in the [Cap
 
 ### Deneb <!-- /part4/history/deneb/ -->
 
-The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://github.com/ethereum/consensus-specs/tree/dev/specs/deneb) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
+The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name) and will take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
+
+Deneb will include [the work needed](https://github.com/ethereum/consensus-specs/tree/dev/specs/deneb) for the consensus layer to support [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) data availability.
+
+### Electra <!-- /part4/history/electra/ -->
+
+The consensus layer upgrade following Deneb has been given the name Electra and will take place simultaneously with the execution layer's Prague upgrade.
 
 ## The Merge <!-- /part4/merge/* -->
 
