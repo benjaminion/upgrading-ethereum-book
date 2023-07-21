@@ -1,4 +1,4 @@
-personal_ws-1.1 en 443 utf-8
+personal_ws-1.1 en 455 utf-8
 ABI
 ADSL
 API's
@@ -19,6 +19,7 @@ AttestationData
 Attester
 AttesterSlashing
 Attesters
+BFT
 BIP
 BLS
 BLSPubkey
@@ -37,6 +38,7 @@ Blockchains
 Blst
 Boneh
 Booleans
+Bracha
 Bugrara's
 CLI
 Casper
@@ -44,6 +46,7 @@ Cassez
 Cassez's
 ChainSafe
 Chia
+Chiu
 Christos
 CommitteeIndex
 Consensys
@@ -64,6 +67,7 @@ Dfinity
 Dfinity's
 DoS
 DomainType
+Doppelganger
 Drijvers
 ECDLP
 ECDSA
@@ -122,6 +126,7 @@ Iykyk
 JSON
 Jacek's
 Joachim
+Juin
 KDF
 KEVM
 Kalinin
@@ -174,11 +179,13 @@ Piecharts
 Pintail's
 PoS
 PoW
+Poon
 Potuz
 Pre
 Proto
 Protoarray
 Protolambda
+Protolambda's
 Prysm
 Psomas
 Pyspec
@@ -217,6 +224,7 @@ Slashings
 Sompolinsky
 Stakers
 Suhabe
+Supermajority
 Szilágyi
 TBD
 TFG
@@ -227,6 +235,8 @@ Teku's
 Tendermint
 TiB
 Tomescu
+Toueg
+Toueg's
 Umberto
 VDF
 VDFs
@@ -285,6 +295,7 @@ cryptographically
 crystallized
 das
 de
+deactivations
 decentralization
 decrementing
 decrypt
@@ -303,6 +314,7 @@ devs
 discretisation
 disincentivise
 disincentivised
+doppelganger
 else's
 endian
 endianness
@@ -351,6 +363,7 @@ memoising
 mempool
 middleware
 misbehaviours
+miscellania
 misconfiguration
 misconfigure
 misconfigured
@@ -365,12 +378,14 @@ parameterisable
 parameterises
 performant
 permalink
+permissioned
 permissionless
 permissionlessly
 permissionlessness
 pernickety
 piecewise
 piechart
+pipelined
 pre
 precompile
 probabilistically
@@ -382,6 +397,7 @@ rebranding
 recency
 repo
 reserialise
+responders
 restake
 restakes
 restaking
@@ -419,7 +435,9 @@ unbiasable
 unboundedly
 unburnt
 underflows
+unfinalised
 unforgeability
+unforgeable
 unpartitioned
 unslashed
 unstake
