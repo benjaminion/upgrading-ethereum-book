@@ -651,6 +651,8 @@ Much work remains, however. In the next sections we will take deeper dives into 
 
 On the history of how everything came together, Vitalik made a terrific [tweet storm](https://web.archive.org/web/20230630135150/https://nitter.it/VitalikButerin/status/1029900695925706753). Consolidated versions are available [here](https://www.trustnodes.com/2018/08/16/vitalik-buterin-tells-story-race-vlad-zamfir-implement-proof-stake-casper) and [here](https://hackmd.io/@liangcc/BJZDR1mIX?type=view). He discusses weak subjectivity a little, which we will deal with [later](/part2/validator/weak_subjectivity/).
 
+The [Proof of Stake FAQ](https://vitalik.ca/general/2017/12/31/pos_faq.html) remains an excellent primer on many of the topics we'll be covering.
+
 Joachim Neu's presentation, [The Why and How of PoS Ethereum's Consensus Problem](https://www.youtube.com/watch?v=2nMS-TK_tMw) (at ETHconomics, Devconnect 2022), is a very accessible insight into the availability&ndash;finality trade-off, and how Ethereum seeks to manage it. We'll pick up again on the idea of "nested ledgers" when we get to the [Gasper protocol](/part2/consensus/gasper/).
 
 ### LMD Ghost <!-- /part2/consensus/lmd_ghost/ -->
@@ -1003,17 +1005,17 @@ Some weaknesses of LMD GHOST as it is currently implemented in Ethereum are revi
 
 #### Introduction
 
-Many articles have been written to explain the basic mechanics of Casper FFG &ndash; _how_ it works &ndash;, but there is very little about _why_ it works. I hope that by the end of this section you will feel that you have some insight into why Casper FFG is effective.
+Many articles have been written to explain the basic mechanics of Casper FFG &ndash; _how_ it works &ndash; but there is very little about _why_ it works. I hope that by the end of this section you will feel that you have some insight into why Casper FFG is effective.
 
-The mechanics of Casper FFG aren't very complicated. Even so, as you read on, bear in mind that the effectiveness of Casper FFG really comes down to two big ideas. First, the two-phase commit (justification and finalisation) and, second, accountable safety.
+The mechanics of Casper FFG are not very complicated. Even so, as you read on, bear in mind that the effectiveness of Casper FFG really comes down to two big ideas. First, the two-phase commit (justification and finalisation) and, second, accountable safety.
 
-The two-phase commit gives Casper FFG classical consensus safety. It makes it possible to declare blocks final, being certain that no honest validator will ever revert them. But that's possible only when over $\frac{2}{3}$ of the stake is controlled by honest validators, something we cannot always assume.
+The two-phase commit gives Casper FFG classical consensus safety. It makes it possible to declare blocks final, being certain that no honest validator will ever revert them. But that's enforceable only when over two-thirds of the stake is controlled by honest validators, something we cannot always assume.
 
-On top of this, Casper FFG offers an extra guarantee called accountable safety for situations when over $\frac{1}{3}$ of the validators are dishonest. If the chain ever suffers from conflicting finality, at least $\frac{1}{3}$ of the total amount of staked Ether will be burnt. This is enforced by slashing validators that break either of the two Casper commandments.
+On top of this, Casper FFG offers an extra guarantee called accountable safety for situations when over one-third of the validators are dishonest. If the chain ever suffers from conflicting finality, at least one-third of the total amount of staked Ether will be burnt. This is enforced by slashing validators that break either of the two Casper commandments.
 
 #### Overview
 
-Casper FFG is a kind of meta-consensus protocol. It is an overlay that can be added on top of an underlying consensus protocol in order to add finality to it. Recall that [finality](/part2/consensus/preliminaries/#finality) is the property that there are blocks in the chain that are guaranteed never to be reverted. In Ethereum's proof of stake consensus, the underlying protocol is [LMD GHOST](/part2/consensus/lmd_ghost/) which does not provide finality - there is always a chance that validators might decide to build a competing chain, and there is no real penalty for doing so. Casper FFG functions as a "finality gadget", and we use it to add finality to LMD GHOST.
+Casper FFG is a kind of meta-consensus protocol. It is an overlay that can be run on top of an underlying consensus protocol in order to add finality to it. Recall that [finality](/part2/consensus/preliminaries/#finality) is the property that there are blocks in the chain that are guaranteed never to be reverted: they will be part of the chain forever. In Ethereum's proof of stake consensus, the underlying protocol is [LMD GHOST](/part2/consensus/lmd_ghost/) which does not provide finality - there is always a chance that validators might decide to build a competing chain, and there is no real penalty for doing so. Casper FFG functions as a "finality gadget", and we use it to add finality to LMD GHOST.
 
 Casper FFG takes advantage of the fact that, as a proof of stake protocol, we know who our participants are: the validators that manage the staked Ether. This means that we can use vote counting to judge when we have seen a majority of the votes of honest validators. More precisely, votes from validators managing a majority of the stake - in everything that follows, every validator's vote is weighted by the value of the stake that it manages, but for simplicity we won't spell it out every time.
 
@@ -1027,9 +1029,9 @@ We operate on an asynchronous network, the Internet, which means that we can tol
 
 [^fn-bracha-toueg]: See, for example, the paper [Asynchronous consensus and broadcast protocols](https://dl.acm.org/doi/10.1145/4221.214134) (1985) by Bracha and Toueg. The earlier work [Reaching Agreement in the Presence of Faults](https://lamport.azurewebsites.net/pubs/reaching.pdf) (1980) by Pease, Shostak and Lamport gives the same bound, but is based on synchronous communications in a system where validators can forge messages. Our environment is asynchronous with unforgeable messages, so Bracha and Toueg's analysis is the relevant one.
 
-To summarise, like all classical Byzantine fault tolerant (BFT) protocols, Casper FFG is able to provide finality when less than $\frac{1}{3}$ of the total validator set is faulty or adversarial. When sufficient honest validators have declared a block finalised, all honest validators will follow, and that block will not be reverted. However, as we shall see, unlike classical BFT protocols, Casper FFG is also able to provide economic finality (accountable safety) even when more than $\frac{1}{3}$ of the total validator set is faulty or adversarial.
+To summarise, like all classical Byzantine fault tolerant (BFT) protocols, Casper FFG is able to provide finality when less than one-third of the total validator set is faulty or adversarial. When sufficient honest validators have declared a block finalised, all honest validators will follow, and that block will not be reverted. However, as we shall see, unlike classical BFT protocols, Casper FFG is also able to provide economic finality (accountable safety) even when more than one-third of the validator set is faulty or adversarial.
 
-In this section, we will consider Casper FFG on its own terms, without considering how it is integrated with LMD GHOST. This is in the spirit of the [Casper FFG paper](https://arxiv.org/pdf/1710.09437.pdf) which has very little to say about the underlying blockchain consensus mechanism. We will look at how the two are combined into Gasper in [the next section](/part2/consensus/gasper/).
+In this section, we will consider Casper FFG on its own terms, without spending much time on how it is integrated with LMD GHOST. This is in the spirit of the [Casper FFG paper](https://arxiv.org/pdf/1710.09437.pdf) which has very little to say about the underlying blockchain consensus mechanism. We will look at how the two are combined into Gasper in [the next section](/part2/consensus/gasper/).
 
 #### Naming
 
@@ -1037,7 +1039,7 @@ Once again, the name Casper FFG comprises two parts, and it's worth looking at t
 
 ##### Casper
 
-The Casper part of the name seems to be due to Vlad Zamfir. He explains in [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58) of his History of Casper.
+The Casper part of the name seems to be due to Vlad Zamfir. He explains in [Part 5](https://medium.com/@Vlad_Zamfir/the-history-of-casper-chapter-5-8652959cef58) of his History of Casper as follows.
 
 > In this chapter I recount the story of Casper’s birth as an application of the principles of Aviv Zohar and Jonatan Sompolinsky’s GHOST to proof-of-stake.
 >
@@ -1097,7 +1099,7 @@ class Checkpoint(Container):
 
 Like classical BFT consensus protocols, Casper FFG achieves finality through a two-round process.
 
-In the first round, I broadcast my view of the best checkpoint ($X$, say) to rest of the network, and I hear from the rest of the network what their view is. If a supermajority tells me that they also support $X$, that allows me to _justify_ it. Justification is local to my network view: at this stage, I believe that the majority of the network believes that $X$ is favourable for finalisation. But I don't yet know that the rest of the network has come to the same conclusion. Under adversarial conditions, it is possible that a sufficient majority of the other validators failed to come to a decision on $X$. We shall look at such a scenario [later](#conflicting-justification).
+In the first round, I broadcast my view of the current epoch's checkpoint ($X$, say) to rest of the network, and I hear from the rest of the network what their view is. If a supermajority tells me that they also support $X$, that allows me to _justify_ it. Justification is local to my network view: at this stage, I believe that the majority of the network believes that $X$ is favourable for finalisation. But I don't yet know that the rest of the network has come to the same conclusion. Under adversarial conditions, it is possible that a sufficient majority of the other validators failed to come to a decision on $X$. We shall look at such a scenario [later](#conflicting-justification).
 
 In the second round, I broadcast the fact that I've heard from a supermajority of validators that they support $X$ (that is, that I've justified $X$) and I hear from the rest of the network whether they believe that a supermajority of validators supports $X$ (that is, that they have justified $X$). If I hear that a supermajority of validators agrees with me that $X$ is justified, then I will _finalise_ $X$. Finalisation is a global property: once a checkpoint is finalised, I know that no honest validator will ever revert it. Even if they haven't yet marked the checkpoint as finalised in their view, I know that they've at least marked it justified, and that there is no (non-slashable) behaviour that will be able to revert that justification.
 
@@ -1203,7 +1205,7 @@ There are some specific criteria around timeliness that valid Casper FFG votes m
 
 When weighing Casper FFG votes, only votes that have been received in blocks are considered. Unlike with LMD GHOST's fork choice, we do not consider any Casper FFG votes received solely via gossip, by carrier pigeon, or by any other means. This is because we must always have a common record of our decision making around finality, and the block history provides that common record. So, when I said above, "I tell the network", it's shorthand for saying that I broadcast an attestation that will be picked up by a block proposer and included in a block. And when I said, "I hear from the network", it's shorthand for saying that I processed the attestations included in a block.
 
-Also, allow me to reiterate that votes in Casper FFG are weighted according to validators' [effective balances](/part2/incentives/balances/). A vote from a validator with a 24 ETH effective balance carries 75% of the weight of a vote from a validator with a 32 ETH effective balance. I will frequently say things like, "the votes of $\frac{2}{3}$ of the validators"; you should understand this as, "the votes of validators managing $\frac{2}{3}$ of the stake".
+Also, allow me to reiterate that votes in Casper FFG are weighted according to validators' [effective balances](/part2/incentives/balances/). A vote from a validator with a 24 ETH effective balance carries 75% of the weight of a vote from a validator with a 32 ETH effective balance. I will frequently say things like, "the votes of two-thirds of the validators"; you should understand this as, "the votes of validators managing two-thirds of the stake".
 
 ##### Supermajority links
 
@@ -1259,7 +1261,7 @@ The above rule for finalising a checkpoint is the one described in the original 
 
 In the Casper FFG paper, each checkpoint has a defined height: if $c$ is a checkpoint, then $h(c)$ is the height of that checkpoint. Checkpoint heights increase monotonically with distance from the genesis block.
 
-In the Eth2 implementation of Casper FFG, the checkpoint height is the checkpoint's epoch number: $h(c) = c.epoch$. Recall that a checkpoint comprises both a block hash and an epoch number. If either of these differs then the checkpoints are different.
+In the Eth2 implementation of Casper FFG, the checkpoint height is the checkpoint's epoch number: $h(c) = \texttt{c.epoch}$. Recall that a checkpoint comprises both a block hash and an epoch number. If either of these differs then the checkpoints are different.
 
 Casper FFG's proof of accountable safety relies on any validator that violates either of the following two rules, or "commandments", being slashed.
 
@@ -1329,7 +1331,7 @@ Any validator that violates either of the Casper commandments is liable to being
 
 Slashing underpins the accountable safety guarantee of Casper by putting a price on bad behaviour - specifically, behaviour that could lead to conflicting checkpoints being finalised. Slashing also [features](/part2/consensus/lmd_ghost/#slashing-in-lmd-ghost) in LMD GHOST, and the [Incentive Layer chapter](/part2/incentives/slashing/) has more information on the detailed mechanics of slashing.
 
-Violations of the commandments are potentially difficult to detect in-protocol. In particular, detection of surround votes might require searching a substantial history of validators' previous votes[^fn-proto-surround-vote]. For this reason, we rely on external slashing detection services[^fn-slasher-implementations] to detect slashing condition violations and submit the evidence to block proposers.
+Violations of the commandments are potentially difficult to detect in-protocol. In particular, detection of surround votes might require searching a substantial history of validators' previous votes[^fn-proto-surround-vote]. For this reason, we rely on external slashing detection services[^fn-slasher-implementations] to detect slashing condition violations and submit the evidence to block proposers. There needs to be only one such service on the network, as long as it is reliable. In practice we have more, but it is certainly not necessary for every node operator to run a slashing detector.
 
 Once evidence of breaking one of the commandments has been found, it is easy to prove on chain that the validator broke the rules. Validators sign every attestation they publish, so, given two conflicting attestations, it is [a simple matter](/part3/transition/block/#attester-slashings) to verify their signatures and show that the validator broke the rules in publishing them.
 
@@ -1337,7 +1339,7 @@ Once evidence of breaking one of the commandments has been found, it is easy to 
 
 [^fn-slasher-implementations]: Slashing detection software has been created by the [Lighthouse team](https://lighthouse-book.sigmaprime.io/slasher.html) and the [Prysm team](https://docs.prylabs.network/docs/prysm-usage/slasher).
 
-The protocol as it is presented in the Casper FFG paper assumes that, on proof of having violated a slashing condition, "the validator's entire deposit is taken away". We have implemented [a variation of this](/part2/incentives/slashing/#the-correlation-penalty) for Eth2 that scales the proportion of a validator's stake that is forfeit in proportion to total amount of stake slashed in a given period. If $\frac{1}{3}$ of all stake were subject to a slashing penalty within a 36 day window, then the whole stake would be forfeit, as in the classic Casper FFG protocol. But if there were very few other slashings in the window, then almost no stake would be forfeit. This nicety does not change the Casper FFG guarantees in practice, at least since the [Bellatrix upgrade](/part4/history/bellatrix/) to the beacon chain gave the [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset/#proportional_slashing_multiplier) constant its final value.
+The protocol as it is presented in the Casper FFG paper assumes that, on proof of having violated a slashing condition, "the validator's entire deposit is taken away". We have implemented [a variation of this](/part2/incentives/slashing/#the-correlation-penalty) for Eth2 that scales the proportion of a validator's stake that is forfeit in proportion to total amount of stake slashed in a given period. If $\frac{1}{3}$ of all stake violated slashing conditions within a 36 day window, then the whole stake would be forfeit, as in the classic Casper FFG protocol. But if there were very few other slashings in the window, then almost no stake would be forfeit. This nicety does not change the Casper FFG guarantees in practice, at least since the [Bellatrix upgrade](/part4/history/bellatrix/) to the beacon chain gave the [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset/#proportional_slashing_multiplier) constant its final value.
 
 ##### Fork choice rule
 
@@ -1347,7 +1349,7 @@ Casper FFG's fork choice rule takes the form of a modification to the underlying
 
 The pure [LMD GHOST](/part2/consensus/lmd_ghost/) protocol always begins its search for the head block from the root of the chain, the genesis block. When modified by Casper FFG's fork choice rule, LMD GHOST will start its search for the head block from the highest justified checkpoint it knows about, and will ignore potential head blocks that do not descend from the highest justified checkpoint. We will discuss this more when we get to [Gasper](/part2/consensus/gasper/).
 
-This modification to the underlying consensus protocol's fork choice rule is what confers finality on it. If a node has justified a checkpoint in its local view, it is committed to never reverting it. Therefore, the underlying chain must always include that checkpoint; all branches not including that checkpoint must be ignored.
+This modification to the underlying consensus protocol's fork choice rule is what confers finality. When a node has justified a checkpoint in its local view, it is committed to never reverting it. Therefore, the underlying chain must always include that checkpoint; all branches that do not include that checkpoint must be ignored.
 
 Note that this fork choice rule is compatible with the [plausible liveness](#plausible-liveness) guarantee of Casper FFG.
 
@@ -1357,9 +1359,9 @@ The Casper FFG consensus protocol makes two guarantees that are analogous to, bu
 
 ##### Accountable safety
 
-Classical PBFT consensus can guarantee safety only when less than $\frac{1}{3}$ of validators are adversarial (faulty). If more than $\frac{1}{3}$ are adversarial then it makes no promises at all.
+Classical PBFT consensus can guarantee safety only when less than one-third of validators are adversarial (faulty). If more than one-third are adversarial then it makes no promises at all.
 
-Casper FFG comes with essentially the same safety guarantee when validators controlling less than $\frac{1}{3}$ of the stake are adversarial: finalised checkpoints will never be reverted. In addition, it provides the further guarantee that, if conflicting checkpoints are ever finalised, validators representing at least $\frac{1}{3}$ of the staked Ether will be slashed. This is called "accountable safety". It is accountable in that we can identify exactly which validators behaved badly and punish them directly.
+Casper FFG comes with essentially the same safety guarantee when validators controlling less than one-third of the stake are adversarial: finalised checkpoints will never be reverted. In addition, it provides the further guarantee that, if conflicting checkpoints are ever finalised, validators representing at least one-third of the staked Ether will be slashed. This is called "accountable safety". It is accountable in that we can identify exactly which validators behaved badly and punish them directly.
 
 The extra safety this guarantee provides is not safety in the usual consensus protocol sense of the word, but it is safety of a specifically cryptoeconomic nature: bad behaviour is heavily disincentivised by the protocol. It is often referred to as "economic finality".
 
@@ -1411,7 +1413,7 @@ In this proof, we have relied on the definition of finalisation being that there
 
 ###### Economic finality
 
-The proof of accountable safety rests on there being,
+The proof of accountable safety rested on there being,
 
 1. no two supermajority links that target distinct checkpoints at the same height, and
 2. no two supermajority links such that one surrounds the other.
@@ -1424,13 +1426,15 @@ In this way, slashing puts a price on attacking the chain, and a huge (and calcu
 
 > Basically, if a block is finalized, then that block is part of the chain, and it is very, very expensive to cause that to change.
 
-[^fn-current-cost-of-attack]: As I write, there is 21.6 million ETH staked on the beacon chain, so a finality reversion would result in at least 7.2 million ETH being slashed. This amounts to \$13.7 billion of economic security against reversion, at current prices.
+[^fn-current-cost-of-attack]: As I write (in July 2023), there is 21.6 million ETH staked on the beacon chain, so a finality reversion would result in at least 7.2 million ETH being slashed. This amounts to \$13.7 billion of economic security against reversion, at current prices.
 
-We call this "economic finality". It is not finality enforced by software; it is finality enforced by the cost of attacking it. Validators' stakes are a "good behaviour bond" that can be taken away from them if it is ever proved that they broke the protocol's rules. Validators have unique identities in the form of their secret keys that they use to sign all their messages, so it is possible to hold individual validators to account, and punish them very specifically.
+We call this "economic finality". It is not finality enforced by software; it is finality enforced by the cost of an attack. Validators' stakes are a "good behaviour bond" that can be taken away from them if it is ever proved that they broke the protocol's rules. Validators have unique identities in the form of their secret keys that they use to sign all their messages, so it is possible to hold individual validators to account, and punish them very specifically.
 
 You might wonder why we need a concept like economic finality at all. After all, PBFT manages to deliver finality without such a construct. Couldn't the protocol simply refuse to finalise a conflicting checkpoint?
 
-The difference is that in PBFT there is the luxury of a hard safety assumption that fewer than one-third of the validators are adversarial. Similarly, in Casper FFG, an adversary with less than one-third of the stake cannot finalise conflicting checkpoints. However, in the world of permissionless blockchains, we must have some defence for when more than one-third of the stake is adversarial. That defence is slashing, which gives us the economic finality guarantee: if more than one-third of validators are willing to behave badly, we can't prevent them from finalising conflicting checkpoints, but we can put a huge cost on doing so.
+The difference is that in PBFT there is the luxury of a hard safety assumption that fewer than one-third of the validators are adversarial. Similarly, in Casper FFG, an adversary with less than one-third of the stake cannot finalise conflicting checkpoints. However, in the world of permissionless blockchains, we must have some defence for when more than one-third of the stake is adversarial. That defence is slashing, which gives us the economic finality guarantee: if more than one-third of validators are willing to behave badly, we can't prevent them from finalising conflicting checkpoints, but we can put a huge cost on doing so.[^fn-economic-finality-pow]
+
+[^fn-economic-finality-pow]: This has some conceptual similarity to the cost of mounting a 51% attack in proof of work. Except that, in PoW, the cost of a successful attack can be zero, since the attacker gains all the block rewards, and the attack can be repeated indefinitely using the same hardware. The economic finality provided by slashing is much higher. In Vlad Zamfir's famous words, getting slashed is "as though your ASIC farm burned down if you participated in a 51% attack".
 
 In a blog post, [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on-settlement-finality), Vitalik puts it like this,
 
@@ -1442,7 +1446,7 @@ Faced with a greater than one-third attacker and an asynchronous network, it's n
 
 Casper FFG on its own does not offer liveness in the classic sense of ensuring that users' transactions get included on chain. All block production and chain building is the responsibility of the underlying consensus mechanism, LMD GHOST in our case.
 
-However, there is a sense in which we want Casper FFG to be live: we always want to be able to continue justifying and finalising checkpoints if at least two-thirds of validators are honest, without any of those validators getting slashed. Conversely, we never want to end up in a deadlock in which it is not possible to finalise a new checkpoint without honest validators being slashed.
+However, there is a sense in which we want Casper FFG to be live: we always want to be able to continue justifying and finalising checkpoints if at least two-thirds of validators are honest, without any of those validators getting slashed. Conversely, we never want to end up in a deadlock in which it is not possible to finalise a new checkpoint without honest validators being slashed. This accords with the "something good eventually happens" [definition](/part2/consensus/preliminaries/#safety-and-liveness) of liveness.
 
 In [Vitalik's words](https://medium.com/@VitalikButerin/minimal-slashing-conditions-20f0b500fc6c),
 
@@ -1484,9 +1488,11 @@ Rewards and penalties are a little more complex in the implementation of Casper 
 
 To get any Casper FFG reward at all, a validator's source vote must be correct. That is, it must agree with the history that the eventual canonical chain converges on. If the source vote is incorrect, then it's as if the validator has not voted at all and it receives a full penalty for missing both source and target. The rationale for this is that having a wrong source means that it was working on a different branch from the one that became canonical in the end. Thus its votes were competing with rather than supporting the consensus.
 
-To receive the source vote reward, the vote must be correct, and it must also be timely. If validator's vote is included in a block within five slots, then it receives the source vote reward, otherwise it receives a penalty of the same size. There is some discussion of the reason for the five slot limit in the [Annotated Specification](/part2/incentives/rewards/#timeliness).
+To receive the source vote reward, the source vote must be correct, and it must also be timely. If a validator's vote is included in a block within five slots, then it receives the source vote reward, otherwise it receives a penalty of the same size. There is some discussion of the reason for the five slot limit in the [Annotated Specification](/part2/incentives/rewards/#timeliness).
 
-To receive the target vote reward, the vote must be correct, and it must also be timely. If validator's vote is included in a block within thirty-two slots, then it receives the target vote reward, otherwise it receives a penalty of the same size.
+To receive the target vote reward, the target vote must be correct, and it must also be timely. If a validator's vote is included in a block within thirty-two slots, then it receives the target vote reward, otherwise it receives a penalty of the same size[^fn-deneb-change-to-target-inclusion-time].
+
+[^fn-deneb-change-to-target-inclusion-time]: This will [be changed](https://github.com/ethereum/consensus-specs/pull/3360) at the Deneb upgrade. Target votes for either the current or previous epoch will be valid, rather than expiring after 32 slots.
 
 The Annotated Spec has a [full matrix](/part2/incentives/penalties/#penalties-rewards-table) of rewards and penalties for the different degrees of correctness and timeliness of votes.
 
@@ -1496,13 +1502,13 @@ In all of the above, we have discussed Casper FFG in terms of a static validator
 
 The Casper FFG paper discusses how accountable safety can be maintained when the validator set changes from epoch to epoch. It analyses this in terms of forward and rear validator sets. The implementation in Ethereum 2.0 ignores this mechanism, working around it instead by severely rate-limiting validator activations and exits. Each epoch, we allow activations and deactivations of validators amounting to a fraction of about 0.0015% of the full validator (see [`CHURN_LIMIT_QUOTIENT`](/part3/config/configuration/#validator-cycle).
 
-The effect of this simplification is analysed in the [Gasper paper](https://arxiv.org/pdf/2003.03052.pdf), section 8.6. By rate-limiting entries and exits, but not accounting for forward and rear validator sets, we fractionally reduce the level of accountable safety. That is, it is possible that slightly less than $\frac{1}{3}$ of the stake gets slashed in the event of finalising a conflicting checkpoint. In practice, due to the rate limiting of validator set changes, this is negligible.
+The effect of this simplification is analysed in the [Gasper paper](https://arxiv.org/pdf/2003.03052.pdf), section 8.6. By rate-limiting entries and exits, but not accounting for forward and rear validator sets, we fractionally reduce the level of accountable safety. That is, it is possible that slightly less than one-third of the stake gets slashed in the event of finalising a conflicting checkpoint. In practice, due to the rate limiting of validator set changes, this is negligible.
 
 ##### k-finality
 
 The original Casper paper requires that, to finalise a checkpoint, we must have a supermajority link from that checkpoint to its direct descendant. It turns out that we can generalise this without affecting the validity of the safety proof.
 
-The key thing that the safety proof relies on is the existence of a supermajority link between two consecutive members of $\mathcal{B}$ spanning the supermajority link ${a_m \rightarrow a_{m+1}}$ that finalises $a_m$. However, the surrounding link on the $b$ branch must still exist if there is a supermajority link ${a_m \rightarrow a_{m+k}}$ where all the checkpoints between $a_m$ and $a_{m+k}$ are justified on the $a$ branch. That's because $\mathcal{B}$ cannot have members in the epochs $m$ to $m+k$ if this is so.
+The key observation that the safety proof relies on is the existence of a supermajority link between two consecutive members of $\mathcal{B}$ spanning the supermajority link ${a_m \rightarrow a_{m+1}}$ that finalises $a_m$. However, the surrounding link on the $b$ branch must still exist if there is a supermajority link ${a_m \rightarrow a_{m+k}}$ where all the checkpoints between $a_m$ and $a_{m+k}$ are justified on the $a$ branch. That's because $\mathcal{B}$ cannot have members in the epochs $m$ to $m+k$ if this is so.
 
 <a id="img_consensus_k_finality_proof"></a>
 <figure class="diagram" style="width: 85%">
@@ -1520,7 +1526,7 @@ So, our generalised finality rule is that we can finalise checkpoint $a_m$ when 
 
 This is called $k$-finality and is discussed in section 4.5 of the [Gasper paper](https://arxiv.org/pdf/2003.03052.pdf).
 
-How many checkpoints $k$ one might want to consider when calculating finality depends on how much record keeping one is prepared to do. On the Ethereum 2.0 beacon chain we have adopted $2$-finality: we keep a record of the justification status of four consecutive epochs, and allow the processing of target votes for two epochs (older target votes are considered invalid).
+How many checkpoints $k$ one might want to consider when calculating finality depends on how much record keeping one is prepared to do. On the Ethereum&nbsp;2.0 beacon chain we have adopted $2$-finality: we keep a record of the justification status of four consecutive epochs, and allow the processing of target votes for two epochs (older target votes are considered invalid).
 
 <a id="img_consensus_2_finality"></a>
 <figure class="diagram" style="width: 65%">
@@ -1534,7 +1540,7 @@ The four cases of 2-finality. In each case the supermajority link causes the che
 </figcaption>
 </figure>
 
-Almost always, we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the 2/3rds participation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 4 to immediately finalise $C_{n-1}$, for example.
+Almost always, we would expect to see only the $1$-finality cases, in particular, case 4. The $2$-finality cases would occur only in situations where many attestations are delayed, or when we are very close to the two-thirds participation threshold. Note that these evaluations stack, so it is possible for rule 2 to finalise $C_{n-2}$ and then for rule 4 to immediately finalise $C_{n-1}$, for example.
 
 The detailed mechanics of this are performed in the [`weigh_justification_and_finalization()`](/part3/transition/epoch/#def_weigh_justification_and_finalization) function during epoch processing[^fn-danny-k-finality-video].
 
@@ -1602,7 +1608,7 @@ For me to _justify_ a checkpoint means that I've heard from $\frac{2}{3}$ of the
 
 For me to _finalise_ a checkpoint means that I've heard back from $\frac{2}{3}$ of the validators that they've heard from $\frac{2}{3}$ of the validators that the checkpoint is good. I now know that $\frac{2}{3}$ of the validators know that $\frac{2}{3}$ of validators have marked that checkpoint as justified, and therefore that a supermajority of validators globally has committed to never reverting it. That checkpoint is globally safe from reversion.
 
-This is all a bit mind-bending, so perhaps it's best understood by looking at ways things can fail if we don't do the full round-trip of confirming that everyone confirms what I have confirmed.[^fn-blue-eyes-puzzle]
+This is all a bit mind-bending, so perhaps it's best understood by looking at ways things can fail if we don't do the full round-trip of confirming that everyone confirms what I have confirmed[^fn-blue-eyes-puzzle].
 
 [^fn-blue-eyes-puzzle]: If you _really_ want to test your understanding of all this "I confirm that everybody has confirmed that everybody has confirmed" stuff, which is at the heart of consensus safety, then I highly recommend tackling the [blue eyes puzzle](https://xkcd.com/blue_eyes.html). I think Joseph Poon introduced me to this in early 2018. It took me a good couple of hours of head scratching to get there, but the effort is worth it. The solution is out there, but I urge you to take a good run at the puzzle before looking it up.
 
@@ -3028,7 +3034,7 @@ If one-third of validators were to be slashed simultaneously, they would have th
 
 It is obligatory at this point to quote (or paraphrase) Vlad Zamfir: comparing proof of stake to proof of work, "it's as though your ASIC farm burned down if you participated in a 51% attack".
 
-For more on the mechanics of economic finality, see below under [Slashing](/part2/incentives/slashing/), and for more on the rationale and justification, see the section on Casper FFG. [TODO: link to Casper FFG when written.]
+For more on the mechanics of economic finality, see below under [Slashing](/part2/incentives/slashing/), and for more on the rationale and justification, see the section on [Casper FFG](/part2/consensus/casper_ffg/).
 
 #### See also
 
