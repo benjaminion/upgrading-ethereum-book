@@ -1598,6 +1598,18 @@ Finally, the safety guarantees of each differ. Safety (finality) in PBFT is a gu
 
 Safety in Casper FFG adds the further cryptoeconomic guarantee that a conflicting checkpoint cannot be finalised without burning at least one-third of the stake. This is a substantially different type of guarantee, but fits well with the permissionless nature of Ethereum's proof of stake protocol.
 
+##### Are the Casper commandments optimal?
+
+There's an interesting discussion to be had around whether the two [Casper commandments](#the-casper-commandments) are ideal or not. For example, there are situations, like the first surround vote shown [above](#img_consensus_commandment_2a), that are harmless, but would nevertheless lead to the validator being slashed. Daniel Lubarov discussed another such scenario in [a post](https://ethresear.ch/t/casper-ffg-leniency-tweak/2286?u=benjaminion) that proposes replacing the second commandment with, "a validator must be prohibited from casting a _finalization_ vote within the span of another vote" (we currently prohibit all spanned votes).
+
+Along similar lines, Justin Drake has proposed [a tight and intuitive Casper slashing condition](https://ethresear.ch/t/a-tight-and-intuitive-casper-slashing-condition/3359?u=benjaminion) that unifies the two commandments into a single commandment.
+
+> A validator must not cast a vote ${s \rightarrow t}$ that "hops over" one of his finalisation votes ${\tilde{s} \rightarrow \tilde{t}}$, i.e. $h(s) \le h(\tilde{s})$ and $h(t) \ge h(\tilde{t})$ [and such that the target votes conflict].
+
+Jacob Eliosoff [goes further](https://ethresear.ch/t/simplifying-casper-votes-to-remove-the-source-param-take-two/6398?u=benjaminion) by suggesting that we remove the source vote altogether and rework the slashing rules accordingly.
+
+While worth thinking through, I think that proposals like these have failed to gain traction simply because what we have is good enough, on the principle of "if it ain't broke, don't fix it". Much work has been done on implementing, analysing, and formally verifying the current version of Casper FFG, and making any change now that does not gain us a huge benefit (such as single slot finality) is unlikely to be worth the effort.
+
 #### Conflicting justification
 
 If you want to test your ability to reason about this distributed consensus stuff &ndash; and it's not easy &ndash; it's worth thinking through why we need both a justified and a finalised status. Why can't I immediately mark as finalised any checkpoint for which I've seen a $\frac{2}{3}$ supermajority vote?
@@ -1751,6 +1763,8 @@ In the consensus layer specifications:
   - Casper FFG slashing violations are handled by [`process_attester_slashing()`](/part3/transition/block/#def_process_attester_slashing).
 
 One of the better articles I've found on Casper FFG is by [Juin Chiu](https://medium.com/unitychain/intro-to-casper-ffg-9ed944d98b2d). It is particularly good on the relationship between Casper FFG and classical PBFT. Vitalik's [Minimal slashing conditions](https://medium.com/@VitalikButerin/minimal-slashing-conditions-20f0b500fc6c) article contains many insights (even if those slashing conditions did not turn out to be minimal).
+
+Some formal verification work on the guarantees of Casper FFG (as presented in the original paper, that is, without $k$-finality, for example) is described in the [Verification of Casper in the Coq Proof Assistant](https://core.ac.uk/download/pdf/161954227.pdf) (2018) paper. It contains some useful insights that clarify the assumptions behind the plausible liveness proof, in particular.
 
 ### Gasper <!-- /part2/consensus/gasper/* -->
 
