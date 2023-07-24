@@ -14,7 +14,7 @@ I'm now working on [Part 2: Technical Overview](/part2/) which wraps a first, ho
 
 This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on proof of stake &ndash; at a technical level. What does it do? How does it work? Why is it like this?
 
-Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are.
+Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are. This is not intended to be an academic work; I am more interested in insight than in rigour. But I try to link out to relevant academic papers and formal analyses where relevant.
 
 Although I am an Ethereum staker and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking/) may be relevant (once I have written it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
 
