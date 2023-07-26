@@ -1069,7 +1069,7 @@ To work around this, voting is spread out through the duration of an epoch[^fn-e
 
 [^fn-epoch-dynasty]: The Casper FFG paper generally uses the word "dynasty" for epoch, with a few exceptions. It's the same thing.
 
-To ensure that validators voting at different points in the epoch have something in common to vote for, we make them vote for a checkpoint, which is the first slot of an epoch. The checkpoint in epoch $N$ is at slot number $32N$ (remembering that slots and epochs are numbered from zero).
+To ensure that validators voting at different times during the epoch have something in common to vote for, we make them vote for a checkpoint, which is the first slot of an epoch. The checkpoint in epoch $N$ is at slot number $32N$ (remembering that slots and epochs are numbered from zero).
 
 <a id="img_consensus_slots_epochs_checkpoints"></a>
 <figure class="diagram" style="width: 90%">
@@ -1478,6 +1478,26 @@ Therefore we can justify checkpoint $c$. It is then clearly safe for all validat
 
 This requirement for plausible liveness underpins Casper FFG's [fork choice rule](#fork-choice-rule): the underlying consensus mechanism must follow the chain containing the justified checkpoint of the greatest height. As long as the underlying chain keeps building on top of the highest justified checkpoint then, according to this proof, we are guaranteed to be able to keep finalising checkpoints on it without anyone getting slashed.
 
+#### Exercise
+
+As an interlude, it's a fun and useful exercise to think through different ways in which Casper FFG could behave.
+
+For example, how could a situation like the following diagram arise? That is, with supermajority links continually skipping checkpoints, resulting in a string of justified checkpoints with none finalised.
+
+<a id="img_consensus_exercise_0"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing a chain of justified checkpoints with supermajority links that continually skip a checkpoint.](images/diagrams/consensus-exercise-0.svg)
+
+<figcaption>
+
+Always justifying but never finalising. How can we get into such a situation?
+
+</figcaption>
+</figure>
+
+The answer is [below](#answer-to-the-exercise), but take a moment to think through the circumstances that could lead to this.
+
 #### Casper FFG miscellania
 
 ##### Incentives
@@ -1747,6 +1767,72 @@ The PoW overlay plan was abandoned in 2018 in favour of moving directly to full 
 The initial specification for Casper FFG on the beacon chain was maintained on [Ethresear.ch](https://ethresear.ch/t/beacon-chain-casper-mini-spec/2760?u=benjaminion) (you can see the document history there). It includes $k$-finality, a slightly weird version of the Casper FFG fork choice rule, and the two Casper commandments as we use them today. However, the beacon chain now uses 32 slot epochs rather than 64, and we did not implement the dynamic validator set mechanism.
 
 The current Casper FFG specification is maintained as part of [epoch processing](/part3/transition/epoch/) in the beacon chain's state transition function.
+
+#### Answer to the Exercise
+
+Here's the answer to the [exercise above](#exercise).
+
+Suppose that attestations are always delayed by exactly one epoch, so that votes made in epoch $N$ are not processed until epoch $N+1$, and consider the following progress of the Casper FFG algorithm.
+
+<a id="img_consensus_answer_0"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing validators voting for a supermajority link from checkpoint 0 to checkpoint 1.](images/diagrams/consensus-answer-0.svg)
+
+<figcaption>
+
+We start with Checkpoint&nbsp;0 being justified. During Epoch&nbsp;1 everyone votes ${0 \rightarrow 1}$ as usual. The supermajority link vote is shown dashed because processing the votes will be delayed until the next epoch.
+
+</figcaption>
+</figure>
+
+<a id="img_consensus_answer_1"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing validators voting for a supermajority link from checkpoint 0 to checkpoint 2.](images/diagrams/consensus-answer-1.svg)
+
+<figcaption>
+
+At the end of Epoch&nbsp;1, no votes have been seen, due to the delay, so Checkpoint&nbsp;1 remains unjustified. During Epoch&nbsp;2 everyone votes ${0 \rightarrow 2}$.
+
+</figcaption>
+</figure>
+
+<a id="img_consensus_answer_2"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing validators voting for a supermajority link from checkpoint 1 to checkpoint 3.](images/diagrams/consensus-answer-2.svg)
+
+<figcaption>
+
+At the end of Epoch&nbsp;2, we can process the Epoch&nbsp;1 votes, which justify Checkpoint&nbsp;1 (and finalise 0, but that's irrelevant). Checkpoint&nbsp;2 remains unjustified as we haven't seen the Epoch&nbsp;2 votes yet. During Epoch&nbsp;3 everyone votes ${1 \rightarrow 3}$.
+
+</figcaption>
+</figure>
+
+<a id="img_consensus_answer_3"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing validators voting for a supermajority link from checkpoint 2 to checkpoint 4.](images/diagrams/consensus-answer-3.svg)
+
+<figcaption>
+
+Justification continues to lag one epoch behind due to the delayed attestations. During Epoch&nbsp;4 everyone votes ${2 \rightarrow 4}$.
+
+</figcaption>
+</figure>
+
+<a id="img_consensus_answer_4"></a>
+<figure class="diagram" style="width: 80%">
+
+![A diagram showing a string of justified blocks with supermajority links that skip alternate checkpoints.](images/diagrams/consensus-answer-4.svg)
+
+<figcaption>
+
+We are now perpetually locked into this leap-frog behaviour where votes always skip a checkpoint because the skipped checkpoint's justification always happens one epoch late.
+
+</figcaption>
+</figure>
 
 #### See also
 
