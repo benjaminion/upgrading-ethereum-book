@@ -3556,7 +3556,11 @@ where, once again, $T$ is the total number of increments of active validators (t
 
 One of the changes brought in with Altair was a tightening of the timeliness requirements for attestations. Previously, there were rewards for correctness and a separate reward for timely inclusion that declined as $\frac{1}{d}$, where $d$ was the inclusion distance in slots, up to a maximum of 32 slots. This led to oddities, like it being worth waiting slightly longer to make sure to get the head vote correct since that was worth more than any loss due to lateness of inclusion, even though a late head vote is pretty much useless.
 
-The new timeliness reward better reflect the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward, Target votes are always useful, but we only want to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots.
+The new timeliness reward better reflect the relative importance of the votes. A head vote that is older than one slot is not useful, so it gets no reward.
+
+Target votes are always useful, but we only want to track attestations pertaining to the current and previous epochs, so we ignore them if they are older than 32 slots. The number 32 was chosen for reasons of fairness: whichever slot in an epoch validators attest, their attestations are valid for the same length of time.[^fn-eip7045-notes]
+
+[^fn-eip7045-notes]: [EIP-7045](https://eips.ethereum.org/EIPS/eip-7045) proposes to change this in the [Deneb upgrade](/part4/history/deneb/) to accept and reward target votes for the whole of the current and previous epochs. Danny Ryan made an insightful presentation on the reasons for changing this, and a defence of why the changes remain fair to validators, in the [PEEPanEIP 114 session](https://www.youtube.com/watch?v=Z4tMgrreCN8).
 
 The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.[^fn-five-slots]
 
@@ -11981,10 +11985,12 @@ This routine processes each attestation included in the block. First a bunch of 
   - The target vote of the attestation must be either the previous epoch's checkpoint or the current epoch's checkpoint.
   - The target checkpoint and the attestation's slot must belong to the same epoch.
   - The attestation must be no newer than [`MIN_ATTESTATION_INCLUSION_DELAY`](/part3/config/preset/#min_attestation_inclusion_delay) slots, which is one. So this condition rules out attestations from the current or future slots.
-  - The attestation must be no older than [`SLOTS_PER_EPOCH`](/part3/config/preset/#slots_per_epoch) slots, which is 32.
+  - The attestation must be no older than [`SLOTS_PER_EPOCH`](/part3/config/preset/#slots_per_epoch) slots, which is 32.[^fn-eip7045]
   - The attestation must come from a committee that existed when the attestation was created.
   - The size of the committee and the size of the aggregate must match (`aggregation_bits`).
   - The (aggregate) signature on the attestation must be valid and must correspond to the aggregated public keys of the validators that it claims to be signed by. This (and other criteria) is checked by [`is_valid_indexed_attestation()`](/part3/helper/predicates/#def_is_valid_indexed_attestation).
+
+[^fn-eip7045]: This is due to change in [EIP-7045](https://eips.ethereum.org/EIPS/eip-7045), scheduled for inclusion in the [Deneb upgrade](/part4/history/deneb/). The change will allow attestations to be included from the whole of current and previous epochs.
 
 Once the attestation has passed the checks it is processed by converting the votes from validators that it contains into flags in the state.
 
@@ -14543,7 +14549,13 @@ The full description of the changes between Bellatrix and Capella is in the [Cap
 
 The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name) and will take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
 
-Deneb will include [the work needed](https://github.com/ethereum/consensus-specs/tree/dev/specs/deneb) for the consensus layer to support [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) data availability.
+The main work included in Deneb will be [the work needed](https://github.com/ethereum/consensus-specs/tree/dev/specs/deneb) for the consensus layer to support [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) data availability.
+
+The following changes are also [planned for inclusion](https://github.com/ethereum/consensus-specs/releases/tag/v1.4.0-beta.0).
+
+  - [EIP-7044](https://eips.ethereum.org/EIPS/eip-7044): Lock voluntary exit domain on Capella [#3288](https://github.com/ethereum/consensus-specs/pull/3288)
+  - [EIP-7045](https://eips.ethereum.org/EIPS/eip-7045): Increase max attestation inclusion slot [#3360](https://github.com/ethereum/consensus-specs/pull/3360)
+  - [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788): Expose parent beacon block root in execution layer [#3421](https://github.com/ethereum/consensus-specs/pull/3421)
 
 ### Electra <!-- /part4/history/electra/ -->
 
