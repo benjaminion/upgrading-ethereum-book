@@ -41,13 +41,13 @@ The generated PDF will be written to your current directory as _book.pdf_.
 ### Significant known issues
 
 - Intermittent: sometimes pages with diagrams overflow off the bottom.
+  - May be fixed in newer versions of xetex; seems ok in XeTeX 3.141592653-2.6-0.999993
 - Footnotes can vanish.
-  - Specifically, footnote 7 in Consensus - Preliminaries - Finality.
-  - This seems to be due to the footnote being referenced from inside block-quoted text.
+  - This happens when the footnote reference is inside block-quoted text.
   - It looks to be due to the code that adds a side-bar using `framed`.
   - Indeed, the [framed manual](https://anorien.csc.warwick.ac.uk/mirrors/CTAN/macros/latex/contrib/framed/framed.pdf) says that footnotes are not supported.
   - Using `mdframed` or other solutions places the footnote with the quote rather than at the bottom of the page.
-  - As a workaround, I've moved the footnote, but it would be good to fix this somehow.
+  - As a workaround, I've moved the footnote, but it would be good to fix this somehow. Looks difficult, though.
 
 ### Pending improvements
 
