@@ -33,11 +33,11 @@
     "gatsby-source-filesystem": "^5.11.0",
     "gatsby-transformer-remark": "^6.11.0",
     "markdownlint": "^0.29.0",
-    "patch-package": "^7.0.0",
+    "patch-package": "^7.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^3.0.2",
-    "webpack": "^5.88.1"
+    "webpack": "^5.88.2"
   },
   "overrides": {
     "babel-plugin-lodash": {
