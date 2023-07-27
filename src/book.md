@@ -14561,6 +14561,8 @@ The following changes are also [planned for inclusion](https://github.com/ethere
 
 The consensus layer upgrade following Deneb has been given the name Electra and will take place simultaneously with the execution layer's Prague upgrade.
 
+An early stage discussion around the potential scope of the Electra upgrade is taking place in [Issue 3449](https://github.com/ethereum/consensus-specs/issues/3449) on the consensus specs repo.
+
 ## The Merge <!-- /part4/merge/* -->
 
 TODO
