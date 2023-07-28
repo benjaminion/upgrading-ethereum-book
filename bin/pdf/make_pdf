@@ -14,7 +14,9 @@ outdir=$(pwd)
 srcdir=$(cd -- $(dirname "$1") && pwd)
 path=$(cd -- $(dirname "$0") && pwd)
 
-echo "Converting $srcdir/$name.md to ./$name.pdf"
+# Git branch name - used on the title page and metadata
+git_branch=$(git branch --show-current 2>/dev/null || echo 'unknown')
+export UE_GIT_BRANCH=${git_branch^}
 
 # Git commit hash - used on the title page
 export UE_GIT_COMMIT=$(git log -1 --format="%h" 2>/dev/null)
@@ -27,12 +29,14 @@ export TEXINPUTS="$path/inc/:"
 
 cd $srcdir
 
+echo "Converting $srcdir/$name.md to ./$name.pdf with version $UE_GIT_BRANCH"
+
 pandoc \
     $name.md \
     --output $outdir/$name.pdf \
     --template $path/template.tex \
     --from markdown \
-    --metadata title-meta:'Upgrading Ethereum - Bellatrix Edition' \
+    --metadata title-meta:"Upgrading Ethereum - ${UE_GIT_BRANCH^} Edition" \
     --metadata author-meta:'Ben Edgington' \
     --metadata lang:en-GB \
     --lua-filter $path/filters/pagebreaks.lua \
