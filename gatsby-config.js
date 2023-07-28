@@ -1,10 +1,5 @@
 const execSync = require('child_process').execSync;
 
-const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
-const version = 'capella';
-const hostname = 'https://eth2book.info';
-const canonical = hostname + '/latest';
-
 function getGitHash() {
   try {
     return execSync('git log -1 --format="%h" 2>/dev/null', {encoding: 'utf8'}).replace(/(\r\n|\n|\r)/, '')
@@ -12,6 +7,19 @@ function getGitHash() {
     return 'unknown'
   }
 }
+
+function getGitBranch() {
+  try {
+    return execSync('git branch --show-current 2>/dev/null', {encoding: 'utf8'}).replace(/(\r\n|\n|\r)/, '')
+  } catch(e) {
+    return 'unknown'
+  }
+}
+
+const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
+const version = getGitBranch();
+const hostname = 'https://eth2book.info';
+const canonical = hostname + '/latest';
 
 module.exports = {
   siteMetadata: {
