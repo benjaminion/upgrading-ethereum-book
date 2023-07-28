@@ -8,6 +8,8 @@ local logging = require 'logging'
 --
 -- For best results run this one after the Pagebreaks filter.
 
+local website = 'https://eth2book.info'
+
 local links, targets = {}, {}
 local skip = { ["contents"] = true, ["annotated-spec"] = true }
 
