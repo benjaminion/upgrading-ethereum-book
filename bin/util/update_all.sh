@@ -13,4 +13,10 @@ for branch in $branches;
 do
     echo "*** Patching $branch"
     git switch $branch && git cherry-pick $1
+    if [ $? -ne 0 ]
+    then
+        echo "*** Cherry pick failed on $branch"
+        echo "*** Aborting"
+        git cherry-pick --abort
+    fi
 done
