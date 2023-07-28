@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=altair
+version=$(git branch --show-current 2>/dev/null || echo 'unknown')
 
 wait_for_input () {
     read -s < /dev/tty
