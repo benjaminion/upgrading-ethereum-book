@@ -1772,6 +1772,9 @@ The current Casper FFG specification is maintained as part of [epoch processing]
 
 Here's the answer to the [exercise above](#exercise).
 
+<details>
+<summary>Answer</summary>
+
 Suppose that attestations are always delayed by exactly one epoch, so that votes made in epoch $N$ are not processed until epoch $N+1$, and consider the following progress of the Casper FFG algorithm.
 
 <a id="img_consensus_answer_0"></a>
@@ -1834,6 +1837,8 @@ We are now perpetually locked into this leap-frog behaviour where votes always s
 </figcaption>
 </figure>
 
+</details>
+
 #### See also
 
 The original [Casper the Friendly Finality Gadget](https://arxiv.org/pdf/1710.09437.pdf) paper remains the canonical reference. Although the details of our implementation in Ethereum&nbsp;2.0 differ in some respects, the foundations remains the same.
@@ -1864,7 +1869,7 @@ TODO
 
 TODO
 
-### Issues and Fixes <!-- /part2/consensus/issues/* -->
+### Issues and Fixes <!-- /part2/consensus/issues/ -->
 
 #### LMD GHOST
 
@@ -1878,11 +1883,11 @@ TODO <!-- 1 slot delay in consideration -->
 
 ##### Attestation recency
 
-TODO <!-- current or previous epoch -->
+TODO. See the [Annotated Fork Choice](/part3/forkchoice/phase0/#attestation-timeliness).
 
 ##### Attestation equivocation
 
-TODO
+TODO. See the [Annotated Fork Choice](/part3/forkchoice/phase0/#on_attester_slashing).
 
 ##### Reorgs and Reversions
 
@@ -1898,7 +1903,63 @@ TODO
 
 ##### Proposer boost
 
+TODO. See the [Annotated Fork Choice](/part3/forkchoice/phase0/#proposer-boost).
+
+#### Casper FFG
+
+##### Casper FFG's fork choice can cause long reorgs
+
+Casper FFG's [fork choice rule](/part2/consensus/casper_ffg/#fork-choice-rule) says that the underlying consensus protocol must follow the chain with the highest justified checkpoint. This guarantees Casper FFG's [plausible liveness](/part2/consensus/casper_ffg/#plausible-liveness), but can also lead to long reorgs in exceptional circumstances.
+
+Such an incident occurred on Ethereum's Goerli testnet on the 28th of July, 2023. The following explanation is guided by the excellent [analysis by Potuz](https://twitter.com/potuz1/status/1685736037321166848).
+
+If we look at [Epoch 192879](https://goerli.beaconcha.in/epoch/192879) on the Goerli testnet, we notice that it has an initial block in [Slot 6172128](https://goerli.beaconcha.in/slot/6172128), but all subsequent blocks in the epoch are either missing completely or were orphaned. A fork choice visualiser [shows](https://twitter.com/potuz1/status/1685736037321166848) that the proposers in [Epoch 192880](https://goerli.beaconcha.in/epoch/192880) simply ignored everything after the first slot of Epoch 192879 and chose instead to build on the block in Slot 6172128.
+
+So, what happened?
+
+1. Unusually, Checkpoint 192878 had not been justified by the end of Epoch 192878, since not enough votes had been accumulated.
+2. The block at [Slot 6172128](https://goerli.beaconcha.in/slot/6172128), at the start of Epoch 192879, contained enough votes to justify Checkpoint 192878, but the block was published very late.
+3. Subsequent proposers correctly ignored the block at Slot 6172128 due to its lateness and instead built a chain on the block at Slot 6172126. They continued building this chain throughout Epoch 192879.
+   - However, the blocks on this new chain did not include the votes that would have justified Checkpoint 192878. By design, blocks have [limited space](/part3/config/preset/#max-operations-per-block) for attestations. Due to several slots being empty, attestation space was congested.
+   - They also did not have enough votes to justify Checkpoint 192879 by the end of Epoch 192879.
+4. After epoch processing at the end of Epoch 192879 we have two branches:
+   1. the first contains a single block in Epoch 192879, at Slot 6172128, and Checkpoint 192878 is the highest justified;
+   2. the second contains many blocks in Epoch 192879, and Checkpoint 192877 is the highest justified.
+5. At start of Epoch 192880, Casper FFG's fork choice says that Block 6172128 must be the new head since it has the highest justified checkpoint, and all of the subsequent blocks in [Epoch 192879](https://goerli.beaconcha.in/epoch/192879) must be ignored.
+
+<a id="img_consensus_issues_ffg_reorg"></a>
+<figure class="diagram" style="width: 95%">
+
+![A diagram illustrating the fork that led to a whole epoch of blocks being orphaned.](images/diagrams/consensus-issues-ffg-reorg.svg)
+
+<figcaption>
+
+During epoch processing at the end of 192879, the top branch contains votes that justify Checkpoint 192878, while the bottom branch does not contain sufficient votes to justify either 192878 or 192879. Casper FFG's fork choice forces proposers in 192880 to build on the branch with higher justification. As a result, all blocks in slots 6172130 to 6172159 were orphaned (reorged). The large squares are checkpoints, the rounded squares are blocks.
+
+</figcaption>
+</figure>
+
+This was not due to an implementation bug, but due to Casper FFG's fork choice. If the bottom fork had remained canonical in epoch 192880, any validator following the top fork, and not seeing the blocks on the bottom fork until much later, would be forced eventually to move its justified epoch back from 192878 to 192877, potentially requiring them to make slashable surround votes in future.
+
+The severity of the reorg was exacerbated by:
+
+  - the length of epochs, with accounting being performed only every 32 slots;
+  - overall participation rates that were close to the 67% supermajority threshold;
+  - a block (at slot 6172128) that contained key justification information having been published late;
+  - several empty slots that caused contention for block space, so that important attestations were excluded from the longer chain in Epoch 192879; and
+  - too tight a time window for attestations to be included, which ought to be helped by the change planned in [EIP 7045](https://eips.ethereum.org/EIPS/eip-7045).
+
+Note that all of this is independent of the separate issues around [unrealised justification](/part3/forkchoice/phase0/#unrealised-justification).
+
+This scenario would be very unlikely to occur on the Ethereum Mainnet, principally because participation is almost always over 99%, way above the supermajority threshold, and blocks are much more rarely missed than on the testnets.
+
+#### Gasper
+
 TODO
+
+##### Unrealised Justification
+
+TODO. See the [Annotated Fork Choice](/part3/forkchoice/phase0/#unrealised-justification).
 
 ### Weak Subjectivity <!-- /part2/validator/weak_subjectivity/* -->
 
