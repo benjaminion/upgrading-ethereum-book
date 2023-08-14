@@ -58,9 +58,6 @@ module.exports.lintSourceMarkdown = (file) => {
       // We have inline html
       'MD033': false,
 
-      // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
-      'MD037': false,
-
       // link-image-reference-definitions - we use these as TODO comments
       'MD053': false,
     }
