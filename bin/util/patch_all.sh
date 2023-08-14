@@ -24,6 +24,7 @@ do
         echo "*** Aborting"
         git cherry-pick --abort
     fi
+    echo
 done
 
 git switch $start
