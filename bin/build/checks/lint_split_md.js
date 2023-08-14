@@ -56,9 +56,6 @@ module.exports.lintSplitMarkdown = (files) => {
       // We have inline html
       'MD033': false,
 
-      // no-space-in-emphasis Spaces inside emphasis markers - gives false positives
-      'MD037': false,
-
       // We don't expect the very first line to be a top-level heading (due to inserted <div>)
       'MD041': false,
 
