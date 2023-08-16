@@ -9339,6 +9339,8 @@ A validator that `is_eligible_for_activation()` has had its `activation_eligibil
 
 To avoid any ambiguity or confusion on the validator side about its state, we wait until its eligibility activation epoch has been finalised before [adding it to the activation queue](/part3/transition/epoch/#registry-updates) by setting its `activation_epoch`. Otherwise, it might at one point become active, and then the beacon chain could flip to a fork in which it is not active. This could happen if the latter fork had fewer blocks and had thus processed fewer deposits.
 
+Note that `state.finalized_checkpoint.epoch` does not mean that all of the slots in that epoch are finalised. We finalise checkpoints, not epochs, so only the first slot (the checkpoint) of that epoch is finalised. This is accounted for in [`process_registry_updates()`](/part3/transition/epoch/#def_process_registry_updates) by adding one to the current epoch when setting the `validator.activation_eligibility_epoch`, so that we can be sure that the block containing the deposit has been finalised.
+
 |||
 |-|------|
 | Used&nbsp;by | [`process_registry_updates()`](/part3/transition/epoch/#def_process_registry_updates) |
