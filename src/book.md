@@ -6325,7 +6325,7 @@ It's not only containers that use this format, it applies to any type that conta
 
 ##### Aliases
 
-Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#aliases) here for completeness:
+Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/ssz/simple-serialize.md#aliases) here for completeness[^fn-ssz-json]:
 
 > For convenience we alias:
 >
@@ -6333,6 +6333,8 @@ Just quoting directly from [the SSZ spec](https://github.com/ethereum/consensus-
 >   - `byte` to `uint8` (this is a basic type)
 >   - `BytesN` and `ByteVector[N]` to `Vector[byte, N]` (this is _not_ a basic type)
 >   - `ByteList[N]` to `List[byte, N]`
+
+[^fn-ssz-json]: An instructive discussion of the wisdom or otherwise of aliasing `byte` to `uint8` was sparked when we began defining a [canonical JSON mapping](https://github.com/ethereum/consensus-specs/pull/2983) for SSZ data. The words "fight to the death" were used.
 
 In the main beacon chain spec, a bunch of [custom types](/part3/config/types/#table_custom_types) are also defined in terms of the standard SSZ types and aliases. For example, `Slot` is an SSZ `uint64` type, `BLSPubkey` is an SSZ `Bytes48` type, and so on.
 
