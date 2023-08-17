@@ -25,7 +25,7 @@
     "gatsby": "^5.11.0",
     "gatsby-plugin-catch-links": "^5.11.0",
     "gatsby-plugin-htaccess": "^1.4.0",
-    "gatsby-plugin-matomo": "^0.16.0",
+    "gatsby-plugin-matomo": "^0.16.1",
     "gatsby-remark-autolink-headers": "^6.11.0",
     "gatsby-remark-katex": "^7.11.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
