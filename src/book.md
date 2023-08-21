@@ -475,7 +475,7 @@ Ethereum's consensus layer prioritises liveness, but also strives to offer a saf
 
 [^fn-liveness-during-nonfinality]: The value of this was evident when the beacon chain [stopped finalising](https://offchain.medium.com/post-mortem-report-ethereum-mainnet-finality-05-11-2023-95e271dfd8b2) for around an hour on the 12th of May, 2023. Participation in consensus dropped from over 99% of validators to around 40% for the duration. Ordinary Ethereum users and applications, however, would have barely noticed. Blocks continued to be produced (albeit fewer than normal) and transactions continued to be executed.
 
-Finality in Ethereum's consensus layer is delivered by the Casper FFG mechanism that we'll exploring soon. The idea is that, periodically, all honest validators agree on fairly recent checkpoint blocks that they will never revert. That block and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer.
+Finality in Ethereum's consensus layer is delivered by the Casper FFG mechanism that we'll be exploring soon. The idea is that, periodically, all honest validators agree on fairly recent checkpoint blocks that they will never revert. That block and all its ancestor blocks are then "final" - they will never change, and if you consult any honest node in the network about them or their ancestors you will always get the same answer.
 
 <a id="img_consensus_finality"></a>
 <figure class="diagram" style="width: 80%">
