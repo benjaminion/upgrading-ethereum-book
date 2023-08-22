@@ -1384,7 +1384,7 @@ Now, there must be a continuous series of justified checkpoints leading from the
 
 <figcaption>
 
-For any finalised checkpoint, such as $b_{10}$, there is a contiguous chain of supermajority links leading to it from the root, $r$. The chain of links here justifies the set of checkpoints $\mathcal{B} = \{r, b_1,\allowbreak b_4, b_5,\allowbreak b_8, b_{10}\}$. Shaded checkpoints are justified (and maybe finalised); cross-hatched checkpoints are finalised (also marked with "F").
+For any finalised checkpoint, such as $b_{10}$, there is a contiguous chain of supermajority links leading to it from the root, $r$. The chain of links here justifies the set of checkpoints $\mathcal{B} = \{r, b_1,\allowbreak b_4, b_5,\allowbreak b_9, b_{10}\}$. Shaded checkpoints are justified (and maybe finalised); cross-hatched checkpoints are finalised (also marked with "F").
 
 </figcaption>
 </figure>
@@ -1404,7 +1404,7 @@ Therefore, we have proved (by contradiction) that two conflicting checkpoints ca
 
 <figcaption>
 
-Suppose an earlier, conflicting checkpoint $a_6$ is finalised. Finalisation means that there must be a supermajority link ${a_6 \rightarrow a_7}$. One of the supermajority links on the $b$ chain &ndash; in this case, ${b_5 \rightarrow b_8}$ &ndash; must span ${a_6 \rightarrow a_7}$.
+Suppose an earlier, conflicting checkpoint $a_6$ is finalised. Finalisation means that there must be a supermajority link ${a_6 \rightarrow a_7}$. One of the supermajority links on the $b$ chain &ndash; in this case, ${b_5 \rightarrow b_9}$ &ndash; must span ${a_6 \rightarrow a_7}$.
 
 </figcaption>
 </figure>
