@@ -733,7 +733,7 @@ class AttestationData(Container):
     target: Checkpoint
 ```
 
-Every honest validator makes an attestation exactly once per epoch, containing its vote for the best head block in its view at the moment that it attests. Within each epoch, the validator set is split into committees, so that at each slot only $1/32$ of the validators are attesting.
+Every honest validator makes an attestation exactly once per epoch, containing its vote for the best head block in its view at the moment that it attests. Within each epoch, the validator set is split up so that only $1/32$ of the validators are attesting at each slot. (The `index` field in this structure relates to the attesting validators being further divided into up to 64 [committees](/part2/building_blocks/committees/) at each slot for operational reasons, but this is not relevant to the mechanics of LMD GHOST and we shall ignore it.)
 
 Nodes receive attestations both directly, via attestation gossip, and indirectly, contained in blocks. In principle, a node could receive attestations through other means &ndash; I could type an attestation in at the keyboard if I wished &ndash; but in practice votes propagate only via attestation gossip and within blocks.
 
@@ -3227,7 +3227,9 @@ Using the effective balance achieves two goals, one to do with economics, the ot
 
 #### Economic aspects of effective balance
 
-The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32&nbsp;ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64&nbsp;ETH but an effective balance of only 32&nbsp;ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead, we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.
+The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32&nbsp;ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64&nbsp;ETH but an effective balance of only 32&nbsp;ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead, we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.[^fn-eip-7251]
+
+[^fn-eip-7251]: There is, in fact, a proposal to [increase the maximum effective balance](https://notes.ethereum.org/@mikeneuder/eip-7251-faq) to 2048 ETH.
 
 The scope of effective balance quickly grew, and now it completely represents the weight of a validator in the consensus protocol.
 
@@ -4351,7 +4353,7 @@ These are the topics that I've picked out for special attention.
 
   - [BLS Signatures](/part2/building_blocks/signatures/) precipitated the total redesign of Ethereum's proof of stake protocol, and underpin the scale and ambition of Ethereum 2.
   - [Randomness](/part2/building_blocks/randomness/) is a vital aspect of security, but difficult to generate in a deterministic system. The beacon chain accomplishes it with BLS signatures.
-  - [Shuffling](/part2/building_blocks/shuffling/) is uses randomness to populate committees. But, for the sake of light clients, we use an "oblivious" shuffle rather than the standard Fisher&ndash;Yates.
+  - [Shuffling](/part2/building_blocks/shuffling/) uses randomness to populate committees. But, for the sake of light clients, we use an "oblivious" shuffle rather than the standard Fisher&ndash;Yates.
   - [Committees](/part2/building_blocks/committees/) distribute the workload of the beacon chain.
   - [Aggregator Selection](/part2/building_blocks/aggregator/) secretly selects small subsets of committees to do the work of aggregating attestations.
   - [SSZ: Simple Serialize](/part2/building_blocks/ssz/) is a novel serialisation technique that appears everywhere in the protocol. It embodies elegance and efficiency.
@@ -4622,9 +4624,9 @@ $$
 
 ##### Benefits of aggregation
 
-Verification of a BLS signature is expensive (resource intensive) compared with verification of an ECDSA signature, more than an order of magnitude slower due to the pairing operation, so what benefits do we gain?
+Verification of a BLS signature is expensive (resource intensive) compared with verification of an ECDSA signature &ndash; more than an order of magnitude slower due to the pairing operation &ndash; so what benefits do we gain?
 
-The benefits accrue when we are able to aggregate significant numbers of signatures. This is exactly what we have with beacon chain attestation committees. Ideally, all the validators in the committee sign-off on the same attestation data, so all their signatures can be aggregated. In practice, there might be differences of opinion about the chain state between committee members resulting in two or three different attestations, but even so there will be many fewer aggregates compared with the total number of committee members.
+The benefits accrue when we are able to aggregate significant numbers of signatures. This is exactly what we have with beacon chain attestation committees. Ideally, all the validators in the committee sign-off on the same attestation data, so all their signatures can be aggregated. In practice, there might be differences of opinion about the chain state between committee members resulting in two or three different attestations, but even so there will be many fewer aggregates than the total number of committee members.
 
 ###### Speed benefits
 
@@ -5663,13 +5665,13 @@ The Altair spec introduced two types of committees, beacon committees and sync c
 
 The current beacon committee structure was strongly influenced by a previous roadmap that included in-protocol data sharding. That design is [now deprecated](https://github.com/ethereum/consensus-specs/pull/1428), yet a remnant of it remains in our 64 beacon committees per slot. These were originally intended to map directly to 64 shards as "crosslink committees" but no longer have that function. Nonetheless, beacon committees still serve a useful purpose in parallelising the aggregation of attestations. Whether 64 remains the right number of committees per slot has not been analysed to my knowledge. The trade-off is that fewer beacon committees would reduce the amount of block space needed for aggregate attestations, but would increase the time needed for [aggregators](/part2/building_blocks/aggregator/) to do their work.
 
-In any case, logically, the 64 committees in a slot now act as a single large committee, all voting on the same information.
+In any case, logically, all of the committees in a slot now act as a single large super-committee, all voting on the same information.
 
 #### Committee assignments
 
 Beacon committees are convened to vote exactly once and then disbanded immediately - they are completely transient. By contrast, a sync committee lasts for 256 epochs (a little over 27 hours), and votes 8192 times during that period.
 
-During an epoch, every active validator is a member of exactly one beacon committee, so the committees are all disjoint. At the start of the next epoch, all the existing committees are disbanded and the active validator set is divided into a fresh set of committees.
+During an epoch, every active validator is a member of exactly one committee, so all the epoch's committees are disjoint. At the start of the next epoch, all the existing committees are disbanded and the active validator set is divided into a fresh set of committees.
 
 The composition of the committees for an epoch is fully determined at the start of an epoch by (1) the active validator set for that epoch, and (2) the [RANDAO seed](/part2/building_blocks/randomness/#lookahead) value at the start of the previous epoch.
 
@@ -5779,7 +5781,7 @@ There is another index that appears when assigning validators to committees in [
 
 Validators are divided among the committees in an epoch by the [`compute_committee()`](/part3/helper/misc/#compute_committee) function.
 
-Given the epoch-based index $j$, `compute_committee()` returns a slice of the full, shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / 32N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / 32N \rfloor - 1$. So the size of each committee is either $\lfloor n / 32N \rfloor$ or $\lceil n / 32N \rceil$. In any case, committee sizes differ by at most one.
+Given the epoch-based index $j$, `compute_committee()` returns a slice of the full, shuffled validator set as the committee membership. Within the shuffled list, the index of the first validator in the committee is $\lfloor nj / 32N \rfloor$, and the index of the last validator in the committee is $\lfloor n(j + 1) / 32N \rfloor - 1$. So the size of each committee is either $\lfloor n / 32N \rfloor$ or $\lceil n / 32N \rceil$. In any case, the committee sizes within an epoch differ by at most one.
 
 In simplified form the [`compute_committee()`](/part3/helper/misc/#compute_committee) calculation looks like this. `N` is the number of committees per slot, `n` is the total number of active validators, and `j` is the epoch-based committee index,
 
