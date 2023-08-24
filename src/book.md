@@ -12501,6 +12501,16 @@ The terms attestation, vote, and message appear frequently. An attestation is a 
 
 Where we discuss attestations, they can be a single attestation from one validator, or aggregate attestations containing the attestations of multiple validators that made the same set of votes. It will be clear from the context which of these applies.
 
+#### Decoding dev-speak
+
+Sometimes you'll hear protocol devs say slightly obscure things like, "we can deal with that in fork choice". For example, "we can handle censorship via the fork choice".
+
+This framing makes sense when we understand that a node's fork choice rule is its expression of which chain it prefers to follow, or prefers not to follow. No honest node wants to follow a chain that contains invalid blocks (according to the state transition), so the fork choice of all honest nodes will never select a head block that has an invalid block in its ancestry.
+
+Similarly, nodes could modify their fork choice rule so that branches with blocks that appear to censor transactions are never selected. If nodes with sufficient validators do this, then any such block will be orphaned, strongly discouraging censorship. This works both ways, of course. A government could declare that the fork choice must ignore any branches with blocks that do _not_ censor transactions. If enough validators &ndash; over half &ndash; choose to comply, then the whole chain will become censoring.
+
+The goal of the fork choice is for the network to converge onto a single history, so there is a strong incentive to try to agree with one's peers. However, it also provides a mechanism that can be used (perhaps as an outcome of social coordination) to be opinionated about what kind of blocks are eventually included in that history.
+
 #### History
 
 [TODO: insert link to history of PoS]::
