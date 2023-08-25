@@ -4,11 +4,11 @@ This is an experimental pipeline for building the whole text as a single PDF fil
 
 ## Pre-requisites
 
-Get the latest `pandoc` from the [pandoc repo](https://github.com/jgm/pandoc/releases/) and install it. It needs to be a fairly up to date one.
+Get the latest `pandoc` from the [pandoc repo](https://github.com/jgm/pandoc/releases/) and install it. It needs to be a fairly up to date one. (Caveat: Pandoc 3.1.6.2 fails due to [this issue](https://github.com/jgm/pandoc/issues/9014).)
 
 ```
 > pandoc --version
-pandoc 3.1.6
+pandoc 3.1.6.1
 ...
 ```
 
