@@ -28,9 +28,9 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 > node --version
 v18.14.2
 > npm --version
-9.5.0
+9.8.1
 > gatsby --version
-Gatsby CLI version: 5.10.0
+Gatsby CLI version: 5.12.0
 ```
 
 `gatsby-cli` can be installed with,
