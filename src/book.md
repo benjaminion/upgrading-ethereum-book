@@ -5926,7 +5926,11 @@ Third, verifiability. We want it to be easy to verify a claim that a particular 
 
 The current aggregation strategy was introduced in [PR 1440](https://github.com/ethereum/consensus-specs/pull/1440) and is described in the Honest Validator specs for [beacon committees](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#attestation-aggregation) and [sync committees](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/altair/validator.md#aggregation-selection).
 
-It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures/). Each validator in the committee generates a signature over the current slot number using its secret signing key. If that signature modulo a given number is zero then it is an aggregator, otherwise it is not an aggregator.
+It turns out that we can straightforwardly satisfy our three desirable properties of size, secrecy, and verifiability using [BLS signatures](/part2/building_blocks/signatures/). The algorithm is quite simple. Each validator in the committee generates a verifiable random number; if that random number modulo another number is zero then it is an aggregator, otherwise it is not an aggregator.
+
+The validator creates its verifiable random number by making a signature over the current slot number using its normal secret signing key, and then hashing the signature. We assume that the result of this is uniformly random; we have no reason to suspect it isn't.
+
+Any validator whose random number modulo `len(committee)` `//` `TARGET_AGGREGATORS_PER_COMMITTEE` equals zero is then an aggregator. This modulus is chosen to provide an average of 16 aggregators per beacon committee.
 
 The following are the [spec functions](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/validator.md#aggregation-selection) for determining which validators are the aggregators in beacon committees.
 
