@@ -1,6 +1,10 @@
 # Preface <!-- /preface/ -->
 
-## Work in progress!
+## Upgrading Ethereum
+
+Welcome to my book about upgrading Ethereum: Ethereum on proof of stake and beyond.
+
+### Work in progress!
 
 I am writing this book backwards. Bottom up. Starting with the details and working towards the big picture.
 
@@ -10,7 +14,7 @@ I'm now working on [Part 2: Technical Overview](/part2/) which wraps a first, ho
 
 **Warning:** until Edition 1.0 is out, anything may change. I'll try not to change URLs and anchors in the Annotated Spec part, but no promises. Anything else, including entire chapters and sections, should be considered unstable.
 
-## What to expect
+### What to expect
 
 This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethereum on proof of stake &ndash; at a technical level. What does it do? How does it work? Why is it like this?
 
@@ -29,7 +33,7 @@ I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as
 
 It's a chunky list of exclusions, but there's still [plenty to talk about](/contents/).
 
-## Versions
+### Versions
 
 This edition covers the Capella version of the deployed Ethereum&nbsp;2.0 consensus layer. The beacon chain went live with [Phase&nbsp;0](/part4/history/phase0/) on December 1st, 2020. It was upgraded to [Altair](/part4/history/altair/) on October 27th, 2021, to [Bellatrix](/part4/history/bellatrix/) on September 6th, 2022, and to [Capella](/part4/history/capella/) on April 12th, 2023.
 
@@ -44,7 +48,7 @@ Historical and current versions of Upgrading Ethereum are available online:
 
 My original annotated specification for the Phase&nbsp;0 version is [also available](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/), though largely of historical interest and now subsumed into this book.
 
-## In defence of &ldquo;Eth2&rdquo;
+### In defence of &ldquo;Eth2&rdquo;
 
 When I started this writing project, Ethereum on proof of stake was universally known as Ethereum&nbsp;2.0, Eth2 for short, as it had been since 2014. This reflects the fact that the Ethereum&nbsp;2.0 vision diverged from the original Ethereum&nbsp;1.0 implementation in many respects. The direction of travel was well-captured in the [Ethereum.org 2.0 Mauve Paper](https://docs.google.com/document/d/1maFT3cpHvwn29gLvtY4WcQiI6kRbN_nbCf3JlgR3m_8/edit#) in 2016. The details of our eventual implementation differ from what's presented there, but the elements were all in place even then. Eth2 was to deliver not only proof of stake, but new cryptography, new peer-to-peer networking, new cryptoeconomics, and new directions in scalability, among other things. This is what we achieved.
 
@@ -59,7 +63,7 @@ This is why I often continue to refer to Ethereum on proof of stake as Ethereum&
 <a id="british-english"></a>
 While we're here, another thing I won't be apologising for is using British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
 
-## Acknowledgements
+### Acknowledgements
 
 Above all, I want to thank my employer, [Consensys](https://consensys.io/). Much of the writing has been done in my own time, but Consensys has been increasingly supportive of me working on this in the course of my day job. In particular, during Q2 2023, the company granted me three months of writing leave to work full-time on the book. They also allowed me to put a liberal licence on everything. All this is extremely cool of them, and I am deeply grateful. Consensys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
