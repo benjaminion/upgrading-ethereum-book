@@ -5403,13 +5403,11 @@ Nonetheless, it is interesting to explore how it might be improved, especially a
 
 The long-term fix for biasability is to use a verifiable delay function (VDF). A VDF is guaranteed to be slow to compute its output, but that output can be verified quickly. In practice the VDF is a calculation run on a specialised hardware device that is assumed to have a performance within a small factor of the theoretical maximum performance. So, a VDF might output a result in, say, 20 seconds with the assumption that the best that any other device could do is to obtain the result in, say, 5 seconds.
 
-[TODO: link VDF section when done]::
-
 The idea is that RANDAO updates would come from the output of the VDF. A proposer would have to decide whether to commit its `randao_reveal` before it is possible for it to compute the actual contribution: the future output of the VDF. This eliminates any opportunistic biasing of the RANDAO.
 
 Only one VDF needs to be active at any time on the network since it can publish its result for quick verification by all the other nodes.
 
-Although a [lot of work](https://www.vdfalliance.org/) has been done on designing and specifying VDFs there is no active plan to implement one in Ethereum at this time.
+Although a [lot of work](https://www.vdfalliance.org/) has been done on designing and specifying VDFs there is no active plan to implement one in Ethereum at this time. If anything, recent results on the [difficulty of constructing VDF functions](https://ethresear.ch/t/statement-regarding-the-public-report-on-the-analysis-of-minroot/16670?u=benjaminion) suggest that the prospect of an in-protocol VDF is receding at this time.
 
 #### See also
 
