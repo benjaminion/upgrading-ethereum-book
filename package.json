@@ -16,9 +16,10 @@
     "spell": "bin/util/check_spellings_list.sh",
     "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'",
     "gramm": "bin/util/check_grammar.sh src/book.md",
-    "patch": "node ./node_modules/patch-package/index.js",
+    "patch": "npx patch-package",
     "pdfit": "bin/pdf/make_pdf src/book.md",
-    "stats": "bin/util/stats.sh"
+    "stats": "bin/util/stats.sh",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",

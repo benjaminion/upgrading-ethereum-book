@@ -47,7 +47,6 @@ Clone this repo. `cd` into it, then:
 
 ```
 npm install
-npm run patch
 gatsby build
 ```
 
