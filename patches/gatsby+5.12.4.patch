@@ -1,0 +1,13 @@
+diff --git a/node_modules/gatsby/dist/commands/serve.js b/node_modules/gatsby/dist/commands/serve.js
+index cb6d5b7..89bebfe 100644
+--- a/node_modules/gatsby/dist/commands/serve.js
++++ b/node_modules/gatsby/dist/commands/serve.js
+@@ -248,7 +248,7 @@ module.exports = async program => {
+       console.log(`  ${_chalk.default.bold(`Local:`)}            ${urls.localUrlForTerminal}`);
+       console.log(`  ${_chalk.default.bold(`On Your Network:`)}  ${urls.lanUrlForTerminal}`);
+     } else {
+-      console.log(`  ${urls.localUrlForTerminal}`);
++      console.log(`  ${urls.localUrlForTerminal}` + pathPrefix.substring(1));
+     }
+   }
+   const startListening = () => {
