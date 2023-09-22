@@ -1915,9 +1915,9 @@ TODO. See the [Annotated Fork Choice](/part3/forkchoice/phase0/#proposer-boost).
 
 Casper FFG's [fork choice rule](/part2/consensus/casper_ffg/#fork-choice-rule) says that the underlying consensus protocol must follow the chain with the highest justified checkpoint. This guarantees Casper FFG's [plausible liveness](/part2/consensus/casper_ffg/#plausible-liveness), but can also lead to long reorgs in exceptional circumstances.
 
-Such an incident occurred on Ethereum's Goerli testnet on the 28th of July, 2023. The following explanation is guided by the excellent [analysis by Potuz](https://twitter.com/potuz1/status/1685736037321166848).
+Such an incident occurred on Ethereum's Goerli testnet on the 28th of July, 2023. The following explanation is guided by the excellent [analysis by Potuz](https://web.archive.org/web/20230922104428/https://nitter.net/potuz1/status/1685736037321166848).
 
-If we look at [Epoch 192879](https://goerli.beaconcha.in/epoch/192879) on the Goerli testnet, we notice that it has an initial block in [Slot 6172128](https://goerli.beaconcha.in/slot/6172128), but all subsequent blocks in the epoch are either missing completely or were orphaned. A fork choice visualiser [shows](https://twitter.com/potuz1/status/1685736037321166848) that the proposers in [Epoch 192880](https://goerli.beaconcha.in/epoch/192880) simply ignored everything after the first slot of Epoch 192879 and chose instead to build on the block in Slot 6172128.
+If we look at [Epoch 192879](https://goerli.beaconcha.in/epoch/192879) on the Goerli testnet, we notice that it has an initial block in [Slot 6172128](https://goerli.beaconcha.in/slot/6172128), but all subsequent blocks in the epoch are either missing completely or were orphaned. A fork choice visualiser [shows](https://web.archive.org/web/20230922104428/https://nitter.net/potuz1/status/1685736037321166848) that the proposers in [Epoch 192880](https://goerli.beaconcha.in/epoch/192880) simply ignored everything after the first slot of Epoch 192879 and chose instead to build on the block in Slot 6172128.
 
 So, what happened?
 
