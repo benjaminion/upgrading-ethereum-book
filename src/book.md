@@ -14509,7 +14509,7 @@ A summary of upgrades to date is below, with more detailed descriptions in the f
 
 [^fn-gamlum]: Gamlum may have been a goat-related ancient name for [Capella](https://en.wikipedia.org/wiki/Capella).
 
-The Merge was a special kind of upgrade in that it was not a hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention, simultaneously with the execution layer's [Paris upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md).
+The Merge was a special kind of upgrade in that it was not a manual hard fork. The protocol changes required to support the Merge were done in the Bellatrix upgrade. The Merge itself happened nine days later without any further intervention, simultaneously with the execution layer's [Paris upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md).
 
 [TODO: link to Merge section when done]::
 
@@ -14641,6 +14641,8 @@ The following changes are also [planned for inclusion](https://github.com/ethere
   - [EIP-7044](https://eips.ethereum.org/EIPS/eip-7044): Lock voluntary exit domain on Capella [#3288](https://github.com/ethereum/consensus-specs/pull/3288)
   - [EIP-7045](https://eips.ethereum.org/EIPS/eip-7045): Increase max attestation inclusion slot [#3360](https://github.com/ethereum/consensus-specs/pull/3360)
   - [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788): Expose parent beacon block root in execution layer [#3421](https://github.com/ethereum/consensus-specs/pull/3421)
+  - [EIP-7514](https://eips.ethereum.org/EIPS/eip-7514): Add Max Epoch Churn Limit [#3499](https://github.com/ethereum/consensus-specs/pull/3499)
+  - Apply proposer boost to first block in case of equivocation [#3352](https://github.com/ethereum/consensus-specs/pull/3352)
 
 ### Electra <!-- /part4/history/electra/ -->
 
