@@ -47,7 +47,7 @@ Clone this repo. `cd` into it, then:
 
 ```
 npm install
-gatsby build
+gatsby build --prefix-paths
 ```
 
 ### Viewing
@@ -55,10 +55,10 @@ gatsby build
 After building as above, do
 
 ```
-gatsby serve
+gatsby serve --prefix-paths
 ```
 
-and visit http://localhost:9000 in a web browser.
+and visit http://localhost:9000/main in a web browser.
 
 Instead of building and serving, you can run `gatsby develop` and point your browser at port 8000. This will not pick up real-time changes to _src/book.md_ and will need to be restarted to pick up changes. It is useful, though, for checking CSS and React changes interactively.
 
@@ -76,7 +76,7 @@ There are various npm script commands to help with building and testing:
     - Markdown linting on both the original source and the generated pages.
   - `npm run build` runs `gatsby build --prefix-paths`.
   - `npm run serve` runs `gatsby serve --prefix-paths`.
-    - Visit http://localhost:9000/bellatrix/ to see the result.
+    - Visit http://localhost:9000/main/ to see the result.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
   - `npm run spell` can be used to maintain the list of spellings.
