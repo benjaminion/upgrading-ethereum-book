@@ -7592,7 +7592,7 @@ After creating a validator with its deposit balance, this and [`decrease_balance
 
 We need two separate functions to change validator balances, one to increase them and one to decrease them, since we are using only unsigned integers.
 
-Fun fact: A typo around this led to Teku's one and only [consensus failure](https://github.com/ConsenSys/teku/pull/885/files) at the initial [client interop event](https://media.consensys.net/how-30-eth-2-0-devs-locked-themselves-in-to-achieve-interoperability-175e4a807d92). Unsigned integers [induce bugs](https://critical.eschertech.com/2010/04/07/danger-unsigned-types-used-here/)!
+Fun fact: A typo around this led to Teku's one and only [consensus failure](https://github.com/ConsenSys/teku/pull/885/files) at the initial [client interop event](https://web.archive.org/web/20221129214218/https://media.consensys.net/how-30-eth-2-0-devs-locked-themselves-in-to-achieve-interoperability-175e4a807d92?gi=cbf4f6b2df72). Unsigned integers [induce bugs](https://critical.eschertech.com/2010/04/07/danger-unsigned-types-used-here/)!
 
 |||
 |-|-|
