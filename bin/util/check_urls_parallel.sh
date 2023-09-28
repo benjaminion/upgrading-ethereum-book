@@ -14,7 +14,7 @@ if [ ! -f "$1" ]; then
     exit 1
 fi
 
-file=$1
+markdown_file=$1
 
 # Number of concurrent checks
 npara=8
@@ -26,7 +26,7 @@ timeout=10
 github_secret=$(cat $(dirname "$0")/../priv/github.txt)
 
 # File to store non-200 URLs
-non_200_urls_file=$(mktemp)
+non_200_urls_tmp=$(mktemp)
 
 # Where to find the book itself (for relative links that are really absolute)
 selfserver=https://eth2book.info
@@ -47,25 +47,32 @@ check_url() {
     if [ "200" -ne "$res" ]
     then
         echo "*** $res ***"
-        echo "$res $x" >> $non_200_urls_file
+        echo "$res $x" >> $non_200_urls_tmp
     fi
 }
 
 export -f check_url
-export timeout github_secret selfserver non_200_urls_file
+export timeout github_secret non_200_urls_tmp
 
 # Extract URLs and pass them to check_url function in parallel
-cat $file | sed "s|(/\.\.|($selfserver|g" | grep -Pho '\(\Khttp[^)]+' | sed 's/#.*$//g' | sort -u | xargs -P $npara -I {} bash -c 'check_url "$@"' _ {}
+cat $markdown_file \
+    | sed "s|(/\.\.|($selfserver|g" \
+    | grep -Pho '\(\Khttp[^)]+' \
+    | sed 's/#.*$//g' \
+    | sort -u \
+    | xargs -P $npara -I {} bash -c 'check_url "$@"' _ {}
 
 # Print non-200 URLs
+exit_code=0
 echo
-if [ -s $non_200_urls_file ]
+if [ -s $non_200_urls_tmp ]
 then
     echo "*** Failing URLs: ***"
-    cat $non_200_urls_file
-    rm $non_200_urls_file
-    exit 1
+    cat $non_200_urls_tmp
+    exit_code=1
 else
     echo "*** All URLs are good ***"
-    exit 0
 fi
+
+rm $non_200_urls_tmp
+exit $exit_code
