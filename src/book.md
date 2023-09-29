@@ -9550,6 +9550,11 @@ def has_eth1_withdrawal_credential(validator: Validator) -> bool:
 
 Only validators that have [Eth1 withdrawal credentials](/part3/config/constants/#withdrawal-prefixes) are eligible for balance withdrawals of any sort.
 
+|||
+|-|------|
+| Used&nbsp;by | [`is_fully_withdrawable_validator()`](#def_is_fully_withdrawable_validator), [`is_partially_withdrawable_validator()`](#is_partially_withdrawable_validator) |
+| See&nbsp;also | [`ETH1_ADDRESS_WITHDRAWAL_PREFIX`](/part3/config/constants/#eth1_address_withdrawal_prefix) |
+
 #### `is_fully_withdrawable_validator`
 
 <a id="def_is_fully_withdrawable_validator"></a>
@@ -9567,6 +9572,11 @@ def is_fully_withdrawable_validator(validator: Validator, balance: Gwei, epoch: 
 ```
 
 A validator is fully withdrawable only when (a) it has an [Eth1 withdrawal credential](/part3/config/constants/#withdrawal-prefixes) to make the withdrawal to, (b) it has become withdrawable, meaning that its exit has been processed and it has passed through its [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration/#min_validator_withdrawability_delay) period, and (c) it has a nonzero balance.
+
+|||
+|-|------|
+| Uses | [`has_eth1_withdrawal_credential()`](#def_has_eth1_withdrawal_credential) |
+| Used&nbsp;by | [`get_expected_withdrawals()`](/part3/transition/block/#def_get_expected_withdrawals) |
 
 #### `is_partially_withdrawable_validator`
 
