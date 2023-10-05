@@ -7988,7 +7988,7 @@ The execution payload (formerly known as an Eth1 block) contains a list of up to
 | - | - |
 | `MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP` | `16384` (= 2**14 ) |
 
-This preset constant was introduced in the [Capella upgrade](/part4/history/capella/) to bound the amount of work each node wold need to do when processing withdrawals.
+This preset constant was introduced in the [Capella upgrade](/part4/history/capella/) to bound the amount of work each node must do when processing withdrawals.
 
 The number of withdrawal transactions per block is bounded at [`MAX_WITHDRAWALS_PER_PAYLOAD`](#max_withdrawals_per_payload). But not all validators will be eligible for a withdrawal transaction, meaning that nodes might have to search indefinitely through the validator set to find enough withdrawals to include. Searching the validator set can be an expensive operation, therefore we [bound the search](/part3/transition/block/#def_get_expected_withdrawals), considering only `MAX_VALIDATORS_PER_WITHDRAWALS_SWEEP` validators per block. If we find fewer withdrawable validators than `MAX_WITHDRAWALS_PER_PAYLOAD` then we make fewer withdrawal transactions.
 
