@@ -3513,7 +3513,7 @@ The beacon chain protocol incentivises each validator to behave well by providin
 2. Proposing beacon chain blocks.
 3. Signing off on blocks in the sync committees that support light clients.
 
-The first of these, making attestations, happens regularly every epoch and accounts for the majority a validator's total expected reward.
+The first of these, making attestations, happens regularly every epoch and accounts for the majority of a validator's total expected reward.
 
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
