@@ -2830,7 +2830,7 @@ The validator's withdrawal credentials will also be set at this point. If they a
 
 It is also possible to make top-up deposits for pre-existing validators. Anyone may do this for any validator. Top-up deposits have exactly the same structure as normal deposits, except that the top-up deposit's BLS signature is not checked, and the withdrawal credentials are ignored.
 
-The minimum top-up amount is 1&nbsp;ETH. One might wish to send a top-up if a validator's effective balance has dropped below the maximum of 32&nbsp;ETH. Since most rewards are proportional to effective balance, such a validator will be under-performing. For example, with a 31&nbsp;ETH effective balance your expected rewards will be reduced by around 3%, and topping up to maintain a 32&nbsp;ETH effective balance might be worthwhile. Not many top-ups have been performed to date, but there are a some [examples](https://etherscan.io/tx/0x3e68702566edee0061344eb99c484b4fac8800db082980bb6027d1dca09f5812).
+The minimum top-up amount is 1&nbsp;ETH. One might wish to send a top-up if a validator's effective balance has dropped below the maximum of 32&nbsp;ETH. Since most rewards are proportional to effective balance, such a validator will be under-performing. For example, with a 31&nbsp;ETH effective balance your expected rewards will be reduced by around 3%, and topping up to maintain a 32&nbsp;ETH effective balance might be worthwhile. Not many top-ups have been performed to date, but there are some [examples](https://etherscan.io/tx/0x3e68702566edee0061344eb99c484b4fac8800db082980bb6027d1dca09f5812).
 
 As noted earlier, it is possible to build up a validator's stake over time, with an initial deposit that's less than 32&nbsp;ETH, followed by one or more top-up deposits. The validator will become active when its effective balance reaches 32&nbsp;ETH. However, if you plan to do this, watch out for a tricky [edge case](/part2/incentives/balances/#an-edge-case) involving hysteresis when the final top-up is 1&nbsp;ETH.
 
@@ -3266,7 +3266,7 @@ The list of validator records in the state is a large data structure. Were we to
 
 The [first approach](https://github.com/ethereum/consensus-specs/pull/317/files) to addressing this simply moved the validators' balances out of the validator records into a dedicated list in the state. This reduces the amount of re-hashing required as the whole validator list does not need to be re-hashed when only the validators' balances change.
 
-However, that leads to a performance issue elsewhere. Light clients needing information on validators' balances would now need to acquire data from two different parts of the state &ndash; both the validator record and the validator balance list. This requires two Merkle proofs rather than one, significantly increasing their bandwidth costs.
+However, that approach led to performance issues elsewhere. Light clients needing information on validators' balances would now need to acquire data from two different parts of the state &ndash; both the validator record and the validator balance list. This requires two Merkle proofs rather than one, significantly increasing their bandwidth costs.
 
 A way round this is to store a slowly changing version of the balances in the validators' records &ndash; meaning that they need to be re-hashed infrequently &ndash; and to store the fast-changing actual balances in a separate list, a much smaller structure to re-hash.
 
