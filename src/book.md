@@ -1955,7 +1955,7 @@ The severity of the reorg was exacerbated by:
 
 Note that all of this is independent of the separate issues around [unrealised justification](/part3/forkchoice/phase0/#unrealised-justification).
 
-This scenario would be very unlikely to occur on the Ethereum Mainnet, principally because participation is almost always over 99%, way above the supermajority threshold, and blocks are much more rarely missed than on the testnets.
+This scenario would be very unlikely to occur on the Ethereum mainnet, principally because participation is almost always over 99%, way above the supermajority threshold, and blocks are much more rarely missed than on the testnets.
 
 #### Gasper
 
@@ -3125,10 +3125,11 @@ This value is a compromise. It tries to be as small as possible to allow wide pa
 The main practical constraint on the number of validators in a monolithic[^fn-monolithic] L1 blockchain is the messaging overhead required to achieve finality. Like other [PBFT](https://pmg.csail.mit.edu/papers/osdi99.pdf)-style consensus algorithms, Casper&nbsp;FFG requires two rounds of all-to-all communication to achieve finality. That is, for all nodes to agree on a block that will never be reverted.
 
 <!-- markdownlint-disable code-block-style ul-indent -->
-[^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
+[^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular". This is the intent behind Ethereum's [rollup-centric roadmap](https://ethereum-magicians.org/t/a-rollup-centric-ethereum-roadmap/4698).
 
     - More on the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
     - More on modularity: [Modular Blockchains: A Deep Dive](https://volt.capital/blog/modular-blockchains) by Alec Chen of Volt Capital.
+    - Well worth a read: Polynya's entertaining (if a little grumpy), [The horrific inefficiencies of monolithic blockchains](https://polynya.mirror.xyz/3-omFNK3uU0iAaYSpFz0f9rCvrDBjx0H3XOSDGXU8hY).
 <!-- markdownlint-enable code-block-style ul-indent -->
 
 Following Vitalik's [notation](https://notes.ethereum.org/@vbuterin/rkhCgQteN#Why-32-ETH-validator-sizes), if we can tolerate a network overhead of $\omega$ messages per second, and we want a time to finality of $f$, then we can have participation from at most $n$ validators, where
