@@ -1617,7 +1617,7 @@ print(epoch)
 From the spec:
 
   - Inactivity scores are updated during epoch processing in [`process_inactivity_updates()`](/part3/transition/epoch/#def_process_inactivity_updates).
-  - Inactivity penalties are calculated in [`def_get_inactivity_penalty_deltas()`](/part3/transition/epoch/#def_get_inactivity_penalty_deltas).
+  - Inactivity penalties are calculated in [`get_inactivity_penalty_deltas()`](/part3/transition/epoch/#def_get_inactivity_penalty_deltas).
 
 For the original description of the mechanics of the inactivity leak, see the [Casper paper](https://arxiv.org/abs/1710.09437), section 4.2.
 
@@ -8598,7 +8598,7 @@ The returned `rewards` array always contains only zeros. It's here just to make 
 
 |||
 |-|-|
-| Used&nbsp;by | [`def_process_rewards_and_penalties()`](#def_process_rewards_and_penalties) |
+| Used&nbsp;by | [`process_rewards_and_penalties()`](#def_process_rewards_and_penalties) |
 | Uses | [`get_unslashed_participating_indices()`](/part3/helper/accessors/#get_unslashed_participating_indices), [`get_eligible_validator_indices()`](/part3/transition/epoch/#def_get_eligible_validator_indices) |
 | See&nbsp;also | [Inactivity Scores](#inactivity-scores), [`INACTIVITY_PENALTY_QUOTIENT_BELLATRIX`](/part3/config/preset/#inactivity_penalty_quotient), [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration/#inactivity_score_recovery_rate) |
 
