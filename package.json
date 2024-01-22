@@ -33,7 +33,7 @@
     "gatsby-remark-prismjs": "^7.13.0",
     "gatsby-source-filesystem": "^5.13.0",
     "gatsby-transformer-remark": "^6.13.0",
-    "markdownlint": "^0.32.1",
+    "markdownlint": "^0.33.0",
     "patch-package": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
