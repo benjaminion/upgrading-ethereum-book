@@ -11,7 +11,7 @@ local logging = require 'logging'
 local website = 'https://eth2book.info'
 
 local links, targets = {}, {}
-local skip = { ["contents"] = true, ["annotated-spec"] = true }
+local skip = { ["/contents/"] = true, ["/annotated-spec/"] = true }
 
 -- Check that there are no duplicate targets
 local function check_target(id)
@@ -24,7 +24,7 @@ end
 -- Check that every link has a target
 local function check_links()
    for link, v in pairs(links) do
-      if not skip[link] and not targets[link] then
+      if not skip['/' .. link .. '/'] and not targets[link] then
          print('Links filter: link "' .. link .. '" points to nothing')
       end
    end
@@ -86,7 +86,9 @@ local function update_links(block, page)
             -- External link
             t = s
          end
-         return pandoc.Link(link.content, t, link.title, link.attr)
+         if not skip[s] then
+            return pandoc.Link(link.content, t, link.title, link.attr)
+         end
       end
    }
 end
