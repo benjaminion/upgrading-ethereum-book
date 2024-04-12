@@ -52,6 +52,9 @@ module.exports.lintSourceMarkdown = (file) => {
       // Multiple top-level titles are ok (they appear on different pages after pre-processing)
       'MD025': false,
 
+      // Doesn't work well with blockquoted lists
+      'MD027': false,
+
       // Some lists begin with other index than 1
       'MD029': false,
 

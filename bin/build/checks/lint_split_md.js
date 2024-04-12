@@ -50,6 +50,9 @@ module.exports.lintSplitMarkdown = (files) => {
       // We have long lines
       'MD013': false,
 
+      // Doesn't work well with blockquoted lists
+      'MD027': false,
+
       // Some lists begin with other index than 1
       'MD029': false,
 
