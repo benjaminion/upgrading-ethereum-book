@@ -1,7 +1,7 @@
-const execSync = require('child_process').execSync;
-const glob = require('glob')
-const lintSourceMarkdown = require('./checks/lint_source_md').lintSourceMarkdown
-const lintSplitMarkdown = require('./checks/lint_split_md').lintSplitMarkdown
+import { execSync } from "child_process";
+import glob from "glob";
+import { lintSourceMarkdown } from "./checks/lint_source_md.mjs"
+import { lintSplitMarkdown } from "./checks/lint_split_md.mjs"
 
 // Performs the following prebuild tasks:
 //  - Checks that internal document links look ok
@@ -71,7 +71,7 @@ function runCheck(
 }
 
 // Set `exitToShell` to false to continue processing after running checks (e.g. while building)
-module.exports.runChecks = (reporter = customReporter, exitToShell = true) => {
+export const runChecks = (reporter = customReporter, exitToShell = true) => {
 
   var allOk = true
   
