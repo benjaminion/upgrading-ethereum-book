@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Run the pre-build checks on the book source
-node -e 'require("./bin/build/prebuild").runChecks()'
+node --input-type=module -e 'import { runChecks } from "./bin/build/prebuild.mjs"; runChecks()'
 
 if [ "$?" != "0" ]
 then
