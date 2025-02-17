@@ -1,15 +1,14 @@
-const markdownlint = require('markdownlint')
+import { lint } from "markdownlint/sync"
 
 //
 // See https://github.com/DavidAnson/markdownlint for the rules and options
 //
 
-// Lint check the markdown files after they have been split out from the source document.
-// The rules differ slightly from the rules for the original source.
-module.exports.lintSplitMarkdown = (files) => {
+// Lint check the source markdown file.
+export const lintSourceMarkdown = (file) => {
 
   const options = {
-    'files': files,
+    'files': [ file ],
     'config': {
       'default': true,
 
@@ -44,11 +43,14 @@ module.exports.lintSplitMarkdown = (files) => {
       // Disabled rules
       //
       
-      // Trailing blank lines are hard to avoid when doing the split
-      'MD012': false,
-
       // We have long lines
       'MD013': false,
+
+      // Duplicate headings are ok (they appear on different pages after pre-processing)
+      'MD024': false,
+
+      // Multiple top-level titles are ok (they appear on different pages after pre-processing)
+      'MD025': false,
 
       // Doesn't work well with blockquoted lists
       'MD027': false,
@@ -59,17 +61,12 @@ module.exports.lintSplitMarkdown = (files) => {
       // We have inline html
       'MD033': false,
 
-      // We don't expect the very first line to be a top-level heading (due to inserted <div>)
-      'MD041': false,
-
       // link-image-reference-definitions - we use these as TODO comments
       'MD053': false,
     }
   }
 
-  const result = markdownlint.sync(options)
+  const result = lint(options)
 
-  return (Object.values(result).filter(x => x.length > 0).length > 0)
-    ? result.toString()
-    : null
+  return (result[file].length > 0) ? result.toString() : null
 }
