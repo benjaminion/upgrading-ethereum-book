@@ -1,11 +1,13 @@
 const path = require('path')
-const prebuild = require('./bin/build/prebuild')
 
 // Set up a hook to pre-process the source file into split files, and perform various
 // checking and linting operations prior to building.
 exports.onPreInit = ({ reporter }) => {
   try {
-    prebuild.runChecks(reporter, false)
+    (async () => {
+      const {default: runChecks } = await import("./bin/build/prebuild.mjs")
+      runChecks(reporter, false)
+    })()
   } catch (err) {
     reporter.panicOnBuild('Could not run pre-build tasks,', err)
   }
