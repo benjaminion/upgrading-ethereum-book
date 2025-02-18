@@ -30,7 +30,7 @@ v20.18.3
 > npm --version
 11.1.0
 > gatsby --version
-Gatsby CLI version: 5.12.1
+Gatsby CLI version: 5.14.0
 ```
 
 `gatsby-cli` can be installed with,
