@@ -23,22 +23,22 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "gatsby": "^5.13.4",
-    "gatsby-plugin-catch-links": "^5.13.1",
+    "gatsby": "^5.14.1",
+    "gatsby-plugin-catch-links": "^5.14.0",
     "gatsby-plugin-htaccess": "^1.4.0",
     "gatsby-plugin-matomo": "^0.16.2",
-    "gatsby-remark-autolink-headers": "^6.13.1",
-    "gatsby-remark-katex": "^7.13.1",
+    "gatsby-remark-autolink-headers": "^6.14.0",
+    "gatsby-remark-katex": "^7.14.0",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
-    "gatsby-remark-prismjs": "^7.13.1",
-    "gatsby-source-filesystem": "^5.13.1",
-    "gatsby-transformer-remark": "^6.13.1",
+    "gatsby-remark-prismjs": "^7.14.0",
+    "gatsby-source-filesystem": "^5.14.0",
+    "gatsby-transformer-remark": "^6.14.0",
     "markdownlint": "^0.37.4",
     "patch-package": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^4.0.0-rc.1",
-    "webpack": "^5.91.0"
+    "webpack": "^5.98.0"
   },
   "overrides": {
     "babel-plugin-lodash": {
