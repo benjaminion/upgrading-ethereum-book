@@ -3,6 +3,10 @@
 #
 # Check availability of external markdown links in the supplied document.
 #
+# Gotchas:
+#  - beaconcha.in is now doing more sophisticated bot detection, so always returns 403
+#  - archive.org rate-limits quite severely, so some will show up as 000
+#  - eigenlayer.xyz always returns 403
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <filename.md>"
