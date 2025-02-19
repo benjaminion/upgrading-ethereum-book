@@ -71,7 +71,7 @@ function runCheck(
 }
 
 // Set `exitToShell` to false to continue processing after running checks (e.g. while building)
-const runChecks = (reporter = customReporter, exitToShell = true) => {
+export const runChecks = (reporter = customReporter, exitToShell = true) => {
 
   var allOk = true
   
@@ -172,5 +172,3 @@ const runChecks = (reporter = customReporter, exitToShell = true) => {
     process.exit(allOk ? 0 : 2)
   }
 }
-
-export default runChecks
