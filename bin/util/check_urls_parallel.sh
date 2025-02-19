@@ -46,7 +46,6 @@ check_url() {
 
     if [ "200" -ne "$res" ]
     then
-        echo "*** $res ***"
         echo "$res $x" >> $non_200_urls_tmp
     fi
 }
