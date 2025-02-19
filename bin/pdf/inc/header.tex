@@ -142,3 +142,15 @@
     width=1.0\linewidth,
     textfont=it,
 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Avoid some headings being orphaned at the bottom of pages
+
+\ifx\paragraph\undefined\else
+  \let\prevparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\prevparagraph{#1}\nopagebreak}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\prevsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\prevsubparagraph{#1}\nopagebreak}
+\fi

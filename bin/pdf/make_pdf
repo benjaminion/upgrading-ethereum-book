@@ -34,7 +34,6 @@ echo "Converting $srcdir/$name.md to ./$name.pdf with version $UE_GIT_BRANCH"
 pandoc \
     $name.md \
     --output $outdir/$name.pdf \
-    --template $path/template.tex \
     --from markdown \
     --metadata title-meta:"Upgrading Ethereum - ${UE_GIT_BRANCH^} Edition" \
     --metadata author-meta:'Ben Edgington' \
