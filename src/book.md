@@ -624,7 +624,7 @@ The main practical constraint on the number of validators in a monolithic[^fn-mo
 <!-- markdownlint-disable code-block-style ul-indent -->
 [^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
 
-    - More on the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
+    - More on the general scalability trilemma: [Why sharding is great](https://web.archive.org/web/20231102071831/https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
     - More on modularity: [Modular Blockchains: A Deep Dive](https://volt.capital/blog/modular-blockchains) by Alec Chen of Volt Capital.
 <!-- markdownlint-enable code-block-style ul-indent -->
 
@@ -2272,7 +2272,7 @@ One relatively simple defence against this &ndash; the one we are using in Ether
 
 ##### Threshold signatures
 
-In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/2020/03/12/scalable-bls-threshold-signatures.html). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
+In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/threshold-bls). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
 
 Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However, they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $N-M$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
 
@@ -2927,7 +2927,7 @@ A good place to start exploring verifiable delay functions is the [VDF Alliance 
 
 Shuffling is used to randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
-Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
+Although there are [pitfalls](https://web.archive.org/web/20230208135555/https://www.developer.com/guides/how-we-learned-to-cheat-at-online-poker-a-study-in-software-security/) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
 
 Other shuffles rely on processing the entire list of elements to find the final ordering. We wish to spare light clients this burden. Ideally, they should deal with only the subsets of lists that they are interested in. Therefore, rather than Fisher&ndash;Yates, we are using a construction called a "swap-or-not" shuffle. The swap-or-not shuffle can tell you the destination index (or, conversely, the origin index) of a single list element, so is ideal when dealing with subsets of the whole validator set.
 
@@ -5443,7 +5443,7 @@ These constants were introduced at the Bellatrix pre-Merge upgrade and are used 
 
 The execution payload (formerly known as an Eth1 block) contains a list of up to `MAX_TRANSACTIONS_PER_PAYLOAD` normal Ethereum transactions. Each of these has size up to `MAX_BYTES_PER_TRANSACTION`. These constants are needed only because [SSZ list types](/part2/building_blocks/ssz/#lists) require a maximum size to be specified. They are set ludicrously large, but that's not a problem in practice.
 
-`BYTES_PER_LOGS_BLOOM` and `MAX_EXTRA_DATA_BYTES` are a direct carry-over from Eth1 blocks as specified in the [Yellow Paper](https://ethereum.org/615606b8e1e1da72687e66dba79771e9/yellow-paper-berlin.pdf), being the size of a block's Bloom filter and the size of a block's extra data field respectively. The execution payload's extra data is analogous to a beacon block's graffiti - the block builder can set it to any value they choose.
+`BYTES_PER_LOGS_BLOOM` and `MAX_EXTRA_DATA_BYTES` are a direct carry-over from Eth1 blocks as specified in the [Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf), being the size of a block's Bloom filter and the size of a block's extra data field respectively. The execution payload's extra data is analogous to a beacon block's graffiti - the block builder can set it to any value they choose.
 
 ### Configuration <!-- /part3/config/configuration/ -->
 
@@ -6307,9 +6307,7 @@ This is a significant change, and is what led to the name "The Merge".
 
 The `ExecutionPayload` is contained in the [`BeaconBlock`](/part3/containers/blocks/#beaconblock) structure.
 
-The fields of `ExecutionPayload` mostly reflect the old structure of Eth1 blocks as described in Ethereum's [Yellow Paper](https://ethereum.org/615606b8e1e1da72687e66dba79771e9/yellow-paper-berlin.pdf)[^fn-yellow-paper-berlin], section 4.3. Differences from the Eth1 block structure are noted in the comments.
-
-[^fn-yellow-paper-berlin]: This is intended to be a permalink to the Yellow Paper's "Berlin" edition, a pre-Merge version of the YP. At the time of writing, the YP has not been updated for the "London" upgrade and is therefore missing the [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) field `base_fee_per_gas`.
+The fields of `ExecutionPayload` mostly reflect the old structure of Eth1 blocks as described in Ethereum's [Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf), section 4.3. Differences from the Eth1 block structure are noted in the comments.
 
 The execution payload differs from an old Eth1 block in the following respects:
 
@@ -11353,7 +11351,7 @@ The consensus layer's Capella upgrade will happen simultaneously with the execut
 
 ### Deneb <!-- /part4/history/deneb/ -->
 
-The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://github.com/ethereum/consensus-specs/tree/dev/specs/eip4844) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
+The consensus layer upgrade following Capella has been given the name [Deneb](https://hackmd.io/@benjaminion/Hkm5x5acj#d-star-name). It is expected to include the needed consensus work for [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) and to take place simultaneously with the execution layer's [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md).
 
 ## The Merge <!-- /part4/merge/* -->
 
