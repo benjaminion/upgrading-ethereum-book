@@ -636,7 +636,7 @@ The main practical constraint on the number of validators in a monolithic[^fn-mo
 <!-- markdownlint-disable code-block-style ul-indent -->
 [^fn-monolithic]: A monolithic blockchain is one in which all nodes process all information, be it transactions or consensus-related. Pretty much all blockchains to date, including Ethereum, have been monolithic. One way to escape the scalability trilemma is to go "modular".
 
-    - More on the general scalability trilemma: [Why sharding is great](https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
+    - More on the general scalability trilemma: [Why sharding is great](https://web.archive.org/web/20231102071831/https://vitalik.ca/general/2021/04/07/sharding.html) by Vitalik.
     - More on modularity: [Modular Blockchains: A Deep Dive](https://volt.capital/blog/modular-blockchains) by Alec Chen of Volt Capital.
 <!-- markdownlint-enable code-block-style ul-indent -->
 
@@ -2205,7 +2205,7 @@ One relatively simple defence against this &ndash; the one we are using in Ether
 
 ##### Threshold signatures
 
-In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/2020/03/12/scalable-bls-threshold-signatures.html). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
+In addition to aggregation, the BLS scheme also supports [threshold signatures](https://alinush.github.io/threshold-bls). This is where a secret key is divided between $N$ validators. For a predefined value of $M \le N$, if $M$ of the validators sign a message then a single joint public key of all the validators can be used to verify the signature.
 
 Threshold signatures are not currently used within the core Ethereum&nbsp;2 protocol. However they are useful at an infrastructure level. For example, for security and resilience it might be desirable to split a validator's secret key between multiple locations. If an attacker acquires fewer than $M$ shares then the key still remains secure; if up to  $N-M$ keystores are unavailable, the validator can still sign correctly. An operational example of this is Attestant's [Dirk](https://www.attestant.io/posts/introducing-dirk/) key manager.
 
@@ -2855,7 +2855,7 @@ A good place to start exploring verifiable delay functions is the [VDF Alliance 
 
 Shuffling is used to randomly assign validators to committees, both attestation committees and sync committees. It is also used to select the block proposer at each slot.
 
-Although there are [pitfalls](https://www.developer.com/tech/article.php/616221/How-We-Learned-to-Cheat-at-Online-Poker-A-Study-in-Software-Security.htm) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
+Although there are [pitfalls](https://web.archive.org/web/20230208135555/https://www.developer.com/guides/how-we-learned-to-cheat-at-online-poker-a-study-in-software-security/) to be aware of, shuffling is a well understood problem in computer science. The gold standard is probably the [Fisher&ndash;Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle). So why aren't we using that for Eth2? In short: light clients.
 
 Other shuffles rely on processing the entire list of elements to find the final ordering. We wish to spare light clients this burden. Ideally, they should deal with only the subsets of lists that they are interested in. Therefore, rather than Fisher&ndash;Yates, we are using a construction called a "swap-or-not" shuffle. The swap-or-not shuffle can tell you the destination index (or, conversely, the origin index) of a single list element, so is ideal when dealing with subsets of the whole validator set.
 
@@ -3975,7 +3975,7 @@ Other SSZ resources:
 
   - [SSZ encoding diagrams](https://github.com/protolambda/eth2-docs#ssz-encoding) by Protolambda.
   - Formal verification of the SSZ specification: [Notes](https://github.com/ConsenSys/eth2.0-dafny/blob/master/wiki/ssz-notes.md) and [Code](https://github.com/ConsenSys/eth2.0-dafny/tree/master/src/dafny/ssz).
-  - An excellent [SSZ explainer](https://rauljordan.com/2019/07/02/go-lessons-from-writing-a-serialization-library-for-ethereum.html) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
+  - An excellent [SSZ explainer](https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/) by Raul Jordan with a deep dive into implementing it in Golang. (Note that the specific library referenced in the article has now been [deprecated](https://github.com/prysmaticlabs/go-ssz) in favour of [fastssz](https://github.com/ferranbt/fastssz).)
   - An [interactive SSZ serialiser/deserialiser](https://simpleserialize.com/) by ChainSafe with all the containers for Phase&nbsp;0 and Altair available to play with. On the "Deserialize" tab you can paste the data from the `IndexedAttestation` above and verify that it deserialises correctly (you'll need to remove line breaks).
 
 ### Hash Tree Roots and Merkleization <!-- /part2/building_blocks/merkleization/ -->
