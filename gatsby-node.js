@@ -5,7 +5,7 @@ const path = require('path')
 exports.onPreInit = ({ reporter }) => {
   try {
     (async () => {
-      const {default: runChecks } = await import("./bin/build/prebuild.mjs")
+      const {runChecks: runChecks } = await import("./bin/build/prebuild.mjs")
       runChecks(reporter, false)
     })()
   } catch (err) {
