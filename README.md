@@ -112,7 +112,7 @@ All images are SVG, and text elements are replaced by paths for maximum compatib
 
 ### Diagrams
 
-Diagrams have been created in [diagrams.net](https://www.diagrams.net/) and exported to SVG with the following options:
+Diagrams have been created in [drawio.com](https://www.drawio.com/) and exported to SVG with the following options:
   - Border width: 10 (some of the sketched elements go out of bounds)
   - Text settings: Convert labels to SVG
   
