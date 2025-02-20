@@ -26,7 +26,7 @@ Install `node`, `npm`, and `gatsby-cli`. These are my versions:
 
 ```
 > node --version
-v20.18.3
+v22.14.0
 > npm --version
 11.1.0
 > gatsby --version
@@ -39,7 +39,7 @@ Gatsby CLI version: 5.14.0
 npm install -g gatsby-cli
 ```
 
-You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document. To run the LaTex linting you'll need to install `libipc-run3-perl` and `chktex`, or you can just disable that check in _bin/build/prebuild.js_.
+You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document. To run the LaTeX linting you'll need to install `libipc-run3-perl` and `chktex`, or you can just disable that check in _bin/build/prebuild.js_.
 
 ### Building
 
@@ -135,9 +135,9 @@ There's an experimental pipeline for typesetting the whole text as a PDF book in
 
 Kind souls sometimes ask for a way to send me a cup of coffee or make a donation. My account info is below - donations are absolutely not expected or necessary, but are always very encouraging and gratefully received.
 
-  - `0xd262d146e869915444d0f34ecdaabab5ab43007e` on Ethereum, ZkSync, Polygon, Optimism, Arbitrum.
+  - `0xd262d146e869915444d0f34ecdaabab5ab43007e` on Ethereum, Polygon, Optimism, Arbitrum, Base.
   - Also at `benjaminion.eth`
 
 Any whales or large treasuries out there, I encourage you to take a look at the [Protocol Guild](https://protocol-guild.readthedocs.io/en/latest/index.html) which supports the people developing and maintaining our incredible technology, not just writing about it.
 
-Finally, all [feedback](https://eth2book.info/latest/contact/) is very welcome, and is handy for helping me to justify to my employer why I'm spending so much time on this thing.
+Finally, all [feedback](https://eth2book.info/latest/contact/) is very welcome!
