@@ -14858,41 +14858,31 @@ print(json.dumps(type_bounds))
 
 #### Set up
 
-We have a few hoops to jump through to get things installed for the first time. The below works well for me on Linux, but I haven't tested extensive variations. Just use the commands prefixed with `>`. I've included some output so that you can check whether things are on the right lines.
+In the below, if you are using Ubuntu you might need to run `sudo apt install python3-pip` first. If not, then you probably need to use `python` rather than `python3`.
 
-First, set up a Python virtual environment.
+The specs installation is much easier than it used to be.
 
 ```bash
 > git clone https://github.com/ethereum/consensus-specs.git
 Cloning into 'consensus-specs'...
 ...
 > cd consensus-specs/
-> python3 -m venv .
-> source bin/activate
-(consensus-specs) > python --version
-Python 3.10.6
-```
-
-Now we install and build all the dependencies required for the actual specs.
-
-```bash
-(consensus-specs) > python setup.py install
-... tons of output ...
-(consensus-specs) > make install_test
+> python3 -m pip install .
+... lots of output ...
+Successfully installed...
+> make pyspec
 ... lots more output ...
-(consensus-specs) > python setup.py pyspecdev
-running pyspecdev
-running build_py command
-running pyspec
-...
 ```
+
+All being well, this will create a directory for each of the spec versions under `tests/core/pyspec/eth2spec/`: `altair`, `bellatrix`, `capella` and so on. Each directory contains the complete executable specification for that version, built automatically from the markdown source. There's a `mainnet` version for each one, and a `minimal` version that runs with lower resource requirements. All this magic is performed by the scripts in `pysetup`.
 
 #### Run
 
 Finally, we can simply run the Python script from above. Copy it into a file called `sizes.py` and run it as follows.
 
 ```bash
-(consensus-specs) > python sizes.py | jq
+> source venv/bin/activate
+(venv) > python sizes.py | jq
 {
   "AggregateAndProof": {
     "min_size": 337,
