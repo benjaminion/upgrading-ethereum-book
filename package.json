@@ -14,6 +14,7 @@
     "check": "node --input-type=module -e 'import { runChecks } from \"./bin/build/prebuild.mjs\"; runChecks()'",
     "links": "bin/util/check_urls.sh src/book.md",
     "spell": "bin/util/check_spellings_list.sh",
+    "spfix": "bin/util/update_spellings_list.sh",
     "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'",
     "gramm": "bin/util/check_grammar.sh src/book.md",
     "patch": "npx patch-package",
