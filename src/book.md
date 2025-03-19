@@ -5083,13 +5083,11 @@ If an attacker gets a string of proposals at the end of an epoch then it has mor
 
 #### Biasability analyses
 
-This section is fully optional. I got a bit carried away with the maths; it's fine to skip to the [next section](#verifiable-delay-functions).
+This section is fully optional. I got a bit carried away with the maths; it's fine to skip to the [next section](#verifiable-delay-functions). These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. See the [further reading](#see-also) section below for links to some more up to date and rigorous discussions.
 
 To make discussion of RANDAO biasability more concrete I shall try to quantify what it means in practice with a couple of examples. In each case the entity "cheating" or "attacking" has control over a proportion of the stake $r$, either directly or through some sort of collusion, and we will assume that the remaining validators are all acting independently and correctly. We will also assume, of course, that individual `randao_reveal`s are uniformly random.
 
 In the first example, I will try to gain control of the RANDAO by permanently acquiring proposals in the last slots of an epoch. In the second example I will try to improve my expected number of block proposals by biasing the RANDAO when I get the opportunity to do so. In both cases I will be selectively making and withholding proposals having computed the best outcome: a process of "grinding" the RANDAO.
-
-These examples are intended only as illustrations. They are not academic studies, and there are lots of loose ends. It's very likely I've messed something up: probability is _hard_. I'd be very interested if anyone wanted to make them more rigorous and complete. Some related work, more simulation based, was previously done by [Runtime Verification](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf).
 
 ##### RANDAO takeover
 
@@ -5418,7 +5416,7 @@ Vitalik has some notes on randomness in his [Annotated Ethereum 2.0 Spec](https:
 
 On RANDAO biasability, Runtime Verification did an analysis in 2018 that both complements and goes deeper than the sketches I presented in this section. There is both a [statistical model](https://github.com/runtimeverification/rdao-smc) and a thorough [write-up](https://github.com/runtimeverification/rdao-smc/blob/master/report/rdao-analysis.pdf) of their work.
 
-A [search for RANDAO](https://ethresear.ch/search?q=RANDAO) on ethresear.ch yields quite a few articles discussing various issues with it, and proposing some solutions (none of which we have adopted).
+A [search for RANDAO](https://ethresear.ch/search?q=RANDAO%20in%3Atitle%20order%3Alatest) on ethresear.ch yields several articles discussing various issues with it, and proposing some solutions (none of which we have adopted). In particular, [Selfish Mixing and RANDAO Manipulation](https://ethresear.ch/t/selfish-mixing-and-randao-manipulation/16081?u=benjaminion) by Toni Wahrstätter does some similar analysis to the above and then considers some data and simulations of the actual network. Also, an article on [Forking the RANDAO](https://ethresear.ch/t/forking-the-randao-manipulating-ethereums-distributed-randomness-beacon/21414?u=benjaminion) by István András Seres, and its [associated paper](https://eprint.iacr.org/2025/037.pdf), proposes a different approach that relies on selectively forking out an honest proposer’s block to manipulate the RANDAO.
 
 A good place to start exploring verifiable delay functions is the [VDF Alliance site](https://www.vdfalliance.org/).
 
