@@ -50,4 +50,4 @@ tar zcf - public | ssh $host tar zxfC - eth2book
 echo
 echo "*** Ready to install - press [ENTER] to continue"
 wait_for_input
-ssh $host eth2book/install_$version.sh
+ssh $host eth2book/install.sh $version
