@@ -4,7 +4,7 @@
 # Apply a git commit to all branches
 #
 
-branches='altair bellatrix capella'
+branches='altair bellatrix capella deneb'
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <commit>"
