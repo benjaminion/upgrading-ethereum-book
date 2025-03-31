@@ -14514,7 +14514,7 @@ A summary of upgrades to date is below, with more detailed descriptions in the f
 | [Bellatrix](/part4/history/bellatrix/) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) | Ailuropoda melanoleuca[^fn-giant-panda] |
 | [Capella](/part4/history/capella/)     | 194048 | 2023-04-12 22:27:35 | Withdrawals enabled | [v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0)  | Gamlum[^fn-gamlum] |
 | [Deneb](/part4/history/deneb/)         | TBD    | TBD                 | EIP-4844 data availability | TBD  | TBD |
-| [Electra](/part4/history/deneb/)       | TBD    | TBD                 | TBD | TBD  | TBD |
+| [Electra](/part4/history/electra/)     | TBD    | TBD                 | TBD | TBD  | TBD |
 
 [^fn-giant-panda]: Ailuropoda melanoleuca is the formal name of the [giant panda](https://en.wikipedia.org/wiki/Giant_panda).
 
