@@ -3232,7 +3232,7 @@ Using the effective balance achieves two goals, one to do with economics, the ot
 
 #### Economic aspects of effective balance
 
-The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32&nbsp;ETH. A validator's actual balance could be much higher, for example if a double deposit had been accidentally made a validator would have an actual balance of 64&nbsp;ETH but an effective balance of only 32&nbsp;ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead, we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.[^fn-eip-7251]
+The effective balance was first introduced to represent the "[maximum balance at risk](https://github.com/ethereum/consensus-specs/pull/162#issuecomment-441759461)" for a validator, capped at 32&nbsp;ETH. A validator's actual balance could be much higher; for example, if a double deposit had been accidentally made, a validator would have an actual balance of 64&nbsp;ETH but an effective balance of only 32&nbsp;ETH. We could envisage a protocol in which each validator has influence proportional to its uncapped actual balance, but that would complicate committee membership among other things. Instead, we cap the effective balance and require stakers to deposit for more validators if they wish to stake more.[^fn-eip-7251]
 
 [^fn-eip-7251]: There is, in fact, a proposal to [increase the maximum effective balance](https://notes.ethereum.org/@mikeneuder/eip-7251-faq) to 2048 ETH.
 
