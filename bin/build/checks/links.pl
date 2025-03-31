@@ -103,7 +103,7 @@ while(<$fh>) {
             }
         } else {
             if ($link =~ /^\/\.\./) {
-                if (!($link =~ /^...\/(latest|altair|bellatrix|capella)/)) {
+                if (!($link =~ /^...\/(latest|altair|bellatrix|capella|deneb)/)) {
                     print "Link to non-existent book version, line $.: $link";
                 }
             } elsif ($link =~ /^([#\/])/) {
