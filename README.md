@@ -39,7 +39,29 @@ Gatsby CLI version: 5.14.0
 npm install -g gatsby-cli
 ```
 
-You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document. To run the LaTeX linting you'll need to install `libipc-run3-perl` and `chktex`, or you can just disable that check in _bin/build/prebuild.js_.
+You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document.
+
+### Pre-build checks
+
+I've implemented a heap of pre-build checks for linting and spelling issues. You can run them standalone with `npm run check`, and they also run as a first step in the build process, though a failure will not stop the build.
+
+To cause Git commits to halt when these checks fail, add the following symlink:
+
+```
+ln -s bin/util/git-pre-commit-hook.sh .git/hooks/pre-commit-hook
+```
+
+The controlling script for the checks is _bin/build/prebuild.mjs_. You can enable and disable specific checks there.
+
+To run the full suite of checks, you might need to so some or all of the following one time:
+
+```
+npm run spfix
+sudo apt install libipc-run3-perl
+sudo apt install chktex
+```
+
+The first line simply updates the spellings list to match whatever dictionary is on your system. The last two enable $LaTeX$ linting. Or you can just disable that check.
 
 ### Building
 
@@ -80,6 +102,7 @@ There are various npm script commands to help with building and testing:
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
   - `npm run spell` can be used to maintain the list of spellings.
+  - `npm run spfix` can be used to maintain the list of spellings.
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
   - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
   - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
