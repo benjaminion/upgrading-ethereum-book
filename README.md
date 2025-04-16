@@ -48,7 +48,7 @@ I've implemented a heap of pre-build checks for linting and spelling issues. You
 To cause Git commits to halt when these checks fail, add the following symlink:
 
 ```
-ln -s bin/util/git-pre-commit-hook.sh .git/hooks/pre-commit-hook
+ln -s bin/util/git-pre-commit-hook.sh .git/hooks/pre-commit
 ```
 
 The controlling script for the checks is _bin/build/prebuild.mjs_. You can enable and disable specific checks there.
