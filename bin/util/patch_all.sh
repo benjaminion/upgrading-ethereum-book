@@ -4,7 +4,7 @@
 # Apply a git commit to all branches
 #
 
-branches='altair bellatrix capella deneb'
+branches='main altair bellatrix capella deneb'
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <commit>"
@@ -16,6 +16,7 @@ start=$(git branch --show-current)
 
 for branch in $branches;
 do
+    [[ $branch == $start ]] && continue
     echo "*** Patching $branch"
     git switch $branch && git cherry-pick --allow-empty $1
     if [ $? -ne 0 ]
