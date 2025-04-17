@@ -101,7 +101,7 @@ There are various npm script commands to help with building and testing:
     - Visit http://localhost:9000/main/ to see the result.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
-  - `npm run spell` can be used to maintain the list of spellings.
+  - `npm run spell` runs a spell check
   - `npm run spfix` can be used to maintain the list of spellings.
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
   - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
