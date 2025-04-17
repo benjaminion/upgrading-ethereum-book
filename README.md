@@ -53,15 +53,11 @@ ln -s bin/util/git-pre-commit-hook.sh .git/hooks/pre-commit
 
 The controlling script for the checks is _bin/build/prebuild.mjs_. You can enable and disable specific checks there.
 
-To run the full suite of checks, you might need to so some or all of the following one time:
+If the $\LaTeX$ linting fails you might need to install the following, or just disable that check.
 
 ```
-npm run spfix
-sudo apt install libipc-run3-perl
-sudo apt install chktex
+sudo apt install libipc-run3-perl chktex
 ```
-
-The first line simply updates the spellings list to match whatever dictionary is on your system. The last two enable $\LaTeX$ linting. Or you can just disable that check.
 
 ### Building
 
