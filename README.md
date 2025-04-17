@@ -61,7 +61,7 @@ sudo apt install libipc-run3-perl
 sudo apt install chktex
 ```
 
-The first line simply updates the spellings list to match whatever dictionary is on your system. The last two enable $LaTeX$ linting. Or you can just disable that check.
+The first line simply updates the spellings list to match whatever dictionary is on your system. The last two enable $\LaTeX$ linting. Or you can just disable that check.
 
 ### Building
 
