@@ -1,4 +1,4 @@
-personal_ws-1.1 en 464 utf-8
+personal_ws-1.1 en 452 utf-8
 ABI
 ADSL
 API's
@@ -34,8 +34,6 @@ Beaconcha
 Biasability
 Bitlists
 Bitvectors
-Blockchain
-Blockchains
 Blst
 Boneh
 Booleans
@@ -209,7 +207,6 @@ Randao
 Remerkleable
 Req
 Rogaway
-Runtime
 SHA
 SSF
 SSLE
@@ -285,10 +282,7 @@ bitlists
 bitvector
 bitvectors
 bitwise
-blockchain
-blockchains
 bls
-boolean
 bytecode
 centric
 costless
@@ -306,7 +300,6 @@ das
 de
 deactivations
 decentralization
-decrementing
 decrypt
 deduplication
 deployer
@@ -317,7 +310,6 @@ deserialised
 deserialiser
 deserialises
 deserialising
-deterministically
 dev
 devs
 discretisation
@@ -347,13 +339,11 @@ incentivised
 incentivises
 incentivising
 incentivization
-incrementing
 initialiser
 initializing
 injective
 instantiations
 interop
-interoperate
 invertible
 involutive
 ish
@@ -412,7 +402,6 @@ restaking
 roadmap
 rollup
 rollups
-scalability
 scalable
 secp
 serialiser
@@ -434,7 +423,6 @@ testnet
 testnets
 th
 tradeoff
-transformational
 trie
 trilemma
 trustless
