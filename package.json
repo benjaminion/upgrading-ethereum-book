@@ -39,7 +39,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svgo": "^4.0.0-rc.1",
-    "webpack": "^5.99.5"
+    "webpack": "^5.99.6"
   },
   "overrides": {
     "babel-plugin-lodash": {
