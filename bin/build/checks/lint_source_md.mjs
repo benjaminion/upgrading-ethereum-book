@@ -63,6 +63,9 @@ export const lintSourceMarkdown = (file) => {
 
       // link-image-reference-definitions - we use these as TODO comments
       'MD053': false,
+
+      // descriptive-link-text - we like using "here" from time to time
+      'MD059': false,
     }
   }
 
