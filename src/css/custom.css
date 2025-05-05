@@ -31,30 +31,3 @@
   border-radius: 20px;
   border: transparent;
 }
-
-sup,
-sub {
-  font-size: 0.75em;
-  line-height: 0;
-  vertical-align: baseline;
-  position: relative;
-  display: inline-block;
-}
-
-sup {
-  top: -0.6em;
-  left: 0.1em;
-}
-
-sub {
-  bottom: -0.25em;
-}
-
-sup a,
-sub a,
-sup span,
-sub span {
-  line-height: normal;
-  font-size: inherit;
-  vertical-align: baseline;
-}
