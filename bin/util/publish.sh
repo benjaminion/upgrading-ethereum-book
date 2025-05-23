@@ -23,31 +23,25 @@ cd $(dirname "$0")/../..
 source bin/priv/server.sh
 
 echo
-echo "*** Patching node modules ***"
-
-npx patch-package --error-on-fail
-was_it_ok $? "patch-package"
-
-echo
 echo "*** Building site..."
 
-gatsby clean
-gatsby build --prefix-paths
-was_it_ok $? "gatsby build"
+npm run clean
+npm run build
+was_it_ok $? "npm run build"
 
 echo
 echo "*** Building PDF..."
 bin/pdf/make_pdf src/book.md
 was_it_ok $? "make_pdf"
 
-mv book.pdf public/
+mv book.pdf dist/
 
 echo
 echo "*** Ready to upload - press [ENTER] to continue"
 wait_for_input
-tar zcf - public | ssh $host tar zxfC - eth2book
+tar zcf - dist | ssh $host tar zxfC - eth2book
 
 echo
 echo "*** Ready to install - press [ENTER] to continue"
 wait_for_input
-ssh $host eth2book/install.sh $version
+ssh $host eth2book/install_astro.sh $version

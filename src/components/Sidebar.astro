@@ -1,0 +1,29 @@
+---
+import '../css/sidebar.css';
+import { Metadata } from '../include/SiteConfig.js';
+import PageList from './PageList.astro';
+
+const { pageIndex, pages, here } = Astro.props;
+
+// List only parts and chapters and immediate children in the sidebar
+const index = pageIndex ? pageIndex : [];
+const filteredPages = index.length < 2
+      ? pages.filter(p => p.data.index.length <= 2)
+      : pages.filter(p => p.data.index.length <= 2
+                     || (p.data.index.length === 3
+                         && p.data.index[0] === index[0]
+                         && p.data.index[1] === index[1]
+                        )
+                    );
+---
+
+<nav class="sidebar scrollable">
+  <div class="sidebar-title">
+    <a href={`/${Metadata.version}/`}>
+      {Metadata.title}
+    </a>
+  </div>
+  <div id="index">
+    <PageList pages={filteredPages} depth={0} here={here} />
+  </div>
+</nav>

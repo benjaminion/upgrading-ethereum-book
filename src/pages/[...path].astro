@@ -1,0 +1,75 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Metadata } from '../include/SiteConfig.js';
+
+import '../css/page.css';
+import Html from '../layouts/Html.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Subsections from '../components/Subsections.astro';
+import PrevNext from '../components/PrevNext.astro';
+import Footer from '../components/Footer.astro';
+import PageNavi from '../components/PageNavi.astro';
+import Search from '../components/Search.astro';
+import FootnoteTooltips from '../components/FootnoteTooltips.astro';
+import Scripts from '../components/Scripts.astro';
+import Banner from '../components/Banner.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  const special = await getCollection('special');
+  // Serve pages according to their frontmatter paths
+  return pages.concat(special).map((page) => ({
+    params: { path: page.data.path },
+    props: { page },
+  }));
+}
+
+//console.log(JSON.stringify(Astro, null, 2));
+
+const allPages = (await getCollection('pages'))
+      .concat(await getCollection('special'))
+      .sort((a,b) => a.data.sequence - b.data.sequence);
+
+const { page } = Astro.props;
+
+const frontmatter = page.data;
+const indexArray = frontmatter.index;
+
+var pageTitle = Metadata.title;
+if (frontmatter.titles !== undefined) {
+  const titles = frontmatter.titles.filter(x => x !== '');
+  const number = (indexArray.length >= 2) ? indexArray.join('.') : '';
+  pageTitle += ' | ' + number + ' ' + titles[titles.length - 1];
+}
+
+const pageUrl = Metadata.hostname + '/' + Metadata.version + frontmatter.path;
+const canonical = Metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path);
+const path = frontmatter.path;
+const index = frontmatter.index;
+const here = frontmatter.sequence;
+
+const { Content } = await render(page);
+---
+
+<Html pageTitle={pageTitle} canonical={canonical} pageUrl={pageUrl}>
+  <div id="page">
+    <Sidebar pageIndex={index} pages={allPages.filter(p => p.data.titles !== undefined)} here={here} />
+    <div id="main-content" class="scrollable">
+      <Banner />
+      <div id="padded-content">
+        <PrevNext seq={here} pages={allPages} />
+        <main>
+          <Content />
+        </main>
+        {path.startsWith('/search')
+         ? <Search />
+         : <Subsections indexArray={index} pages={allPages.filter(p => p.data.index)}} /> }
+        <Footer />
+        <PrevNext seq={here} pages={allPages} />
+      </div>
+    </div>
+    <PageNavi page={page} />
+  </div>
+  <FootnoteTooltips />
+  <Scripts />
+</Html>

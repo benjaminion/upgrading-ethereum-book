@@ -1,6 +1,6 @@
 ---
 path: /search/
-titles: ["Search","",""]
+titles: ["Search"]
 index: [-1]
 sequence: -2
 ---

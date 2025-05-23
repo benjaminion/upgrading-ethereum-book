@@ -1,0 +1,60 @@
+---
+import '../css/footnote-tooltips.css'
+---
+
+<script>
+
+  function addFootnoteTooltips() {
+
+    document.body.querySelectorAll('a[data-footnote-ref]').forEach( (fn) => {
+
+      // Avoid footnote labels we have already processed
+      if (fn.parentElement.querySelector('span.fn-span') === null) {
+
+        // Find the footnote
+        const footnoteId = fn.attributes.href.textContent.substring(1);
+        const footnote = document.getElementById(footnoteId);
+
+        if (!footnote) {
+          console.log('Failed to find footnote ID ' + footnoteId);
+          return;
+        }
+
+        // Create a new span element to hold the tooltip
+        const fnSpan = document.createElement('span');
+        fnSpan.className = 'fn-span';
+        for (let i = 0; i < footnote.childNodes.length; i++) {
+          fnSpan.appendChild(footnote.childNodes[i].cloneNode(true));
+        }
+
+        // Remove any backlinks (there should be exactly one)
+        const backlinks = fnSpan.getElementsByClassName('data-footnote-backref');
+        for (let i = 0; i < backlinks.length; i++) {
+          backlinks[i].parentElement.removeChild(backlinks[i]);
+        }
+
+        // Ensure the tooltip doesn't overflow the main content area
+        fnSpan.addEventListener("transitionstart", (event) => {
+          const span = event.target;
+          const padding = 16;
+          const mainRect = document.getElementById('main-content').getBoundingClientRect();
+          const fnRect = fn.getBoundingClientRect();
+          const spanRect = span.getBoundingClientRect();
+          const spanWidth = spanRect.right - spanRect.left;
+          var left = (fnRect.right + fnRect.left - spanWidth) / 2;
+          left = Math.max(left, mainRect.left + padding);
+          left = Math.min(left, mainRect.right - spanWidth - padding);
+          const zeroPos = fnRect.right;
+          span.style.left=`${left - zeroPos}px`;
+        })
+
+        fn.parentElement.append(fnSpan);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', (e) => {
+    addFootnoteTooltips();
+  });
+
+</script>

@@ -82,11 +82,12 @@ while (<>)  {
             die "Internal error: can't determine heading level.";
         }
 
+        my $titles = '"'.join('","', grep($_, ($thisPart, $thisChapter, $thisSection))).'"';
         print $ofh
             "---",
             "hide: $hide",
             "path: $path",
-            "titles: [\"$thisPart\",\"$thisChapter\",\"$thisSection\"]",
+            "titles: [$titles]",
             "index: [$idx]",
             "sequence: $sequence",
             "---";
