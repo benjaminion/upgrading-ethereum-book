@@ -33,7 +33,7 @@ sup:hover span.fn-span {
   padding: 0;
   margin: 0;
 }
-  
+
 @media print {
   .fn-span {
     display: none;
