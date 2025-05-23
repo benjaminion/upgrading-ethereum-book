@@ -2,53 +2,37 @@
   "name": "upgrading-ethereum-book",
   "version": "0.3.0",
   "private": true,
+  "type": "module",
   "description": "A technical handbook on Ethereum's move to proof of stake and beyond",
   "author": "Ben Edgington",
   "keywords": [],
   "scripts": {
-    "devel": "gatsby develop",
-    "start": "gatsby develop",
-    "build": "gatsby build --prefix-paths",
-    "serve": "gatsby serve --prefix-paths",
-    "clean": "gatsby clean",
-    "check": "node --input-type=module -e 'import { runChecks } from \"./bin/build/prebuild.mjs\"; runChecks()'",
+    "devel": "astro dev",
+    "build": "astro build",
+    "minim": "rm -rf dist/ node_modules/.astro && UE_MINIMAL=t astro build",
+    "serve": "astro preview",
+    "clean": "rm -rf dist/ node_modules/.astro",
+    "debug": "DEBUG='astro:my*' astro build",
+    "astro": "astro",
+    "check": "node --input-type=module -e 'import runChecks from \"./bin/build/prebuild.js\"; runChecks()'",
     "links": "bin/util/check_urls.sh src/book.md",
     "spell": "bin/util/check_spellings_list.sh",
     "spfix": "bin/util/update_spellings_list.sh",
-    "valid": "node -e 'require(\"./bin/util/validate\").validateHtml(\"public/index.html\")'",
     "gramm": "bin/util/check_grammar.sh src/book.md",
-    "patch": "npx patch-package",
     "pdfit": "bin/pdf/make_pdf src/book.md",
     "stats": "bin/util/stats.sh",
-    "postinstall": "patch-package"
+    "valid": "node --input-type=module -e 'import validateHtml from \"./bin/util/validate.js\"; validateHtml(\"dist/part2/building_blocks/ssz/index.html\")'"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "gatsby": "^5.14.3",
-    "gatsby-plugin-catch-links": "^5.14.0",
-    "gatsby-plugin-htaccess": "^1.4.0",
-    "gatsby-plugin-matomo": "^0.17.0",
-    "gatsby-remark-autolink-headers": "^6.14.0",
-    "gatsby-remark-katex": "^7.14.0",
-    "gatsby-remark-numbered-footnotes": "^1.0.1",
-    "gatsby-remark-prismjs": "^7.14.0",
-    "gatsby-source-filesystem": "^5.14.0",
-    "gatsby-transformer-remark": "^6.14.0",
-    "lmdb": "^3.3.0",
+    "astro": "^5.7.13",
+    "axios": "^1.9.0",
+    "cheerio": "^1.0.0",
+    "glob": "^11.0.2",
+    "hast-util-to-string": "^3.0.1",
+    "loader-utils": "^3.3.1",
     "markdownlint": "^0.38.0",
-    "msgpackr": "^1.11.2",
-    "patch-package": "^8.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "svgo": "^4.0.0-rc.1",
-    "webpack": "^5.99.8"
-  },
-  "overrides": {
-    "babel-plugin-lodash": {
-      "@babel/types": "~7.20.0"
-    },
-    "react-server-dom-webpack@0.0.0-experimental-c8b778b7f-20220825": {
-      "react": "$react"
-    }
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "svgo": "^4.0.0-rc.4"
   }
 }

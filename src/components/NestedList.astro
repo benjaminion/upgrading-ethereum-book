@@ -1,0 +1,45 @@
+---
+import { Metadata } from '../include/SiteConfig.js';
+
+const { items, level, idx } = Astro.props;
+
+function conditionalLink(to, noLink, isCurrent, children) {
+  const active = isCurrent ? ' class="index-active" aria-current="page"' : '';
+  const ret = noLink
+        ? children
+        : `<a href=/${Metadata.version}${to}${active}>${children}</a>`;
+  return ret;
+}
+
+function renderNestedList(items, level, idx) {
+  let result = '';
+  let i = idx;
+
+  while (i < items.length) {
+    const item = items[i];
+    const labelSpan = item.label ? `<span class="label-string">${item.label}</span>` : '';
+
+    if (item.level === level) {
+      let nestedContent = '';
+      if (i + 1 < items.length && items[i + 1].level > level) {
+        nestedContent = renderNestedList(items, level + 1, i + 1);
+      }
+
+      result +=
+        `<li>` +
+        `${conditionalLink(item.link, item.hide, item.here, labelSpan + " " + item.title)}` +
+        `${nestedContent}` +
+        `</li>`;
+
+      // Skip child elements
+      i++;
+      while (i < items.length && items[i].level > level) i++;
+    } else {
+      break;
+    }
+  }
+  return `<ul>${result}</ul>`;
+}
+---
+
+<Fragment set:html={renderNestedList(items, level, idx)} />

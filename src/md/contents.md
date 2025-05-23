@@ -1,6 +1,6 @@
 ---
 path: /contents/
-titles: ["Contents","",""]
+titles: ["Contents"]
 index: [-1]
 sequence: -1
 ---

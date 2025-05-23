@@ -1,7 +1,7 @@
-const axios = require('axios')
-const fs=require('fs')
+import axios from 'axios';
+import fs from 'fs';
 
-module.exports.validateHtml = (fileName) => {
+export default function validateHtml(fileName) {
 
   const file = fs.readFileSync(fileName)
 

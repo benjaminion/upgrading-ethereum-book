@@ -9,7 +9,7 @@
 #
 # Relative page paths are not supported.
 #
-# Anchors generated from headings have some rules (imposed by Gatsby):
+# Anchors generated from headings have some rules. See integrations/my_autolink_headings.js
 #  - Converted to lower case
 #  - Spaces become "-"
 #  - Special characters are omitted: ".,?:'`/[]()" and probably others
@@ -57,10 +57,10 @@ while(<$fh>) {
 
     # Add headings
     if (/^#+ (.*)$/) {
-        my $name = $1 =~ s/ <!-- .* -->$//r;
+        my $name = $1 =~ s/\s+<!-- .* -->$//r;
         $name = lc $name;
-        $name =~ tr/ /-/;
-        $name =~ tr/a-z0-9_-//cd;
+        $name =~ s/\s+/-/g;
+        $name =~ s/[^a-z0-9_-]//g;
         $anchors{$pagePath . '#' . $name} = 1;
     }
 

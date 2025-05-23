@@ -18,11 +18,16 @@ body {
               background-color var(--transition);
 }
 
-/* A fix for PgUp/PgDn not working to scroll */
-@media screen {
-  #gatsby-focus-wrapper {
-    display: contents;
-  }
+/* Screen reader only content - leave it there but make it take no space */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: rect(0 0 0 0);
+  border: 0;
 }
 
 #page {
@@ -149,6 +154,28 @@ h6 {
 
 h4 code, h5 code, h6 code {font-size: inherit; }
 
+/*** Heading autolinks ***/
+
+a.anchor {
+  position: relative;
+}
+
+a.anchor svg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-right: 4px;
+  padding-top: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+h1:hover svg, h2:hover svg, h3:hover svg, h4:hover svg, h5:hover svg, h6:hover svg  {
+  opacity: 1;
+}
+
+/*** Others ***/
+
 figure {
   text-align: center;
   padding: 0;
@@ -227,12 +254,29 @@ div.title-page {
   text-align: center;
   flex-direction: column;
   justify-content: space-around;
+  font-weight: bold;
 }
 
-div.title-page h1, div.title-page h2, div.title-page h3, div.title-page h4 {
+div.title-page .h1, div.title-page .h2, div.title-page .h3, div.title-page .h4 {
   border: none;
   padding: 0;
   margin: 1ex 0;
+}
+
+div.title-page .h1 {
+  font-size: 40px;
+}
+
+div.title-page .h2 {
+  font-size: 30px;
+}
+
+div.title-page .h3 {
+  font-size: 26px;
+}
+
+div.title-page .h4 {
+  font-size: 24px;
 }
 
 div.title-page svg {
@@ -300,23 +344,20 @@ pre[class^="language-"] code {
 /*** Equations ***/
 
 /* Keep inline equations the same size as surrounding text */
-.math-inline .katex {
+p span.katex {
   font-size: inherit!important;
 }
 
 /* Control size of the displayed equations - this makes them a little smaller */
-.math-display .katex {
+.katex-display .katex {
   font-size: 1em!important;
 }
 
 /*** Footnotes ***/
-div.footnotes hr {
+section.footnotes {
   margin-top: 6ex;
   border: 0;
   border-top: solid 1px #ccc;
-}
-
-div.footnotes {
   font-size: 85%;
 }
 
@@ -336,7 +377,6 @@ svg path, svg g, svg use {
 }
 
 a.anchor svg path {
-  stroke: var(--foreground);
   fill:  var(--foreground);
 }
 
@@ -427,7 +467,7 @@ div.title-page svg g#layer101 path {
   a.anchor {
     display: none;
   }
-  a.footnote-backref {
+  a.data-footnote-backref {
     display: none;
   }
   /* Undo code styling */

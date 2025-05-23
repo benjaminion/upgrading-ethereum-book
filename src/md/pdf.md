@@ -1,6 +1,6 @@
 ---
 path: /pdf/
-titles: ["PDF","",""]
+titles: ["PDF"]
 index: [999]
 sequence: 995
 ---
