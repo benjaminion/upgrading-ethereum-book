@@ -1,14 +1,21 @@
 @import "custom.css";
 
-sup[id^='fnref-'] {
+sup:has(a[data-footnote-ref]) {
   position: relative;
   display: inline;
+}
+
+sup:hover span.fn-span {
+  visibility: visible;
+  opacity: 1;
+  z-index: 999;
 }
 
 .fn-span {
   visibility: hidden;
   font-family: 'Open Sans', sans-serif;
   font-size: 80%;
+  font-weight: normal;
   position: absolute;
   top: 30px;
   color: var(--fn-tt-foreground);
@@ -22,12 +29,11 @@ sup[id^='fnref-'] {
   transition: opacity 0.8s;
 }
 
-sup[id^='fnref-']:hover span.fn-span {
-  visibility: visible;
-  opacity: 1;
-  z-index: 999;
+.fn-span  p {
+  padding: 0;
+  margin: 0;
 }
-
+  
 @media print {
   .fn-span {
     display: none;

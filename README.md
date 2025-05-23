@@ -20,23 +20,17 @@ Kindly note that [British spelling](https://www.oxfordinternationalenglish.com/d
 
 ## Installing
 
+As of May 2025, I have migrated the entire build from Gatsby to [Astro](https://astro.build/). Please let me know if you spot any issues!
+
 ### Pre-requisites
 
-Install `node`, `npm`, and `gatsby-cli`. These are my versions:
+Install `node` and `npm`. These are my versions:
 
 ```
 > node --version
 v22.14.0
 > npm --version
-11.1.0
-> gatsby --version
-Gatsby CLI version: 5.14.0
-```
-
-`gatsby-cli` can be installed with,
-
-```
-npm install -g gatsby-cli
+11.4.1
 ```
 
 You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document.
@@ -48,10 +42,10 @@ I've implemented a heap of pre-build checks for linting and spelling issues. You
 To cause Git commits to halt when these checks fail, add the following symlink:
 
 ```
-ln -s bin/util/git-pre-commit-hook.sh .git/hooks/pre-commit
+(cd .git/hooks; ln -s ../../bin/util/git-pre-commit-hook.sh pre-commit)
 ```
 
-The controlling script for the checks is _bin/build/prebuild.mjs_. You can enable and disable specific checks there.
+The controlling script for the checks is _bin/build/prebuild.js_. You can enable and disable specific checks there.
 
 If the $\LaTeX$ linting fails you might need to install the following, or just disable that check.
 
@@ -65,7 +59,7 @@ Clone this repo. `cd` into it, then:
 
 ```
 npm install
-gatsby build --prefix-paths
+npm run build
 ```
 
 ### Viewing
@@ -73,28 +67,28 @@ gatsby build --prefix-paths
 After building as above, do
 
 ```
-gatsby serve --prefix-paths
+npm run serve
 ```
 
-and visit http://localhost:9000/main in a web browser.
+Astro will tell you where it is serving the content (somewhere like http://localhost:4321/capella).
 
-Instead of building and serving, you can run `gatsby develop` and point your browser at port 8000. This will not pick up real-time changes to _src/book.md_ and will need to be restarted to pick up changes. It is useful, though, for checking CSS and React changes interactively.
+Instead of building and serving, you can run `npm run devel` and visit the link Astro shows. This will not pick up real-time changes to _src/book.md_ and will need to be restarted to see them. It is useful, though, for checking CSS and other component changes interactively.
 
 ## Workflow
 
 The entire text for the book is in the _src/book.md_ file. Everything under _src/md/pages_ is auto-generated and any changes there will be lost.
 
-There are various npm script commands to help with building and testing:
+There are various npm script commands to help with building and testing. See `package.json` for the full list.
 
-  - `npm run clean` runs `gatsby clean`.
-    - Do this after adding new graphics or if anything weird happens.
+  - `npm run clean` deletes the output directory (`dist/`) and the Astro cache. 
+    - I recommend doing this often. Astro caches aggressively and will often skip things like rebulding the search index.
   - `npm run check` runs a bunch of custom linting and checking, controlled by the _bin/build/prebuild.js_ script.
     - Check all links to internal anchors, image files, and footnotes.
-    - Spell check. Add any exceptions to _src/spellings.txt_
+    - Spell check. Add any exceptions to _src/spellings.en.pws_ (or use `npm run spfix`).
     - Markdown linting on both the original source and the generated pages.
-  - `npm run build` runs `gatsby build --prefix-paths`.
-  - `npm run serve` runs `gatsby serve --prefix-paths`.
-    - Visit http://localhost:9000/main/ to see the result.
+    - HTML checks and LaTeX expression linting.
+  - `npm run build` runs `astro build`.
+  - `npm run serve` runs `astro preview`.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
   - `npm run spell` runs a spell check
@@ -102,6 +96,8 @@ There are various npm script commands to help with building and testing:
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
   - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
   - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
+  - `npm run debug` builds with debugging output for my integrations.
+  - `npm run minim` does a minimal build with only a couple of pages. See `src/content.config.js`.
 
 ## How to
 

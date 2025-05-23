@@ -1,0 +1,24 @@
+---
+import '../css/prevnext.css';
+import { Metadata } from '../include/SiteConfig.js';
+import PrevNextLink from './PrevNextLink.astro';
+
+const { seq, pages } = Astro.props;
+
+if (seq === null) return null;
+
+const prevPage = pages.filter(p => p.data.sequence === (seq - 1))[0];
+const nextPage = pages.filter(p => p.data.sequence === (seq + 1))[0];
+---
+
+<div class="prevnext">
+  <span class="prev">
+    <PrevNextLink page={prevPage} rel="prev">Back</PrevNextLink>
+  </span>
+  <span class="contents">
+    <a href={`/${Metadata.version}/contents/`}>Contents</a>
+  </span>
+  <span class="next">
+    <PrevNextLink page={nextPage} rel="next">Next</PrevNextLink>
+  </span>
+</div>

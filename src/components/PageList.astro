@@ -1,0 +1,20 @@
+---
+import NestedList from './NestedList.astro';
+
+const { pages, depth, here } = Astro.props;
+
+const filteredPages = pages.filter(p => p.data.index !== null);
+if (filteredPages.length === 0) return null;
+
+// Make a flat array of list level and the list info
+const layout = filteredPages.map(p => {return ({
+  level: p.data.index.length,
+  label: p.data.index.join("."),
+  title: p.data.titles[p.data.titles.length - 1],
+  link: p.data.path,
+  hide: p.data.hide,
+  here: p.data.sequence === here
+})})
+---
+
+<NestedList items={layout} level={depth + 1} idx={0} />
