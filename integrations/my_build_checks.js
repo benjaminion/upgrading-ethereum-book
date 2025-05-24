@@ -11,7 +11,7 @@ export default function() {
     name: 'myBuildChecks',
     hooks: {
       'astro:config:setup': ({ command }) => {
-        doChecks = (command === 'build');
+        doChecks = (command === 'build' && process.env.UE_NOCHECK === undefined);
       },
       'astro:config:done': ({ logger }) => {
         if (doChecks) {
