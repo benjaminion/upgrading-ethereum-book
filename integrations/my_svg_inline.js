@@ -17,15 +17,15 @@ const addTitle = {
         exit: (node, parentNode) => {
           if (node.name === 'svg' && parentNode.type === 'root') {
             const hasTitle = node.children.some(
-              (child) => child.type === 'element' && child.name === 'title'
-            )
+              (child) => child.type === 'element' && child.name === 'title',
+            );
             if (!hasTitle) {
               const titleElement = {
                 type: 'element',
                 name: 'title',
                 attributes: {},
                 children: [],
-              }
+              };
               Object.defineProperty(titleElement, 'parentNode', {
                 writable: true,
                 value: node,
@@ -33,20 +33,20 @@ const addTitle = {
               const titleContents = {
                 type: 'text',
                 value: params.titleText,
-              }
+              };
               Object.defineProperty(titleContents, 'parentNode', {
                 writable: true,
                 value: titleElement,
               });
-              titleElement.children.push(titleContents)
+              titleElement.children.push(titleContents);
               node.children.unshift(titleElement);
             }
           }
         },
       },
-    }
+    };
   },
-}
+};
 
 // See https://www.npmjs.com/package/svgo
 const plugins = [
@@ -56,39 +56,38 @@ const plugins = [
   'removeXMLNS',
   {
     name: 'addAttributesToSVGElement',
-    params: {attribute: {'role': 'img'}},
+    params: { attribute: { role: 'img' } },
   },
-]
+];
 
-const addTitleSettings =  {
+const addTitleSettings = {
   name: addTitle.name,
   type: addTitle.type,
   active: addTitle.active,
   fn: addTitle.fn,
   params: undefined,
-}
+};
 
 const addAttributes = {
-    name: 'addAttributesToSVGElement',
-    params: undefined,
-}
+  name: 'addAttributesToSVGElement',
+  params: undefined,
+};
 
 function inlineSvg(options) {
-
   const filePath = options.filePath || '';
   const cachePathTmp = options.cachePath;
-  const cachePath = cachePathTmp.endsWith('/') ? cachePathTmp : cachePathTmp + '/';
-  const { logger, doCache} = options;
+  const cachePath = cachePathTmp.endsWith('/')
+    ? cachePathTmp
+    : cachePathTmp + '/';
+  const { logger, doCache } = options;
 
   return function (tree) {
     try {
-      visit(tree, 'paragraph', async node => {
+      visit(tree, 'paragraph', async (node) => {
         if (node.children[0].type == 'image') {
-
           const image = node.children[0];
 
           if (image.url.endsWith('.svg')) {
-
             const originalSvg = fs.readFileSync(filePath + image.url, 'utf8');
             const basename = path.basename(image.url, '.svg');
 
@@ -96,10 +95,10 @@ function inlineSvg(options) {
             const digest = getHashDigest(basename, 'md5', 'base52', 4);
 
             // Configure the SVGO addAttributes plugin to add an ID to SVG element
-            addAttributes['params'] = {attribute: {id: basename + "-svg"}};
+            addAttributes['params'] = { attribute: { id: basename + '-svg' } };
 
             // Configure our custom plugin that adds a title element
-            addTitleSettings['params'] = {titleText: image.alt};
+            addTitleSettings['params'] = { titleText: image.alt };
 
             // If the cachePath option is provided, we load the optimised SVG from there
             // when it exists and is newer than the original SVG. If a cached version is
@@ -107,22 +106,20 @@ function inlineSvg(options) {
 
             const origMtime = fs.statSync(filePath + image.url).mtime;
             const cacheFile = doCache ? cachePath + basename + '.svg' : null;
-            const goodCache = doCache
-                  && fs.existsSync(cacheFile)
-                  && (fs.statSync(cacheFile).mtime > origMtime);
+            const goodCache =
+              doCache &&
+              fs.existsSync(cacheFile) &&
+              fs.statSync(cacheFile).mtime > origMtime;
 
             let svg;
             if (goodCache) {
               svg = fs.readFileSync(cacheFile, 'utf8');
               logger.debug(`Using cached ${basename}.svg`);
             } else {
-              svg = optimize(
-                originalSvg,
-                {
-                  path: digest,
-                  plugins: plugins.concat([addTitleSettings, addAttributes])
-                }
-              ).data;
+              svg = optimize(originalSvg, {
+                path: digest,
+                plugins: plugins.concat([addTitleSettings, addAttributes]),
+              }).data;
               logger.debug(`Optimising ${basename}.svg`);
               if (doCache) {
                 fs.writeFileSync(cacheFile, svg);
@@ -138,14 +135,14 @@ function inlineSvg(options) {
             node.children = [];
           }
         }
-      })
+      });
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 }
 
-export default function(options) {
+export default function (options) {
   return {
     name: 'mySvgInline',
     hooks: {
@@ -156,10 +153,14 @@ export default function(options) {
             if (fs.statSync(options.cachePath).isDirectory()) {
               doCache = true;
             } else {
-              logger.warn(`Not caching SVGs: ${options.cachePath} is not a directory`);
+              logger.warn(
+                `Not caching SVGs: ${options.cachePath} is not a directory`,
+              );
             }
-          } catch(e) {
-            logger.warn(`Not caching SVGs: ${options.cachePath} does not exist`);
+          } catch (e) {
+            logger.warn(
+              `Not caching SVGs: ${options.cachePath} does not exist`,
+            );
           }
         } else {
           logger.info('Not caching SVGs: no cachePath provided');
