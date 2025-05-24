@@ -75,14 +75,14 @@ function includePage(frontmatter, exclude) {
 
 function buildSearchIndex(options) {
 
-  const { chunkTypes, exclude } = { ...options };
+  const { chunkTypes, exclude, logger } = { ...options };
 
   return function (tree, file) {
 
     const frontmatter = file.data.astro.frontmatter;
 
     if (includePage(frontmatter, exclude)) {
-      // console.log('Processing ' + frontmatter.path);
+      logger.debug('Processing ' + frontmatter.path);
 
       // We convert between HAST and Cheerio by going via a HTML string.
       // TODO: avoid cheerio and just use unist-visit and related tools.
@@ -102,7 +102,7 @@ function buildSearchIndex(options) {
       return unified().use(parse, {fragment: true}).parse($.html());
 
     } else {
-      // console.log('Ignoring ' + frontmatter.path);
+      logger.debug('Ignoring ' + frontmatter.path);
     }
   }
 }
@@ -131,11 +131,11 @@ export default function(options) {
     name: 'mySearchIndex',
     hooks: {
       // We build the search index with rehype
-      'astro:config:setup': ({ updateConfig }) => {
+      'astro:config:setup': ({ updateConfig, logger }) => {
         updateConfig({
           markdown: {
             rehypePlugins: [
-              [buildSearchIndex, options],
+              [buildSearchIndex, { ...options, logger: logger }],
             ],
           },
         });

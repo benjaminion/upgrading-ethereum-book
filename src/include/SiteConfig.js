@@ -52,7 +52,7 @@ const SearchOptions = {
     // Note, only pages under src/md/pages have a "hide" property.
     frontmatter: [{hide: true}],
     // No point indexing these.
-    pages: ['/', '/404.html','/contents/','/search/', '/annotated-spec/'],
+    pages: ['/', '/404/','/contents/','/search/', '/annotated-spec/'],
     // Elements matching this query are ignored completely, including their text:
     ignore: 'svg, details, mtable, mrow, [aria-hidden="true"], .footnote-ref',
   }
