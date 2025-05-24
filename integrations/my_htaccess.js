@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 // Write a .htaccess file to set the correct 404 page
 
 function writeHtaccess(base, dir, logger) {

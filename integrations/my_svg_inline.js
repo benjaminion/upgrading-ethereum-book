@@ -2,6 +2,7 @@ import { visit } from 'unist-util-visit';
 import { optimize } from 'svgo';
 import { getHashDigest } from 'loader-utils';
 import path from 'path';
+import fs from 'fs';
 
 // Inline SVG files into the Markdown AST
 

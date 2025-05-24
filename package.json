@@ -34,5 +34,10 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "svgo": "^4.0.0-rc.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "eslint": "^9.27.0",
+    "globals": "^16.1.0"
   }
 }
