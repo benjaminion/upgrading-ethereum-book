@@ -37,15 +37,18 @@ const Metadata = {
 
 const SearchOptions = {
   enabled: true,
-  // Matching elements have their text added to the index. First match wins.
   indexFile: 'search-index.json',
+  // Matching elements have their text added to the index. First match wins.
+  // Note that these are not full CSS selectors - they can only match the current element.
+  // See https://github.com/syntax-tree/hast-util-select#matchesselector-node-space
   chunkTypes: [
     {query: 'figcaption', label: 'Figure caption'},
-    {query: 'section[data-footnotes] li', label: 'Footnote'},
+    {query: 'li[id^="fn-"]', label: 'Footnote'},
     {query: 'li', label: 'List item'},
     {query: 'pre', label: 'Code'},
     {query: 'table', label: 'Table'},
-    {query: 'h3, h4, h5, h6', label: 'Heading', weight: 5},
+    {query: 'h3, h4', label: 'Heading', weight: 10},
+    {query: 'h5, h6', label: 'Minor Heading', weight: 5},
     {query: 'p', label: 'Paragraph'},
   ],
   exclude: {
@@ -54,7 +57,7 @@ const SearchOptions = {
     // No point indexing these.
     pages: ['/', '/404/','/contents/','/search/', '/annotated-spec/'],
     // Elements matching this query are ignored completely, including their text:
-    ignore: 'svg, details, mtable, mrow, [aria-hidden="true"], .footnote-ref',
+    ignore: 'svg, details, mtable, mrow, [aria-hidden="true"], a[id^="fnref-"], a.data-footnote-backref',
   }
 };
 

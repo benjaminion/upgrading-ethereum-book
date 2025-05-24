@@ -148,32 +148,15 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
         }).join('');
         return (
           `<li>
-            <a
-              href=/${prefix}${result.url + '#' + match.id}
-              class="label"
-              target="_blank"
-              rel="noreferrer"
-            >
-              ${match.label}
-            </a>
-            <span class=${'chunk-text ' + match.type}>
-              ${matches}
-            </span>
+            <a href=/${prefix}${result.url + '#' + match.id} class="label" target="_blank">${match.label}</a>
+            <span class="chunk-text ${match.type}">${matches}</span>
           </li>`
         );
       }).join('');
       return (
         `<li>
-          <a
-            href=/${prefix}${result.url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            ${result.title}
-          </a>
-          <ul>
-            ${chunks}
-          </ul>
+          <a href=/${prefix}${result.url} target="_blank">${result.title}</a>
+          <ul>${chunks}</ul>
         </li>`
       );
     }).join('');
