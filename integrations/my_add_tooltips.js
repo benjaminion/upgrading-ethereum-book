@@ -1,4 +1,5 @@
 import { visit } from 'unist-util-visit';
+import fs from 'fs';
 
 // Add a tooltip to constant values in the text according to the mapping in the
 // supplied file.
