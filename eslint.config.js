@@ -1,6 +1,5 @@
 import js from '@eslint/js';
 import globals from 'globals';
-import css from '@eslint/css';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
