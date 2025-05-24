@@ -80,7 +80,7 @@ The entire text for the book is in the _src/book.md_ file. Everything under _src
 
 There are various npm script commands to help with building and testing. See `package.json` for the full list.
 
-  - `npm run clean` deletes the output directory (`dist/`) and the Astro cache. 
+  - `npm run clean` deletes the output directory (`dist/`) and the Astro cache.
     - I recommend doing this often. Astro caches aggressively and will often skip things like rebulding the search index.
   - `npm run check` runs a bunch of custom linting and checking, controlled by the _bin/build/prebuild.js_ script.
     - Check all links to internal anchors, image files, and footnotes.
@@ -98,6 +98,15 @@ There are various npm script commands to help with building and testing. See `pa
   - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
   - `npm run debug` builds with debugging output for my integrations.
   - `npm run minim` does a minimal build with only a couple of pages. See `src/content.config.js`.
+
+### Environment variables
+
+A couple of environment variables can be used to shorten the build time when testing infrastructure changes:
+
+```
+UE_MINIMAL= npm run build   # Build a minimal version with only a couple of pages
+UE_NOCHECK= npm run build   # Skip checks on the source markdown when building
+```
 
 ## How to
 
@@ -130,7 +139,7 @@ All images are SVG, and text elements are replaced by paths for maximum compatib
 Diagrams have been created in [drawio.com](https://www.drawio.com/) and exported to SVG with the following options:
   - Border width: 10 (some of the sketched elements go out of bounds)
   - Text settings: Convert labels to SVG
-  
+
 Source files for all diagrams are in the _src/diagrams_ directory. The font used is the _Gloria Hallelujah_ Google font.
 
 ### Charts
