@@ -1,8 +1,6 @@
-import * as cheerio from 'cheerio';
-import { unified } from 'unified';
-import {rehype} from 'rehype'
-import parse from 'rehype-parse';
-import { toHtml } from 'hast-util-to-html';
+import { visit, SKIP } from 'unist-util-visit';
+import { toString } from 'hast-util-to-string';
+import { matches } from 'hast-util-select';
 import fs from 'fs';
 
 // File scoped to accumulate the index across calls to mySearchIndex
@@ -20,51 +18,65 @@ function isExcludedFrontmatter (frontmatter, exclude) {
   return false;
 }
 
-// Concatenate all text in child nodes while respecting exclusions
-function getText ($, node, exclude) {
-  return [...$(node).contents().not(exclude.ignore)]
-    .map(e => (e.type === 'text') ? e.data : getText($, e, exclude))
-    .join('');
+// Recursively concatenate all text in child nodes while respecting exclusions
+function getText (node, exclude) {
+
+  if (node.type === 'text') {
+    // [\u202F\u00A0] is a non-breaking space
+    return node.value.replace(/[\u202F\u00A0]/, ' ');
+  }
+
+  if (node.type !== 'element'
+      || matches(exclude.ignore, node)) {
+    return '';
+  }
+
+  return node.children.map( node => {return getText(node, exclude)}).join('');
 }
 
-// Recurse until we find an element we want to treat as a chunk, then get all its text content.
-function getChunks ($, node, chunkTypes, exclude, counts) {
+function getChunks (tree, chunkTypes, exclude) {
 
-  if (counts === undefined) {
-    counts = Array(chunkTypes.length).fill(0);
-  }
+  const counts = Array(chunkTypes.length).fill(0);
+  let chunks = [];
 
-  for (let idx = 0; idx < chunkTypes.length; idx++) {
+  // Walk the tree until we find an element we want to treat as a chunk, then get
+  // all its text content.
+  visit(tree, 'element', node => {
 
-    const type = chunkTypes[idx];
-
-    if ($(node).is(type.query)) {
-
-      const text = getText($, node, exclude);
-      if (text !== '') {
-
-        const tagName = $(node).prop('tagName').toLowerCase()
-        let id = $(node).attr('id');
-        if ( id === undefined) {
-          id = tagName + '_' + counts[idx];
-          $(node).attr('id', id);
-          ++counts[idx];
-        }
-
-        return [{
-          type: tagName,
-          label: type.label,
-          id: id,
-          text: text,
-          weight: type.weight === undefined ? 1 : type.weight,
-        }];
-      }
+    if (matches(exclude.ignore, node)) {
+      return SKIP;
     }
-  }
 
-  return [...$(node).children().not(exclude.ignore)]
-    .map(e => getChunks($, e, chunkTypes, exclude, counts))
-    .flat();
+    for (let idx = 0; idx < chunkTypes.length; idx++) {
+
+      const type = chunkTypes[idx];
+      if (matches(type.query, node)) {
+
+        const text = getText(node, exclude);
+        if (text !== '') {
+
+          const tagName = node.tagName.toLowerCase();
+          let id = node.properties?.id;
+          if ( id === undefined) {
+            id = tagName + '_' + counts[idx];
+            node.properties.id = id;
+            ++counts[idx];
+          }
+
+          chunks.push({
+            type: tagName,
+            label: type.label,
+            id: id,
+            text: text,
+            weight: type.weight === undefined ? 1 : type.weight,
+          });
+        }
+        return SKIP;
+      };
+    }
+  });
+
+  return chunks;
 }
 
 function includePage(frontmatter, exclude) {
@@ -84,10 +96,7 @@ function buildSearchIndex(options) {
     if (includePage(frontmatter, exclude)) {
       logger.debug('Processing ' + frontmatter.path);
 
-      // We convert between HAST and Cheerio by going via a HTML string.
-      // TODO: avoid cheerio and just use unist-visit and related tools.
-      const $ = cheerio.load(toHtml(tree, {allowDangerousHtml: true}), null, false);
-      const chunks = getChunks($, $.root(), chunkTypes, exclude)
+      const chunks = getChunks(tree, chunkTypes, exclude)
 
       const pageIndexData = {
         frontmatter: {
@@ -98,8 +107,6 @@ function buildSearchIndex(options) {
       }
 
       searchIndex.push(pageIndexData);
-
-      return unified().use(parse, {fragment: true}).parse($.html());
 
     } else {
       logger.debug('Ignoring ' + frontmatter.path);
