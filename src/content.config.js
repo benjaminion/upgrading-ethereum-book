@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const minimal = import.meta.env.UE_MINIMAL ? true : false;
+const minimal = import.meta.env.UE_MINIMAL === undefined ? false : true;
 if (minimal) {
   console.log('Building minimal configuration');
 }
