@@ -1,5 +1,4 @@
-import { visit, SKIP } from 'unist-util-visit';
-import { toString } from 'hast-util-to-string';
+import { visit, SKIP, CONTINUE } from 'unist-util-visit';
 import { matches } from 'hast-util-select';
 import fs from 'fs';
 
@@ -58,6 +57,7 @@ function getChunks (tree, chunkTypes, exclude) {
           const tagName = node.tagName.toLowerCase();
           let id = node.properties?.id;
           if ( id === undefined) {
+            // Edit the element's ID so we can find it from the search page later
             id = tagName + '_' + counts[idx];
             node.properties.id = id;
             ++counts[idx];
@@ -74,6 +74,8 @@ function getChunks (tree, chunkTypes, exclude) {
         return SKIP;
       };
     }
+
+    return CONTINUE;
   });
 
   return chunks;
@@ -94,10 +96,10 @@ function buildSearchIndex(options) {
     const frontmatter = file.data.astro.frontmatter;
 
     if (includePage(frontmatter, exclude)) {
+
       logger.debug('Processing ' + frontmatter.path);
 
-      const chunks = getChunks(tree, chunkTypes, exclude)
-
+      const chunks = getChunks(tree, chunkTypes, exclude);
       const pageIndexData = {
         frontmatter: {
           path: frontmatter.path,
@@ -105,11 +107,12 @@ function buildSearchIndex(options) {
         },
         chunks: chunks,
       }
-
       searchIndex.push(pageIndexData);
 
     } else {
+
       logger.debug('Ignoring ' + frontmatter.path);
+
     }
   }
 }
