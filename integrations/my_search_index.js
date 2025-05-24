@@ -8,10 +8,10 @@ const searchIndex = [];
 function isExcludedFrontmatter(frontmatter, exclude) {
   for (let i = 0; i < exclude.frontmatter.length; i++) {
     const test = exclude.frontmatter[i];
-    const key = Object.keys(test)[0];
+    const key = test.key;
     if (
       Object.prototype.hasOwnProperty.call(frontmatter, key) &&
-      frontmatter[key] == test[key]
+      frontmatter[key] == test.value
     ) {
       return true;
     }
