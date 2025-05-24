@@ -6,8 +6,7 @@ import { visit } from 'unist-util-visit';
 let constantsMap = {};
 
 function addTooltips() {
-
-  return function(tree) {
+  return function (tree) {
     try {
       visit(tree, 'inlineCode', (node, index, parent) => {
         // HTML in headings causes problems for the page index, so skip these
@@ -20,15 +19,14 @@ function addTooltips() {
             node.children = undefined;
           }
         }
-      })
+      });
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 }
 
-export default function(options) {
-
+export default function (options) {
   // Read the constants file and store it for later
   const constantsFile = options?.constantsFile || '';
   try {
@@ -43,9 +41,7 @@ export default function(options) {
       'astro:config:setup': ({ updateConfig }) => {
         updateConfig({
           markdown: {
-            remarkPlugins: [
-              addTooltips,
-            ],
+            remarkPlugins: [addTooltips],
           },
         });
       },
