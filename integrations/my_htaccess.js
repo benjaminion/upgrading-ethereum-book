@@ -7,7 +7,7 @@ function writeHtaccess(base, dir, logger) {
   logger.info(`Wrote .htaccess file to ${file}`);
 }
 
-export default function(base) {
+export default function (base) {
   return {
     name: 'myHtaccess',
     hooks: {
