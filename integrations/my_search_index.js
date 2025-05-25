@@ -30,11 +30,20 @@ function getText(node, exclude) {
     return '';
   }
 
+  let separator = '';
+  if (node.type === 'element') {
+    if (node.tagName === 'tr') {
+      separator = ' | ';
+    } else if (node.tagName === 'tbody' || node.tagName === 'table') {
+      separator = '<br>';
+    }
+  }
   return node.children
     .map((node) => {
       return getText(node, exclude);
     })
-    .join('');
+    .filter((x) => x)
+    .join(separator);
 }
 
 function getChunks(tree, chunkTypes, exclude) {
