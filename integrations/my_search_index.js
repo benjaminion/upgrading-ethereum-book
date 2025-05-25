@@ -30,6 +30,7 @@ function getText(node, exclude) {
     return '';
   }
 
+  // Add some minimal formatting for tables
   let separator = '';
   if (node.type === 'element') {
     if (node.tagName === 'tr') {
@@ -38,6 +39,7 @@ function getText(node, exclude) {
       separator = '<br>';
     }
   }
+
   return node.children
     .map((node) => {
       return getText(node, exclude);
