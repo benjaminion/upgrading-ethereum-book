@@ -19,8 +19,10 @@ import myHtaccess from './integrations/my_htaccess';
 Prism.languages.none = Prism.languages.text;
 Prism.languages.code = Prism.languages.text;
 
+const basePath = '/' + Metadata.version;
+
 export default defineConfig({
-  base: `/` + Metadata.version,
+  base: basePath,
   integrations: [
     myBuildChecks(),
     myAutolinkHeadings(),
@@ -29,18 +31,16 @@ export default defineConfig({
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
     myFixupLinks(),
     myCleanupHtml(),
-    myHtaccess(`/` + Metadata.version),
+    myHtaccess(basePath),
   ],
   markdown: {
     syntaxHighlight: 'prism',
     smartypants: false,
     remarkRehype: { clobberPrefix: '' }, // This is ok as we trust the markdown
-    remarkPlugins: [
-      remarkMath,
-    ],
+    remarkPlugins: [remarkMath],
     rehypePlugins: [
       rehypeRaw, // Insert HTML embedded in MD files into the AST rather than as raw strings
       [rehypeKatex, {}],
     ],
-  }
+  },
 });
