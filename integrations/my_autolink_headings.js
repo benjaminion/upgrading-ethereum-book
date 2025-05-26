@@ -24,28 +24,22 @@ function slugIt(heading) {
 
 function autolinkHeadings() {
   return function (tree) {
-    try {
-      visit(tree, 'element', (node) => {
-        if (headings.indexOf(node.tagName) === -1) {
-          return CONTINUE;
-        }
-        const newAnchor = structuredClone(anchor);
-        if (node.properties.id) {
-          newAnchor.properties = {
-            ...newAnchor.properties,
-            href: '#' + node.properties.id,
-          };
-        } else {
-          const id = slugIt(node);
-          newAnchor.properties = { ...newAnchor.properties, href: '#' + id };
-          node.properties.id = id;
-        }
-        node.children = [newAnchor].concat(node.children);
-        return SKIP;
-      });
-    } catch (err) {
-      console.error(err);
-    }
+    visit(tree, 'element', (node) => {
+      if (headings.indexOf(node.tagName) === -1) {
+        return CONTINUE;
+      }
+      const newAnchor = structuredClone(anchor);
+      if (node.properties.id) {
+        const id = node.properties.id;
+        newAnchor.properties = { ...newAnchor.properties, href: '#' + id };
+      } else {
+        const id = slugIt(node);
+        newAnchor.properties = { ...newAnchor.properties, href: '#' + id };
+        node.properties.id = id;
+      }
+      node.children.unshift(newAnchor);
+      return SKIP;
+    });
   };
 }
 
