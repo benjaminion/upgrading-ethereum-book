@@ -9,14 +9,18 @@ if (!headings) {
   return null;
 }
 
-const items = headings.filter(h => h.depth >= 2 && h.text !== 'Footnotes').map(h => {return ({
-  level: h.depth,
-  label: '',
-  title: h.text,
-  link: page.data.path + '#' + h.slug,
-  hide: false,
-  here: false
-})});
+const items = headings
+  .filter((h) => h.depth >= 2 && h.text !== 'Footnotes')
+  .map((h) => {
+    return {
+      level: h.depth,
+      label: '',
+      title: h.text,
+      link: page.data.path + '#' + h.slug,
+      hide: false,
+      here: false,
+    };
+  });
 ---
 
 <div id="page-navi" class="scrollable">

@@ -27,8 +27,8 @@ export async function getStaticPaths() {
 //console.log(JSON.stringify(Astro, null, 2));
 
 const allPages = (await getCollection('pages'))
-      .concat(await getCollection('special'))
-      .sort((a,b) => a.data.sequence - b.data.sequence);
+  .concat(await getCollection('special'))
+  .sort((a, b) => a.data.sequence - b.data.sequence);
 
 const { page } = Astro.props;
 
@@ -37,13 +37,14 @@ const indexArray = frontmatter.index;
 
 var pageTitle = Metadata.title;
 if (frontmatter.titles !== undefined) {
-  const titles = frontmatter.titles.filter(x => x !== '');
-  const number = (indexArray.length >= 2) ? indexArray.join('.') : '';
+  const titles = frontmatter.titles.filter((x) => x !== '');
+  const number = indexArray.length >= 2 ? indexArray.join('.') : '';
   pageTitle += ' | ' + number + ' ' + titles[titles.length - 1];
 }
 
 const pageUrl = Metadata.hostname + '/' + Metadata.version + frontmatter.path;
-const canonical = Metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path);
+const canonical =
+  Metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path);
 const path = frontmatter.path;
 const index = frontmatter.index;
 const here = frontmatter.sequence;
@@ -53,7 +54,11 @@ const { Content } = await render(page);
 
 <Html pageTitle={pageTitle} canonical={canonical} pageUrl={pageUrl}>
   <div id="page">
-    <Sidebar pageIndex={index} pages={allPages.filter(p => p.data.titles !== undefined)} here={here} />
+    <Sidebar
+      pageIndex={index}
+      pages={allPages.filter((p) => p.data.titles !== undefined)}
+      here={here}
+    />
     <div id="main-content" class="scrollable">
       <Banner />
       <div id="padded-content">
@@ -61,9 +66,16 @@ const { Content } = await render(page);
         <main>
           <Content />
         </main>
-        {path.startsWith('/search')
-         ? <Search />
-         : <Subsections indexArray={index} pages={allPages.filter(p => p.data.index)}} /> }
+        {
+          path.startsWith('/search') ? (
+            <Search />
+          ) : (
+            <Subsections
+              indexArray={index}
+              pages={allPages.filter((p) => p.data.index)}
+            />
+          )
+        }
         <Footer />
         <PrevNext seq={here} pages={allPages} />
       </div>

@@ -16,12 +16,15 @@ if (index[0] === -1) {
 
 // Find pages that are subsections of the page we are on
 const indexFilterString = index.length === 0 ? '' : index.join() + ',';
-const filteredPages = pages.filter(p => p.data.index.join().startsWith(indexFilterString))
+const filteredPages = pages.filter((p) =>
+  p.data.index.join().startsWith(indexFilterString),
+);
 ---
 
-{filteredPages.length > 0
- ? <div class="subsection-list">
-     <PageList pages={filteredPages} depth={index.length} />
-   </div>
- : null
+{
+  filteredPages.length > 0 ? (
+    <div class="subsection-list">
+      <PageList pages={filteredPages} depth={index.length} />
+    </div>
+  ) : null
 }
