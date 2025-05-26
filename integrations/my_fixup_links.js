@@ -5,31 +5,27 @@ import { visit } from 'unist-util-visit';
 
 function fixupLinks(basePath) {
   return function (tree) {
-    try {
-      visit(tree, 'element', (node) => {
-        if (node.tagName == 'a' && node.properties.href) {
-          // Add basePath prefix to local URLs that lack it
-          // [Astro does not do this](https://github.com/withastro/astro/issues/3626)
-          if (
-            node.properties.href.startsWith('/') &&
-            !node.properties.href.startsWith(basePath + '/')
-          ) {
-            node.properties.href = basePath + node.properties.href;
-          }
-
-          // Add rel="external noopener" and target="_blank" attributes to off-site links
-          if (
-            !node.properties.href.startsWith('/') &&
-            !node.properties.href.startsWith('#')
-          ) {
-            node.properties.rel = ['external', 'noopener'];
-            node.properties.target = '_blank';
-          }
+    visit(tree, 'element', (node) => {
+      if (node.tagName == 'a' && node.properties.href) {
+        // Add basePath prefix to local URLs that lack it
+        // [Astro does not do this](https://github.com/withastro/astro/issues/3626)
+        if (
+          node.properties.href.startsWith('/') &&
+          !node.properties.href.startsWith(basePath + '/')
+        ) {
+          node.properties.href = basePath + node.properties.href;
         }
-      });
-    } catch (err) {
-      console.error(err);
-    }
+
+        // Add rel="external noopener" and target="_blank" attributes to off-site links
+        if (
+          !node.properties.href.startsWith('/') &&
+          !node.properties.href.startsWith('#')
+        ) {
+          node.properties.rel = ['external', 'noopener'];
+          node.properties.target = '_blank';
+        }
+      }
+    });
   };
 }
 
