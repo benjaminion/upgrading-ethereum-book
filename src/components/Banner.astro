@@ -1,12 +1,17 @@
 ---
-import "../css/banner.css"
+import '../css/banner.css';
 
 // This will differ between the git branches for the different historical versions
 const addBanner = true;
 ---
 
-{addBanner ?
- <div id="banner">
-   <p>This version is old (Altair). The latest book is <a href="/latest/">here</a>.</p>
- </div>
- : null}
+{
+  addBanner ? (
+    <div id="banner">
+      <p>
+        This version is old (Altair). The latest book is{' '}
+        <a href="/latest/">here</a>.
+      </p>
+    </div>
+  ) : null
+}

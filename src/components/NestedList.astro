@@ -6,8 +6,8 @@ const { items, level, idx } = Astro.props;
 function conditionalLink(to, noLink, isCurrent, children) {
   const active = isCurrent ? ' class="index-active" aria-current="page"' : '';
   const ret = noLink
-        ? children
-        : `<a href=/${Metadata.version}${to}${active}>${children}</a>`;
+    ? children
+    : `<a href=/${Metadata.version}${to}${active}>${children}</a>`;
   return ret;
 }
 
@@ -17,7 +17,9 @@ function renderNestedList(items, level, idx) {
 
   while (i < items.length) {
     const item = items[i];
-    const labelSpan = item.label ? `<span class="label-string">${item.label}</span>` : '';
+    const labelSpan = item.label
+      ? `<span class="label-string">${item.label}</span>`
+      : '';
 
     if (item.level === level) {
       let nestedContent = '';
@@ -27,7 +29,7 @@ function renderNestedList(items, level, idx) {
 
       result +=
         `<li>` +
-        `${conditionalLink(item.link, item.hide, item.here, labelSpan + " " + item.title)}` +
+        `${conditionalLink(item.link, item.hide, item.here, labelSpan + ' ' + item.title)}` +
         `${nestedContent}` +
         `</li>`;
 

@@ -5,7 +5,13 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
 
 <div id="search-page">
   <div id="search-parameters">
-    <input name="searchText" id="search-text" placeholder="Search" autofocus="" value="" />
+    <input
+      name="searchText"
+      id="search-text"
+      placeholder="Search"
+      autofocus=""
+      value=""
+    />
     <span id="checkbox">
       <input type="checkbox" id="is-case-sensitive" />
       <label for="is-case-sensitive">Case sensitive</label>
@@ -16,8 +22,11 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
   </div>
 </div>
 
-<script id="astro-metadata" data-prefix={Metadata.version} data-file={SearchOptions.indexFile}>
-
+<script
+  id="astro-metadata"
+  data-prefix={Metadata.version}
+  data-file={SearchOptions.indexFile}
+>
   const logTimings = true;
   let t0, t1, t2;
 
@@ -32,7 +41,6 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
 
   // Load search index from the server if necessary
   async function loadSearchIndex() {
-
     if (searchIndex) {
       return searchIndex;
     }
@@ -43,12 +51,11 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
         searchIndex = JSON.parse(cachedIndex);
         return searchIndex;
       }
-    } catch(error) {
-        console.log('Failed read index from session storage');
+    } catch (error) {
+      console.log('Failed read index from session storage');
     }
 
     try {
-
       if (logTimings) {
         t0 = Date.now();
       }
@@ -67,39 +74,35 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
 
       try {
         sessionStorage.setItem('searchIndex', JSON.stringify(searchIndex));
-      } catch(error) {
+      } catch (error) {
         console.log('Failed to save index to session storage');
       }
       return searchIndex;
-
     } catch (error) {
-
       console.error('Failed to load search index:', error);
       return null;
-
     }
   }
 
   const escapeRegExp = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  }
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  };
 
-  async function getSearchResults (query, index) {
-
+  async function getSearchResults(query, index) {
     if (query.searchText.length < 3) {
       return [];
     }
 
     // Match the starts of words only. The "d" flag gives us the matching indices.
-    const regex = RegExp('(^|\\W|_)(' + escapeRegExp(query.searchText) + ')',
-                  'gd' + (query.isCaseSensitive ? '' : 'i'));
+    const regex = RegExp(
+      '(^|\\W|_)(' + escapeRegExp(query.searchText) + ')',
+      'gd' + (query.isCaseSensitive ? '' : 'i'),
+    );
 
-    const result = index.map( (node) => {
-
+    const result = index.map((node) => {
       let pageScore = 0;
       const matches = [];
       for (let i = 0; i < node.chunks?.length; i++) {
-
         let chunk = node.chunks[i];
         let match;
         const indices = [];
@@ -107,62 +110,72 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
           indices.push([match.indices[2][0], match.indices[2][1]]);
         }
         if (indices.length > 0) {
-          matches.push(
-            {
-              type: chunk.type,
-              label: chunk.label,
-              id: chunk.id,
-              text: chunk.text,
-              indices: indices,
-            }
-          );
+          matches.push({
+            type: chunk.type,
+            label: chunk.label,
+            id: chunk.id,
+            text: chunk.text,
+            indices: indices,
+          });
           pageScore += chunk.weight * indices.length;
         }
       }
 
-      return matches.length === 0 ? null : {
-        url: node.frontmatter.path,
-        title: node.frontmatter.titles.join(' | '),
-        matches: matches,
-        score: pageScore,
-      };
-    })
+      return matches.length === 0
+        ? null
+        : {
+            url: node.frontmatter.path,
+            title: node.frontmatter.titles.join(' | '),
+            matches: matches,
+            score: pageScore,
+          };
+    });
 
-    return result.filter(x => x).sort((a, b) => (b.score - a.score));
+    return result.filter((x) => x).sort((a, b) => b.score - a.score);
   }
 
   async function updateSearchResults(query, index) {
-
     if (!index) {
       return;
     }
 
     const results = await getSearchResults(query, index);
 
-    const pages = results.map((result) => {
-      const chunks = result.matches.map((match) => {
-        const matches = match.indices.map((indices, i) => {
-          return (match.text.substring((i === 0) ? 0 : match.indices[i-1][1], indices[0]))
-            + `<span class='match-text'>${match.text.substring(indices[0], indices[1])}</span>`
-            + ((i === match.indices.length - 1) ? match.text.substring(indices[1]) : '');
-        }).join('');
-        return (
-          `<li>
+    const pages = results
+      .map((result) => {
+        const chunks = result.matches
+          .map((match) => {
+            const matches = match.indices
+              .map((indices, i) => {
+                return (
+                  match.text.substring(
+                    i === 0 ? 0 : match.indices[i - 1][1],
+                    indices[0],
+                  ) +
+                  `<span class='match-text'>${match.text.substring(indices[0], indices[1])}</span>` +
+                  (i === match.indices.length - 1
+                    ? match.text.substring(indices[1])
+                    : '')
+                );
+              })
+              .join('');
+            return `<li>
             <a href=/${prefix}${result.url + '#' + match.id} class="label" target="_blank">${match.label}</a>
             <span class="chunk-text ${match.type}">${matches}</span>
-          </li>`
-        );
-      }).join('');
-      return (
-        `<li>
+          </li>`;
+          })
+          .join('');
+        return `<li>
           <a href=/${prefix}${result.url} target="_blank">${result.title}</a>
           <ul>${chunks}</ul>
-        </li>`
-      );
-    }).join('');
+        </li>`;
+      })
+      .join('');
 
     const resultsDiv = document.getElementById('search-results');
-    resultsDiv.innerHTML = results.length ? '<ul>' + pages + '</ul>' : '<p>No results</p>';
+    resultsDiv.innerHTML = results.length
+      ? '<ul>' + pages + '</ul>'
+      : '<p>No results</p>';
   }
 
   const searchTextInput = document.getElementById('search-text');
@@ -172,11 +185,11 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
   searchTextInput.value = '';
   caseSensitiveCheckbox.checked = false;
 
-  async function doSearch () {
+  async function doSearch() {
     const query = {
       searchText: searchTextInput.value,
       isCaseSensitive: caseSensitiveCheckbox.checked,
-    }
+    };
     const index = await loadSearchIndex();
     updateSearchResults(query, index);
   }
@@ -193,5 +206,4 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
   document.addEventListener('DOMContentLoaded', (e) => {
     searchIndex = loadSearchIndex();
   });
-
 </script>
