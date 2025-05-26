@@ -7,8 +7,8 @@ const { seq, pages } = Astro.props;
 
 if (seq === null) return null;
 
-const prevPage = pages.filter(p => p.data.sequence === (seq - 1))[0];
-const nextPage = pages.filter(p => p.data.sequence === (seq + 1))[0];
+const prevPage = pages.filter((p) => p.data.sequence === seq - 1)[0];
+const nextPage = pages.filter((p) => p.data.sequence === seq + 1)[0];
 ---
 
 <div class="prevnext">

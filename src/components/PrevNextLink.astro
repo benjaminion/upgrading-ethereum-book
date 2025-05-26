@@ -1,14 +1,13 @@
 ---
 import { Metadata } from '../include/SiteConfig.js';
 
-const {page, rel } = Astro.props;
+const { page, rel } = Astro.props;
 
-if (page === null
-    || page === undefined
-    || page.data.sequence < 0
-   ) return null;
+if (page === null || page === undefined || page.data.sequence < 0) return null;
 
-let title = page.data.titles.join(" > ");
+let title = page.data.titles.join(' > ');
 ---
 
-<a href={`/${Metadata.version}${page.data.path}`} title={title} rel={rel}><slot /></a>
+<a href={`/${Metadata.version}${page.data.path}`} title={title} rel={rel}
+  ><slot /></a
+>
