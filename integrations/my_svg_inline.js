@@ -83,63 +83,59 @@ function inlineSvg(options) {
   const { logger, doCache } = options;
 
   return function (tree) {
-    try {
-      visit(tree, 'paragraph', async (node) => {
-        if (node.children[0].type == 'image') {
-          const image = node.children[0];
+    visit(tree, 'paragraph', async (node) => {
+      if (node.children[0].type == 'image') {
+        const image = node.children[0];
 
-          if (image.url.endsWith('.svg')) {
-            const originalSvg = fs.readFileSync(filePath + image.url, 'utf8');
-            const basename = path.basename(image.url, '.svg');
+        if (image.url.endsWith('.svg')) {
+          const originalSvg = fs.readFileSync(filePath + image.url, 'utf8');
+          const basename = path.basename(image.url, '.svg');
 
-            // We need to distinguish multiple SVGs on the same page by using "prefixIds"
-            const digest = getHashDigest(basename, 'md5', 'base52', 4);
+          // We need to distinguish multiple SVGs on the same page by using "prefixIds"
+          const digest = getHashDigest(basename, 'md5', 'base52', 4);
 
-            // Configure the SVGO addAttributes plugin to add an ID to SVG element
-            addAttributes['params'] = { attribute: { id: basename + '-svg' } };
+          // Configure the SVGO addAttributes plugin to add an ID to SVG element
+          addAttributes['params'] = { attribute: { id: basename + '-svg' } };
 
-            // Configure our custom plugin that adds a title element
-            addTitleSettings['params'] = { titleText: image.alt };
+          // Configure our custom plugin that adds a title element
+          addTitleSettings['params'] = { titleText: image.alt };
 
-            // If the cachePath option is provided, we load the optimised SVG from there
-            // when it exists and is newer than the original SVG. If a cached version is
-            // is not available or is older than the original SVG, we rewrite it.
+          // If the cachePath option is provided, we load the optimised SVG from there
+          // when it exists and is newer than the original SVG. If a cached version is
+          // is not available or is older than the original SVG, we rewrite it.
 
-            const origMtime = fs.statSync(filePath + image.url).mtime;
-            const cacheFile = doCache ? cachePath + basename + '.svg' : null;
-            const goodCache =
-              doCache &&
-              fs.existsSync(cacheFile) &&
-              fs.statSync(cacheFile).mtime > origMtime;
+          const origMtime = fs.statSync(filePath + image.url).mtime;
+          const cacheFile = doCache ? cachePath + basename + '.svg' : null;
+          const goodCache =
+            doCache &&
+            fs.existsSync(cacheFile) &&
+            fs.statSync(cacheFile).mtime > origMtime;
 
-            let svg;
-            if (goodCache) {
-              svg = fs.readFileSync(cacheFile, 'utf8');
-              logger.debug(`Using cached ${basename}.svg`);
+          let svg;
+          if (goodCache) {
+            svg = fs.readFileSync(cacheFile, 'utf8');
+            logger.debug(`Using cached ${basename}.svg`);
+          } else {
+            svg = optimize(originalSvg, {
+              path: digest,
+              plugins: plugins.concat([addTitleSettings, addAttributes]),
+            }).data;
+            logger.debug(`Optimising ${basename}.svg`);
+            if (doCache) {
+              fs.writeFileSync(cacheFile, svg);
+              logger.debug(`Caching ${basename}.svg`);
             } else {
-              svg = optimize(originalSvg, {
-                path: digest,
-                plugins: plugins.concat([addTitleSettings, addAttributes]),
-              }).data;
-              logger.debug(`Optimising ${basename}.svg`);
-              if (doCache) {
-                fs.writeFileSync(cacheFile, svg);
-                logger.debug(`Caching ${basename}.svg`);
-              } else {
-                logger.debug(`Not caching ${basename}.svg`);
-              }
+              logger.debug(`Not caching ${basename}.svg`);
             }
-
-            // Modify the current node in-place
-            node.type = 'html';
-            node.value = svg;
-            node.children = [];
           }
+
+          // Modify the current node in-place
+          node.type = 'html';
+          node.value = svg;
+          node.children = [];
         }
-      });
-    } catch (err) {
-      console.error(err);
-    }
+      }
+    });
   };
 }
 
