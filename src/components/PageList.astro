@@ -4,7 +4,7 @@ import NestedList from './NestedList.astro';
 const { pages, depth, here } = Astro.props;
 
 const filteredPages = pages.filter((p) => p.data.index !== null);
-if (filteredPages.length === 0) return null;
+const render = filteredPages.length !== 0;
 
 // Make a flat array of list level and the list info
 const layout = filteredPages.map((p) => {
@@ -19,4 +19,4 @@ const layout = filteredPages.map((p) => {
 });
 ---
 
-<NestedList items={layout} level={depth + 1} idx={0} />
+{render ? <NestedList items={layout} level={depth + 1} idx={0} /> : null}

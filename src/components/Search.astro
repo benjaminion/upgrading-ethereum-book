@@ -203,7 +203,7 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
   });
 
   // Pre-fetch and cache the search index
-  document.addEventListener('DOMContentLoaded', (e) => {
+  document.addEventListener('DOMContentLoaded', () => {
     searchIndex = loadSearchIndex();
   });
 </script>
