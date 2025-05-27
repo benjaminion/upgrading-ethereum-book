@@ -7,18 +7,18 @@ const { indexArray, pages } = Astro.props;
 let index = indexArray;
 
 // Only add the auto index for Parts, not any deeper structure
-if (index === undefined || index === null || index.length > 1) return null;
+const skip = index === undefined || index === null || index.length > 1;
 
 // Special hacky handling for the the /contents page
-if (index[0] === -1) {
+if (!skip && index[0] === -1) {
   index = [];
 }
 
 // Find pages that are subsections of the page we are on
-const indexFilterString = index.length === 0 ? '' : index.join() + ',';
-const filteredPages = pages.filter((p) =>
-  p.data.index.join().startsWith(indexFilterString),
-);
+const indexFilterString = skip || index.length === 0 ? '' : index.join() + ',';
+const filteredPages = skip
+  ? []
+  : pages.filter((p) => p.data.index.join().startsWith(indexFilterString));
 ---
 
 {
