@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import globals from 'globals';
 import { defineConfig } from 'eslint/config';
+import eslintPluginAstro from 'eslint-plugin-astro';
 
 export default defineConfig([
   {
@@ -22,4 +23,5 @@ export default defineConfig([
       ],
     },
   },
+  ...eslintPluginAstro.configs.recommended,
 ]);
