@@ -15,7 +15,7 @@ const nextPage = seq
 
 {
   seq && (
-    <div class="prevnext">
+    <nav class="prevnext" aria-label="Next and previous">
       <span class="prev">
         <PrevNextLink page={prevPage} rel="prev">
           Back
@@ -29,6 +29,6 @@ const nextPage = seq
           Next
         </PrevNextLink>
       </span>
-    </div>
+    </nav>
   )
 }
