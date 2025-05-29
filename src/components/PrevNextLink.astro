@@ -7,7 +7,7 @@ const title = skip ? null : page.data.titles.join(' > ');
 ---
 
 {
-  skip ? null : (
+  !skip && (
     <a href={`/${Metadata.version}${page.data.path}`} title={title} rel={rel}>
       <slot />
     </a>
