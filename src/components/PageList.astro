@@ -19,4 +19,4 @@ const layout = filteredPages.map((p) => {
 });
 ---
 
-{render ? <NestedList items={layout} level={depth + 1} idx={0} /> : null}
+{render && <NestedList items={layout} level={depth + 1} idx={0} />}
