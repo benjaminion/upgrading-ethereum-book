@@ -11,7 +11,7 @@
     "build": "astro build",
     "minim": "rm -rf dist/ node_modules/.astro && UE_MINIMAL=t astro build",
     "serve": "astro preview",
-    "clean": "rm -rf dist/ node_modules/.astro",
+    "clean": "rm -rf dist/ .astro/ node_modules/.astro",
     "debug": "DEBUG='astro:my*' astro build",
     "astro": "astro",
     "check": "node --input-type=module -e 'import runChecks from \"./bin/build/prebuild.js\"; runChecks()'",
