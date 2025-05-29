@@ -14,7 +14,7 @@ const nextPage = seq
 ---
 
 {
-  seq ? (
+  seq && (
     <div class="prevnext">
       <span class="prev">
         <PrevNextLink page={prevPage} rel="prev">
@@ -30,5 +30,5 @@ const nextPage = seq
         </PrevNextLink>
       </span>
     </div>
-  ) : null
+  )
 }

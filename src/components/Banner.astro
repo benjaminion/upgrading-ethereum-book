@@ -6,12 +6,12 @@ const addBanner = true;
 ---
 
 {
-  addBanner ? (
+  addBanner && (
     <div id="banner">
       <p>
         This version is old (Bellatrix). The latest book is{' '}
         <a href="/latest/">here</a>.
       </p>
     </div>
-  ) : null
+  )
 }
