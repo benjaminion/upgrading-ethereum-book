@@ -1,4 +1,4 @@
-div.prevnext {
+.prevnext {
   width: 100%;
   margin: 0;
   padding: 6px 0;
@@ -6,30 +6,30 @@ div.prevnext {
   justify-content: space-between;
 }
 
-div.prevnext span {
+.prevnext span {
   display: flex;
 }
 
-div.prevnext span.prev {
+.prevnext span.prev {
   justify-content: flex-start;
 }
 
-div.prevnext span.next {
+.prevnext span.next {
   justify-content: flex-end;
 }
 
-div.prevnext span.contents {
+.prevnext span.contents {
   display: none;
 }
 
 @media print {
-  div.prevnext {
+  .prevnext {
     display: none;
   }
 }
 
 @media screen and (max-width: 1200px) {
-  div.prevnext span.contents {
+  prevnext span.contents {
     display: flex;
     justify-content: center;
   }

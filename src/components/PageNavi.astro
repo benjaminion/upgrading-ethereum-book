@@ -24,8 +24,12 @@ const items = headings
 
 {
   headings && (
-    <div id="page-navi" class="scrollable">
+    <nav
+      id="page-navi"
+      class="scrollable"
+      aria-label="Page contents navigation"
+    >
       <NestedList items={items} level={2} idx={0} />
-    </div>
+    </nav>
   )
 }
