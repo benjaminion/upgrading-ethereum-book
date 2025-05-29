@@ -28,7 +28,7 @@ Install `node` and `npm`. These are my versions:
 
 ```
 > node --version
-v22.14.0
+v22.16.0
 > npm --version
 11.4.1
 ```
