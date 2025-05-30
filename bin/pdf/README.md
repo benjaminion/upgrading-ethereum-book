@@ -8,7 +8,7 @@ Get the latest `pandoc` from the [pandoc repo](https://github.com/jgm/pandoc/rel
 
 ```
 > pandoc --version
-pandoc 3.6.3
+pandoc 3.7.0.2
 ...
 ```
 
