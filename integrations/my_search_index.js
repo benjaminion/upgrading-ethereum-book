@@ -6,17 +6,9 @@ import fs from 'fs';
 const searchIndex = [];
 
 function isExcludedFrontmatter(frontmatter, exclude) {
-  for (let i = 0; i < exclude.frontmatter.length; i++) {
-    const test = exclude.frontmatter[i];
-    const key = test.key;
-    if (
-      Object.prototype.hasOwnProperty.call(frontmatter, key) &&
-      frontmatter[key] == test.value
-    ) {
-      return true;
-    }
-  }
-  return false;
+  return exclude.frontmatter.some(
+    (test) => frontmatter[test.key] === test.value,
+  );
 }
 
 // Recursively concatenate all text in child nodes while respecting exclusions
@@ -93,9 +85,8 @@ function getChunks(tree, chunkTypes, exclude) {
 
 function includePage(frontmatter, exclude) {
   return (
-    frontmatter !== undefined &&
-    isExcludedFrontmatter(frontmatter, exclude) === false &&
-    exclude.pages?.indexOf(frontmatter.path) === -1
+    exclude.pages?.indexOf(frontmatter.path) === -1 &&
+    !isExcludedFrontmatter(frontmatter, exclude)
   );
 }
 
