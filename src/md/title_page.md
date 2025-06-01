@@ -3,7 +3,7 @@ path: /
 ---
 
 <div class="title-page">
-<div class="h1">Upgrading Ethereum</div>
+<h1>Upgrading Ethereum</h1>
 <div class="h2">A technical handbook on Ethereum's move to proof of stake and beyond</div>
 <div class="h3">Edition 0.1: Altair [Outdated]</div>
 <div class="h4">by Ben Edgington</div>
