@@ -1,5 +1,6 @@
 ---
 path: /
+search: false
 ---
 
 <div class="title-page">
