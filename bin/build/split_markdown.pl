@@ -95,14 +95,14 @@ while (<>)  {
         if ($thisSection ne '') {
             print $ofh
                 "\n<div class=\"section-header\">\n",
-                "# $thisPart\n",
-                "## $thisChapter",
+                "<h1 class=\"no-link\">$thisPart</h1>\n",
+                "<h2 class=\"no-link\">$thisChapter</h2>\n",
                 "\n</div>\n",
                 "### $thisSection";
         } elsif ($thisChapter ne '') {
             print $ofh
                 "\n<div class=\"chapter-header\">\n",
-                "# $thisPart",
+                "<h1 class=\"no-link\">$thisPart</h1>\n",
                 "\n</div>\n",
                 "## $thisChapter";
         } else {
