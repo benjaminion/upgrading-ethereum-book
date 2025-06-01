@@ -84,10 +84,7 @@ function getChunks(tree, chunkTypes, exclude) {
 }
 
 function includePage(frontmatter, exclude) {
-  return (
-    exclude.pages?.indexOf(frontmatter.path) === -1 &&
-    !isExcludedFrontmatter(frontmatter, exclude)
-  );
+  return !isExcludedFrontmatter(frontmatter, exclude);
 }
 
 function buildSearchIndex(options) {

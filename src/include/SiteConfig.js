@@ -58,9 +58,11 @@ const SearchOptions = {
   ],
   exclude: {
     // Note, only pages under src/md/pages have a "hide" property.
-    frontmatter: [{ key: 'hide', value: true }],
-    // No point indexing these.
-    pages: ['/', '/404/', '/contents/', '/search/', '/annotated-spec/'],
+    frontmatter: [
+      { key: 'hide', value: true },
+      { key: 'search', value: false },
+      { key: 'path', value: '/annotated-spec/' },
+    ],
     // Elements matching this query are ignored completely, including their text:
     ignore:
       'svg, details, mtable, mrow, [aria-hidden="true"], a[id^="fnref-"], a.data-footnote-backref',
