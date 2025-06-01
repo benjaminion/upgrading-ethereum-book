@@ -113,6 +113,10 @@ sup a, sub a, sup span, sub span {
 
 /*** Headings ***/
 
+h2, h3, h4, h5, h6 {
+  position: relative;
+}
+
 h3 {
   padding-bottom: 6px;
   margin-bottom: 1ex;
@@ -157,20 +161,20 @@ h4 code, h5 code, h6 code {font-size: inherit; }
 /*** Heading autolinks ***/
 
 a.anchor {
-  position: relative;
+  position: absolute;
+  left: -20px;
+  display: inline-block;
 }
 
 a.anchor svg {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding-right: 4px;
-  padding-top: 4px;
+  width: 16px;
+  height: 16px;
   opacity: 0;
   transition: opacity 0.3s ease;
+
 }
 
-h1:hover svg, h2:hover svg, h3:hover svg, h4:hover svg, h5:hover svg, h6:hover svg  {
+h2:hover svg, h3:hover svg, h4:hover svg, h5:hover svg, h6:hover svg  {
   opacity: 1;
 }
 
@@ -257,14 +261,10 @@ div.title-page {
   font-weight: bold;
 }
 
-div.title-page .h1, div.title-page .h2, div.title-page .h3, div.title-page .h4 {
+div.title-page .h2, div.title-page .h3, div.title-page .h4 {
   border: none;
   padding: 0;
   margin: 1ex 0;
-}
-
-div.title-page .h1 {
-  font-size: 40px;
 }
 
 div.title-page .h2 {
