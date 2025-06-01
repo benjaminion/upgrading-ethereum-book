@@ -37,115 +37,139 @@ const ourSpellings = 'src/spellings.en.pws';
 const customReporter = {
   // https://tintin.mudhalla.net/info/xterm/
   // https://tintin.mudhalla.net/info/256color/
-  info: function (m) { console.log('\x1b[38;5;19m%s\x1b[0m %s', 'info', m) },
-  warn: function (m) { console.log('\x1b[38;5;130m%s\x1b[0m %s', 'warn', m) },
-  error: function (m) { console.log('\x1b[38;5;160m%s\x1b[0m %s', 'error', m) },
+  info: (m) => {
+    console.log('\x1b[38;5;19m%s\x1b[0m %s', 'info', m);
+  },
+  warn: (m) => {
+    console.log('\x1b[38;5;130m%s\x1b[0m %s', 'warn', m);
+  },
+  error: (m) => {
+    console.log('\x1b[38;5;160m%s\x1b[0m %s', 'error', m);
+  },
 };
 
 function printLines(s, reporter) {
   s.split(/\r?\n/).forEach((line, i) => line && reporter.warn(line));
 }
 
-function runCheck(
-  enabled, checker, infoMessage, failMessage, errorMessage, skipMessage, reporter
-) {
+function runCheck(enabled, checker, messages, reporter) {
   let success = true;
   if (enabled) {
-    reporter.info(infoMessage);
+    reporter.info(messages.info);
     try {
       const out = checker();
       if (out !== '' && out !== null) {
-        reporter.warn(failMessage);
+        reporter.warn(messages.fail);
         printLines(out, reporter);
         success = false;
       }
     } catch (err) {
-      reporter.warn(errorMessage);
+      reporter.warn(messages.error);
       printLines(err.toString(), reporter);
       success = false;
     }
   } else {
-    reporter.warn(skipMessage);
+    reporter.warn(messages.skip);
   }
   return success;
 }
 
 // Set `exitToShell` to false to continue processing after running checks (e.g. while building)
-export default function runChecks(reporter = customReporter, exitToShell = true) {
-
+export default function runChecks(
+  reporter = customReporter,
+  exitToShell = true,
+) {
   var allOk = true;
-  
+
   allOk &= runCheck(
     doInternalLinks,
-    () => execSync(`${linkChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Checking internal links...',
-    'Found some bad internal links:',
-    'Unable to check internal links:',
-    'Skipping internal link check',
-    reporter
+    () => execSync(`${linkChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    {
+      info: 'Checking internal links...',
+      fail: 'Found some bad internal links:',
+      error: 'Unable to check internal links:',
+      skip: 'Skipping internal link check',
+    },
+    reporter,
   );
 
   allOk &= runCheck(
     doHtmlCheck,
-    () => execSync(`${htmlChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Checking HTML...',
-    'Found HTML issues:',
-    'Unable to check HTML:',
-    'Skipping HTML check',
-    reporter
+    () => execSync(`${htmlChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    {
+      info: 'Checking HTML...',
+      fail: 'Found HTML issues:',
+      error: 'Unable to check HTML:',
+      skip: 'Skipping HTML check',
+    },
+    reporter,
   );
 
   allOk &= runCheck(
     doSpellCheck,
-    () => execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {encoding: 'utf8'}),
-    'Performing spellcheck...',
-    'Found some misspellings:',
-    'Unable to perform spellcheck:',
-    'Skipping spellcheck',
-    reporter
+    () =>
+      execSync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {
+        encoding: 'utf8',
+      }),
+    {
+      info: 'Performing spellcheck...',
+      fail: 'Found some misspellings:',
+      error: 'Unable to perform spellcheck:',
+      skip: 'Skipping spellcheck',
+    },
+    reporter,
   );
 
   allOk &= runCheck(
     doRepeatCheck,
-    () => execSync(`${repeatChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Performing repeated words check...',
-    'Found some repeated words:',
-    'Unable to perform repeat check:',
-    'Skipping repeat check',
-    reporter
+    () => execSync(`${repeatChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    {
+      info: 'Performing repeated words check...',
+      fail: 'Found some repeated words:',
+      error: 'Unable to perform repeat check:',
+      skip: 'Skipping repeat check',
+    },
+    reporter,
   );
 
   allOk &= runCheck(
     doWhitespaceCheck,
-    () => execSync(`${whitespaceChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Performing trailing whitespace check...',
-    'Found trailing whitespace:',
-    'Unable to perform whitespace check:',
-    'Skipping whitespace check',
-    reporter
+    () =>
+      execSync(`${whitespaceChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    {
+      info: 'Performing trailing whitespace check...',
+      fail: 'Found trailing whitespace:',
+      error: 'Unable to perform whitespace check:',
+      skip: 'Skipping whitespace check',
+    },
+    reporter,
   );
 
   allOk &= runCheck(
     doLatexCheck,
-    () => execSync(`${latexChecker} ${sourceMarkdown}`, {encoding: 'utf8'}),
-    'Performing LaTeX check...',
-    'Found LaTeX issues:',
-    'Unable to perform LaTeX check:',
-    'Skipping LaTeX check',
-    reporter
+    () => execSync(`${latexChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    {
+      info: 'Performing LaTeX check...',
+      fail: 'Found LaTeX issues:',
+      error: 'Unable to perform LaTeX check:',
+      skip: 'Skipping LaTeX check',
+    },
+    reporter,
   );
 
   let sourceLintSucceeded = runCheck(
     doSourceLint,
     () => lintSourceMarkdown(sourceMarkdown),
-    'Linting source markdown...',
-    'Found some linting issues:',
-    'Unable to lint check source markdown:',
-    'Skipping source markdown linting',
-    reporter
+    {
+      info: 'Linting source markdown...',
+      fail: 'Found some linting issues:',
+      error: 'Unable to lint check source markdown:',
+      skip: 'Skipping source markdown linting',
+    },
+    reporter,
   );
   allOk &= sourceLintSucceeded;
-  
+
   reporter.info('Unpacking book source...');
   try {
     execSync(`${mdSplitter} ${sourceMarkdown}`);
@@ -157,12 +181,17 @@ export default function runChecks(reporter = customReporter, exitToShell = true)
   if (sourceLintSucceeded) {
     allOk &= runCheck(
       doSplitLint,
-      () => lintSplitMarkdown(glob.sync('src/md/**/*.md', {'ignore': 'src/md/annotated.md'})),
-      'Linting split markdown...',
-      'Found some linting issues:',
-      'Unable to lint check split markdown:',
-      'Skipping split markdown linting',
-      reporter
+      () =>
+        lintSplitMarkdown(
+          glob.sync('src/md/**/*.md', { ignore: 'src/md/annotated.md' }),
+        ),
+      {
+        info: 'Linting split markdown...',
+        fail: 'Found some linting issues:',
+        error: 'Unable to lint check split markdown:',
+        skip: 'Skipping split markdown linting',
+      },
+      reporter,
     );
   } else {
     reporter.warn('Skipping split markdown linting due to earlier errors');
