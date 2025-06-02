@@ -12,10 +12,6 @@ const anchor = fromHtmlIsomorphic(
   { fragment: true },
 ).children[0];
 
-// The headings to process
-const headings = ['h2', 'h3', 'h4', 'h5', 'h6'];
-const excludeMatch = '.no-link';
-
 // Should match the method in bin/build/checks/links.pl
 function slugIt(heading) {
   return toString(heading)
@@ -25,10 +21,11 @@ function slugIt(heading) {
     .replace(/[^a-z0-9_-]/g, '');
 }
 
-function autolinkHeadings() {
+function autoLinkHeadings(options) {
+  const { headings, exclude } = options;
   return function (tree) {
     visit(tree, 'element', (node) => {
-      if (!isElement(node, headings) || matches(excludeMatch, node)) {
+      if (!isElement(node, headings) || (exclude && matches(exclude, node))) {
         return CONTINUE;
       }
       const newAnchor = structuredClone(anchor);
@@ -46,14 +43,27 @@ function autolinkHeadings() {
   };
 }
 
-export default function () {
+// The headings to process
+const defaultHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+// Headings that match this selector are ignored
+const defaultExclude = undefined;
+
+export default function (options) {
+  const headings =
+    options?.headings !== undefined ? options.headings : defaultHeadings;
+  const exclude =
+    options?.exclude !== undefined ? options.exclude : defaultExclude;
   return {
-    name: 'myAutolinkHeadings',
+    name: 'myAutoLinkHeadings',
     hooks: {
-      'astro:config:setup': ({ updateConfig }) => {
+      'astro:config:setup': ({ updateConfig, logger }) => {
+        logger.debug('Headings: ' + headings);
+        logger.debug('Exclude: ' + exclude);
         updateConfig({
           markdown: {
-            rehypePlugins: [autolinkHeadings],
+            rehypePlugins: [
+              [autoLinkHeadings, { headings: headings, exclude: exclude }],
+            ],
           },
         });
       },
