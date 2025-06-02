@@ -25,7 +25,7 @@ export default defineConfig({
   base: basePath,
   integrations: [
     myBuildChecks(),
-    myAutoLinkHeadings({ headings: ['h2', 'h3', 'h4', 'h5', 'h6'], exclude: '.no-anchor' }),
+    myAutoLinkHeadings({ exclude: 'h1, .no-anchor' }),
     mySvgInline({ filePath: 'src/', cachePath: 'src/cache/' }),
     mySearchIndex(SearchOptions),
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
