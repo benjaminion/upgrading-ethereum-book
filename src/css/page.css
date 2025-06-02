@@ -344,13 +344,13 @@ pre[class^="language-"] code {
 /*** Equations ***/
 
 /* Keep inline equations the same size as surrounding text */
-p span.katex {
-  font-size: inherit!important;
+p span.katex, li span.katex {
+  font-size: inherit;
 }
 
 /* Control size of the displayed equations - this makes them a little smaller */
 .katex-display .katex {
-  font-size: 1em!important;
+  font-size: 1em;
 }
 
 /*** Footnotes ***/
