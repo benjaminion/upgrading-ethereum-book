@@ -1,5 +1,5 @@
 ---
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 
 const { page, rel } = Astro.props;
 const skip = page === null || page === undefined || page.data.sequence < 0;
@@ -8,7 +8,7 @@ const title = skip ? null : page.data.titles.join(' > ');
 
 {
   !skip && (
-    <a href={`/${Metadata.version}${page.data.path}`} title={title} rel={rel}>
+    <a href={`/${metadata.version}${page.data.path}`} title={title} rel={rel}>
       <slot />
     </a>
   )

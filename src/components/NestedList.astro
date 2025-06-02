@@ -1,5 +1,5 @@
 ---
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 
 const { items, level, idx } = Astro.props;
 
@@ -7,7 +7,7 @@ function conditionalLink(to, noLink, isCurrent, children) {
   const active = isCurrent ? ' class="index-active" aria-current="page"' : '';
   const ret = noLink
     ? children
-    : `<a href=/${Metadata.version}${to}${active}>${children}</a>`;
+    : `<a href=/${metadata.version}${to}${active}>${children}</a>`;
   return ret;
 }
 

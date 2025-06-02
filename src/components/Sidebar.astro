@@ -1,6 +1,6 @@
 ---
 import '../css/sidebar.css';
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 import PageList from './PageList.astro';
 
 const { pageIndex, pages, here } = Astro.props;
@@ -21,8 +21,8 @@ const filteredPages =
 
 <nav class="sidebar scrollable" aria-label="Book contents navigation">
   <div class="sidebar-title">
-    <a href={`/${Metadata.version}/`}>
-      {Metadata.title}
+    <a href={`/${metadata.version}/`}>
+      {metadata.title}
     </a>
   </div>
   <div id="index">
