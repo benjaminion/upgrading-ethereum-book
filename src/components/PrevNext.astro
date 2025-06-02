@@ -1,6 +1,6 @@
 ---
 import '../css/prevnext.css';
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 import PrevNextLink from './PrevNextLink.astro';
 
 const { seq, pages } = Astro.props;
@@ -22,7 +22,7 @@ const nextPage = seq
         </PrevNextLink>
       </span>
       <span class="contents">
-        <a href={`/${Metadata.version}/contents/`}>Contents</a>
+        <a href={`/${metadata.version}/contents/`}>Contents</a>
       </span>
       <span class="next">
         <PrevNextLink page={nextPage} rel="next">

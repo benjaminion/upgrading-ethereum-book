@@ -25,7 +25,7 @@ const version = getGitBranch();
 const hostname = 'https://eth2book.info';
 const canonical = hostname + '/latest';
 
-const Metadata = {
+const metadata = {
   title: 'Upgrading Ethereum',
   description:
     "A technical handbook on Ethereum's move to proof of stake and beyond",
@@ -40,7 +40,7 @@ const Metadata = {
   canonical: canonical,
 };
 
-const SearchOptions = {
+const searchOptions = {
   enabled: true,
   indexFile: 'search-index.json',
   // Matching elements have their text added to the index. First match wins.
@@ -69,4 +69,4 @@ const SearchOptions = {
   },
 };
 
-export { Metadata, SearchOptions };
+export { metadata, searchOptions };

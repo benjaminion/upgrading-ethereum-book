@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import { Metadata, SearchOptions } from './src/include/SiteConfig.js';
+import { metadata, searchOptions } from './src/include/SiteConfig.js';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -19,7 +19,7 @@ import myHtaccess from './integrations/my_htaccess';
 Prism.languages.none = Prism.languages.text;
 Prism.languages.code = Prism.languages.text;
 
-const basePath = '/' + Metadata.version;
+const basePath = '/' + metadata.version;
 
 export default defineConfig({
   base: basePath,
@@ -27,7 +27,7 @@ export default defineConfig({
     myBuildChecks(),
     myAutoLinkHeadings({ exclude: 'h1, .no-anchor' }),
     mySvgInline({ filePath: 'src/', cachePath: 'src/cache/' }),
-    mySearchIndex(SearchOptions),
+    mySearchIndex(searchOptions),
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
     myFixupLinks(),
     myCleanupHtml(),

@@ -1,6 +1,6 @@
 ---
 import '../css/search.css';
-import { Metadata, SearchOptions } from '../include/SiteConfig.js';
+import { metadata, searchOptions } from '../include/SiteConfig.js';
 ---
 
 <div id="search-page">
@@ -24,8 +24,8 @@ import { Metadata, SearchOptions } from '../include/SiteConfig.js';
 
 <script
   id="astro-metadata"
-  data-prefix={Metadata.version}
-  data-file={SearchOptions.indexFile}
+  data-prefix={metadata.version}
+  data-file={searchOptions.indexFile}
 >
   const logTimings = true;
   let t0, t1, t2;
