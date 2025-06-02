@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 
 import '../css/page.css';
 import Html from '../layouts/Html.astro';
@@ -35,16 +35,16 @@ const { page } = Astro.props;
 const frontmatter = page.data;
 const indexArray = frontmatter.index;
 
-var pageTitle = Metadata.title;
+var pageTitle = metadata.title;
 if (frontmatter.titles !== undefined) {
   const titles = frontmatter.titles.filter((x) => x !== '');
   const number = indexArray.length >= 2 ? indexArray.join('.') : '';
   pageTitle += ' | ' + number + ' ' + titles[titles.length - 1];
 }
 
-const pageUrl = Metadata.hostname + '/' + Metadata.version + frontmatter.path;
+const pageUrl = metadata.hostname + '/' + metadata.version + frontmatter.path;
 const canonical =
-  Metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path);
+  metadata.canonical + (frontmatter.hide ? '/' : frontmatter.path);
 const path = frontmatter.path;
 const index = frontmatter.index;
 const here = frontmatter.sequence;

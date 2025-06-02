@@ -1,19 +1,19 @@
 ---
 import '../css/footer.css';
-import { Metadata } from '../include/SiteConfig.js';
+import { metadata } from '../include/SiteConfig.js';
 ---
 
 <footer>
   <p>
-    Created by {Metadata.author}. Licensed under <a
-      href={Metadata.licenceUrl}
+    Created by {metadata.author}. Licensed under <a
+      href={metadata.licenceUrl}
       target="_blank"
-      rel="external noreferrer">{Metadata.licence}</a
-    >. Published <span class="date">{Metadata.date}</span>. Commit <a
+      rel="external noreferrer">{metadata.licence}</a
+    >. Published <span class="date">{metadata.date}</span>. Commit <a
       class="githash"
-      href={Metadata.gitUrl}
+      href={metadata.gitUrl}
       target="_blank"
-      rel="external noreferrer">{Metadata.gitHash}</a
+      rel="external noreferrer">{metadata.gitHash}</a
     >.
   </p>
 </footer>
