@@ -8,7 +8,7 @@ import Prism from 'prismjs';
 
 // Custom integrations
 import myBuildChecks from './integrations/my_build_checks';
-import myAutolinkHeadings from './integrations/my_autolink_headings';
+import myAutoLinkHeadings from './integrations/my_autolink_headings';
 import mySvgInline from './integrations/my_svg_inline';
 import mySearchIndex from './integrations/my_search_index';
 import myAddTooltips from './integrations/my_add_tooltips';
@@ -25,7 +25,7 @@ export default defineConfig({
   base: basePath,
   integrations: [
     myBuildChecks(),
-    myAutolinkHeadings(),
+    myAutoLinkHeadings({ headings: ['h2', 'h3', 'h4', 'h5', 'h6'], exclude: '.no-anchor' }),
     mySvgInline({ filePath: 'src/', cachePath: 'src/cache/' }),
     mySearchIndex(SearchOptions),
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
