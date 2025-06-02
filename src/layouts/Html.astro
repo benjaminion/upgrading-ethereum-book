@@ -9,17 +9,13 @@ const { pageTitle, canonical, pageUrl } = Astro.props;
 
 <html lang="en-GB">
   <head>
+    <title>{pageTitle}</title>
+    <meta name="description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
     <meta charSet="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta property="og:site-name" content="Upgrading Ethereum" />
-    <meta
-      property="og:image"
-      content="https://eth2book.info/f/android-icon-192x192.png"
-    />
-    <meta
-      property="og:description"
-      content="A technical handbook on Ethereum's move to proof of stake and beyond."
-    />
+    <meta property="og:image" content="https://eth2book.info/f/android-icon-192x192.png" />
+    <meta property="og:description" content="A technical handbook on Ethereum's move to proof of stake and beyond." />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={pageTitle} />
@@ -27,98 +23,24 @@ const { pageTitle, canonical, pageUrl } = Astro.props;
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="eth2book.info" />
     <meta name="twitter:creator" content="@benjaminion_xyz" />
-    <meta
-      name="twitter:image"
-      content="https://eth2book.info/f/android-icon-192x192.png"
-    />
-    <meta
-      name="description"
-      content="A technical handbook on Ethereum's move to proof of stake and beyond."
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="57x57"
-      href="https://eth2book.info/f/apple-icon-57x57.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="60x60"
-      href="https://eth2book.info/f/apple-icon-60x60.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="72x72"
-      href="https://eth2book.info/f/apple-icon-72x72.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="76x76"
-      href="https://eth2book.info/f/apple-icon-76x76.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="114x114"
-      href="https://eth2book.info/f/apple-icon-114x114.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="https://eth2book.info/f/apple-icon-120x120.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="144x144"
-      href="https://eth2book.info/f/apple-icon-144x144.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      href="https://eth2book.info/f/apple-icon-152x152.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="https://eth2book.info/f/apple-icon-180x180.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="https://eth2book.info/f/android-icon-192x192.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="https://eth2book.info/f/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="96x96"
-      href="https://eth2book.info/f/favicon-96x96.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="https://eth2book.info/f/favicon-16x16.png"
-    />
-    {/* Dark mode stuff */}
-    <link
-      rel="stylesheet"
-      href={`/${metadata.version}/dark_230103.css`}
-      media="(prefers-color-scheme: dark)"
-    />
-    <link
-      rel="stylesheet"
-      href={`/${metadata.version}/light_230103.css`}
-      media="(prefers-color-scheme: light)"
-    />
-    <script type="module" src="https://eth2book.info/inc/dark-mode-toggle.js"
-    ></script>
+    <meta name="twitter:image" content="https://eth2book.info/f/android-icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="https://eth2book.info/f/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="https://eth2book.info/f/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="https://eth2book.info/f/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="https://eth2book.info/f/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="https://eth2book.info/f/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="https://eth2book.info/f/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="https://eth2book.info/f/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://eth2book.info/f/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://eth2book.info/f/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://eth2book.info/f/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://eth2book.info/f/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="https://eth2book.info/f/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="https://eth2book.info/f/favicon-16x16.png" />
     <link rel="canonical" href={canonical} />
-    <title>{pageTitle}</title>
+    <link rel="stylesheet" href={`/${metadata.version}/dark_230103.css`} media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href={`/${metadata.version}/light_230103.css`} media="(prefers-color-scheme: light)" />
+    <script type="module" src="https://eth2book.info/inc/dark-mode-toggle.js"></script>
     <Matomo />
   </head>
   <body>
