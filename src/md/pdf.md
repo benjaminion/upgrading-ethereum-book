@@ -1,8 +1,8 @@
 ---
 path: /pdf/
 titles: ["PDF"]
-index: [999]
-sequence: 995
+index: [992]
+sequence: 992
 ---
 # PDF Version
 

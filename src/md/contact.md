@@ -1,7 +1,7 @@
 ---
 path: /contact/
 titles: ["Contact me"]
-index: [999]
+index: [995]
 sequence: 995
 ---
 # Contact me
