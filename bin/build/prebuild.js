@@ -1,7 +1,6 @@
 import { execSync } from 'child_process';
 import { glob } from 'glob';
 import { lintSourceMarkdown } from './checks/lint_source_md.mjs';
-import { lintSplitMarkdown } from './checks/lint_split_md.mjs';
 
 // Performs the following prebuild tasks:
 //  - Checks that internal document links look ok
@@ -11,8 +10,6 @@ import { lintSplitMarkdown } from './checks/lint_split_md.mjs';
 //  - Trailing whitespace check
 //  - Linting of LaTeX expressions
 //  - Lints the source markdown
-//  - Splits the source markdown into individual pages
-//  - Lints the split markdown
 
 const doInternalLinks = true;
 const doHtmlCheck = true;
@@ -21,7 +18,6 @@ const doRepeatCheck = true;
 const doWhitespaceCheck = true;
 const doLatexCheck = true;
 const doSourceLint = true;
-const doSplitLint = true;
 
 const linkChecker = 'bin/build/checks/links.pl';
 const htmlChecker = 'bin/build/checks/html.pl';
@@ -29,7 +25,6 @@ const spellChecker = 'bin/build/checks/spellcheck.sh';
 const repeatChecker = 'bin/build/checks/repeats.sh';
 const whitespaceChecker = 'bin/build/checks/whitespace.pl';
 const latexChecker = 'bin/build/checks/latex.pl';
-const mdSplitter = 'bin/build/process_markdown.sh';
 
 const sourceMarkdown = 'src/book.md';
 const ourSpellings = 'src/spellings.en.pws';
@@ -157,7 +152,7 @@ export default function runChecks(
     reporter,
   );
 
-  let sourceLintSucceeded = runCheck(
+  allOk &= runCheck(
     doSourceLint,
     () => lintSourceMarkdown(sourceMarkdown),
     {
@@ -168,34 +163,6 @@ export default function runChecks(
     },
     reporter,
   );
-  allOk &= sourceLintSucceeded;
-
-  reporter.info('Unpacking book source...');
-  try {
-    execSync(`${mdSplitter} ${sourceMarkdown}`);
-  } catch (err) {
-    reporter.error('Failed to unpack book source.');
-    throw err;
-  }
-
-  if (sourceLintSucceeded) {
-    allOk &= runCheck(
-      doSplitLint,
-      () =>
-        lintSplitMarkdown(
-          glob.sync('src/md/**/*.md', { ignore: 'src/md/annotated.md' }),
-        ),
-      {
-        info: 'Linting split markdown...',
-        fail: 'Found some linting issues:',
-        error: 'Unable to lint check split markdown:',
-        skip: 'Skipping split markdown linting',
-      },
-      reporter,
-    );
-  } else {
-    reporter.warn('Skipping split markdown linting due to earlier errors');
-  }
 
   if (exitToShell) {
     process.exit(allOk ? 0 : 2);

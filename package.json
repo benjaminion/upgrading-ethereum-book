@@ -7,6 +7,7 @@
   "author": "Ben Edgington",
   "keywords": [],
   "scripts": {
+    "prepare": "custompatch",
     "devel": "astro dev",
     "build": "astro build",
     "minim": "rm -rf dist/ node_modules/.astro && UE_MINIMAL=t astro build",
@@ -21,10 +22,12 @@
     "gramm": "bin/util/check_grammar.sh src/book.md",
     "pdfit": "bin/pdf/make_pdf src/book.md",
     "stats": "bin/util/stats.sh",
-    "valid": "node --input-type=module -e 'import validateHtml from \"./bin/util/validate.js\"; validateHtml(\"dist/part2/building_blocks/ssz/index.html\")'"
+    "valid": "node --input-type=module -e 'import validateHtml from \"./bin/util/validate.js\"; validateHtml(\"dist/part2/building_blocks/ssz/index.html\")'",
+    "patch": "custompatch"
   },
   "dependencies": {
-    "astro": "^5.9.0",
+    "astro": "^5.9.1",
+    "custompatch": "^1.1.7",
     "glob": "^11.0.2",
     "hast-util-select": "^6.0.4",
     "hast-util-to-string": "^3.0.1",

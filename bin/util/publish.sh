@@ -23,6 +23,12 @@ cd $(dirname "$0")/../..
 source bin/priv/server.sh
 
 echo
+echo "*** Patching node modules ***"
+
+npx custompatch
+was_it_ok $? "custompatch"
+
+echo
 echo "*** Building site..."
 
 npm run clean

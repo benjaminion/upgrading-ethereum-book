@@ -1,5 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { bookLoader } from './loaders/book-loader';
+import { specLoader } from './loaders/spec-loader';
 
 const minimal = import.meta.env.UE_MINIMAL === undefined ? false : true;
 if (minimal) {
@@ -7,15 +9,13 @@ if (minimal) {
 }
 
 const pages = defineCollection({
-  loader: minimal
-    ? glob({ pattern: '**/preface.md', base: './src/md/pages' })
-    : glob({ pattern: '**/*.md', base: './src/md/pages' }),
+  loader: minimal ? bookLoader('src/test.md') : bookLoader('src/book.md'),
   schema: z.object({
     hide: z.boolean(),
     path: z.string(),
+    sequence: z.number(),
     titles: z.array(z.string()),
     index: z.array(z.number()),
-    sequence: z.number(),
     search: z.boolean().optional(),
   }),
 });
@@ -33,4 +33,15 @@ const special = defineCollection({
   }),
 });
 
-export const collections = { pages, special };
+const annotated = defineCollection({
+  loader: minimal ? specLoader('src/test.md') : specLoader('src/book.md'),
+  schema: z.object({
+    path: z.string(),
+    sequence: z.number(),
+    titles: z.array(z.string()),
+    index: z.array(z.number()),
+    search: z.boolean(),
+  }),
+});
+
+export const collections = { pages, special, annotated };

@@ -1,7 +1,7 @@
 ---
 path: /search/
 titles: ["Search"]
-index: [-1]
+index: [-2]
 sequence: -2
 search: false
 ---
