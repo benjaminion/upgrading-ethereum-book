@@ -1,0 +1,18 @@
+Index: /astro/dist/content/content-layer.js
+===================================================================
+--- /astro/dist/content/content-layer.js
++++ /astro/dist/content/content-layer.js
+@@ -96,11 +96,11 @@
+         ...this.#settings.dataEntryTypes
+       ])
+     };
+   }
+-  async #processMarkdown(content) {
++  async #processMarkdown(content, opts) {
+     this.#markdownProcessor ??= await createMarkdownProcessor(this.#settings.config.markdown);
+-    const { code, metadata } = await this.#markdownProcessor.render(content);
++    const { code, metadata } = await this.#markdownProcessor.render(content, opts);
+     return {
+       html: code,
+       metadata
+     };

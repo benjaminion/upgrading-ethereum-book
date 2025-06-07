@@ -10,7 +10,7 @@ const render = filteredPages.length !== 0;
 const layout = filteredPages.map((p) => {
   return {
     level: p.data.index.length,
-    label: p.data.index.join('.'),
+    label: p.data.index.length > 1 ? p.data.index.join('.') : undefined,
     title: p.data.titles[p.data.titles.length - 1],
     link: p.data.path,
     hide: p.data.hide,

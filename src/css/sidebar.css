@@ -40,10 +40,6 @@ nav.sidebar {
   font-weight: bold;
 }
 
-#index > ul > li > a > span.label-string {
-  display: none;
-}
-
 #index a.index-active {
   text-decoration: underline;
 }

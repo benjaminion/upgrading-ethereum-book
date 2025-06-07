@@ -14,21 +14,25 @@ import FootnoteTooltips from '../components/FootnoteTooltips.astro';
 import Scripts from '../components/Scripts.astro';
 import Banner from '../components/Banner.astro';
 
-export async function getStaticPaths() {
+export async function getAllPages() {
   const pages = await getCollection('pages');
   const special = await getCollection('special');
+  const annotated = await getCollection('annotated');
+  return [pages, special, annotated].flat();
+}
+
+export async function getStaticPaths() {
   // Serve pages according to their frontmatter paths
-  return pages.concat(special).map((page) => ({
+  return (await getAllPages()).map((page) => ({
     params: { path: page.data.path },
     props: { page },
   }));
 }
 
-//console.log(JSON.stringify(Astro, null, 2));
-
-const allPages = (await getCollection('pages'))
-  .concat(await getCollection('special'))
-  .sort((a, b) => a.data.sequence - b.data.sequence);
+// Put pages that have undefined sequence numbers (e.g. '/404/' and '/') at the end
+const allPages = (await getAllPages()).sort(
+  (a, b) => (a.data.sequence ?? 10000) - (b.data.sequence ?? 10000),
+);
 
 const { page } = Astro.props;
 
