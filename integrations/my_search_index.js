@@ -70,7 +70,7 @@ function getChunks(tree, chunkTypes, exclude) {
             label: type.label,
             id: id,
             text: text,
-            weight: type.weight === undefined ? 1 : type.weight,
+            weight: type.weight ?? 1,
           });
         }
         return SKIP;
