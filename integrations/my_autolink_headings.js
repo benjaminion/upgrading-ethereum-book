@@ -49,10 +49,8 @@ const defaultHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const defaultExclude = undefined;
 
 export default function (options) {
-  const headings =
-    options?.headings !== undefined ? options.headings : defaultHeadings;
-  const exclude =
-    options?.exclude !== undefined ? options.exclude : defaultExclude;
+  const headings = options?.headings ?? defaultHeadings;
+  const exclude = options?.exclude ?? defaultExclude;
   return {
     name: 'myAutoLinkHeadings',
     hooks: {
