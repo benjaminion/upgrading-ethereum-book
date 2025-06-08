@@ -15,8 +15,10 @@ const regex =
 export function bookLoader(fileName) {
   return {
     name: 'book-loader',
-    load: async ({ store, parseData, renderMarkdown, logger }) => {
-      logger.info('Reading pages from ' + fileName);
+    load: async ({ collection, store, parseData, renderMarkdown, logger }) => {
+      logger.info(`Reading ${collection} from ${fileName}`);
+
+      store.clear();
 
       let allMarkdown = '';
       try {
@@ -25,16 +27,6 @@ export function bookLoader(fileName) {
         console.error('Failed to read input file ' + fileName);
         throw error;
       }
-
-      const matches = [];
-      let m;
-      while ((m = regex.exec(allMarkdown)) !== null) {
-        matches.push({ ...m.groups, index: m.index });
-      }
-
-      logger.info('Read ' + matches.length + ' pages');
-
-      store.clear();
 
       const t = {
         part: '',
@@ -46,79 +38,82 @@ export function bookLoader(fileName) {
         index: [],
       };
 
-      for (let i = 0; i < matches.length; i++) {
-        const m = matches[i];
-        switch (m.level) {
-          case '#':
-            t.part = m.title;
-            t.chapter = '';
-            t.section = '';
-            t.partNo++;
-            t.chapterNo = 0;
-            t.index = [t.partNo];
-            break;
-          case '##':
-            t.chapter = m.title;
-            t.section = '';
-            t.chapterNo++;
-            t.sectionNo = 0;
-            t.index = [t.partNo, t.chapterNo];
-            break;
-          case '###':
-            t.section = m.title;
-            t.sectionNo++;
-            t.index = [t.partNo, t.chapterNo, t.sectionNo];
-            break;
-          default:
-            throw 'Something broke while splitting up the pages.';
-        }
+      const count = [...allMarkdown.matchAll(regex)].map(
+        async (m, i, allMatches) => {
+          switch (m.groups.level) {
+            case '#':
+              t.part = m.groups.title;
+              t.chapter = '';
+              t.section = '';
+              t.partNo++;
+              t.chapterNo = 0;
+              t.index = [t.partNo];
+              break;
+            case '##':
+              t.chapter = m.groups.title;
+              t.section = '';
+              t.chapterNo++;
+              t.sectionNo = 0;
+              t.index = [t.partNo, t.chapterNo];
+              break;
+            case '###':
+              t.section = m.groups.title;
+              t.sectionNo++;
+              t.index = [t.partNo, t.chapterNo, t.sectionNo];
+              break;
+            default:
+              throw 'Something broke while splitting up the pages.';
+          }
 
-        let headings = '';
-        if (t.section) {
-          headings =
-            `<div class="section-header">` +
-            `<h1 class="no-anchor">${t.part}</h1>` +
-            `<h2 class="no-anchor">${t.chapter}</h2>` +
-            `</div>\n\n`;
-        } else if (t.chapter) {
-          headings =
-            `<div class="chapter-header">` +
-            `<h1 class="no-anchor">${t.part}</h1>` +
-            `</div>\n\n`;
-        }
+          let headings = '';
+          if (t.section) {
+            headings =
+              `<div class="section-header">` +
+              `<h1 class="no-anchor">${t.part}</h1>` +
+              `<h2 class="no-anchor">${t.chapter}</h2>` +
+              `</div>\n\n`;
+          } else if (t.chapter) {
+            headings =
+              `<div class="chapter-header">` +
+              `<h1 class="no-anchor">${t.part}</h1>` +
+              `</div>\n\n`;
+          }
 
-        const markdown =
-          headings + allMarkdown.substring(m.index, matches[i + 1]?.index);
+          const markdown =
+            headings + allMarkdown.substring(m.index, allMatches[i + 1]?.index);
 
-        const frontmatter = {
-          path: m.path,
-          hide: m.hide === '*',
-          titles: [t.part, t.chapter, t.section].filter((x) => x),
-          index: t.index,
-          sequence: i + 1,
-        };
+          const frontmatter = {
+            path: m.groups.path,
+            hide: m.groups.hide === '*',
+            titles: [t.part, t.chapter, t.section].filter((x) => x),
+            index: t.index,
+            sequence: i + 1,
+          };
 
-        // Validate the frontmatter data against the collection schema
-        // Beware that it will silently filter out any properties not defined in the schema
-        const data = await parseData({
-          id: m.path,
-          data: frontmatter,
-        });
+          // Validate the frontmatter data against the collection schema
+          // Beware that it will silently filter out any properties not defined in the schema
+          const data = await parseData({
+            id: m.groups.path,
+            data: frontmatter,
+          });
 
-        // Use the hacked version - I'd love to avoid this!
-        const rendered = await renderMarkdown(markdown, {
-          frontmatter: frontmatter,
-          fileURL: m.path,
-        });
-        // const rendered = await renderMarkdown(markdown);
+          // Use the hacked version - I'd love to avoid this!
+          const rendered = await renderMarkdown(markdown, {
+            frontmatter: frontmatter,
+            fileURL: m.groups.path,
+          });
+          // const rendered = await renderMarkdown(markdown);
 
-        store.set({
-          id: m.path,
-          data: data,
-          body: markdown,
-          rendered: rendered,
-        });
-      }
+          store.set({
+            id: m.groups.path,
+            data: data,
+            body: markdown,
+            rendered: rendered,
+          });
+        },
+      ).length;
+
+      logger.info(`Read ${count} pages`);
     },
   };
 }
