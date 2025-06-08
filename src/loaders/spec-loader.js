@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-// Extract annotated spec into a single page document
+// Extract annotated spec into a single page document.
 
 // This matches the page divisions in the Markdown file
 const reStart = /^# .*<!-- \/part3\/ -->$/dm;
@@ -17,8 +17,10 @@ const preamble =
 export function specLoader(fileName) {
   return {
     name: 'spec-loader',
-    load: async ({ store, parseData, renderMarkdown, logger }) => {
-      logger.info('Reading spec from ' + fileName);
+    load: async ({ collection, store, parseData, renderMarkdown, logger }) => {
+      logger.info(`Reading ${collection} from ${fileName}`);
+
+      store.clear();
 
       let allMarkdown = '';
       try {
@@ -27,8 +29,6 @@ export function specLoader(fileName) {
         console.error('Failed to read input file ' + fileName);
         throw error;
       }
-
-      store.clear();
 
       const startMatch = reStart.exec(allMarkdown);
       const endMatch = reEnd.exec(allMarkdown);
