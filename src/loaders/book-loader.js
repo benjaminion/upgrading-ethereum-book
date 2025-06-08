@@ -22,7 +22,7 @@ export function bookLoader(fileName) {
 
       let allMarkdown = '';
       try {
-        allMarkdown = await fs.readFileSync(fileName, 'utf8');
+        allMarkdown = fs.readFileSync(fileName, 'utf8');
       } catch (error) {
         console.error('Failed to read input file ' + fileName);
         throw error;
