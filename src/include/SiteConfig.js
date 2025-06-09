@@ -4,7 +4,7 @@ function getGitHash() {
   try {
     return execSync('git log -1 --format="%h" 2>/dev/null', {
       encoding: 'utf8',
-    }).replace(/(\r\n|\n|\r)/, '');
+    }).trim();
   } catch (e) {
     return 'unknown';
   }
@@ -14,7 +14,7 @@ function getGitBranch() {
   try {
     return execSync('git branch --show-current 2>/dev/null', {
       encoding: 'utf8',
-    }).replace(/(\r\n|\n|\r)/, '');
+    }).trim();
   } catch (e) {
     return 'unknown';
   }
