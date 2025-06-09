@@ -13,6 +13,28 @@ const regex =
 // I can't find an "official" way to do this. Prepending synthetic frontmatter before
 // doing renderMarkdown does not work.
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Wait until the file size is stable to avoid a race condition when a reload is
+// triggered by a watcher before the file has finished writing.
+async function waitForFile(fileName, logger) {
+  const maxStableCount = 3;
+  const intervalTime = 10;
+  let stableCount = 0;
+  let newSize = fs.statSync(fileName).size;
+  while (stableCount < maxStableCount) {
+    let oldSize = newSize;
+    await delay(intervalTime);
+    newSize = fs.statSync(fileName).size;
+    logger.debug(
+      `Waiting: oldSize = ${oldSize}, newSize = ${newSize}, stableCount = ${stableCount}`,
+    );
+    stableCount = newSize === oldSize ? stableCount + 1 : 0;
+  }
+}
+
 async function syncBook(
   fileName,
   store,
@@ -25,6 +47,9 @@ async function syncBook(
   let allMarkdown;
   try {
     logger.debug(`Reading Markdown from ${fileName}`);
+    if (isWatcherUpdate) {
+      await waitForFile(fileName, logger);
+    }
     allMarkdown = fs.readFileSync(fileName, 'utf8');
     if (!allMarkdown) {
       logger.warn(`Read empty file from ${fileName}`);
@@ -165,24 +190,18 @@ export function bookLoader(fileName) {
         false,
       );
 
-      let fsWait = false;
       watcher?.on('change', async (changedPath) => {
         if (changedPath === filePath) {
-          // We need a short delay after saving the file to avoid a race condition in which
-          // reading the file too quickly can return empty. A delay of 100ms seems reliable.
-          clearTimeout(fsWait); // debounce
-          fsWait = setTimeout(async () => {
-            logger.info(`Reloading ${collection} from ${fileName}`);
-            await syncBook(
-              fileName,
-              store,
-              parseData,
-              renderMarkdown,
-              generateDigest,
-              logger,
-              true,
-            );
-          }, 100);
+          logger.info(`Reloading ${collection} from ${fileName}`);
+          await syncBook(
+            fileName,
+            store,
+            parseData,
+            renderMarkdown,
+            generateDigest,
+            logger,
+            true,
+          );
         } else {
           logger.debug(
             `Not reloading ${collection} due to change in ${changedPath}`,
