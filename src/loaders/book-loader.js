@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { fileURLToPath } from 'node:url';
 
 // Split monolithic book source file into individual markdown pages.
 
@@ -12,108 +13,182 @@ const regex =
 // I can't find an "official" way to do this. Prepending synthetic frontmatter before
 // doing renderMarkdown does not work.
 
+async function syncBook(
+  fileName,
+  store,
+  parseData,
+  renderMarkdown,
+  generateDigest,
+  logger,
+  isWatcherUpdate,
+) {
+  let allMarkdown;
+  try {
+    logger.debug(`Reading Markdown from ${fileName}`);
+    allMarkdown = fs.readFileSync(fileName, 'utf8');
+    if (!allMarkdown) {
+      logger.warn(`Read empty file from ${fileName}`);
+    }
+  } catch (error) {
+    logger.error('Failed to read input file ' + fileName);
+    throw error;
+  }
+
+  const t = {
+    part: '',
+    chapter: '',
+    section: '',
+    partNo: -1, // Number parts from 0
+    chapterNo: 0,
+    sectionNo: 0,
+    index: [],
+  };
+
+  const count = await Promise.all(
+    [...allMarkdown.matchAll(regex)].map(async (m, i, allMatches) => {
+      switch (m.groups.level) {
+        case '#':
+          t.part = m.groups.title;
+          t.chapter = '';
+          t.section = '';
+          t.partNo++;
+          t.chapterNo = 0;
+          t.index = [t.partNo];
+          break;
+        case '##':
+          t.chapter = m.groups.title;
+          t.section = '';
+          t.chapterNo++;
+          t.sectionNo = 0;
+          t.index = [t.partNo, t.chapterNo];
+          break;
+        case '###':
+          t.section = m.groups.title;
+          t.sectionNo++;
+          t.index = [t.partNo, t.chapterNo, t.sectionNo];
+          break;
+        default:
+          throw 'Something broke while splitting up the pages.';
+      }
+
+      let headings = '';
+      if (t.section) {
+        headings =
+          `<div class="section-header">` +
+          `<h1 class="no-anchor">${t.part}</h1>` +
+          `<h2 class="no-anchor">${t.chapter}</h2>` +
+          `</div>\n\n`;
+      } else if (t.chapter) {
+        headings =
+          `<div class="chapter-header">` +
+          `<h1 class="no-anchor">${t.part}</h1>` +
+          `</div>\n\n`;
+      }
+
+      const markdown =
+        headings + allMarkdown.substring(m.index, allMatches[i + 1]?.index);
+
+      const digest = generateDigest(markdown);
+      if (store.get(m.groups.path)?.digest === digest) {
+        logger.debug(`Not reloading ${m.groups.path}`);
+        return false;
+      }
+
+      if (isWatcherUpdate) {
+        logger.info(`Reloading ${m.groups.path}`);
+      } else {
+        logger.debug(`Reloading ${m.groups.path}`);
+      }
+
+      const frontmatter = {
+        path: m.groups.path,
+        hide: m.groups.hide === '*',
+        titles: [t.part, t.chapter, t.section].filter((x) => x),
+        index: t.index,
+        sequence: i + 1,
+      };
+
+      // Validate the frontmatter data against the collection schema
+      // Beware that it will silently filter out any properties not defined in the schema
+      const data = await parseData({
+        id: m.groups.path,
+        data: frontmatter,
+      });
+
+      // Use the hacked version - I'd love to avoid this!
+      const rendered = await renderMarkdown(markdown, {
+        frontmatter: frontmatter,
+        fileURL: m.groups.path,
+      });
+      // const rendered = await renderMarkdown(markdown);
+
+      store.set({
+        id: m.groups.path,
+        data: data,
+        body: markdown,
+        digest: digest,
+        rendered: rendered,
+      });
+
+      return true;
+    }),
+  );
+
+  logger.info(`Total pages read: ${count.length}`);
+  logger.info(`Total pages reloaded: ${count.filter((x) => x).length}`);
+}
+
 export function bookLoader(fileName) {
   return {
     name: 'book-loader',
-    load: async ({ collection, store, parseData, renderMarkdown, logger }) => {
+    load: async ({
+      collection,
+      store,
+      parseData,
+      renderMarkdown,
+      generateDigest,
+      config,
+      watcher,
+      logger,
+    }) => {
+      const filePath = fileURLToPath(new URL(fileName, config.root));
+      logger.debug(`FilePath: ${filePath}`);
+
       logger.info(`Reading ${collection} from ${fileName}`);
+      await syncBook(
+        fileName,
+        store,
+        parseData,
+        renderMarkdown,
+        generateDigest,
+        logger,
+        false,
+      );
 
-      store.clear();
-
-      let allMarkdown = '';
-      try {
-        allMarkdown = fs.readFileSync(fileName, 'utf8');
-      } catch (error) {
-        console.error('Failed to read input file ' + fileName);
-        throw error;
-      }
-
-      const t = {
-        part: '',
-        chapter: '',
-        section: '',
-        partNo: -1, // Number parts from 0
-        chapterNo: 0,
-        sectionNo: 0,
-        index: [],
-      };
-
-      const count = [...allMarkdown.matchAll(regex)].map(
-        async (m, i, allMatches) => {
-          switch (m.groups.level) {
-            case '#':
-              t.part = m.groups.title;
-              t.chapter = '';
-              t.section = '';
-              t.partNo++;
-              t.chapterNo = 0;
-              t.index = [t.partNo];
-              break;
-            case '##':
-              t.chapter = m.groups.title;
-              t.section = '';
-              t.chapterNo++;
-              t.sectionNo = 0;
-              t.index = [t.partNo, t.chapterNo];
-              break;
-            case '###':
-              t.section = m.groups.title;
-              t.sectionNo++;
-              t.index = [t.partNo, t.chapterNo, t.sectionNo];
-              break;
-            default:
-              throw 'Something broke while splitting up the pages.';
-          }
-
-          let headings = '';
-          if (t.section) {
-            headings =
-              `<div class="section-header">` +
-              `<h1 class="no-anchor">${t.part}</h1>` +
-              `<h2 class="no-anchor">${t.chapter}</h2>` +
-              `</div>\n\n`;
-          } else if (t.chapter) {
-            headings =
-              `<div class="chapter-header">` +
-              `<h1 class="no-anchor">${t.part}</h1>` +
-              `</div>\n\n`;
-          }
-
-          const markdown =
-            headings + allMarkdown.substring(m.index, allMatches[i + 1]?.index);
-
-          const frontmatter = {
-            path: m.groups.path,
-            hide: m.groups.hide === '*',
-            titles: [t.part, t.chapter, t.section].filter((x) => x),
-            index: t.index,
-            sequence: i + 1,
-          };
-
-          // Validate the frontmatter data against the collection schema
-          // Beware that it will silently filter out any properties not defined in the schema
-          const data = await parseData({
-            id: m.groups.path,
-            data: frontmatter,
-          });
-
-          // Use the hacked version - I'd love to avoid this!
-          const rendered = await renderMarkdown(markdown, {
-            frontmatter: frontmatter,
-            fileURL: m.groups.path,
-          });
-          // const rendered = await renderMarkdown(markdown);
-
-          store.set({
-            id: m.groups.path,
-            data: data,
-            body: markdown,
-            rendered: rendered,
-          });
-        },
-      ).length;
-
-      logger.info(`Read ${count} pages`);
+      let fsWait = false;
+      watcher?.on('change', async (changedPath) => {
+        if (changedPath === filePath) {
+          // We need a short delay after saving the file to avoid a race condition in which
+          // reading the file too quickly can return empty. A delay of 100ms seems reliable.
+          clearTimeout(fsWait); // debounce
+          fsWait = setTimeout(async () => {
+            logger.info(`Reloading ${collection} from ${fileName}`);
+            await syncBook(
+              fileName,
+              store,
+              parseData,
+              renderMarkdown,
+              generateDigest,
+              logger,
+              true,
+            );
+          }, 100);
+        } else {
+          logger.debug(
+            `Not reloading ${collection} due to change in ${changedPath}`,
+          );
+        }
+      });
     },
   };
 }
