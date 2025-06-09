@@ -33,13 +33,13 @@ v22.16.0
 11.4.1
 ```
 
-You'll also need a working `perl` installed at _/usr/bin/perl_ so that the build can preprocess the book document.
+You'll need a working `perl` installed at _/usr/bin/perl_ to run the pre-build checks.
 
 ### Pre-build checks
 
 I've implemented a heap of pre-build checks for linting and spelling issues. You can run them standalone with `npm run check`, and they also run as a first step in the build process, though a failure will not stop the build.
 
-To cause Git commits to halt when these checks fail, add the following symlink:
+To cause Git commits to halt when trying to commit `src/book.md` while these checks are failing, add the following symlink:
 
 ```
 (cd .git/hooks; ln -s ../../bin/util/git-pre-commit-hook.sh pre-commit)
@@ -72,7 +72,7 @@ npm run serve
 
 Astro will tell you where it is serving the content (somewhere like http://localhost:4321/capella).
 
-Instead of building and serving, you can run `npm run devel` and visit the link Astro shows. This will not pick up real-time changes to _src/book.md_ and will need to be restarted to see them. It is useful, though, for checking CSS and other component changes interactively.
+Instead of building and serving, you can run `npm run devel`. This will live-update pages in response to changes to `src/book.md` and other files like CSS and Astro scripts. Note that the one-page annotated spec and the search index will not update interactively - do `npm run clean` for a full rebuild.
 
 ## Workflow
 
@@ -81,14 +81,15 @@ The entire text for the book is in the _src/book.md_ file. Everything under _src
 There are various npm script commands to help with building and testing. See `package.json` for the full list.
 
   - `npm run clean` deletes the output directory (`dist/`) and the Astro cache.
-    - I recommend doing this often. Astro caches aggressively and will often skip things like rebulding the search index.
+    - Astro caches aggressively and will often skip things like rebulding the search index.
   - `npm run check` runs a bunch of custom linting and checking, controlled by the _bin/build/prebuild.js_ script.
     - Check all links to internal anchors, image files, and footnotes.
     - Spell check. Add any exceptions to _src/spellings.en.pws_ (or use `npm run spfix`).
-    - Markdown linting on both the original source and the generated pages.
+    - Markdown linting with [`markdownlint`](https://github.com/DavidAnson/markdownlint).
     - HTML checks and LaTeX expression linting.
   - `npm run build` runs `astro build`.
   - `npm run serve` runs `astro preview`.
+  - `npm run devel` runs the interactive development server.
   - `npm run links` checks external links.
     - Checking links to GitHub it will fail due to rate-limiting unless you supply GitHub credentials.
   - `npm run spell` runs a spell check
@@ -96,8 +97,9 @@ There are various npm script commands to help with building and testing. See `pa
   - `npm run valid` submits a page to the [W3C markup validation service](https://validator.w3.org/) and lists any issues above `info` level.
   - `npm run pdfit` creates a PDF of the whole thing. See the [README](bin/pdf/README.md).
   - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
-  - `npm run debug` builds with debugging output for my integrations.
+  - `npm run debug` builds with debugging output for my custom integrations.
   - `npm run minim` does a minimal build with only a couple of pages. See `src/content.config.js`.
+  - `npm run patch` applies my patches to the Astro NPM package using [`custompatch`](https://www.npmjs.com/package/custompatch).
 
 ### Environment variables
 
