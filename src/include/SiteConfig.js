@@ -61,7 +61,6 @@ const searchOptions = {
     frontmatter: [
       { key: 'hide', value: true },
       { key: 'search', value: false },
-      { key: 'path', value: '/annotated-spec/' },
     ],
     // Elements matching this query are ignored completely, including their text:
     ignore:
