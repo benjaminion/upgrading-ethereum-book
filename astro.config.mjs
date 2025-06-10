@@ -19,10 +19,8 @@ import myHtaccess from './integrations/my_htaccess';
 Prism.languages.none = Prism.languages.text;
 Prism.languages.code = Prism.languages.text;
 
-const basePath = '/' + metadata.version;
-
 export default defineConfig({
-  base: basePath,
+  base: '/' + metadata.version,
   integrations: [
     myBuildChecks(),
     myAutoLinkHeadings({ exclude: 'h1, .no-anchor' }),
@@ -31,7 +29,7 @@ export default defineConfig({
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
     myFixupLinks(),
     myCleanupHtml(),
-    myHtaccess(basePath),
+    myHtaccess(),
   ],
   markdown: {
     syntaxHighlight: 'prism',
