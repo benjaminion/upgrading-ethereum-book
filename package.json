@@ -26,7 +26,7 @@
     "patch": "custompatch"
   },
   "dependencies": {
-    "astro": "^5.9.1",
+    "astro": "^5.9.2",
     "custompatch": "^1.1.7",
     "glob": "^11.0.2",
     "hast-util-select": "^6.0.4",
