@@ -2,7 +2,6 @@ import fs from 'fs';
 
 // Extract annotated spec into a single page document.
 
-// This matches the page divisions in the Markdown file
 const reStart = /^# .*<!-- \/part3\/ -->$/dm;
 const reEnd = /^# .*<!-- \/part4\/ -->$/dm;
 
@@ -17,10 +16,15 @@ const preamble =
 export function specLoader(fileName) {
   return {
     name: 'spec-loader',
-    load: async ({ collection, store, parseData, renderMarkdown, logger }) => {
+    load: async ({
+      collection,
+      store,
+      parseData,
+      renderMarkdown,
+      generateDigest,
+      logger,
+    }) => {
       logger.info(`Reading ${collection} from ${fileName}`);
-
-      store.clear();
 
       let allMarkdown = '';
       try {
@@ -47,6 +51,14 @@ export function specLoader(fileName) {
       }
 
       const path = '/annotated-spec/';
+
+      const digest = generateDigest(markdown);
+      if (store.get(path)?.digest === digest) {
+        logger.debug(`Not reloading ${path}`);
+        return;
+      }
+      logger.debug(`Reloading ${path}`);
+
       const frontmatter = {
         path: path,
         titles: ['One Page Annotated Spec'],
@@ -73,6 +85,7 @@ export function specLoader(fileName) {
         id: path,
         data: data,
         body: markdown,
+        digest: digest,
         rendered: rendered,
       });
     },
