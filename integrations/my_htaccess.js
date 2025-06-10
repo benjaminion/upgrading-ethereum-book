@@ -9,10 +9,14 @@ function writeHtaccess(base, dir, logger) {
   logger.info(`Wrote .htaccess file to ${file}`);
 }
 
-export default function (base) {
+export default function () {
+  let base;
   return {
     name: 'myHtaccess',
     hooks: {
+      'astro:config:done': ({ config }) => {
+        base = config.base;
+      },
       'astro:build:done': ({ dir, logger }) => {
         writeHtaccess(base, dir, logger);
       },

@@ -21,7 +21,6 @@ function getGitBranch() {
 }
 
 const date = new Date().toISOString().substr(0, 16).replace('T', ' ') + ' UTC';
-const version = getGitBranch();
 const hostname = 'https://eth2book.info';
 const canonical = hostname + '/latest';
 
@@ -30,13 +29,13 @@ const metadata = {
   description:
     "A technical handbook on Ethereum's move to proof of stake and beyond",
   author: 'Ben Edgington',
-  gitHash: getGitHash(),
+  gitHash: getGitHash() || 'unknown',
   gitUrl: 'https://github.com/benjaminion/upgrading-ethereum-book',
   date: date,
   licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
   licence: 'CC BY-SA 4.0',
   hostname: hostname,
-  version: version,
+  version: getGitBranch() || 'unknown',
   canonical: canonical,
 };
 
