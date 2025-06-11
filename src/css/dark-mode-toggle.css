@@ -6,8 +6,8 @@ aside#dark-mode-toggle {
 }
 
 dark-mode-toggle {
-  --dark-mode-toggle-dark-icon: url("../images/sun.svg");
-  --dark-mode-toggle-light-icon: url("../images/moon.svg");
+  --dark-mode-toggle-dark-icon: url("../../public/sun.svg");
+  --dark-mode-toggle-light-icon: url("../../public/moon.svg");
   --dark-mode-toggle-icon-size: 20px;
 }
 
