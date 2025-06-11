@@ -68,7 +68,7 @@ async function syncBook(
     index: [],
   };
 
-  const count = await Promise.all(
+  Promise.all(
     [...allMarkdown.matchAll(regex)].map(async (m, i, allMatches) => {
       switch (m.groups.level) {
         case '#':
@@ -156,10 +156,10 @@ async function syncBook(
 
       return true;
     }),
-  );
-
-  logger.info(`Total pages read: ${count.length}`);
-  logger.info(`Total pages reloaded: ${count.filter((x) => x).length}`);
+  ).then((count) => {
+    logger.info(`Total pages read: ${count.length}`);
+    logger.info(`Total pages reloaded: ${count.filter((x) => x).length}`);
+  });
 }
 
 export function bookLoader(fileName) {
