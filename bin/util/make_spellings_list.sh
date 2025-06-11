@@ -8,4 +8,5 @@ here=$(dirname "$0")
 check=$here/../build/checks/spellcheck.sh
 source=$here/../../src/book.md
 
-$check $source /dev/null | awk '{print $3}' | sort -u
+$check $source /dev/null | awk '{print $3}' | sort -fr | awk '!seen[tolower($0)]++' | tac
+
