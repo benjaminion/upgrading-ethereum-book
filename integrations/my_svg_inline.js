@@ -83,7 +83,7 @@ function inlineSvg(options) {
   const { logger, doCache } = options;
 
   return function (tree) {
-    visit(tree, 'paragraph', async (node) => {
+    visit(tree, 'paragraph', (node) => {
       if (node.children[0].type == 'image') {
         const image = node.children[0];
 
