@@ -26,8 +26,7 @@ async function waitForFile(fileName, logger) {
   let newSize = fs.statSync(fileName).size;
   while (stableCount < maxStableCount) {
     let oldSize = newSize;
-    await delay(intervalTime);
-    newSize = fs.statSync(fileName).size;
+    newSize = await delay(intervalTime).then(() => fs.statSync(fileName).size);
     logger.debug(
       `Waiting: oldSize = ${oldSize}, newSize = ${newSize}, stableCount = ${stableCount}`,
     );
