@@ -10,9 +10,6 @@ const preamble =
   '**Note:** This page is automatically generated from the chapters ' +
   'in [Part 3](/part3/). You may find that some internal links are broken.';
 
-// Note that this relies on modifying the astro package to add an `opts` argument
-// to `.render` (see ../patches) in order to get the frontmatter correctly propagated.
-
 export function specLoader(fileName) {
   return {
     name: 'spec-loader',
@@ -20,9 +17,10 @@ export function specLoader(fileName) {
       collection,
       store,
       parseData,
-      renderMarkdown,
       generateDigest,
+      config,
       logger,
+      entryTypes,
     }) => {
       logger.info(`Reading ${collection} from ${fileName}`);
 
@@ -74,12 +72,14 @@ export function specLoader(fileName) {
         data: frontmatter,
       });
 
-      // Use the hacked version - I'd love to avoid this!
-      const rendered = await renderMarkdown(markdown, {
-        frontmatter: frontmatter,
-        fileURL: path,
+      const render = await entryTypes.get('.md').getRenderFunction(config);
+      const rendered = await render({
+        id: path,
+        data: frontmatter,
+        body: markdown,
+        filePath: path,
+        digest: digest,
       });
-      // const rendered = await renderMarkdown(markdown);
 
       store.set({
         id: path,
