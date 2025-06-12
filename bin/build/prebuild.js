@@ -22,7 +22,7 @@ const doSourceLint = true;
 const linkChecker = 'bin/build/checks/links.pl';
 const htmlChecker = 'bin/build/checks/html.pl';
 const spellChecker = 'bin/build/checks/spellcheck.sh';
-const repeatChecker = 'bin/build/checks/repeats.sh';
+const repeatChecker = 'bin/build/checks/repeats.pl';
 const whitespaceChecker = 'bin/build/checks/whitespace.pl';
 const latexChecker = 'bin/build/checks/latex.pl';
 
