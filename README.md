@@ -99,7 +99,6 @@ There are various npm script commands to help with building and testing. See `pa
   - `npm run stats` shows some stats about the book. Build the PDF first to get the full set.
   - `npm run debug` builds with debugging output for my custom integrations.
   - `npm run minim` does a minimal build with only a couple of pages. See `src/content.config.js`.
-  - `npm run patch` applies my patches to the Astro NPM package using [`custompatch`](https://www.npmjs.com/package/custompatch).
 
 ### Environment variables
 
