@@ -7,12 +7,6 @@ import { fileURLToPath } from 'node:url';
 const regex =
   /^(?<level>#{1,3}) (?<title>.+) <!-- (?<path>\/.*\/)(?<hide>\*?) -->$/gm;
 
-// Note that this relies on modifying the astro package to add an `opts` argument
-// to `.render` (see ../patches) in order to get the frontmatter correctly propagated.
-//
-// I can't find an "official" way to do this. Prepending synthetic frontmatter before
-// doing renderMarkdown does not work.
-
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -38,7 +32,7 @@ async function syncBook(
   fileName,
   store,
   parseData,
-  renderMarkdown,
+  render,
   generateDigest,
   logger,
   isWatcherUpdate,
@@ -139,12 +133,13 @@ async function syncBook(
         data: frontmatter,
       });
 
-      // Use the hacked version - I'd love to avoid this!
-      const rendered = await renderMarkdown(markdown, {
-        frontmatter: frontmatter,
-        fileURL: m.groups.path,
+      const rendered = await render({
+        id: m.groups.path,
+        data: frontmatter,
+        body: markdown,
+        filePath: m.groups.path,
+        digest: digest,
       });
-      // const rendered = await renderMarkdown(markdown);
 
       store.set({
         id: m.groups.path,
@@ -169,21 +164,23 @@ export function bookLoader(fileName) {
       collection,
       store,
       parseData,
-      renderMarkdown,
       generateDigest,
       config,
       watcher,
       logger,
+      entryTypes,
     }) => {
       const filePath = fileURLToPath(new URL(fileName, config.root));
       logger.debug(`FilePath: ${filePath}`);
+
+      const render = await entryTypes.get('.md').getRenderFunction(config);
 
       logger.info(`Reading ${collection} from ${fileName}`);
       await syncBook(
         fileName,
         store,
         parseData,
-        renderMarkdown,
+        render,
         generateDigest,
         logger,
         false,
@@ -196,7 +193,7 @@ export function bookLoader(fileName) {
             fileName,
             store,
             parseData,
-            renderMarkdown,
+            render,
             generateDigest,
             logger,
             true,
