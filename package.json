@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "astro": "^5.9.2",
-    "glob": "^11.0.2",
+    "glob": "^11.0.3",
     "hast-util-select": "^6.0.4",
     "hast-util-to-string": "^3.0.1",
     "loader-utils": "^3.3.1",
