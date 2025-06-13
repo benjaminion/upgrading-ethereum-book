@@ -1,75 +1,74 @@
-import { lint } from "markdownlint/sync"
+import { lint } from 'markdownlint/promise';
 
 //
 // See https://github.com/DavidAnson/markdownlint for the rules and options
 //
 
 // Lint check the source markdown file.
-export const lintSourceMarkdown = (file) => {
-
+export default async function (file) {
   const options = {
-    'files': [ file ],
-    'config': {
-      'default': true,
+    files: [file],
+    config: {
+      default: true,
 
       // Start unordered lists with two spaces of indentation
-      'MD007': {
-        'indent': 2,
-        'start_indented': true,
-        'start_indent': 2,
+      MD007: {
+        indent: 2,
+        start_indented: true,
+        start_indent: 2,
       },
 
       // We don't want any trailing spaces
-      'MD009': {
-        'strict': true,
+      MD009: {
+        strict: true,
       },
 
       // Some headings end in ! or ?
-      'MD026': {
-        'punctuation': '.,;:',
+      MD026: {
+        punctuation: '.,;:',
       },
 
       // We fence all block code with backticks
-      'MD046': {
-        'style': 'fenced',
+      MD046: {
+        style: 'fenced',
       },
 
       // Emphasis style
-      'MD049': {
-        'style': 'underscore',
+      MD049: {
+        style: 'underscore',
       },
 
       //
       // Disabled rules
       //
-      
+
       // We have long lines
-      'MD013': false,
+      MD013: false,
 
       // Duplicate headings are ok (they appear on different pages after pre-processing)
-      'MD024': false,
+      MD024: false,
 
       // Multiple top-level titles are ok (they appear on different pages after pre-processing)
-      'MD025': false,
+      MD025: false,
 
       // Doesn't work well with blockquoted lists
-      'MD027': false,
+      MD027: false,
 
       // Some lists begin with other index than 1
-      'MD029': false,
+      MD029: false,
 
       // We have inline html
-      'MD033': false,
+      MD033: false,
 
       // link-image-reference-definitions - we use these as TODO comments
-      'MD053': false,
+      MD053: false,
 
       // descriptive-link-text - we like using "here" from time to time
-      'MD059': false,
-    }
-  }
+      MD059: false,
+    },
+  };
 
-  const result = lint(options)
+  const result = await lint(options);
 
-  return (result[file].length > 0) ? result.toString() : null
+  return result[file].length > 0 ? result.toString() : '';
 }
