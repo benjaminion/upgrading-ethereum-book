@@ -66,7 +66,7 @@ const checks = [
     checker: () => execAsync(`${whitespaceChecker} ${sourceMarkdown}`),
   },
   {
-    name: 'LaTex',
+    name: 'LaTeX',
     enabled: doLatexCheck,
     checker: () => execAsync(`${latexChecker} ${sourceMarkdown}`),
   },
