@@ -99,26 +99,27 @@ function printLines(s, reporter) {
   s.split(/\r?\n/).forEach((line) => line && reporter.warn(line));
 }
 
-async function runCheck({ name, enabled, checker }) {
-  let info = '';
-  let warn = '';
+async function runCheck({ name, enabled, checker }, reporter) {
   let success = true;
   if (enabled) {
-    info += `Doing ${name} check`;
     try {
       const out = await checker();
-      if (out !== '' && out !== null) {
-        warn += `Issues were found by ${name} check:\n` + out;
+      if (out === '' || out === null) {
+        reporter.info(`The ${name} check passed`);
+      } else {
+        reporter.warn(`Issues were found by ${name} check:`);
+        printLines(out, reporter);
         success = false;
       }
     } catch (err) {
-      warn += `An error occurred during ${name} check:\n` + err.toString();
+      reporter.warn(`An error occurred during ${name} check:`);
+      printLines(err.toString(), reporter);
       success = false;
     }
   } else {
-    warn += `Skipping ${name} check`;
+    reporter.warn(`Skipping ${name} check`);
   }
-  return { success: success, info: info, warn: warn };
+  return success;
 }
 
 // Set `exitToShell` to false to continue processing after running checks (e.g. while building)
@@ -126,14 +127,11 @@ export default async function runChecks(
   reporter = customReporter,
   exitToShell = true,
 ) {
-  const results = await Promise.all(checks.map((check) => runCheck(check)));
-
-  results.forEach(({ info, warn }) => {
-    info && reporter.info(info);
-    warn && printLines(warn, reporter);
-  });
+  const results = await Promise.all(
+    checks.map((check) => runCheck(check, reporter)),
+  );
 
   if (exitToShell) {
-    process.exit(results.every(({ success }) => success) ? 0 : 2);
+    process.exit(results.every((x) => x) ? 0 : 2);
   }
 }
