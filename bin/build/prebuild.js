@@ -29,8 +29,8 @@ const latexChecker = 'bin/build/checks/latex.pl';
 const sourceMarkdown = 'src/book.md';
 const ourSpellings = 'src/spellings.en.pws';
 
-async function execAsync(fn) {
-  return promisify(exec)(fn).then((x) => x.stdout);
+async function execAsync(cmd) {
+  return promisify(exec)(cmd, { encoding: 'utf8' }).then((x) => x.stdout);
 }
 
 const checks = [
@@ -42,42 +42,33 @@ const checks = [
   {
     name: 'internal links',
     enabled: doInternalLinks,
-    checker: () =>
-      execAsync(`${linkChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    checker: () => execAsync(`${linkChecker} ${sourceMarkdown}`),
   },
   {
     name: 'HTML',
     enabled: doHtmlCheck,
-    checker: () =>
-      execAsync(`${htmlChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    checker: () => execAsync(`${htmlChecker} ${sourceMarkdown}`),
   },
   {
     name: 'spellings',
     enabled: doSpellCheck,
     checker: () =>
-      execAsync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`, {
-        encoding: 'utf8',
-      }),
+      execAsync(`${spellChecker} ${sourceMarkdown} ${ourSpellings}`),
   },
   {
     name: 'repeated words',
     enabled: doRepeatCheck,
-    checker: () =>
-      execAsync(`${repeatChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    checker: () => execAsync(`${repeatChecker} ${sourceMarkdown}`),
   },
   {
     name: 'trailing whitespace',
     enabled: doWhitespaceCheck,
-    checker: () =>
-      execAsync(`${whitespaceChecker} ${sourceMarkdown}`, {
-        encoding: 'utf8',
-      }),
+    checker: () => execAsync(`${whitespaceChecker} ${sourceMarkdown}`),
   },
   {
     name: 'LaTex',
     enabled: doLatexCheck,
-    checker: () =>
-      execAsync(`${latexChecker} ${sourceMarkdown}`, { encoding: 'utf8' }),
+    checker: () => execAsync(`${latexChecker} ${sourceMarkdown}`),
   },
 ];
 
