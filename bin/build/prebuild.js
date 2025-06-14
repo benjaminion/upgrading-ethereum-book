@@ -27,6 +27,7 @@ const whitespaceChecker = 'bin/build/checks/whitespace.pl';
 const latexChecker = 'bin/build/checks/latex.pl';
 
 const sourceMarkdown = 'src/book.md';
+const imagePath = 'src/';
 const ourSpellings = 'src/spellings.en.pws';
 
 async function execAsync(cmd) {
@@ -42,7 +43,7 @@ const checks = [
   {
     name: 'internal links',
     enabled: doInternalLinks,
-    checker: () => execAsync(`${linkChecker} ${sourceMarkdown}`),
+    checker: () => execAsync(`${linkChecker} ${imagePath} ${sourceMarkdown}`),
   },
   {
     name: 'HTML',
