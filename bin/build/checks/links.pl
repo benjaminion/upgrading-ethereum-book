@@ -25,13 +25,14 @@ use Fcntl qw(SEEK_SET);
 
 $\ = "\n"; # set output record separator
 
-my ($file) = @ARGV;
-die "Usage: $0 FILE\n" if not $file;
-open my $fh, '<', $file or die "Can't open $file: $!";
+my $filePath = shift;
+die "Usage: $0 FILEPATH [FILE]\n" if not $filePath;
+
+# Read stdin or file to in-memory array
+my @lines = <>;
 
 my $domainMatch = qr/(localhost|eth2book.info|upgrading-ethereum.info)/;
 my $newPagePath = qr/^(#{1,3} ).* <!-- ([^*]+)\*? -->$/;
-my $filePath = $file =~ s|[^/]+$||r;
 my $pagePath;
 my $inCode;
 
@@ -43,7 +44,7 @@ my %fns;
 
 # First pass: build lists of anchors and footnotes
 $inCode = 0;
-while(<$fh>) {
+foreach (@lines) {
 
     $inCode = 1 - $inCode if /^```/;
     next if $inCode;
@@ -75,11 +76,8 @@ while(<$fh>) {
 
 $inCode and die "Error: unbalanced code block markers!";
 
-# Reset position to start of file
-seek $fh, $. = 0, SEEK_SET;
-
 # Second pass: check anchors and footnotes exist
-while(<$fh>) {
+foreach (@lines) {
 
     /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
@@ -99,7 +97,7 @@ while(<$fh>) {
 
         if ($isImg) {
             unless(-e $filePath . $link) {
-                print "Nonexistent image file: $link line $.";
+                print "Image file $link not found in $filePath: line $.";
             }
         } else {
             if ($link =~ /^\/\.\./) {
