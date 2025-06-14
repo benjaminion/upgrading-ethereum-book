@@ -7,12 +7,7 @@ use warnings;
 
 $\ = "\n"; # set output record separator
 
-my $fh = *STDIN;
-if (my $file = shift) {
-    open $fh, '<', $file or die "Can't open $file: $!";
-}
-
-while(<$fh>) {
+while(<>) {
     while (/\b([_[:alpha:]]+)\s+(\1)\b/g) {
         print "Line $.: $1 $2";
     }

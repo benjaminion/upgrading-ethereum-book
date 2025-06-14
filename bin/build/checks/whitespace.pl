@@ -5,11 +5,6 @@
 use strict;
 use warnings;
 
-my $fh = *STDIN;
-if (my $file = shift) {
-    open $fh, '<', $file or die "Can't open $file: $!";
-}
-
-while(<$fh>) {
+while(<>) {
     print "Line $." if /\h$/;
 }
