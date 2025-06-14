@@ -10,11 +10,6 @@ use IPC::Run3;
 
 $\ = "\n"; # set output record separator
 
-my $fh = *STDIN;
-if (my $file = shift) {
-    open $fh, '<', $file or die "Can't open $file: $!";
-}
-
 # Add any exclusions here by adding "-n#" where # is the warning number
 my @command = ["chktex", "-q"];
 
@@ -23,7 +18,7 @@ my $ignore = qr/\$(\[1,r\))\$/;
 
 my $latex = '';
 my $inMath = 0;
-while(<$fh>) {
+while(<>) {
 
     chomp;
 

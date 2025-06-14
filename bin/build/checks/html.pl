@@ -10,14 +10,9 @@ $\ = "\n"; # set output record separator
 my @html_entities = ('ndash', 'nbsp', 'trade', 'ldquo', 'rdquo');
 my %entities = map { $_ => 1 } @html_entities;
 
-my $fh = *STDIN;
-if (my $file = shift) {
-    open $fh, '<', $file or die "Can't open $file: $!";
-}
-
 my @tags = ();
 
-while(<$fh>) {
+while(<>) {
 
     while (/<(\/{0,1})([a-z]+).*?(\/{0,1})>/g) {
         my $thisTag = $2;
