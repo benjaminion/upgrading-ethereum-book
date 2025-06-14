@@ -72,54 +72,53 @@ const checks = [
   },
 ];
 
-const customReporter = {
-  // https://tintin.mudhalla.net/info/xterm/
-  // https://tintin.mudhalla.net/info/256color/
+// https://tintin.mudhalla.net/info/256color/
+const colour = {
+  blue: (s) => '\x1b[38;5;19m' + s + '\x1b[0m',
+  orange: (s) => '\x1b[38;5;130m' + s + '\x1b[0m',
+  green: (s) => '\x1b[38;5;34m' + s + '\x1b[0m',
+};
+
+const myLogger = {
   info: (m) => {
-    console.log('\x1b[38;5;19m%s\x1b[0m %s', 'info', m);
+    console.log(colour.blue('info ') + m);
   },
   warn: (m) => {
-    console.log('\x1b[38;5;130m%s\x1b[0m %s', 'warn', m);
-  },
-  error: (m) => {
-    console.log('\x1b[38;5;160m%s\x1b[0m %s', 'error', m);
+    console.log(colour.orange('warn ') + m);
   },
 };
 
-function printLines(s, reporter) {
-  s.split(/\r?\n/).forEach((line) => line && reporter.warn(line));
+function printLines(s, logger) {
+  s.split(/\r?\n/).forEach((line) => line && logger.warn(line));
 }
 
-async function runCheck({ name, enabled, checker }, reporter) {
+async function runCheck({ name, enabled, checker }, logger) {
   let success = true;
   if (enabled) {
     try {
       const out = await checker();
       if (out === '' || out === null) {
-        reporter.info(`The ${name} check passed`);
+        logger.info(colour.green('\u2713') + ` Passed ${name} check`);
       } else {
-        reporter.warn(`Issues were found by ${name} check:`);
-        printLines(out, reporter);
+        logger.warn(`Issues were found by ${name} check:`);
+        printLines(out, logger);
         success = false;
       }
     } catch (err) {
-      reporter.warn(`An error occurred during ${name} check:`);
-      printLines(err.toString(), reporter);
+      logger.warn(`An error occurred during ${name} check:`);
+      printLines(err.toString(), logger);
       success = false;
     }
   } else {
-    reporter.warn(`Skipping ${name} check`);
+    logger.warn(`Skipping ${name} check`);
   }
   return success;
 }
 
 // Set `exitToShell` to false to continue processing after running checks (e.g. while building)
-export default async function runChecks(
-  reporter = customReporter,
-  exitToShell = true,
-) {
+export default async function runChecks(logger = myLogger, exitToShell = true) {
   const results = await Promise.all(
-    checks.map((check) => runCheck(check, reporter)),
+    checks.map((check) => runCheck(check, logger)),
   );
 
   if (exitToShell) {
