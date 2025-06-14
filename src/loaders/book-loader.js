@@ -109,7 +109,7 @@ async function syncBook(
       const digest = generateDigest(markdown);
       if (store.get(m.groups.path)?.digest === digest) {
         logger.debug(`Not reloading ${m.groups.path}`);
-        return false;
+        return { path: m.groups.path, reload: false };
       }
 
       if (isWatcherUpdate) {
@@ -149,12 +149,30 @@ async function syncBook(
         rendered: rendered,
       });
 
-      return true;
+      return { path: m.groups.path, reload: true };
     }),
-  ).then((count) => {
-    logger.info(`Total pages read: ${count.length}`);
-    logger.info(`Total pages reloaded: ${count.filter((x) => x).length}`);
-  });
+  )
+    .then((pages) => {
+      // Print a summary of the outcome
+      logger.info(`Total pages read: ${pages.length}`);
+      logger.info(
+        `Total pages reloaded: ${pages.filter((x) => x.reload).length}`,
+      );
+      return pages.map((page) => page.path);
+    })
+    .then((paths) => {
+      // Remove any stale paths from the store
+      const storePaths = store.keys();
+      logger.debug(
+        `Store paths: actual ${storePaths.length}, expected ${paths.length}`,
+      );
+      if (storePaths.length > paths.length) {
+        new Set(storePaths).difference(new Set(paths)).forEach((path) => {
+          logger.debug(`Deleting stale path ${path} from store`);
+          store.delete(path);
+        });
+      }
+    });
 }
 
 export function bookLoader(fileName) {
