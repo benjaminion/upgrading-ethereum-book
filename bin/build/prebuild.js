@@ -79,6 +79,11 @@ const colour = {
   green: (s) => '\x1b[38;5;34m' + s + '\x1b[0m',
 };
 
+const chars = {
+  tick: colour.green('\u2713'),
+  cross: colour.orange('\u2717'),
+};
+
 const myLogger = {
   info: (m) => {
     console.log(colour.blue('info ') + m);
@@ -98,14 +103,14 @@ async function runCheck({ name, enabled, checker }, logger) {
     try {
       const out = await checker();
       if (out === '' || out === null) {
-        logger.info(colour.green('\u2713') + ` Passed ${name} check`);
+        logger.info(chars.tick + ` Passed ${name} check`);
       } else {
-        logger.warn(`Issues were found by ${name} check:`);
+        logger.warn(chars.cross + ` Issues were found by ${name} check:`);
         printLines(out, logger);
         success = false;
       }
     } catch (err) {
-      logger.warn(`An error occurred during ${name} check:`);
+      logger.warn(chars.cross + ` An error occurred during ${name} check:`);
       printLines(err.toString(), logger);
       success = false;
     }
