@@ -68,7 +68,7 @@ export default async function (file) {
     },
   };
 
-  const result = await lint(options);
-
-  return result[file].length > 0 ? result.toString() : '';
+  return lint(options).then((result) =>
+    result[file].length ? result.toString() : '',
+  );
 }
