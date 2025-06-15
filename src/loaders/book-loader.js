@@ -37,6 +37,11 @@ async function syncBook(
   logger,
   isWatcherUpdate,
 ) {
+  // Only do search index processing when we are rebuilding from scratch.
+  // We don't really maintain the search index when doing partial reloads.
+  const doSearch = store.keys().length === 0;
+  logger.debug((doSearch ? 'Rebuilding' : 'Not rebuilding') + ' search index');
+
   let allMarkdown;
   try {
     logger.debug(`Reading Markdown from ${fileName}`);
@@ -124,6 +129,7 @@ async function syncBook(
         titles: [t.part, t.chapter, t.section].filter((x) => x),
         index: t.index,
         sequence: i + 1,
+        search: doSearch,
       };
 
       // Validate the frontmatter data against the collection schema
