@@ -57,10 +57,7 @@ const searchOptions = {
   ],
   exclude: {
     // Note, only pages under src/md/pages have a "hide" property.
-    frontmatter: [
-      { key: 'hide', value: true },
-      { key: 'search', value: false },
-    ],
+    frontmatter: [{ key: 'hide', value: true }],
     // Elements matching this query are ignored completely, including their text:
     ignore:
       'svg, details, mtable, mrow, [aria-hidden="true"], a[id^="fnref-"], a.data-footnote-backref',
