@@ -116,17 +116,28 @@ function writeSearchIndex(dir, file, logger) {
 
   if (searchIndex.length) {
     logger.info('Indexed ' + searchIndex.length + ' pages');
+    fs.writeFileSync(fileName, JSON.stringify(searchIndex));
+    logger.info('Wrote search index to ' + fileName);
   } else {
     logger.warn('No pages were indexed');
   }
-
-  fs.writeFileSync(fileName, JSON.stringify(searchIndex));
-  logger.info('Wrote search index to ' + fileName);
 }
 
 export default function (options) {
   if (options.enabled === false) {
     return { name: 'my-search-index' };
+  }
+
+  // We always exlude pages that have `search: false` in the frontmatter
+  const defaultExclude = { key: 'search', value: false };
+  if (options.exclude) {
+    if (options.exclude.frontmatter) {
+      options.exclude.frontmatter.push(defaultExclude);
+    } else {
+      options.exclude.frontmatter = [defaultExclude];
+    }
+  } else {
+    options.exclude = { frontmatter: [defaultExclude] };
   }
 
   return {
