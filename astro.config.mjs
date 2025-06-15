@@ -3,7 +3,6 @@ import { defineConfig } from 'astro/config';
 import { metadata, searchOptions } from './src/include/SiteConfig.js';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
 import Prism from 'prismjs';
 
 // Custom integrations
@@ -34,11 +33,8 @@ export default defineConfig({
   markdown: {
     syntaxHighlight: 'prism',
     smartypants: false,
-    remarkRehype: { clobberPrefix: '' }, // This is ok as we trust the markdown
+    remarkRehype: { clobberPrefix: '', allowDangerousHtml: true }, // We trust the markdown
     remarkPlugins: [remarkMath],
-    rehypePlugins: [
-      rehypeRaw, // Insert HTML embedded in MD files into the AST rather than as raw strings
-      [rehypeKatex, {}],
-    ],
+    rehypePlugins: [[rehypeKatex, {}]],
   },
 });
