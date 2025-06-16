@@ -86,6 +86,11 @@ code {
   font-size: 95%;
 }
 
+/*** Wrapping long lines of hex ***/
+span.wrap {
+  word-break: break-all;
+}
+
 /*** Constant line heights ***/
 
 sup, sub {
