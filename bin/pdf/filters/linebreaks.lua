@@ -15,3 +15,17 @@ function RawInline (el)
    end
    return el
 end
+
+-- We now support <span class="wrap">...</span>
+-- These spans must contain only raw text (or backquoted code), with no nested elements
+function Span (span)
+  if span.classes:includes('wrap') then
+    if (span.content[1].t == 'Str') then
+      return pandoc.RawInline('latex', '\\seqsplit{' .. span.content[1].text .. '}')
+    end
+    if (span.content[1].t == 'Code') then
+      return pandoc.RawInline('latex', '\\texttt{\\seqsplit{' .. span.content[1].text .. '}}')
+    end
+  end
+  return span
+end
