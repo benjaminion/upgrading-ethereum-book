@@ -22,11 +22,11 @@ cd $(dirname "$0")/../..
 # Set the host variable
 source bin/priv/server.sh
 
-echo
-echo "*** Patching node modules ***"
-
-npx custompatch
-was_it_ok $? "custompatch"
+# echo
+# echo "*** Patching node modules ***"
+#
+# npx custompatch
+# was_it_ok $? "custompatch"
 
 echo
 echo "*** Building site..."
