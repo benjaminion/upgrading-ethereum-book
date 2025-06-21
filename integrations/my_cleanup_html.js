@@ -10,6 +10,20 @@ function cleanupHtml() {
         delete node.properties['is:raw'];
         return CONTINUE;
       }
+
+      // Remove whitespace at the end of headings. This can be left by section marker comments.
+      if (node.type === 'text') {
+        if (
+          parent.type === 'element' &&
+          (parent.tagName === 'h1' ||
+            parent.tagName === 'h2' ||
+            parent.tagName === 'h3')
+        ) {
+          node.value = node.value.trim();
+        }
+        return CONTINUE;
+      }
+
       // Remove all comments
       if (node.type === 'comment') {
         parent.children.splice(index, 1);
