@@ -42,8 +42,8 @@ const indexArray = frontmatter.index;
 var pageTitle = metadata.title;
 if (frontmatter.titles !== undefined) {
   const titles = frontmatter.titles.filter((x) => x !== '');
-  const number = indexArray.length >= 2 ? indexArray.join('.') : '';
-  pageTitle += ' | ' + number + ' ' + titles[titles.length - 1];
+  const number = indexArray.length >= 2 ? indexArray.join('.') + ' ' : '';
+  pageTitle += ' | ' + number + titles[titles.length - 1];
 }
 
 const pageUrl = metadata.hostname + '/' + metadata.version + frontmatter.path;
