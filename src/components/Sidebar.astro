@@ -21,9 +21,7 @@ const filteredPages =
 
 <nav class="sidebar scrollable" aria-label="Book contents navigation">
   <div class="sidebar-title">
-    <a href={`/${metadata.version}/`}>
-      {metadata.title}
-    </a>
+    <a href={`/${metadata.version}/`}>{metadata.title}</a>
   </div>
   <div id="index">
     <PageList pages={filteredPages} depth={0} here={here} />
