@@ -11,16 +11,13 @@ function cleanupHtml() {
         return CONTINUE;
       }
 
-      // Remove whitespace at the end of headings. This can be left by section marker comments.
-      if (node.type === 'text') {
-        if (
-          parent.type === 'element' &&
-          (parent.tagName === 'h1' ||
-            parent.tagName === 'h2' ||
-            parent.tagName === 'h3')
-        ) {
-          node.value = node.value.trim();
-        }
+      // Remove whitespace at the end of headings. This can be left behind by section markers.
+      if (
+        node.type === 'text' &&
+        parent.type === 'element' &&
+        ['h1', 'h2', 'h3'].includes(parent.tagName)
+      ) {
+        node.value = node.value.trim();
         return CONTINUE;
       }
 
