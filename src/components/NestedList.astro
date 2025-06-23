@@ -18,7 +18,7 @@ function renderNestedList(items, level, idx) {
   while (i < items.length) {
     const item = items[i];
     const labelSpan = item.label
-      ? `<span class="label-string">${item.label}</span>`
+      ? `<span class="label-string">${item.label}</span> `
       : '';
 
     if (item.level === level) {
@@ -29,7 +29,7 @@ function renderNestedList(items, level, idx) {
 
       result +=
         `<li>` +
-        `${conditionalLink(item.link, item.hide, item.here, labelSpan + ' ' + item.title)}` +
+        `${conditionalLink(item.link, item.hide, item.here, labelSpan + item.title)}` +
         `${nestedContent}` +
         `</li>`;
 
