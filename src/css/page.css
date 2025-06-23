@@ -349,7 +349,7 @@ pre[class^="language-"] code {
 /*** Equations ***/
 
 /* Keep inline equations the same size as surrounding text */
-p span.katex, li span.katex {
+p span.katex, li span.katex, td span.katex {
   font-size: inherit;
 }
 
