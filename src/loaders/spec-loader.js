@@ -8,7 +8,7 @@ const reEnd = /^# .*<!-- \/part4\/ -->$/dm;
 const preamble =
   '# One Page Annotated Spec\n\n' +
   '**Note:** This page is automatically generated from the chapters ' +
-  'in [Part 3](/part3/). You may find that some internal links are broken.';
+  'in [Part 3](/part3/).';
 
 export function specLoader(fileName) {
   return {
@@ -37,13 +37,10 @@ export function specLoader(fileName) {
 
       let markdown = preamble;
       if (startMatch && endMatch) {
-        // Remove the title - we will replace it
+        // Extract the markdown, removing the title and replacing it with the preamble
         const start = startMatch.indices[0][1] + 1;
         const end = endMatch.indices[0][0];
-        // Extract the spec, add the preamble, and rewrite internal links
-        markdown += allMarkdown
-          .substring(start, end)
-          .replace(/]\(\/part3\/[^#)]*/g, '](');
+        markdown += allMarkdown.substring(start, end);
       } else {
         logger.warn('Creating empty annotated spec');
       }

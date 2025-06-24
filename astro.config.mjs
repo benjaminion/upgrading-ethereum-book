@@ -12,6 +12,7 @@ import myAutoLinkHeadings from './integrations/my_autolink_headings';
 import mySvgInline from './integrations/my_svg_inline';
 import mySearchIndex from './integrations/my_search_index';
 import myAddTooltips from './integrations/my_add_tooltips';
+import mySpecLinks from './integrations/my_spec_links';
 import myFixupLinks from './integrations/my_fixup_links';
 import myCleanupHtml from './integrations/my_cleanup_html';
 import myHtaccess from './integrations/my_htaccess';
@@ -27,6 +28,7 @@ export default defineConfig({
     mySvgInline({ filePath: 'src/', cachePath: './.svg_cache/' }),
     mySearchIndex(searchOptions),
     myAddTooltips({ constantsFile: 'src/include/constants.json' }),
+    mySpecLinks(),
     myFixupLinks(),
     myCleanupHtml(),
     myHtaccess(),
