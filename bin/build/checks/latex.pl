@@ -11,7 +11,8 @@ use IPC::Run3;
 $\ = "\n"; # set output record separator
 
 # Add any exclusions here by adding "-n#" where # is the warning number
-my @command = ["chktex", "-q"];
+# [Disable rule 3](https://tex.stackexchange.com/questions/529937/why-should-i-enclose-the-previous-parenthesis-with)
+my @command = ["chktex", "-q", "-n3"];
 
 # Specifically ignore some false positives.
 my $ignore = qr/\$(\[1,r\))\$/;
