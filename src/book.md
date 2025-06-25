@@ -4,6 +4,16 @@
 
 Welcome to my book about upgrading Ethereum: Ethereum on proof of stake and beyond.
 
+Back in 2018, I was working with the [Teku](https://docs.teku.consensys.io/introduction) client team as we helped to create and implement Ethereum's new proof of stake protocol from the ground up. I soon became concerned that the bare specification on its own was missing many of the insights and subtleties that had shaped it, so I began a project to [annotate the spec](https://benjaminion.xyz/eth2-annotated-spec/phase0/beacon-chain/) with my own commentary.
+
+A core part of this book is the maintenance of that [annotated specification](/part3/) as it evolves through upgrades over time. This has become an increasingly valuable exercise since the way that the [official consensus specs](https://github.com/ethereum/consensus-specs) are structured and maintained means that there is nowhere to see the entire current spec in one place.
+
+Once the annotated spec was done, it seemed good to start adding some more narrative chapters to try to teach and explain Ethereum's proof of stake mechanisms without being constrained by the structure of the spec. I try not to assume too much in these chapters. The idea is to begin fairly gently and to gradually work up to the more complex aspects.
+
+Two significant challenges hinder anyone wanting to learn about Ethereum's inner workings. For one, although there is quite a lot of information available, it is scattered and can be hard to find and assemble into a coherent picture. For another, articles and explainers tend to get out of date rather quickly, and it's difficult to know what is current and what is stale. I am aiming to help on both these fronts, first by gathering and ordering the information, and second by carefully versioning everything: hence the Altair, Bellatrix, Capella and so on editions.
+
+With all this in mind, it is my hope that this book will serve both as a useful reference to the consensus specification, and as a textbook for exploring Ethereum's consensus layer.
+
 ### Work in progress!
 
 I am writing this book backwards. Bottom up. Starting with the details and working towards the big picture.
@@ -20,7 +30,7 @@ This is a book for those who want to understand Ethereum&nbsp;2.0 &ndash; Ethere
 
 Who am I writing for? For people like me! People who enjoy understanding how things work. But more than that, who like to know _why_ things are the way they are. This is not intended to be an academic work; I am more interested in insight than in rigour. But I try to link out to relevant academic papers and formal analyses where relevant.
 
-Although I am an Ethereum staker and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking/) may be relevant (once I have written it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
+Although I am an Ethereum staker and an Ethereum user, I am not writing primarily for stakers or users here. Some of the generic material on [Staking](/appendices/staking/) might be relevant (if I ever get round to writing it), but you will find better help in places like the excellent [EthStaker](https://ethstaker.cc/) community.
 
 The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 protocol. Ethereum&nbsp;2.0 has become a less well-defined term recently. But for me, it broadly includes,
 
@@ -29,7 +39,7 @@ The scope of the book concerns (what I consider to be) the Ethereum&nbsp;2.0 pro
   - in-protocol data sharding, and
   - an array of potential future enhancements.
 
-I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, though rather out of date now. Although rollups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 system, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
+I will not be covering any of the historic Ethereum&nbsp;1.0 protocol, including the Ethereum Virtual Machine (EVM), except as it touches upon The Merge. The [Mastering Ethereum book](https://github.com/ethereumbook/ethereumbook) is an excellent resource, though rather out of date now. Although rollups and other so-called layer 2 solutions have rapidly become part of the overall Ethereum&nbsp;2.0 system, they are by definition not in-protocol, and I will not be covering them here. I will not be discussing, DeFi, DAOs, NFTs, or any of the wonderful things that can be built on top of this amazing technology.
 
 It's a chunky list of exclusions, but there's still [plenty to talk about](/contents/).
 
@@ -60,20 +70,18 @@ This is why I often continue to refer to Ethereum on proof of stake as Ethereum&
 
 [^fn-ef-overreach]: That, and being a bloody-minded reactionary who dislikes being told what to do and say by a centralised authority. The EF's claim that, "As of late 2021, core developers stopped using the terminology" is laughably untrue.
 
+### In defence of the English language
+
 <a id="british-english"></a>
-While we're here, another thing I won't be apologising for is using British English spelling, punctuation, and quaint idioms. It's a feature, not a bug.
+While we're here, another thing I won't be apologising for is using British English spelling, punctuation, and quaint idioms. Consider it a feature rather than a bug.
 
 ### Acknowledgements
 
-Above all, I want to thank my employer, [Consensys](https://consensys.io/). Much of the writing has been done in my own time, but Consensys has been increasingly supportive of me working on this in the course of my day job. In particular, during Q2 2023, the company granted me three months of writing leave to work full-time on the book. They also allowed me to put a liberal licence on everything. All this is extremely cool of them, and I am deeply grateful. Consensys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
+Above all, I want to thank my former employer, [Consensys](https://consensys.io/). Much of the writing has been done in my own time, but Consensys was wonderfully supportive of me working on this in the course of my day job. In particular, during Q2 2023, the company granted me three months of writing leave to work full-time on the book. They also allowed me to put a liberal licence on everything. All this is extremely cool of them, and I am deeply grateful. Consensys is a wonderful employer, a terrific force for good in the ecosystem, and an incredible place to work.
 
 So much of what I do involves writing about other people's work, and pretty much everything in this book is other people's work. I deeply value the openness and generosity of the Ethereum community. For me, this is one of its defining characteristics. Many people's contributions are cited throughout this book, and I am indebted to all of you. Being part of the Eth2 dev community has been the best experience of my life.
 
 Thank you to the many GitCoin grant supporters who donated in support of the original annotated specification and my regular What's New in Eth2 newsletter. And to generous crypto friends, anon and otherwise, for your kind gifts over the years. Your support has encouraged me hugely as I've wrestled with the minutiae of the spec. I bloody love this community.
-
-Shout-out to the EthStaker community: you rock!
-
-Finally, to circle back to Consensys: working daily with such brilliant, talented, generous, and knowledgeable people is a joy. The Protocols group, PegaSys, has been my home for the past five-plus years. It is where I helped establish the fabulous Protocols R&D team, and later kicked off the project that became Teku. Thank you for all your support and encouragement. I love working with all you wonderful people.
 
 # Part 1: Building <!-- /part1/ -->
 
@@ -202,7 +210,9 @@ An explicit design goal for Ethereum is that it doesn't only run well when every
 
 The Ethereum network comprises a large number of individual nodes. Each node acts independently, and nodes communicate over an unreliable, asynchronous network, the Internet. Any individual node might be honest &ndash; behaving correctly at all times &ndash; or faulty in any arbitrary way: simply down or non-communicative, following a different version of the protocol, actively trying to mislead other nodes, publishing contradictory messages, or any manner of other fault.
 
-Users submit transactions to this network of nodes, and the goal of the consensus protocol is that all correct nodes eventually agree on a single, consistent view of the history of transactions. That is, the order in which transactions were processed and the outcome of that processing. So, if I have 1&nbsp;ETH and I simultaneously tell the network that I am sending that 1&nbsp;ETH to Alice and also to Bob, we expect that eventually the network will agree that either I sent it to Alice or I sent it to Bob. It would be a failure if both Alice and Bob received my Ether, or if neither received it.
+Users submit transactions to this network of nodes, and the goal of the consensus protocol is that all correct nodes eventually agree on a single, consistent view of the history of transactions. That is, the order in which transactions were processed and the outcome of that processing. So, if I have 1&nbsp;ETH and I simultaneously tell the network that I am sending that 1&nbsp;ETH to Alice and also to Bob, we expect that eventually the network will agree that either I sent it to Alice or I sent it to Bob. It would be a failure if both Alice and Bob received my Ether, or if neither received it[^fn-alice-bob].
+
+[^fn-alice-bob]: The former would be a safety failure, the latter a liveness failure.
 
 A consensus protocol is the process by which this agreement on the ordering of transactions comes about.
 
@@ -417,7 +427,7 @@ Informally, an algorithm is said to be safe if "nothing bad ever happens".[^fn-s
 
 Examples of bad things that might happen in the blockchain context could be the double-spend of a coin, or the finalising of two conflicting checkpoints.
 
-An important aspect of safety in a distributed system is "consistency". That is, if we were to ask different (honest) nodes about the state of the chain at some point in its progress, such as the balance of an account at a particular block height, then we should always get the same answer, no matter which node we ask. In a safe system, every node has an identical view of the history of the chain that never changes.
+An important aspect of safety in a distributed system is "consistency". That is, if we were to ask different (honest) nodes about the state of the chain at some point in its progress, such as the balance of an account at a particular block height, then we should always get the same answer, no matter which node we ask. In a safe system, every node has an identical view of the history of the chain that never changes - reorgs never happen.
 
 Effectively, safety means that our distributed system "behaves like a centralized implementation that executes operations atomically one at a time." (to quote [Castro and Liskov](https://www.scs.stanford.edu/nyu/03sp/sched/bfs.pdf)). A safe system is, in Vitalik's [taxonomy](https://medium.com/@VitalikButerin/the-meaning-of-decentralization-a0c92b76a274) of centralisation, logically centralised.
 
@@ -619,11 +629,11 @@ An arbitrary block tree with three forks (branches). Any of blocks $I$, $E$, or 
 </figcaption>
 </figure>
 
-In this situation, I have three candidate head blocks, $I$, $E$, and $M$. Under proof of work's longest chain rule, the choice of head block is obvious: I must choose M since it has the greatest block height, or (almost) equivalently the greatest amount of work done. Under LMD GHOST we can't choose a head block from this information alone, we'd need to see the votes from the other validators in order to make a choice.
+In this situation, we have three candidate head blocks, $I$, $E$, and $M$. Under proof of work's longest chain rule, the choice of head block is obvious: we must choose M since it has the greatest block height, or (almost) equivalently the greatest amount of work done. Under LMD GHOST we can't choose a head block from this information alone, we'd need to see the votes from the other validators in order to make a choice.
 
 The challenge is that the chain from blocks $J$ to $M$ might be from an attacker. The attacker might have mined that chain in secret and revealed it later in a so-called 51% attack. Proof of work nodes would have no choice but to reorg to make $M$ the head, thereby favouring the attacker's chain and potentially becoming vulnerable to double-spends.
 
-The value that Casper FFG brings is that it confers finality. Let's say that block $D$ is marked as final by Casper FFG (which automatically finalises blocks $A$, $B$, and $C$). Finalisation modifies the fork choice rule of the underlying protocol so that any branch with blocks that competes with block $D$ &ndash; that is, any block not descended from $D$ &ndash; is excluded. Equivalently, branches are pruned so that there are no forks prior to the finalised block.
+Casper FFG's finality can help us here. Let's say that block $D$ is marked as final by Casper FFG (which automatically finalises blocks $A$, $B$, and $C$). Finalisation modifies the fork choice rule of the underlying protocol so that any branch that competes with block $D$ &ndash; that is, containing blocks not descended from $D$ &ndash; is excluded. Equivalently, branches are pruned so that there are no forks prior to the finalised block.
 
 <a id="img_gasper_blocktree_finalised"></a>
 <figure class="diagram" style="width: 70%">
@@ -643,7 +653,7 @@ Essentially, the finality delivered by Casper FFG prevents long reorganisations 
 
 #### Conclusion
 
-As a reminder, [this](/part2/consensus/) is the sentence we are trying to understand in all its parts.
+Recall that [this](/part2/consensus/) is the sentence we are trying to understand in all its parts.
 
 > The Proof-of-Stake (PoS) Ethereum consensus protocol is constructed by applying the finality gadget Casper FFG on top of the fork choice rule LMD GHOST, a flavor of the Greedy Heaviest-Observed Sub-Tree (GHOST) rule which considers only each participant's most recent vote (Latest Message Driven, LMD).
 
@@ -1328,6 +1338,8 @@ Another way to violate the no surround vote rule: again, the link ${0 \rightarro
 
 </figcaption>
 </figure>
+
+For an example of when the second of these situations became important, see the recovery effort from the [Holešky Pectra Incident](https://github.com/ethereum/pm/blob/master/Pectra/holesky-postmortem.md). In this testnet incident, clients managing a supermajority of the stake managed to justify an invalid block, the "Epoch 1" checkpoint in the diagram on the lower branch, while the minority of correct clients continued on the upper branch. Recovering the bad clients onto the good chain forced them to make surround votes and therefore be slashed.
 
 ##### Slashing
 
@@ -2641,7 +2653,7 @@ For every deposit accepted by the deposit contract it issues a receipt (also cal
 
 [^fn-receipts-naming]: Naming of these things is really messed up. I believe that Eth1 logs, events, and receipts are all the same thing. Etherscan hedges its bets by calling them "Transaction Receipt Event Logs".
 
-The receipt has a single topic, which is the `DepositEvent` signature: `0x649bbc62d0e31342`<wbr/>`afea4e5cd82d4049`<wbr/>`e7e1ee912fc0889a`<wbr/>`a790803be39038c5`, equal to `keccak256("DepositEvent(bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes)")`.
+The receipt has a single topic, which is the `DepositEvent` signature: <span class="wrap">`0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5`</span>, equal to `keccak256("DepositEvent(bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes,`<wbr/>`bytes)")`.
 
 The receipt's data is the 576 byte ABI encoding of `pubkey`, `withdrawal_credentials`, `amount`, `signature`, and `deposit_count`, converted to little-endian where required. Here's [an example](https://etherscan.io/tx/0xa41ae80276c837f3855e109c3bbba89bb6078215f86ccc4b981a4930858d3f3a#eventlog).
 
@@ -4411,7 +4423,7 @@ This signature aggregation capability was the main breakthrough that prompted us
 
 #### BLS Digital Signatures
 
-Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
+Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](/part2/building_blocks/bls12-381/) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
 
 [^fn-bls-bls]: There is a curious naming collision here. The BLS trio of "BLS signatures" are Boneh, Lynn, and Shacham, whereas those of the "BLS12-381" elliptic curve are Barreto, Lynn, and Scott. Ben Lynn is the only common name between the two.
 
@@ -4428,7 +4440,7 @@ There are four component pieces of data within the BLS digital signature process
 3. The _message_. We'll look later at the kinds of messages used in the Eth2 protocol and how they are constructed. For now, the message is just a string of bytes.
 4. The _signature_, which is the output of the signing process. The signature is created by combining the message with the secret key. Given a message, a signature for that message, and a public key, we can verify that the validator with that public key signed exactly that message. In other words, no-one else could have signed that message, and the message has not been changed since signing.
 
-More mathematically, things look like this. We use two subgroups of the BLS12-381 elliptic curve: $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a 77 digit prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
+More mathematically, things look like this. We use two subgroups of the [BLS12-381 elliptic curve](/part2/building_blocks/bls12-381/): $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a 77 digit prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
 
 1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, very small values of $sk$ would be hopelessly insecure).
 2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is therefore a member of the $G_1$ group.
@@ -4473,7 +4485,7 @@ A validator randomly generates its secret key. Its public key is then derived fr
 
 In the beacon chain protocol the only messages that get signed are [hash tree roots](/part2/building_blocks/merkleization/) of objects: their so-called signing roots, which are 32 byte strings. The [`compute_signing_root()`](/part3/helper/misc/#compute_signing_root) function always combines the hash tree root of an object with a "domain" as described [below](#domain-separation-and-forks).
 
-Once we have the signing root it needs to be mapped onto an elliptic curve point in the $G_2$ group. If the message's signing root is $m$, then the point is $H(m)$ where $H()$ is a function that maps bytes to $G_2$. This mapping is hard to do well, and an entire [draft standard](https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/) exists to define the process. Thankfully, we can ignore the details completely and leave them to our cryptographic libraries[^fn-implement-h2g2].
+Once we have the signing root it needs to be mapped onto an elliptic curve point in the $G_2$ group. If the message's signing root is $m$, then the point is $H(m)$ where $H()$ is a function that [maps bytes to $G_2$](/part2/building_blocks/bls12-381/#hashing-to-the-curve). This mapping is hard to do well, and an entire standard, [RFC 9380](https://www.rfc-editor.org/rfc/rfc9380.html), exists to define the process. Thankfully, we can ignore the details completely and leave them to our cryptographic libraries[^fn-implement-h2g2].
 
 [^fn-implement-h2g2]: Unless you have to implement the thing, as I [ended up doing](https://github.com/ConsenSys/teku/commit/e927d9be89b64fe8297b74405f37aa0e6378024) in Java.
 
@@ -4483,7 +4495,7 @@ $$
 \sigma = [sk]H(m)
 $$
 
-Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it serialises to a 96 byte string in compressed form.
+Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it serialises to a 96 byte string in [compressed form](/part2/building_blocks/bls12-381/#point-compression).
 
 <a id="img_bls_signing"></a>
 <figure class="diagram" style="width:65%">
@@ -4505,24 +4517,17 @@ Signature verification can be treated as a black-box: we send the message, the p
 
 More formally, signatures are verified using elliptic curve pairings.
 
-With respect to the curve BLS12-381, a pairing simply takes a point $P\in G_1$, and a point $Q\in G_2$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, for a pairing $e$, $e:G_1\times G_2\rightarrow G_T$.[^fn-pairing-multiplication]
-
-[^fn-pairing-multiplication]: If it helps, you can loosely think of a pairing as being a way to "multiply" a point in $G_1$ by a point in $G_2$. If we were to write all the groups additively then the arithmetic would work out very nicely. However, we conventionally write $G_T$ multiplicatively, so the notation isn't quite right.
-
-Pairings are usually denoted $e(P,Q)$ and have special properties. In particular, with $P$ and $S$ in $G_1$ and $Q$ and $R$ in $G_2$,
-
-  - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
-  - $e(P + S, R) = e(P, R) \cdot e(S, R)$.
-
-(Conventionally $G_1$ and $G_2$ are written as additive groups, and $G_T$ as multiplicative, so the $\cdot$ operator is point multiplication in $G_T$.)
-
-From this, we can deduce that all the following identities hold:
+As discussed in the chapter on BLS12-381, a [pairing operation](/part2/building_blocks/bls12-381/#pairings) can be defined for which the following identities hold as a consequence of the bilinearity of the pairing.
 
 $$
 e([a]P,[b]Q)={e(P,[b]Q)}^a={e(P,Q)}^{ab}={e(P,[a]Q)}^b=e([b]P,[a]Q)
 $$
 
-Armed with our pairing, verifying a signature is straightforward. The signature is valid if and only if
+In this notation, the pairing simply takes a point $P \in G_1$, and a point $Q \in G_2$ and outputs a point from a group $G_T \subset F_{q^{12}}$. That is, for a pairing $e$, $e:G_1\times G_2\rightarrow G_T$. Scalar multiplication of the points in $G_1$ and $G_2$ is denoted $[n]P$ and $[n]Q$ respectively.[^fn-notation-discussion]
+
+[^fn-notation-discussion]: See the BLS12-381 chapter for a discussion of [the notation](/part2/building_blocks/bls12-381/#pairings) and bilinearity.
+
+Armed with this, verifying a signature is straightforward. The signature is valid if and only if
 
 $$
 e(g_1,\sigma)=e(pk,H(m))
@@ -4536,7 +4541,7 @@ $$
 e(pk,H(m)) = e([sk]g_1,H(m)) = {e(g_1,H(m))}^{(sk)} = e(g_1,[sk]H(m)) = e(g_1,\sigma)
 $$
 
-Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](https://hackmd.io/@benjaminion/bls12-381#History), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
+Note that elliptic curves supporting such a pairing function are very rare. Such curves can be constructed, as [BLS12-381 was](/part2/building_blocks/bls12-381/#history), but general elliptic curves such as the more commonly used secp256k1 curve do not support pairings and cannot be used for BLS signatures.
 
 <a id="img_bls_verifying"></a>
 <figure class="diagram" style="width:80%">
@@ -4800,9 +4805,7 @@ The bilinearity of the pairing function allows for some pretty funky optimisatio
 
 ##### Quantum security
 
-The security (unforgeability) of BLS signatures relies on, among other things, the hardness of something called the elliptic curve discrete logarithm problem (ECDLP)[^fn-discrete-division-problem]. Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
-
-[^fn-discrete-division-problem]: It's puzzling to me that this is called the discrete logarithm problem when we write groups additively, rather than the discrete division problem. But it's far from being the most confusing thing about elliptic curves.
+The security (unforgeability) of BLS signatures relies on, among other things, the hardness of something called the elliptic curve discrete logarithm problem (ECDLP). Basically, given the public key $[sk]g_1$ it is computationally infeasible to work out what the secret key $sk$ is.
 
 The ECDLP is believed to be vulnerable to attack by [quantum computers](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks), thus our signature scheme may have a limited shelf-life.
 
@@ -4812,10 +4815,7 @@ In case someone overnight unveils a sufficiently capable quantum computer, [EIP-
 
 #### BLS library functions
 
-As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the draft [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)[^fn-ietf-irtf-0]. Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
-
-[^fn-ietf-irtf-0]: This document does not have the full force of an IETF standard. For one thing, it remains a draft (that is now expired), for another it is an IRTF document, meaning that it is from a research group rather than being on the IETF standards track. [Some context](https://mailarchive.ietf.org/arch/msg/ietf/A8MaBwNpbWf_DJoWj0sRROIml3Y/) from Brian Carpenter, former IETF chair,
-    > I gather that you are referring to an issue in draft-irtf-cfrg-bls-signature-04. That is not even an IETF draft; it's an IRTF draft, apparently being discussed in an IRTF Research Group. So it is not even remotely under consideration to become an IETF standard...
+As a reference, the following are the BLS library functions used in the Ethereum&nbsp;2 [specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/phase0/beacon-chain.md#bls-signatures). They are named for and defined by the draft [BLS Signature Standard](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04). Function names link to the definitions in the standard. Since we use the [proof of possession](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-3.3) scheme defined in the standard, our `Sign`, `Verify`, and `AggregateVerify` functions correspond to `CoreSign`, `CoreVerify`, and `CoreAggregateVerify` respectively.
 
   - `def` [`Sign`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.6)`(privkey: int, message: Bytes) -> BLSSignature`
     - Sign a message with the validator's secret (private) key.
@@ -4828,23 +4828,15 @@ As a reference, the following are the BLS library functions used in the Ethereum
   - `def` [`AggregateVerify`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.9)`(pubkeys: Sequence[BLSPubkey], messages: Sequence[Bytes], signature: BLSSignature) -> bool`
     - This is not used in the current spec but appears in the future [Proof of Custody spec](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/_features/custody_game/beacon-chain.md). It takes $n$ messages signed by $n$ validators and verifies their aggregate signature. The mathematics is similar to that above, but requires $n+1$ pairing operations rather than just two. But this is better than the $2n$ pairings that would be required to verify the unaggregated signatures.
   - `def` [`KeyValidate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.5)`(pubkey: BLSPubkey) -> bool`
-    - Checks that a public key is valid. That is, it lies on the elliptic curve, it is not the group's identity point (corresponding to the zero secret key), and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
+    - Checks that a public key is valid. That is: it lies on the elliptic curve; it is not the group's identity point (corresponding to the zero secret key); and it is a member of the $G_1$ subgroup of the curve. All these checks are important to avoid certain attacks. The group membership check is quite expensive but only ever needs to be done once per public key stored in the beacon state.
 
 The Eth2 spec also defines two further BLS utility functions, `eth_aggregate_pubkeys()` and `eth_fast_aggregate_verify()` that I describe in the [annotated spec](/part3/helper/crypto/#bls-signatures).
 
 #### See also
 
-The main standards that we strive to follow are the following IRTF drafts:
-
-  - [BLS Signatures](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04)
-  - [Hashing to Elliptic Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-09)
-  - [Pairing-Friendly Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-pairing-friendly-curves-10)
+See the chapter on [Curve BLS12-381](/part2/building_blocks/bls12-381/) for a much deeper dive into the joy of elliptic curve pairings and links to more references.
 
 [Compact Multi-Signatures for Smaller Blockchains](https://eprint.iacr.org/2018/483.pdf) (Boneh, Drijvers, Neven) is the original paper that described efficient BLS multi-signatures. And [Pragmatic signature aggregation with BLS](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion) is Justin Drake's proposal to use these signatures in an Ethereum&nbsp;2 context.
-
-For a gentle(ish) introduction to pairings, Vitalik's [Exploring Elliptic Curve Pairings](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627) is very good. If you are looking for a very deep rabbit hole to explore, [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) by Craig Costello is amazing.
-
-I've written a lengthy homage to the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve that also covers some BLS signature topics.
 
 Three EIPs are intended to govern the generation and storage of keys in practice:
 
@@ -4852,10 +4844,572 @@ Three EIPs are intended to govern the generation and storage of keys in practice
   - [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md) defines a deterministic account hierarchy for specifying the purpose of keys.
   - [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) specifies a standard keystore format for storage and interchange of BLS12-381 keys.
 
-There are several implementations of pairings on the BLS12-381 curve around, which can be used to implement the BLS signature scheme we use:
+### Curve BLS12-381 <!-- /part2/building_blocks/bls12-381/ -->
 
-  - The [Blst](https://github.com/supranational/blst) library is the most commonly used by Eth2 client implementers.
-  - The [noble-bls12-381](https://github.com/paulmillr/noble-bls12-381) library is better documented and may be more enjoyable if you want to try playing around with these things.
+<div class="summary">
+
+  - BLS12-381 is a cryptographically secure, pairing-friendly elliptic curve.
+  - Bilinear pairings enable important features such as signature aggregation and polynomial commitments.
+
+</div>
+
+This chapter is an edited and updated version of my original [homage to curve BLS12-381](https://hackmd.io/@benjaminion/bls12-381). It is not required reading &ndash; it's fine to treat the elliptic curve implementation as a black box &ndash; but I've included it for those who enjoy digging deeper. While curve BLS12-281 is the main focus, much of what follows covers broader background material on elliptic curves and pairings in general. As a non-mathematician[^fn-non-mathematician], all of this was very mysterious when I first encountered it; it has taken me quite a while to feel that I have some grasp of what's going on.
+
+[^fn-non-mathematician]: Many, many years ago I studied mathematics at both undergraduate and graduate levels, but I diligently shirked anything that looked like pure maths, such as group theory. I regret this now.
+
+#### Introduction
+
+Elliptic curves have been part of the blockchain toolkit since day one. For example, both Bitcoin and Ethereum use the curve known as [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) to sign users' transactions with [ECDSA](https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm), the "elliptic curve digital signature algorithm".
+
+Curve secp256k1 is not used in Ethereum's consensus layer, however. Instead we use a curve called BLS12-381 because it supports a mathematical operation called bilinear pairing - it is a "pairing-friendly" elliptic curve. Pairings are very cool because, among other things, they allow us to do [signature aggregation](/part2/building_blocks/signatures/) and polynomial commitments, operations that have become foundational to Ethereum's consensus but are not supported by most elliptic curves.
+
+Pairing-friendly elliptic curves are curves with both a favourable embedding degree (to be explained [below](#embedding-degree)), and a large prime-order subgroup (also see [below](#the-subgroups)). These are rare. If you create an elliptic curve at random, it has a miniscule chance of being pairing-friendly. Nevertheless, they can be constructed, and several families of pairing-friendly curves [are known](https://eprint.iacr.org/2006/372.pdf) in addition to the BLS curves.
+
+Some good reading if you want to learn more about pairing-based cryptography:
+
+  - Vitalik has a great general introduction to [elliptic curve pairings](https://web.archive.org/web/20231102064237/https://vitalik.ca/general/2017/01/14/exploring_ecp.html).
+  - Alin Tomescu gives an entertaining review of the history of the development of pairing based cryptography and some of its applications in a blog post, [Pairings or bilinear maps](https://alinush.github.io/pairings).
+  - The [NIST report](https://pmc.ncbi.nlm.nih.gov/articles/PMC4730686/pdf/jres.120.002.pdf) on pairing-based cryptography is quite readable. I recommend Section 2 and the Appendix.
+  - Also good background is the [draft IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html) for pairing-friendly curves.
+
+If you really want to _understand_ this stuff then [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) is unsurpassed. It turns out to be a lot less scary than it looks if you work through it carefully, studying the examples as you go.
+
+#### BLS12-381 in Ethereum
+
+The possibility of signature aggregation was the [key breakthrough](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion) that made Ethereum's beacon chain possible. It allowed us to abandon the previous, impractical, proof of stake plans in mid-2018 and go all-in on the beacon chain approach.
+
+To perform signature aggregation, we need to use a cryptographically secure, pairing-friendly elliptic curve. As noted, these are quite rare.
+
+The main reason for the choice of BLS12-381 for the beacon chain is that it is a sweet-spot among the available pairing-friendly curves in terms of security (originally thought to be around 128 bits, but [see below](#security-level)), [speed of the pairing operation](https://github.com/zcash/zcash/issues/2502), and the sizes of the public key (48 bytes) and signature (96 bytes). Among other candidates, the BN128/BN254 curve has smaller signatures but lower security ([~100 bits](https://github.com/zcash/zcash/issues/714#issuecomment-295813446)). Other pairing-friendly curves (such as the BW, MNT, and KSS families) tend to have larger signatures or slower pairings for a similar security level.
+
+Other influential factors were the following.
+
+  - BLS12-381 was designed for Zcash and was already being adopted by other chains such as Chia. There is safety in numbers (more scrutiny, better libraries), and interoperability between chains was a guiding principle at the time, although that ambition has faded since.
+  - The [original paper](https://eprint.iacr.org/2018/483.pdf)[^fn-compact-multi] about signature aggregation for blockchains used BLS12-381 in its analysis.
+  - BLS curves are included in the IETF pairing-friendly curve [standardisation process](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html). Standardisation makes everything easier[^fn-keccak-sha3].
+
+[^fn-compact-multi]: [Compact Multi-Signatures for Smaller Blockchains](https://link.springer.com/chapter/10.1007/978-3-030-03329-3_15), Boneh, Drijvers, and Neven, 2018.
+
+[^fn-keccak-sha3]: That Ethereum's execution layer uses the almost, [but not quite standard](https://crypto.stackexchange.com/questions/15727/what-are-the-key-differences-between-the-draft-sha-3-standard-and-the-keccak-sub) Keccak hash rather than the SHA-3 standard remains a burr in the underpants to this day.
+
+It's worth mentioning that BLS12-381 is also designed to be efficient for ZK-SNARK proving (which is Zcash's main purpose for it), but this wasn't a major consideration for Ethereum's original adoption of it.
+
+All in all, I don't recall any significant debate about the adoption of curve BLS12-381; it was simply the obvious choice at the time.
+
+#### About curve BLS12-381
+
+##### History
+
+Curve BLS12-381 was [designed](https://electriccoin.co/blog/new-snark-curve/) by [Sean Bowe](https://twitter.com/ebfull) in early 2017 as the foundation for an upgrade to the Zcash protocol. It is both pairing-friendly (making it efficient for digital signatures) and effective for constructing ZK-SNARKs.
+
+Ethereum 2.0 was a fairly early adopter of the curve. A number of other blockchains (Zcash, Chia, Dfinity, Filecoin, Algorand) also use BLS12-381, and several cryptographic libraries support it. The main library used by Ethereum clients is [Blst](https://github.com/supranational/blst), which was commissioned by the Ethereum Foundation for this purpose; other libraries that implement the curve are [Gnark](https://github.com/Consensys/gnark-crypto), [Noble](https://github.com/paulmillr/noble-curves), [Herumi/mcl](https://github.com/herumi/mcl), and [Constantine](https://github.com/mratsim/constantine).
+
+As for standardisation, BLS12-381 is [included](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#section-4.2.1) in the emerging IETF standard for [Pairing-Friendly Curves](https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/). It also appears in the draft standards for [Hashing to Elliptic Curves](https://www.ietf.org/archive/id/draft-irtf-cfrg-hash-to-curve-10.html#section-8.8), and [BLS signatures](https://www.ietf.org/archive/id/draft-irtf-cfrg-bls-signature-05.html#section-4.2)[^fn-ietf-irtf-0].
+
+[^fn-ietf-irtf-0]: This document does not have the full force of an IETF standard. For one thing, it remains a draft (that is now expired), for another it is an IRTF document, meaning that it is from a research group rather than being on the IETF standards track. [Some context](https://mailarchive.ietf.org/arch/msg/ietf/A8MaBwNpbWf_DJoWj0sRROIml3Y/) from Brian Carpenter, former IETF chair,
+    > I gather that you are referring to an issue in draft-irtf-cfrg-bls-signature-04. That is not even an IETF draft; it's an IRTF draft, apparently being discussed in an IRTF Research Group. So it is not even remotely under consideration to become an IETF standard...
+
+##### Naming
+
+BLS12-381 is part of a family of curves described by [Barreto, Lynn, and Scott](https://eprint.iacr.org/2002/088.pdf) (they are the B, L, and S in view here - a mostly different BLS trio appears in connection with [BLS signatures](/part2/building_blocks/signatures/)).
+
+The 12 is the embedding degree of the curve: neither too low, nor too high. We'll discuss embedding degrees [in a little while](#embedding-degree).
+
+The 381 is the number of bits needed to represent coordinates on the curve: the field modulus, $q$. The coordinates of a point come from a finite field that has a prime order, and that prime number, $q$, is 381 bits wide. 381 is a fairly handy number as we can use 48 bytes per field element, with 3 bits left over for useful flags or arithmetic optimisations. The size of this number is guided both by [security requirements](#security-level) and implementation efficiency.
+
+##### Curve equation and parameters
+
+The basic equation of the BLS12-381 curve is $y^2=x^3+4$.[^fn-bls12381-refs]
+
+[^fn-bls12381-refs]: This [now deleted page](https://github.com/zkcrypto/pairing/blob/34aa52b0f7bef705917252ea63e5a13fa01af551/src/bls12_381/README.md) is the reference for much of this section. Lots of curve data is also in the [IETF specification](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#name-bls-curves-for-the-128-bit-).
+
+The key parameters for a BLS curve are set using a single parameter $\tt x$ (different from the $x$ in the curve equation!) that can be selected to give the curve nice properties for implementation. BLS12-381 is derived from the $k\equiv0\,\text{(mod 6)}$ case of Construction 6.6 in the [taxonomy](https://eprint.iacr.org/2006/372.pdf).
+
+Specific design goals for BLS12-381 are:
+
+  - $\tt x$ has "low hamming weight", meaning that it has very few bits set to 1. This is particularly important for the efficiency of the algorithm that calculates pairings (the Miller loop).
+  - The field modulus $q$ mentioned above is prime and has 383 bits or fewer, which makes 64-bit or 32-bit arithmetic on it more efficient.
+  - The order $r$ of the subgroups we use is prime and has 255 bits or fewer, which is good for the same reason as above.
+  - The security target is 128 bits - see [below](#security-level).
+  - To support ZK-SNARK schemes, we want to have a large power of two [root of unity](#roots-of-unity) in the field $F_r$. This means we want $2^n$ to be a factor of $r-1$, for some biggish $n$. Making $\tt x$ a multiple of $2^\frac{n}{2}$ will achieve this. This property is key to being able to use fast Fourier transforms for interesting things like polynomial multiplication.
+
+The value ${\tt x}=$&nbsp;`-0xd201000000010000` (hexadecimal, note that it is negative) gives the largest $q$ and the lowest Hamming weight meeting these criteria. With this $\tt x$ value we have,
+
+| Parameter | &nbsp; | Equation | Value | Comments |
+| ---- | - | ---- | ---------------- | ---- |
+| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)^2}\\{({\tt x}^4-{\tt x}^2+1)}\\ +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Subgroup size | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
+
+##### Field extensions
+
+Field extensions are fundamental to elliptic curve pairings. The "12" in BLS12-381 is not only the embedding degree, it is also (relatedly) the degree of field extension that we will need to use to calculate pairings.
+
+The field $F_q$ can be thought of as just the integers modulo $q$: $0,1,\ldots,q-1$. But what kind of beast is $F_{q^{12}}$, the twelfth extension of $F_q$?
+
+I have been unable to find any straightforward explainers of field extensions, so here's my attempt.
+
+Let's construct $F_{q^2}$, the quadratic extension of $F_q$. In $F_{q^2}$ we will represent field elements as first-degree polynomials like $a_0 + a_1x$, which we can write more concisely as $(a_0, a_1)$ if we wish.
+
+Adding two elements is easy: ${(a, b) + (c, d)} = {a + bx + c + dx} = {(a+c) + (b+d)x} = {(a+c, b+d)}$. We just need to be sure to reduce $a+c$ and $b+d$ modulo $q$.
+
+What about multiplying? ${(a, b) \times (c, d)} = {(a + bx)(c + dx)} = {ac + (ad+bc)x+ bdx^2} = {\tt ???}$. Oops - what are we supposed to do with the $x^2$ that's appeared?
+
+We need a rule for reducing polynomials so that they have a degree less than two. In this example we're going to take ${x^2 + 1} = 0$ as our rule, but we could make other choices. There are only two rules about our rule[^fn-efmr],
+
+  1. it must be a degree $k$ polynomial, where $k$ is our extension degree, $2$ in this case; and
+  2. it must be [irreducible](https://en.wikipedia.org/wiki/Irreducible_polynomial) in the field we are extending. That means it must not be possible to factor it into two or more lower degree polynomials.
+
+[^fn-efmr]: Our rule is "an extension field modular reduction" (terminology from [here](https://web.archive.org/web/20250618101639/https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=0a0f5c189957ef6b78bb2a96b275599f7426e1ac), section 4.4). We can think of it as analogous to the modulo operation in normal arithmetic: it keeps the degree of polynomials to within a given bound, just as the modulo operation keeps the size of numbers to within a given bound. The irreducibility requirement is akin to the polynomial being "prime", that is, having no non-trivial factors.
+
+Applying our rule, by substituting $x^2 = -1$ to eliminate the unwanted $x^2$ term, gives us the final result ${(a, b) \times (c, d)} = {ac + (ad+bc)x + bdx^2} = {(ac-bd) + (ad+bc)x} = {(ac-bd, ad+bc)}$. This might look a little familiar from complex arithmetic: ${(a+ib) \times (c+id)} = {(ac-bd) + (ad+bc)i}$. This is not a coincidence! The complex numbers are a quadratic extension of the real numbers.
+
+Complex numbers can't be extended any further because there are [no irreducible polynomials over the complex numbers](https://en.wikipedia.org/wiki/Fundamental_theorem_of_algebra). But for finite fields, if we can find an irreducible $k$-degree polynomial in our field $F_q$, and we often can, then we are able to extend the field to $F_{q^k}$, and represent the elements of the extended field as degree $k-1$ polynomials, $a_0 + a_1x + \cdots + a_{k-1}x^{k-1}$. We can write this compactly as $(a_0,\ldots,a_{k-1})$, as long as we remember that there may be some very funky arithmetic going on.
+
+Also worth noting is that modular reductions like this (our reduction rule) can be chosen so that they play nicely with the [twisting](#twists) operation.
+
+In practice, large extension fields like $F_{q^{12}}$ are implemented as towers of smaller extensions. That's an implementation aspect, so I've put it in the more practical section [below](#extension-towers).
+
+##### The curves
+
+One of the initially non-obvious things about BLS12-381 is that we're really dealing with two curves, not one. Both curves share more-or-less the same curve equation, but are defined over different fields.
+
+The simpler one is over the finite field $F_q$, which is just the integers mod $q$. So the curve has points only where the equation $y^2=x^3+4$ has solutions with $x$ and $y$ both integers less than $q$. Such a point is $(0,2)$, for example[^fn-another-point]. We shall call this curve $E(F_q)$.
+
+[^fn-another-point]: Another point on $E(F_q)$ is <span class="wrap">`(0x04,0x0a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c)`</span>. On average about half of $x$ values result in a point on the curve, and for most of those both $(x,y)$ and $(x,-y)$ are on the curve (for some, $y=0$). You soon get used to these ridiculously big numbers.
+
+The other curve is defined over an [extension](https://en.wikipedia.org/wiki/Field_extension) of $F_q$ to $F_{q^2}$ (think complex numbers). In this case, the curve equation is slightly modified to be $y^2=x^3+4(1+i)$[^fn-i-or-u], and we'll call the curve $E'(F_{q^2})$[^fn-point-on-e-prime]. We'll explain where this comes from in the section on [Twists](#twists).
+
+[^fn-i-or-u]: Sometimes $u$ is used rather than $i$ here, with $u^2+1=0$. I'm using $i$.
+
+[^fn-point-on-e-prime]: Here's a point on the $E'$ curve: <span class="wrap">`(1+i, 0x17faa6201231304f270b858dad9462089f2a5b83388e4b10773abc1eef6d193b9fce4e8ea2d9d28e3c3a315aa7de14ca + i * 0xcc12449be6ac4e7f367e7242250427c4fb4c39325d3164ad397c1837a90f0ea1a534757df374dd6569345eb41ed76e)`</span>
+
+As an aside, the curve order of $E'(F_{q^2})$ (the number of points on the curve) is vastly bigger than that of $E(F_q)$; the curve equation has many more solutions when the domain is extended to the complex numbers. In fact, the order of $E$ is close to $q$, and the order of $E'$ is close to $q^2$. This is not a coincidence, but a result of the [Hasse bound](https://en.wikipedia.org/wiki/Hasse%27s_theorem_on_elliptic_curves). See the [reference section](#bls12-381-reference) for the actual values of these numbers.
+
+##### The Subgroups
+
+In this section and the next I'll attempt to explain how BLS12-381 ended up having two curve equations rather than one.
+
+A pairing is a bilinear map. This means that it takes as input two points, each from a group of the same order, $r$. This $r$ must be prime, and for security needs to be large. Also, for rather technical reasons[^fn-distinct-subgroups], these two groups need to be distinct. Let's call them $G_1$ and $G_2$.
+
+[^fn-distinct-subgroups]: See the Asymmetric Pairings paragraph in the introduction to [Subgroup security in pairing-based cryptography](https://eprint.iacr.org/2015/247.pdf) for more on why we prefer distinct subgroups for $G_1$ and $G_2$. In short, asymmetric pairings are more secure and more efficient to compute than symmetric pairings, since the latter exist only on supersingular curves.
+
+Unfortunately, our simple curve $E(F_q)$ has only a single large subgroup, so we can't define a useful pairing based solely on $E(F_q)$.
+
+[However](https://web.archive.org/web/20131203082655/https://www.computing.dcu.ie/~mike/tate.html), if we keep extending the field over which $E$ is defined, it can be proved that we eventually find a curve that has more than one subgroup of order $r$ (in fact, $r+1$ of them). That is, for some $k$, $E(F_{q^k})$[^fn-lost-prime] contains other subgroups of order $r$ that we can use. One of these subgroups contains only points having a trace of zero[^fn-trace-zero], and we choose that subgroup to be $G_2$.
+
+[^fn-lost-prime]: Note that we lost the $'$ on $E$ here - this is the original curve $y^2=x^3+4$, but now defined over $F_{q^k}$.
+
+[^fn-trace-zero]: Basically, the trace of a point is $\sum_{i=0}^{k-1}(x^{q^i},y^{q^i})$, where k=12 in our case. Understanding this involves stuff like the Frobenius endomorphism, and that rabbit hole goes deep.
+
+This number $k$, the amount that we need to extend the base field by to find the new group, is called the _embedding degree_ of the curve, which in our case is the "12" in BLS12-381. We'll discuss embedding degree more in a moment.
+
+For completeness, note that each of $G_1$ and $G_2$ shares with its containing curve the "point at infinity". This is the identity element of the elliptic curve arithmetic group, often denoted $\mathcal{O}$. For any point $P$, $P+\mathcal{O}=\mathcal{O}+P=P$.
+
+To summarise where we've got to, we now have a group $G_1$ of order $r$ in $E(F_q)$, and we have a distinct group $G_2$ of order $r$ in $E(F_{q^{12}})$. Yay - we can do pairings!
+
+##### Twists
+
+But there's another challenge. As discussed earlier, doing arithmetic in $F_{q^{12}}$ is horribly complicated and inefficient, and curve operations need a lot of arithmetic. But there is a way to side-step this.
+
+A [twist](https://web.archive.org/web/20241006125924/http://indigo.ie/~mscott/twists.pdf) is something like a coordinate transformation. Rather wonderfully, this can be used to transform our $E(F_{q^{12}})$ curve into a curve defined over a lower degree field that still has an order $r$ subgroup. Moreover, this subgroup has a simple mapping to and from our $G_2$ group[^fn-trace-zero-again].
+
+[^fn-trace-zero-again]: Because we previously selected the trace zero subgroup. [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) dives into the details on this.
+
+Curve BLS12-381 uses a "sextic twist". This means that it reduces the degree of the extension field by a factor of six. So $G_2$ on the twisted curve can be defined over $F_{q^2}$ instead of $F_{q^{12}}$, which is a huge saving in complexity.
+
+If we can find a $u$ such that $u^6=(1+i)^{-1}$, then we can define our twisting transformation as $(x,y)\rightarrow(x/u^2,y/u^3)$[^fn-twisting-transformation]. This transforms our original curve $E:y^2=x^3+4$ into the curve $E':y^2 = {x^3 + 4/u^6} = {x^3 + 4(1+i)}$. $E$ and $E'$ look different, but are actually the same object presented with respect to coefficients in different base fields[^fn-ack-olivier].
+
+[^fn-twisting-transformation]: This doesn't seem to be documented anywhere, but I got here by attempting to decode section 3 of [Pairing-Friendly Elliptic Curves of Prime Order](https://eprint.iacr.org/2005/133.pdf) by Barreto and Naehrig.
+
+[^fn-ack-olivier]: My thanks to Olivier Bégassat for this insight.
+
+When the twist is [done correctly](https://web.archive.org/web/20241006125924/http://indigo.ie/~mscott/twists.pdf), the resulting $E'$ has a subgroup of order $r$ that maps to our $G_2$ group and vice-versa. So, it turns out that we can work in $E'$ over $F_{q^2}$ for most purposes, and map $G_2$ back to $E(F_{q^{12}})$ only when required (that is, only while actually computing pairings).
+
+So these are the two groups we will be using:
+
+  - $G_1$ $\subset E(F_q)$ where $E: y^2 = x^3 + 4$
+  - $G_2$ $\subset E'(F_{q^2})$ where $E': y^2 = x^3 + 4(1+i)$
+
+And that's the story of why BLS12-381 looks like two curves, not one. $E'(F_{q^2})$ is called the twist of, or the twisted curve corresponding to, $E(F_q)$.
+
+Note that coordinates of points in the $G_1$ group are pairs of integers, and coordinates of points in the $G_2$ group are pairs of complex integers, so $G_2$ points take twice the amount of storage, and are more expensive to work with. This leads to interesting [implementation trade-offs](#swapping-g1-and-g2).
+
+##### Pairings
+
+So, what's this pairing thing all about?
+
+As far as BLS12-381 is concerned, a pairing is a function that simply takes a point $P\in G_1\subset E(F_q)$, and a point $Q\in G_2\subset E'(F_{q^2})$ and outputs a point from a group $G_T\subset F_{q^{12}}$. That is, a pairing $e$ is a mapping, $e:G_1\times G_2\rightarrow G_T$.
+
+Elliptic curve pairings are usually denoted $e(\cdot,\cdot)$ (they take a pair of operands, hence the name) and have certain properties.
+
+1. $e(\cdot,\cdot)$ is [bilinear](#bilinearity).
+2. $e(\cdot,\cdot)$ is efficiently computable. For any $P$ and $Q$, we must have a polynomial time algorithm for computing $e(P,Q)$.
+3. $e(\cdot,\cdot)$ is non-degenerate. That is, for a non-zero $P \in G_1$ there must exist some $Q \in G_2$ such that $e(P,Q) \neq 1$ (the identity in $G_T$), and vice versa. This ensures that the pairing is "non-trivial" and actually useful.
+
+###### Bilinearity
+
+The property of pairings that we are most interested in is that they are _bilinear_. That is, $e(P,Q)$ is linear in both its arguments.
+
+We are familiar with bilinearity if we can multiply integers: let $f(a,b) \equiv a \times b$, then ${f(a_1 + a_2, b)} = {f(a_1, b) + f(a_2, b)}$, and ${f(a, b_1 + b_2)} = {f(a, b_1) + f(a, b_2)}$ - multiplication is linear in both its arguments.
+
+We could construct a similar bilinear function for elliptic curve points by multiplying the discrete logarithms of the two input points. If $g$ is a generator of an elliptic curve group, then a point $P$ is, by definition, a multiple of that generator, $P=[p]g$, and $p$ is said to be the discrete logarithm of $P$[^dl-rant]. So, given points $P=[p]g$ and $Q=[q]g$, we could find $p$ and $q$ and define $e(P,Q) = [pq]g$ - this boils down to integer multiplication and is therefore bilinear. The flaw with this, however, is that taking discrete logarithms on our elliptic curve is assumed to be very, very expensive by design. It basically requires brute-force calculation with a cost proportional to the curve order, which is what keeps our signature scheme secure. This is why the pairing operation needs its second property: it must be _efficiently_ computable.
+
+[^dl-rant]: Cue my usual rant about why it is still called discrete logarithm rather than discrete division in additively written groups.
+
+###### Bilinear pairings
+
+I'm not going to go into all the details of how the efficiently computable pairing function $e(\cdot,\cdot)$ is constructed &ndash; we can pretty much treat it as a black box &ndash; nevertheless, a great introduction is [Vitalik's article](https://web.archive.org/web/20231102064237/https://vitalik.ca/general/2017/01/14/exploring_ecp.html), and for all the glorious details let me pitch again [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf).
+
+Recall that $e$ is a mapping, $e:G_1\times G_2\rightarrow G_T$. Since $e(\cdot,\cdot)$ is linear in both its arguments, it behaves as follows.
+
+  - $e(P, Q + R) = e(P, Q) \cdot e(P, R)$, and
+  - $e(P + S, R) = e(P, R) \cdot e(S, R)$
+
+From this, we can deduce that all of the following identities hold:
+
+  - ${e([a]P,[b]Q)} = {e(P,[b]Q)^a} = {e(P,Q)^{ab}} = {e(P,[a]Q)^b} = {e([b]P,[a]Q)}$
+
+Note that, traditionally, the group operation in $G_1$ and $G_2$ is written additively, and the group operation in $G_T$ is written multiplicatively[^fn-notational-weirdness] - I've used a "$\cdot$" to show that above. So we write $[n]P$ or $[n]Q$ for applying the group operation $n$ times on $P \in G_1$ or on $Q \in G_2$, but we write $e(P,Q)^n$ (rather than $[n]e(P,Q)$) because $e(P,Q) \in G_T$.
+
+[^fn-notational-weirdness]: It is natural to write elliptic curve groups (like $G_1$ and $G_2$) additively due to the way that elliptic curve point addition is constructed geometrically. $G_T$ is not an elliptic curve group, but rather a finite field subgroup, in which multiplication is the more intuitive group operation.
+
+If we look past this notational weirdness, then we can loosely think of a pairing as being a way to "multiply" a point in $G_1$ by a point in $G_2$, an operation that cryptographically secure elliptic curves don't normally support in any practical way.
+
+In any case, bilinearity is just what we need when [verifying BLS digital signatures](/part2/building_blocks/signatures/#verifying).
+
+##### Embedding degree
+
+We've mentioned the embedding degree several times, and it is significant enough to appear in the name of the curve.
+
+The embedding degree, $k$, is calculated as the smallest positive integer such that $r$ divides $(q^k − 1)$. So, in the case of BLS12-381, $r$ is a factor of $(q^{12}-1)$[^fn12], but not of any lower power.
+
+[^fn12]: Numbers in this world are truly enormous. The number of times $r$ divides $(q^{12}-1)$ is 1299 digits long in decimal. This number is actually used in the final exponentiation when computing pairings (a multiplicative version of cofactor clearing).
+
+It turns out that this number, $k$, gives the smallest field extension $F_{q^k}$ that satisfies the two equivalent conditions:
+
+  - $F_{q^k}$ contains more than one subgroup of order $r$ (used for constructing $G_2$, see [above](#the-subgroups));
+  - $F_{q^k}$ contains all the $r$th roots of unity (used for constructing $G_T$, see [below](#roots-of-unity))
+
+These are the conditions we need to satisfy for pairings to be possible.
+
+The choice of an embedding degree is a balance between security and efficiency (as ever). On the [security](#security-level) front, the embedding degree is also known as the security multiplier: a higher embedding degree makes the discrete logarithm problem harder to solve in $G_T$. However, a high embedding degree means we have to do field operations in high-degree extensions, such as $F_{q^{12}}$, which is clunky and inefficient. (This is true even when using [twists](#twists): the maximum available twist is degree six, so the best we can do is to reduce the field extension degree by six. And in any case pairing must be done in the large extension field.)
+
+Embedding degrees of 12 or 24 seem to be a current sweet-spot for many applications. Once again, the embedding degree of BLS12-381 is 12 - it's in the name.
+
+##### Security level
+
+Security of cryptographic systems is [measured in bits](https://en.wikipedia.org/wiki/Security_level). Informally, I take $n$-bit security to mean something like, "would need about $2^n$ operations to break it".
+
+For elliptic curve cryptography, security is all about making the discrete logarithm problem hard. That is, given a point $g$ and a point $g^k$ (in multiplicative group notation), finding $k$ must be infeasible without prior knowledge, meaning that we want it to take at least $2^n$ operations for $n>100$ or so, in today's terms.
+
+For pairing-friendly curves, the discrete logarithm problem must be hard in each of the three of the groups we are using, $G_1$, $G_2$, and $G_T$. Thus, to target $n$-bit security,
+
+  - The prime group order $r$ must be at least $2n$ bits long as there are algorithms such as [Pollard's rho algorithm](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm_for_logarithms) that have cost $O(\sqrt{r})$.
+  - Our extension field $F_{q^k}$ must be large enough not to be vulnerable to methods like the [number field sieve](https://en.wikipedia.org/wiki/General_number_field_sieve).
+
+BLS12-381 was intended to offer around a 128 bit security level, based on these criteria, and this was supported by initial analyses. See Table 1.1 in the [Taxonomy](https://eprint.iacr.org/2006/372.pdf), for example.
+
+However, on closer examination it seems that "the finite extension field of size 3072 = 12 × 256 bits is not big enough" (quoting section 2 [here](https://eprint.iacr.org/2019/077.pdf)), in view of the second criterion above.
+
+According to a [report by NCC Group](https://www.nccgroup.com/media/v1kkxeae/_ncc_group_zcash2018_public_report_2019-01-30_v13.pdf), citing other sources, the actual security level is probably between 117 and 120 bits (see pages 8 and 9). They regard this as a perfectly adequate level of security: "The value of reaching '128-bit' [being] mostly psychological". Sean Bowe has also commented on the security level in the light of the [original design goals](https://github.com/zcash/zcash/issues/4065#issuecomment-572202467). The draft IETF specification for BLS12-381 is less pessimistic than the NCC Group, and [cites](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#section-4.2.1-8) a security level of 126 bits.
+
+##### Cofactor
+
+A subgroup's cofactor is the ratio of the size of the whole group to the size of the subgroup. Normal elliptic curve cryptography requires the cofactor to be very small, [usually one](https://crypto.stackexchange.com/questions/2881/why-would-anyone-use-an-elliptic-curve-with-a-cofactor-1), in order to avoid small subgroup attacks on discrete logarithms. In pairing-based cryptography, however, this is not the case, and the cofactors of the $G_1$ and $G_2$ groups can be truly enormous.
+
+It turns out that, with care, we can have large cofactors and still be secure. Namely, when the cofactors of $G_1$, $G_2$ and $G_T$ contain no prime factors smaller than $r$. Section 3.2 of [this paper](https://eprint.iacr.org/2015/247.pdf) discusses this in detail. This is _not_ the case for BLS12-381, however, and the $G_1$ and $G_2$ cofactors both have several small factors. Thus, we have to be mindful of small subgroup attacks [in our implementations](#subgroup-membership-checks).
+
+I've listed the prime factors of the curve orders in the [reference section](#bls12-381-reference), as well as the cofactors themselves. The $G_1$ cofactor contains small prime factors like 3, 11, and 10177; the $G_2$ cofactor contains small prime factors like 13, 23, and 2713.
+
+It's not all bad news when it comes to the cofactors, though. It turns out that multiplying by the group's cofactor is a straightforward way to map any arbitrary point on the elliptic curve into the respective subgroup, $G_1$ or $G_2$[^fn13]. This is important when doing "hash to curve" operations and the like: we first make a point on the curve, and then we map it into the appropriate group by multiplying by the cofactor, so-called [cofactor clearing](#cofactor-clearing).
+
+[^fn13]: This is easy to see. The subgroup $G$ has order $r$, and its cofactor is $h$, such that $hr = n$, the order of the whole elliptic curve group. Consider an arbitrary element $P$ of the elliptic curve group. We have $\mathcal{O} = [n]P = [r] ([h]P)$. Thus, $[h]P\in G$. While not specific to BLS12-381, here is an [excellent article](https://loup-vaillant.fr/tutorials/cofactor) about cofactor clearing.
+
+##### Roots of unity
+
+Just a note on roots of unity, because they appear in two completely different and unrelated contexts, which can be confusing.
+
+First, we said that to support ZK-SNARK schemes with this curve, for some biggish $n$ we want to have a $2^n$th root of unity in the field $F_r$ (not $F_q$, note). This is to facilitate efficient fast Fourier transforms for manipulating very large polynomials over the scalar field $F_r$. From the hexadecimal representation of $r-1$, it's clearly a multiple of $2^{32}$, so there is a $2^{32}$th root of unity ($2^{32}$ of them, in fact).
+
+Second, and completely unrelated, the effect of the pairing is to map the two points from $G_1$ and $G_2$ onto an $r$th root of unity in $F_{q^{12}}$. These $r$th roots of unity actually form a subgroup in $F_{q^{12}}$ of order $r$[^fn-roots-of-unity], which is the group we call $G_T$.
+
+[^fn-roots-of-unity]: This is a general property of roots of unity in multiplicative groups, not special to elliptic curves or pairings. For example, the set of fourth roots of unity in $F_{q^2}$, $\{1, -i, -1, i\}$, forms a group of order four under multiplication.
+
+Let's briefly revisit [our discussion](#the-subgroups) of extending the base field for $E$ to $F_{q^{12}}$, which we did in order to find another subgroup of order $r$. It also turns out $F_{q^{12}}$ treated as a multiplicative group is the smallest field extension that contains the $r$th roots of unity in the field, the 12 coming from the embedding degree once again. This is why $G_T$ is defined over $F_{q^{12}}$.
+
+#### Using curve BLS12-381
+
+This section is a miscellany of things relevant to using BLS12-381 in practice.
+
+##### BLS digital signatures
+
+Now it's time to introduce the other BLS: Boneh, Lynn and Shacham. (The L is the same L as in BLS12-381; the B and the S are different.)
+
+BLS signatures were introduced [back in 2001](https://www.iacr.org/archive/asiacrypt2001/22480516.pdf), a little before the [BLS curve family](https://eprint.iacr.org/2002/088.pdf) was published in 2002. Pleasingly, they go hand-in-hand. (BLS signatures can use other curves; BLS curves have uses other than signatures. But it's nice when they come together.)
+
+The BLS signature scheme is described briefly below. See the [BLS Signatures](/part2/building_blocks/signatures/) chapter for a fuller exploration of how we have implemented them in Ethereum 2. You can find a pretty concise but lucid description of the BLS signature scheme in the [draft IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-bls-signature-05.html). See also the [GitHub repo](https://github.com/kwantam/draft-irtf-cfrg-bls-signature).
+
+###### Private and public keys
+
+The private/secret key (to be used for signing) is just a randomly chosen number between $1$ and $r-1$ inclusive. We'll call it $sk$.
+
+The corresponding public key (if we're [using $G_1$ for public keys](#swapping-g1-and-g2)) is $pk = [sk]g_1$, where $g_1$ is the chosen [generator](#generators) of $G_1$. That is, $g_1$ multiplied by $sk$, which is $g_1$ added to itself $sk$ times.
+
+The discrete logarithm problem means that it is unfeasible to recover $sk$ given the public key $pk$.
+
+###### Signing
+
+To sign a message $m$ we first need to map $m$ onto a point in group $G_2$ (if we're [using $G_2$ for signatures](#swapping-g1-and-g2)). See hashing to the curve, [below](#hashing-to-the-curve), for a discussion on ways to do this. Anyway, let's assume we can do this, and call the resulting $G_2$ point $H(m)$.
+
+We sign the message by calculating the signature $\sigma = [sk]H(m)$. That is, by multiplying the hash point by our secret key.
+
+###### Verification
+
+Given a message $m$, a signature $\sigma$, and a public key $pk$, we want to verify that it was signed with the $sk$ corresponding to $pk$.
+
+This is where [pairing](#pairings) comes in. The signature is valid if, and only if, $e(g_1,\sigma) = e(pk,H(m))$.
+
+We can confirm this using the properties of pairings: ${e(pk,H(m))} = {e([sk]g_1,H(m))} = {e(g_1,H(m))^{(sk)}} = {e(g_1,[sk]H(m))} = {e(g_1,\sigma)}$.
+
+###### Aggregation
+
+A really neat property of BLS signatures is that they can be [aggregated](https://eprint.iacr.org/2018/483.pdf) (see also the [original paper](https://crypto.stanford.edu/~dabo/pubs/papers/aggreg.pdf)), so that we need only two pairings to verify a single message signed by $n$ parties, or $n+1$ pairings to verify $n$ different messages signed by $n$ parties, rather than $2n$ pairings you might naively expect to need. Pairings are expensive to compute, so this is very attractive.
+
+It's possible to aggregate signatures over different messages, or signatures over the same message. In the case of Ethereum 2.0 we aggregate over the same message, so for brevity I'm just going to consider that.
+
+To aggregate signatures we just have to add up the $G_2$ points they correspond to: $\sigma_{agg} = \sigma_1+\sigma_2+\cdots+\sigma_n$. We also aggregate the corresponding $G_1$ public key points $pk_{agg} = pk_1+pk_2+\cdots+pk_n$.
+
+Now the magic of pairings means that we can just verify that $e(g_1,\sigma_{agg}) = e(pk_{agg},H(m))$ to verify all the signatures together with just two pairings.
+
+##### Swapping G1 and G2
+
+For many purposes, the $G_1$ and $G_2$ groups are interchangeable. For example, with the BLS signature scheme, we can choose our public keys to be members of $G_1$ and our signatures to be members of $G_2$, or we can do it the other way round - the pairing function doesn't care; everything still works if we swap the groups over.
+
+The trade-offs are execution speed and storage size. $G_1$ has small points and is fast; $G_2$ has large points and is slow. BLS12-381 was initially designed to implement Zcash, and for performance reasons they chose to use $G_1$ to represent signatures and $G_2$ to represent public keys.
+
+With respect to Zcash, most other implementations are "reversed". In Ethereum 2.0 we [use $G_1$ for public keys](/part2/building_blocks/signatures/#choice-of-groups): for one thing, aggregation of public keys happens much more often than aggregation of signatures; for another, public keys of validators need to be stored in state, so keeping the representation small is important. Signatures, then, are $G_2$ points.
+
+##### Point compression
+
+(Note that sometimes, the [twisting](#twists) operation is referred to as point compression - that's something completely different to what we're discussing here.)
+
+For storing and transmitting elliptic curve points, it is common to drop the $y$-coordinate. This halves the amount of data. For BLS12-381, $G_1$ points are reduced from 96 bytes (2 × 381 bits-rounded-to-bytes) to 48 bytes, and $G_2$ points are reduced from 192 bytes to 96 bytes.
+
+Any elliptic curve point can be regenerated from the $x$ coordinate by using the relevant curve equation, $E$ or $E'$. For any valid $x$ coordinate on the curve, $y$ is either zero or has two possible values that are the negative of each other: $y=\pm\sqrt{x^3+4}$ for $G_1$, and analogously for $G_2$.
+
+Since field elements are 381 bits, and 48 bytes is 384 bits, we have some bits to spare for flags. The most important is a flag to show which of the $y$ values the point corresponds to (positive or negative). Another bit is used to signal whether this is the point at infinity (which has many possible representations). A third is simply to indicate whether this is a compressed or uncompressed representation, though context should handle this in practice.
+
+For both $G_1$ and $G_2$, about half of $x$ values are not on the curve. In this case, the point is conventionally decoded to the point at infinity. But unless the infinity flag is set &ndash; in which case we would not have attempted to decode the point &ndash; this is an error condition.
+
+The specific details of how the flag bits and $x$ values are encoded is [here](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization).
+
+##### Subgroup membership checks
+
+When dealing with any point with an unknown origin, whether it comes to us compressed or uncompressed, it's important that we check that it lies in the correct subgroup. The point decompression described above only results in a point on the curve; we don't know whether it lies in the appropriate $G_1$ or $G_2$.
+
+The main issue seems to be that both $E(F_{q})$ and $E'(F_{q^2})$ contain small subgroups (you can see this by factoring the cofactors[^fn-factoring] - see the [reference section](#bls12-381-reference) for the actual factors). Inadvertently working with points in these small subgroups could lead to vulnerabilities, as discussed in [this paper](https://eprint.iacr.org/2015/247.pdf).
+
+[^fn-factoring]: A couple of online tools for factoring huge numbers are [dCode](https://www.dcode.fr/prime-factors-decomposition), and [Dario Alpern](https://www.alpertron.com.ar/ECM.HTM)'s tool)
+
+Subgroup checks are easy in principle: simply multiply our point by $r$. For points in $G_1$ or $G_2$ this will result in the respective points at infinity; for points outside the groups, it won't.
+
+Unfortunately, this is slow in practice, especially for $G_2$, since $r$ is so large. As an alternative, there are [new techniques](https://eprint.iacr.org/2019/814.pdf) making use of endomorphisms for performing faster subgroup checks.
+
+##### Generators
+
+$G_1$ and $G_2$ are cyclic groups of prime order, so any point (except the identity/point at infinity) is a generator. Thus, picking generators is just a matter of convention.
+
+Generator points for $G_1$ and $G_2$ are specified in decimal [here](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#generators) and the same points in hexadecimal [here](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#section-4.2.1).
+
+These were chosen [as follows](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#generators):
+
+> The generators of $G_1$ and $G_2$ are computed by finding the lexicographically smallest valid x-coordinate, and its lexicographically smallest y-coordinate and scaling it by the cofactor such that the result is not the point at infinity.
+
+By my calculations, with $h_1$ and $h_2$ the respective group [cofactors](#cofactor), this makes the $G_1$ generator $g_1=[h_1]p_1$, with $p_1$ as follows,
+
+  - $p_1 =$ <span class="wrap">`(0x04, 0x0a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c)`</span>
+
+and the $G_2$ generator $g_2=[h_2]p_2$, with $p_2$ as follows,
+
+  - $p_2 =$ <span class="wrap">`([0x02, 0x00],[0x013a59858b6809fca4d9a3b6539246a70051a3c88899964a42bc9a69cf9acdd9dd387cfa9086b894185b9a46a402be73,0x02d27e0ec3356299a346a09ad7dc4ef68a483c3aed53f9139d2f929a3eecebf72082e5e58c6da24ee32e03040c406d4f])`</span>
+
+(I think "lexicographically smallest" means treating all numbers in the base field as non-negative, and just taking the smaller one, prioritising real parts over imaginary parts.)
+
+##### Final exponentiation
+
+Calculation of a pairing has two parts: the Miller loop and the final exponentiation. Both parts are quite expensive, but there's a nice hack you can do to reduce the impact of the final exponentiation.
+
+Normally, we calculate two full pairings in order to perform signature verification, to check whether $e(g_1,\sigma)=e(pk,H(m))$.
+
+If we denote as $e'(\cdot,\cdot)$ the pairing without the final exponentiation, then for, some $x$, we are checking whether $e'(g_1,\sigma)^x=e'(pk,H(m))^x$. ($x$ happens to be $(q^{12} − 1)/r$, which is huge[^fn-final-exponentiation].)
+
+[^fn-final-exponentiation]: $(q^{12} − 1)/r$ is actually the cofactor of the $G_T$ group in $F^*_{q^{12}}$. Performing the exponentiation maps the element produced by the Miller loop into $G_T$, the group of $r$th roots of unity. When we account for the notational difference between additive and multiplicative groups, this is analogous to cofactor clearing for $G_1$ and $G_2$ discussed elsewhere in this section.
+
+We know how to multiply in group $G_T$, so we can reorganise this as a check whether $(e'(-g_1,\sigma)e'(pk,H(m)))^x=1$. (We can negate any one of the points: the magic of pairings makes this equivalent to taking the inverse in $G_T$.)
+
+So, to verify a signature, we do the two Miller loops, one with a negated input value, multiply the results and then do a single final exponentiation. If the result is unity in $G_T$ then our pairings match. This ought to give a worthwhile speedup.
+
+##### Hashing to the curve
+
+To calculate a digital signature over a message, we first need to transform an arbitrary message (byte string) to a point on the $G_2$ curve (if we are using $G_2$ for signatures). There are many ways to do this, with varying degrees of efficiency and security.
+
+###### Hash and check
+
+The [initial implementation](https://github.com/ethereum/consensus-specs/pull/141/files) in Eth2 was "hash-and-check". This is very simple.
+
+1. Hash your message to an integer modulo $q$.
+2. Check if there is a point on the curve with this $x$-coordinate (real part $x$, imaginary part $0$). If not, add one to $x$ and repeat this step.
+3. We have a point on the curve! Multiply by the $G_2$ cofactor to convert it into a point in $G_2$ ([cofactor clearing](#cofactor-clearing)).
+
+About half the points that we try will result in a point on the curve, so this is not constant time: we don't know how many iterations it will take to find one. In one sense it doesn't matter: all the information is public, so we're not leaking anything. However, it does open up a griefing attack. An attacker could pre-calculate messages that take a very long time to find a point (1 in one million messages will take 20 tries, for example) and slow us down considerably.
+
+###### Simplified SWU map
+
+We have now adopted a better approach which is described in [this paper](https://eprint.iacr.org/2019/403.pdf) and defined in [RFC 9380](https://www.rfc-editor.org/rfc/rfc9380#name-bls12-381-g2), the IETF standard for hashing to curves. As before (but a bit differently to ensure a uniform distribution of output points) we first create a field point by hashing the message mod $q$ (the "expand message" step).
+
+Next we use a special map (the SWU map) that is guaranteed to translate that field point into a valid point on an elliptic curve. For technical reasons, this is _not_ the curve $E'(F_{q^2})$, but a curve [isogenous](https://www.johndcook.com/blog/2019/04/21/what-is-an-isogeny/) to it (i.e. having the same number of points). We then use another map (3-isogeny) to transfer this to a point on $E'(F_{q^2})$. Finally we use [cofactor clearing](#cofactor-clearing) to end up with a point in $G_2$.
+
+You can take a look at my [implementation of this in Java](https://github.com/PegaSysEng/artemis/pull/898) , based on the [reference code in Python](https://github.com/algorand/bls_sigs_ref/tree/master/python-impl). The idea is for this approach to be generally adopted to enhance the interoperability of blockchains.
+
+##### Cofactor clearing
+
+We discussed multiplying by the [cofactor](#cofactor) as a way to make an arbitrary point on $E$ or $E'$ into a point in $G_1$ or $G_2$ respectively. This is useful when [hashing to the curve](#hashing-to-the-curve), for example.
+
+The $G_2$ co-factor is [_huge_](#subgroup-g_2), so multiplying by it is slow. However, there are [faster ways](https://eprint.iacr.org/2017/419.pdf) to map curve points into $G_2$ using an endomorphism (a map of a group to itself). This features in the [RFC 9380](https://www.rfc-editor.org/rfc/rfc9380#name-clearing-the-cofactor) standard.
+
+The endomorphism we use was until recently subject to [a patent](https://patents.google.com/patent/US7110538B2/en), but, as of 2020, this patent has expired everywhere.
+
+As a workaround to the patent before it expired, instead of multiplying by the $G_2$ cofactor, the standard suggests multiplying by an effective cofactor, $h_{eff}$ (see [section 8.8.2](https://www.rfc-editor.org/rfc/rfc9380#name-bls12-381-g2) of RFC 9380 for the value), which gives the same result as the endomorphism. The effective cofactor is _even larger_ than the $G_2$ cofactor, but the multiplication can be implemented using an [addition chain](https://github.com/PegaSysEng/teku/blob/55d04f87b422112312f79c1b4d662b3d58e3ca74/bls/src/main/java/tech/pegasys/teku/bls/impl/mikuli/hash2g2/Chains.java#L569) as an optimisation.
+
+Now that the patent has expired, the endomorphism can be just dropped in as a replacement for the effective cofactor multiplication.
+
+##### Extension towers
+
+Recall our discussion of [field extensions](#field-extensions)? In practice, rather than implementing a massive 12th-degree extension directly, it is more efficient to build it up from smaller extensions: [a tower of extensions](https://eprint.iacr.org/2009/556.pdf).
+
+For BLS12-381, the $F_{q^{12}}$ field is implemented as a quadratic (degree two) extension, on top of a cubic (degree three) extension, on top of a quadratic extension of $F_q$.
+
+As long as the modular reduction polynomial (our reduction rule) is irreducible (can't be factored) in the field being extended at each stage, then this all works out fine.
+
+[Specifically](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md):
+
+  1. $F_{q^2}$ is constructed as $F_q(u) / (u^2 - \beta)$ where $\beta = -1$.
+  2. $F_{q^6}$ is constructed as $F_{q^2}(v) / (v^3 - \xi)$ where $\xi = u + 1$.
+  3. $F_{q^{12}}$ is constructed as $F_{q^6}(w) / (w^2 - \gamma)$ where $\gamma = v$
+
+Interpreting these in terms of our previous explanation:
+
+  1. We write elements of the $F_{q^2}$ field as first degree polynomials in $u$, with coefficients from $F_q$, and apply the reduction rule $u^2 + 1 = 0$, which is irreducible in $F_q$.
+      - an element of $F_{q^2}$ looks like $a_0 + a_1u$ where $a_j \in F_q$.
+  2. We write elements of the $F_{q^6}$ field as second degree polynomials in $v$, with coefficients from the $F_{q^2}$ field we just constructed, and apply the reduction rule $v^3 - (u + 1) = 0$, which is irreducible in $F_{q^2}$.
+      - an element of $F_{q^6}$ looks like $b_0 + b_1v + b_2v^2$ where $b_j \in F_{q^2}$.
+  3. We write elements of the $F_{q^{12}}$ field as first degree polynomials in $w$, with coefficients from the $F_{q^6}$ field we just constructed, and apply the reduction rule $w^2 - v = 0$, which is irreducible in $F_{q^6}$.
+      - an element of $F_{q^{12}}$ looks like $c_0 + c_1w$ where $c_j \in F_{q^6}$.
+
+This towered extension can replace the direct extension as a basis for pairings, and when well-implemented can save a huge amount of arithmetic when multiplying $F_{q^{12}}$ points. See [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) section 7.3 for a full discussion of the advantages.
+
+##### Coordinate systems
+
+Finding the inverse of a field element (i.e. division) is an expensive operation, so implementations of elliptic curve arithmetic try to avoid it as much as possible. It helps if we choose the right coordinate system for representing our points.
+
+###### Affine coordinates
+
+Affine coordinates are the traditional representation of points with just an $(x,y)$ pair of coordinates, where $x$ and $y$ satisfy the curve equation. This is what we normally use when storing and transmitting points.
+
+However, it is not always the most efficient form to use when actually working with points, and there are two other schemes I'm aware of that are used for BLS12-381.
+
+The basic idea is to represent the coordinate using notional fractions, reducing the number of actual division operations needed. To do this, a third coordinate is introduced and we use $(X, Y, Z)$ for the internal representation of a point. Like our familiar fractions, there are many representations of the same value, all corresponding to a single actual value ($\frac{1}{2}$, $\frac{3}{6}$, $\frac{197}{394}$ are all the same number).
+
+The two systems I know of in use for BLS12-381 are Standard Projective coordinates and Jacobian coordinates.
+
+###### Standard Projective coordinates
+
+The [Standard Projective coordinate](https://en.wikibooks.org/wiki/Cryptography/Prime_Curve/Standard_Projective_Coordinates) point $(X, Y, Z)$ represents the Affine coordinate point $(X/Z, Y/Z)$.
+
+These are also called homogeneous projective coordinates because the curve equation takes on the homogeneous form $Y^2Z=X^3+4Z^3$. Points become straight lines through the origin in $(X, Y, Z)$ space, with the Affine point being the intersection of the line with the plane $Z=1$. Figure 2.10 in [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) gives a nice illustration.
+
+Standard Projective coordinates are used by the [Apache Milagro](https://milagro.apache.org/) BLS12-381 library, and also by the [noble-curves](https://github.com/paulmillr/noble-curves/tree/main) BLS12-381 implementation.
+
+###### Jacobian coordinates
+
+A different kind of projective coordinates are [Jacobian coordinates](https://en.wikibooks.org/wiki/Cryptography/Prime_Curve/Jacobian_Coordinates). In this scheme, the Jacobian point $(X, Y, Z)$ represents the Affine point $(X/Z^2, Y/Z^3)$. The curve equation becomes $Y^2=X^3+4Z^6$.
+
+The [sample code](https://github.com/algorand/bls_sigs_ref/tree/master/python-impl) for the constant-time hash-to-curve uses Jacobian coordinates, as does the [gnark-crypto](https://github.com/Consensys/gnark-crypto) library.
+
+Note that, in both schemes, the easiest way to import the Affine point $(x, y)$ is to map it to $(x, y, 1)$.
+
+##### BLS12-381 Reference
+
+###### General
+
+| Parameter | &nbsp; | Equation | Value | Comments |
+| ---- | - | ---- | ---------------- | ---- |
+| Curve parameter| ${\tt x}$ | &nbsp; | `-0xd201000000010000` | |
+| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)^2}\\{({\tt x}^4-{\tt x}^2+1)}\\+{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Subgroup size: $\vert G_1\vert$, $\vert G_2\vert$, $\vert G_T\vert$ | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
+
+###### Curve E(F_q)
+
+|||
+| - | ----- |
+| Equation | $y^2=x^3+4$ |
+| Order $\vert E(F_q)\vert$ | <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb15400008c0000000000aaab`</span> |
+| Order (decimal) | <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129030796414117214202539</span> |
+| Prime Factorisation | 3 $\times$ 11$^2$ $\times$ 10177$^2$ $\times$ 859267$^2$ $\times$ 52437899$^2$ $\times$ $r$ |
+
+The product of the factors of the group order, excluding $r$, are (by definition) the cofactor of the subgroup with order $r$ ($G_1$ in this case).
+
+Observe that the number of points on curve $E$, its order, $|E(F_q)|$, is (in some sense) very close to the field modulus, $q$. This is a consequence of the [Hasse bound](https://en.wikipedia.org/wiki/Hasse%27s_theorem_on_elliptic_curves).
+
+###### Subgroup G_1
+
+|||
+| - | ------- |
+| Order | $r$ |
+| Generator | <span class="wrap">`(0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb,`</span><br/><span class="wrap">`0x08b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1)`</span> |
+| Cofactor | <span class="wrap">`0x396c8c005555e1568c00aaab0000aaab`</span> |
+
+The $G_1$ cofactor is the factorisation of the curve order, $|E(F_q)|$, excluding the $r$ term.
+
+###### Curve E'(F_q^2)
+
+|||
+| - | ----- |
+| Equation | $y^2=x^3+4(1+i)$ |
+| Order $\vert E'(F_{q^2})\vert$ | <span class="wrap">`0x2a437a4b8c35fc74bd278eaa22f25e9e2dc90e50e7046b466e59e49349e8bd050a62cfd16ddca6ef53149330978ef0137697386bf984315744a2d5eb3dd4d213f2484c55b94474ab096de2c62640b2643116b1e2788e6a8b2a9fffe1c7238e5`</span> |
+| Order (decimal) | <span class="wrap">16019282247729705411943748644318972617695120099330552659862384536985976748491357143400656079302193429974954385540174732940659106207100323726025938325193045129788127168347624263893040187112659960846674086295148469572963088890738917</span> |
+| Prime Factorisation | 13$^2$ $\times$ 23$^2$ $\times$ 2713 $\times$ 11953 $\times$ 262069 $\times$ <span class="wrap">402096035359507321594726366720466575392706800671181159425656785868777272553337714697862511267018014931937703598282857976535744623203249</span> $\times$ $r$ |
+
+The order of curve $E'$, $|E'(F_{q^2})|$, is close to the square of the field modulus, $q^2$.
+
+###### Subgroup G_2
+
+|||
+| - | ------- |
+| Order | $r$ |
+| Generator | <span class="wrap">`([0x024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8, 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e],`</span><br/><span class="wrap">`[0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801, 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be])`</span> |
+| Cofactor | <span class="wrap">`0x5d543a95414e7f1091d50792876a202cd91de4547085abaa68a205b2e5a7ddfa628f1cb4d9e82ef21537e293a6691ae1616ec6e786f0c70cf1c38e31c7238e5`</span> |
+
+The $G_2$ cofactor is the factorisation of the curve order, $|E'(F_{q^2})|$, excluding the $r$ term.
+
+##### Resources and further reading
+
+There are _lots_ of references linked in the above, and I'm not going to repeat many here. I'll just pick out a few particularly useful or interesting things.
+
+Useful reference material:
+
+  - [The original](https://electriccoin.co/blog/new-snark-curve/) BLS12-381 announcement
+  - [Concise](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md) description of the parameters and serialisation
+  - Draft [IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#name-bls-curves-for-the-128-bit-)
+
+In general, implementations of pairing libraries tend to be highly optimised and/or very generic (supporting many curves) which makes them quite hard to learn from. The [Noble BLS12-381](https://github.com/paulmillr/noble-bls12-381) library in JavaScript/TypeScript by Paul Miller is definitely among the easier to follow.
+
+The [`blsh`](https://github.com/one-hundred-proof/blsh) REPL (a wrapper around the BLST library) is excellent for exploring the curve itself. See the [grammar](https://github.com/one-hundred-proof/blsh/blob/main/src/blsh.pest) for the full functionality - the `info` command alone is worth it. You can [manually verify](https://x.com/1_00_proof/status/1930535556049424817) BLS signatures if you like.
+
+Finally, a couple of fun and interesting reads:
+
+  - This white paper on [Curve9769](https://github.com/pornin/curve9767/raw/master/doc/curve9767.pdf) is not directly relevant to BLS12-381, but is a well-written and wonderful exploration of the joys and pains of designing and implementing an elliptic curve (not a pairing-friendly one in this case).
+  - [Pairings are not dead, just resting](https://ecc2017.cs.ru.nl/slides/ecc2017-aranha.pdf). A great overview presentation. Some BLS12-381 things.
 
 ### Randomness <!-- /part2/building_blocks/randomness/ -->
 
@@ -7249,13 +7803,13 @@ And regarding "64-bit", early versions of the spec used [other](https://github.c
 | `ExecutionAddress`   | `Bytes20`      | Address of account on the execution layer |
 | `WithdrawalIndex`    | `uint64`       | an index of a `Withdrawal` |
 
-#### Slot
+#### `Slot`
 
 Time is divided into fixed length slots. Within each slot, exactly one validator is randomly selected to propose a beacon chain block. The progress of slots is the fundamental heartbeat of the beacon chain.
 
 [TODO: link to Slots chapter]::
 
-#### Epoch
+#### `Epoch`
 
 Sequences of slots are combined into fixed-length epochs.
 
@@ -7335,13 +7889,13 @@ In Ethereum&nbsp;2.0, BLS public keys are elliptic curve points from the BLS12-3
 
 See the section on [BLS signatures](/part2/building_blocks/signatures/) in part&nbsp;2 for a more in-depth look at these things.
 
-#### BLSSignature
+#### `BLSSignature`
 
 As above, we are using BLS signatures over the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve in order to sign messages between participants. As with all digital signature schemes, this guarantees both the identity of the sender and the integrity of the contents of any message.
 
 In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $G_2$ group, thus are 96 bytes long when compressed.
 
-#### ParticipationFlags
+#### `ParticipationFlags`
 
 The `ParticipationFlags` type was introduced in the Altair upgrade as part of the accounting reforms.
 
@@ -7351,9 +7905,9 @@ Three of the eight bits are [currently used](/part3/config/constants/#participat
 
 As an aside, it might have been more intuitive if `ParticipationFlags` were a `Bytes1` type, rather than introducing a weird `uint8` into the spec. After all, it is not used as an arithmetic integer. However, `Bytes1` is a composite type in SSZ, really an alias for `Vector[uint8, 1]`, whereas `uint8` is a basic type. When computing the hash tree root of a `List` type, multiple basic types can be packed into a single leaf, while composite types take a leaf each. This would result in 32 times as many hashing operations for a list of `Bytes1`. For similar reasons the type of `ParticipationFlags` [was changed](https://github.com/ethereum/consensus-specs/pull/2176#pullrequestreview-566879992) from `bitlist` to `uint8`.
 
-#### Transaction
+#### `Transaction`
 
-The Transaction type was introduced in the Bellatrix pre-Merge upgrade to allow for Ethereum transactions to be included in beacon blocks. It appears in [`ExecutionPayload`](/part3/containers/execution/#executionpayload) objects.
+The `Transaction` type was introduced in the Bellatrix pre-Merge upgrade to allow for Ethereum transactions to be included in beacon blocks. It appears in [`ExecutionPayload`](/part3/containers/execution/#executionpayload) objects.
 
 Transactions are completely opaque to the beacon chain and are exclusively handled in the execution layer. A note reflecting this is included in the [Bellatrix specification](https://github.com/ethereum/consensus-specs/blob/v1.3.0/specs/bellatrix/beacon-chain.md):
 
@@ -7361,13 +7915,13 @@ Transactions are completely opaque to the beacon chain and are exclusively handl
 
 The maximum size of a transaction is [`MAX_BYTES_PER_TRANSACTION`](/part3/config/preset/#max_bytes_per_transaction) which looks huge, but since the underlying type is an SSZ `ByteList` (which is a [`List`](/part2/building_blocks/ssz/#lists)), a Transaction object will only occupy as much space as necessary.
 
-#### ExecutionAddress
+#### `ExecutionAddress`
 
-The ExecutionAddress type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20-byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution/#executionpayload) class.
+The `ExecutionAddress` type was introduced in the Bellatrix pre-Merge upgrade to represent the fee recipient on the execution chain for beacon blocks that contain transactions. It is a normal, 20-byte, Ethereum address, and is used in the [`ExecutionPayload`](/part3/containers/execution/#executionpayload) class.
 
-#### WithdrawalIndex
+#### `WithdrawalIndex`
 
-The WithdrawalIndex keeps track of the total number of withdrawal transactions made from the consensus layer to the execution layer. All nodes store this number in their state, so a block containing withdrawal transactions that have unexpected withdrawal indices is invalid.
+The `WithdrawalIndex` keeps track of the total number of withdrawal transactions made from the consensus layer to the execution layer. All nodes store this number in their state, so a block containing withdrawal transactions that have unexpected withdrawal indices is invalid.
 
 At the maximum rate of 16 withdrawals per slot, a `uint64` will take 438 billion years to overflow. This ought to be enough.
 
@@ -8789,7 +9343,7 @@ The values of these two fields is fixed for the life of the chain. For the mainn
 |||
 |-|-|
 | `genesis_time` | 1606824023 |
-| `genesis_validators_root` | `0x4b363db9`<wbr/>`4e286120`<wbr/>`d76eb905`<wbr/>`340fdd4e`<wbr/>`54bfe9f0`<wbr/>`6bf33ff6`<wbr/>`cf5ad27f`<wbr/>`511bfe95` |
+| `genesis_validators_root` | <span class="wrap">`0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95`</span> |
 
 The `fork` [object](/part3/containers/dependencies/#fork) is manually updated as part of beacon chain upgrades, also called hard forks. This invalidates blocks and attestations from validators not following the new fork.
 
@@ -9738,7 +10292,7 @@ Looking at the parameters in reverse order:
   - `seed` is the seed value for computing the pseudo-random shuffling, based on the epoch number and a domain parameter. ([`get_beacon_committee()`](/part3/helper/accessors/#def_get_beacon_committee) uses [`DOMAIN_BEACON_ATTESTER`](/part3/config/constants/#domain_beacon_attester).)
   - `indices` is the list of validators eligible for inclusion in committees, namely the whole list of indices of active validators.
 
-Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [ValidatorIndex](/part3/config/types/#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
+Random sampling among the validators is done by taking a contiguous slice of array indices from `start` to `end` and seeing where each one gets shuffled to by `compute_shuffled_index()`. Note that `ValidatorIndex(i)` is a type-cast in the above: it just turns `i` into a [`ValidatorIndex`](/part3/config/types/#validatorindex) type for input into the shuffling. The output value of the shuffling is then used as an index into the `indices` list. There is much here that client implementations will optimise with caching and batch operations.
 
 It may not be immediately obvious, but not all committees returned will be the same size (they can vary by one), and every validator in `indices` will be a member of exactly one committee. As we increment `index` from zero, clearly `start` for `index == j + 1` is `end` for `index == j`, so there are no gaps. In addition, the highest `index` is `count - 1`, so every validator in `indices` finds its way into a committee.[^fn_formal_verif_committee_size]
 
@@ -9965,7 +10519,7 @@ def add_flag(flags: ParticipationFlags, flag_index: int) -> ParticipationFlags:
     return flags | flag
 ```
 
-This is simple and self-explanatory. The `2**flag_index` is a bit Pythonic. In a C-like language it would use a bit-shift:
+This is simple and self-explanatory. The `2**flag_index` is a bit Pythonic. In a C-like language we would use a bit-shift:
 
 ```code
     1 << flag_index
@@ -10724,7 +11278,7 @@ In addition, an exited validator remains eligible to be slashed until its `withd
 
 |||
 |-|------|
-| Used by | [`slash_validator()`](/part3/helper/mutators/#def_slash_validator), [`process_registry_updates()`](/part3/transition/epoch/#def_process_registry_updates), [`process_voluntary_exit()`](/part3/transition/block/#def_process_voluntary_exit) |
+| Used&nbsp;by | [`slash_validator()`](/part3/helper/mutators/#def_slash_validator), [`process_registry_updates()`](/part3/transition/epoch/#def_process_registry_updates), [`process_voluntary_exit()`](/part3/transition/block/#def_process_voluntary_exit) |
 | Uses | [`compute_activation_exit_epoch()`](/part3/helper/misc/#compute_activation_exit_epoch), [`get_validator_churn_limit()`](/part3/helper/accessors/#get_validator_churn_limit)|
 | See also | [Voluntary Exits](/part3/transition/block/#voluntary-exits), [`MIN_VALIDATOR_WITHDRAWABILITY_DELAY`](/part3/config/configuration/#min_validator_withdrawability_delay) |
 
@@ -14195,6 +14749,8 @@ The remainder of the material in this section (mostly Engine API related) isn't 
 
 ### Protocols
 
+As usual, text with a side bar is quoted directly from the specification.
+
 #### `ExecutionEngine`
 
 > _Note_: The `notify_forkchoice_updated` function is added to the `ExecutionEngine` protocol to signal the fork choice updates.
@@ -14505,14 +15061,16 @@ TODO
 
 Through an open process in February 2021 we decided that beacon chain (consensus layer) upgrades would be [named after stars](https://github.com/ethereum/eth2.0-pm/issues/202#issuecomment-775789449). We're taking them in English alphabetical order, with the first being [Altair](https://github.com/ethereum/consensus-specs/issues/2218). The genesis configuration remains Phase&nbsp;0 due to its origin in the now defunct [three-phase plan](https://web.archive.org/web/20220916204934/https://docs.ethhub.io/ethereum-roadmap/ethereum-2.0/eth-2.0-phases/) for delivering Ethereum&nbsp;2.0.
 
-A summary of upgrades to date is below, with more detailed descriptions in the following sections.
+A summary of upgrades to date is below, with more detailed descriptions in the following sections.[^fn-upgrade-config]
 
-| Name | Epoch | Date&nbsp;(UTC) | Comments | Spec&nbsp;tag | Release&nbsp;name |
+[^fn-upgrade-config]: [Client configuration files](https://github.com/Consensys/teku/blob/master/ethereum/spec/src/main/resources/tech/pegasys/teku/spec/config/configs/mainnet.yaml#L42) are a useful reference for upgrade times and dates.
+
+| Name | Epoch | Date&nbsp;(UTC) | Main theme | Spec&nbsp;tag | Release&nbsp;name |
 | - | - | - | - | - | - |
 | [Phase&nbsp;0](/part4/history/phase0/) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) | Cosmic Egg |
 | [Altair](/part4/history/altair/)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |  The Great Machine |
 | [Bellatrix](/part4/history/bellatrix/) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) | Ailuropoda melanoleuca[^fn-giant-panda] |
-| [Capella](/part4/history/capella/)     | 194048 | 2023-04-12 22:27:35 | Withdrawals enabled | [v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0)  | Gamlum[^fn-gamlum] |
+| [Capella](/part4/history/capella/)     | 194048 | 2023-04-12 22:27:35 | Withdrawals enabled | [v1.3.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.3.0) | Gamlum[^fn-gamlum] |
 | [Deneb](/part4/history/deneb/)         | TBD    | TBD                 | EIP-4844 data availability | TBD  | TBD |
 | [Electra](/part4/history/electra/)     | TBD    | TBD                 | TBD | TBD  | TBD |
 
@@ -14589,7 +15147,7 @@ As for the penalty parameters, the following parameters were updated. These had 
   - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset/#min_slashing_penalty_quotient_bellatrix) decreased from 128 to 64. This sets the initial slashing penalty to 0.5&nbsp;ETH for a validator with a full stake rather than the 0.25&nbsp;ETH of Phase&nbsp;0.
   - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset/#proportional_slashing_multiplier_bellatrix) increased from 1 to 2 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of two-thirds of their stakes rather than the one-third of Phase&nbsp;0.
 
-The full description of the changes between Phase&nbsp;0 and Altair is in the [Altair specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair).
+The overall description of the changes between Phase&nbsp;0 and Altair is in the [Altair specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair).
 
 My [Altair annotated specification](/../altair/part3/) remains available.
 
@@ -14615,13 +15173,13 @@ In addition, continuing the changes from Altair, some penalty parameters were up
   - [`MIN_SLASHING_PENALTY_QUOTIENT`](/part3/config/preset/#min_slashing_penalty_quotient_bellatrix) decreased from 64 to 32. This sets the initial slashing penalty to 1&nbsp;ETH for a validator with a full stake rather than 0.5&nbsp;ETH.
   - [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset/#proportional_slashing_multiplier_bellatrix) increased from 2 to 3 so that, in the event of over one-third of validators being slashed together, the full penalty would be the removal of their entire stakes.
 
-The full description of the changes between Altair and Bellatrix is in the [Bellatrix specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix).
+The overall description of the changes between Altair and Bellatrix is in the [Bellatrix specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix).
 
 My [Bellatrix annotated specification](/../bellatrix/part3/) remains available.
 
 ### Capella <!-- /part4/history/capella/ -->
 
-The Capella upgrade took place at 22:27:35 UTC on April the 12th, 2023.
+The consensus layer's Capella upgrade took place at 22:27:35 UTC on April the 12th, 2023, at the same time as the execution layer's [Shanghai upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md). This was the first coordinated, simultaneous upgrade of the two layers. The combined upgrade was known by the name "Shapella".
 
 Capella included the following updates:
 
@@ -14637,9 +15195,9 @@ Two withdrawal mechanisms were implemented.
   1. Exited and withdrawable validators have their full balances automatically transferred to their withdrawal addresses.
   2. Excess balances from active validators are regularly swept into their withdrawal addresses.
 
-The consensus layer's Capella upgrade took place at the same time as the execution layer's [Shanghai upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md).
+The overall description of the changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/capella).
 
-The full description of the changes between Bellatrix and Capella is in the [Capella specs](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/capella).
+My [Capella annotated specification](/../capella/part3/) remains available.
 
 ### Deneb <!-- /part4/history/deneb/ -->
 
