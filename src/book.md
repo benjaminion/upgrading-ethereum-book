@@ -4937,7 +4937,7 @@ The value ${\tt x}=$&nbsp;`-0xd201000000010000` (hexadecimal, note that it is ne
 
 | Parameter | &nbsp; | Equation | Value | Comments |
 | ---- | - | ---- | ---------------- | ---- |
-| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)^2}\\{({\tt x}^4-{\tt x}^2+1)}\\ +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)}^2\allowbreak {({\tt x}^4-{\tt x}^2+1)}\allowbreak +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
 | Subgroup size | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
 
 ##### Field extensions
@@ -5345,7 +5345,7 @@ Note that, in both schemes, the easiest way to import the Affine point $(x, y)$ 
 | Parameter | &nbsp; | Equation | Value | Comments |
 | ---- | - | ---- | ---------------- | ---- |
 | Curve parameter| ${\tt x}$ | &nbsp; | `-0xd201000000010000` | |
-| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)^2}\\{({\tt x}^4-{\tt x}^2+1)}\\+{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)}^2\allowbreak {({\tt x}^4-{\tt x}^2+1)}\allowbreak +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
 | Subgroup size: $\vert G_1\vert$, $\vert G_2\vert$, $\vert G_T\vert$ | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
 
 ###### Curve E(F_q)
@@ -15066,7 +15066,7 @@ A summary of upgrades to date is below, with more detailed descriptions in the f
 [^fn-upgrade-config]: [Client configuration files](https://github.com/Consensys/teku/blob/master/ethereum/spec/src/main/resources/tech/pegasys/teku/spec/config/configs/mainnet.yaml#L42) are a useful reference for upgrade times and dates.
 
 | Name | Epoch | Date&nbsp;(UTC) | Main theme | Spec&nbsp;tag | Release&nbsp;name |
-| - | - | - | - | - | - |
+| - | - | -- | -- | - | -- |
 | [Phase&nbsp;0](/part4/history/phase0/) | 0      | 2020-12-01 12:00:23 | The genesis configuration | [v1.0.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.0.0) | Cosmic Egg |
 | [Altair](/part4/history/altair/)       | 74240  | 2021-10-27 10:56:23 | Sync committees and economic reforms | [v1.1.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.1.0) |  The Great Machine |
 | [Bellatrix](/part4/history/bellatrix/) | 144896 | 2022-09-06 11:34:47 | Merge-readiness upgrade | [v1.2.0](https://github.com/ethereum/consensus-specs/releases/tag/v1.2.0) | Ailuropoda melanoleuca[^fn-giant-panda] |
@@ -15082,7 +15082,7 @@ The Merge was a special kind of upgrade in that it was not a manual hard fork. T
 
 [TODO: link to Merge section when done]::
 
-The consensus layer specifications are written incrementally. Thus, each version (such as the current Bellatrix [v1.3.0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.3.0).
+The consensus layer specifications are written incrementally. Each version (such as the current Bellatrix [v1.3.0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs) version) contains the unchanged specs for previous versions, plus a separate set of documents detailing the changes for the new version. Thus, to build Bellatrix, for example, you need the [Phase&nbsp;0](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/phase0) specs, the [Altair](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/altair) "diff" specs on top of that, and the [Bellatrix](https://github.com/ethereum/consensus-specs/tree/v1.3.0/specs/bellatrix) "diff" specs on top of that, all with the same GitHub release tag (in this case, v1.3.0).
 
 The consensus specs repo contains some other, unreleased, versions such as [das](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/das) (data-availability sampling), [custody_game](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/custody_game), and [sharding](https://github.com/ethereum/consensus-specs/tree/dev/specs/_features/sharding). These reflect different research directions and are in varying states of currency.
 
