@@ -1,4 +1,4 @@
-import { visit, CONTINUE, SKIP } from 'unist-util-visit';
+import { visit, SKIP } from 'unist-util-visit';
 import GithubSlugger from 'github-slugger';
 
 // Fix up internal links in the one-page annotated spec.
@@ -22,11 +22,13 @@ const isTargetElement = (node) => {
   );
 };
 
-// We look at all links, but '/part3/' should point to the main book, not the one-page spec
-const isLinkElement = (node) => {
+// We process all internal links, but '/part3/' should point to the main book
+const isInternalLink = (node) => {
   return (
     node.tagName === 'a' &&
     node.properties?.href !== undefined &&
+    (node.properties.href.startsWith('/part3/') ||
+      node.properties.href.startsWith('#')) &&
     node.properties.href !== '/part3/'
   );
 };
@@ -43,11 +45,11 @@ function specLinks({ logger }) {
   return function (tree, file) {
     if (file.data.astro.frontmatter.path !== '/annotated-spec/') return;
 
-    // We re-slug the slug to handle duplicates
+    // Re-slug the slug to handle duplicates
     const slugger = new GithubSlugger();
 
-    // Pass 1: Build a map of pages and ids/slugs
     const map = {};
+    const links = [];
     let page = '';
     visit(tree, 'element', (node) => {
       if (isIgnoredElement(node)) return SKIP;
@@ -60,33 +62,29 @@ function specLinks({ logger }) {
           page = node.children[node.children.length - 1].value.trim();
           map[page] = newSlug;
         }
-        if (!page) logger.warn(`Page is not set when processing ${oldSlug}`);
-        map[page + '#' + oldSlug] = newSlug;
+        if (page) {
+          map[page + '#' + oldSlug] = newSlug;
+        } else {
+          logger.warn(`Page is not set when processing ${oldSlug}`);
+        }
+      }
+
+      if (isInternalLink(node)) {
+        links.push({ node, page });
       }
     });
 
-    // Pass 2: Adjust hrefs - we need two passes in case any references are forward-looking
-    page = '';
-    visit(tree, 'element', (node) => {
-      if (isIgnoredElement(node)) return SKIP;
+    logger.debug(`Rewriting ${links.length} internal links`);
 
-      if (isNewPage(node)) {
-        page = node.children[node.children.length - 1].value.trim();
-        return CONTINUE;
-      }
-
-      if (isLinkElement(node)) {
-        const oldHref = node.properties.href;
-        let newHref;
-        if (oldHref.startsWith('#')) {
-          newHref = map[page + oldHref];
-        } else if (oldHref.startsWith('/part3/')) {
-          newHref = map[oldHref];
-        } else {
-          return CONTINUE;
-        }
-        if (!newHref) logger.warn(`Failed to fix spec link ${oldHref}`);
+    links.forEach(({ node, page }) => {
+      const oldHref = node.properties.href;
+      const newHref = oldHref.startsWith('#')
+        ? map[page + oldHref]
+        : map[oldHref];
+      if (newHref) {
         node.properties.href = '#' + newHref;
+      } else {
+        logger.warn(`Failed to fix spec link ${oldHref}`);
       }
     });
   };
