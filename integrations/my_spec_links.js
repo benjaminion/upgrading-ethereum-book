@@ -6,38 +6,38 @@ import GithubSlugger from 'github-slugger';
 // The one-page spec is excluded from search index processing, so no need to worry about that.
 
 // Ignore SVGs and anything to do with footnotes (which should be fine without help)
-function isIgnoredElement(node) {
+const isIgnoredElement = (node) => {
   return (
     node.tagName === 'svg' ||
     (node.tagName === 'a' && node.properties.dataFootnoteRef !== undefined) ||
     (node.tagName === 'section' && node.properties.dataFootnotes !== undefined)
   );
-}
+};
 
 // Only headings and <a id="..."> are of interest
-function isTargetElement(node) {
+const isTargetElement = (node) => {
   return (
     node.properties?.id !== undefined &&
     ['a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.tagName)
   );
-}
+};
 
 // We look at all links, but '/part3/' should point to the main book, not the one-page spec
-function isLinkElement(node) {
+const isLinkElement = (node) => {
   return (
     node.tagName === 'a' &&
     node.properties?.href !== undefined &&
     node.properties.href !== '/part3/'
   );
-}
+};
 
 // New pages are indicated by comments attached to certain headings in the Markdown
-function isNewPage(node) {
+const isNewPage = (node) => {
   return (
     ['h1', 'h2', 'h3'].includes(node.tagName) &&
     node.children[node.children.length - 1].type === 'comment'
   );
-}
+};
 
 function specLinks({ logger }) {
   return function (tree, file) {
@@ -60,7 +60,7 @@ function specLinks({ logger }) {
           page = node.children[node.children.length - 1].value.trim();
           map[page] = newSlug;
         }
-        page || logger.warn('Page is not set when processing ' + oldSlug);
+        if (!page) logger.warn(`Page is not set when processing ${oldSlug}`);
         map[page + '#' + oldSlug] = newSlug;
       }
     });
@@ -85,7 +85,7 @@ function specLinks({ logger }) {
         } else {
           return CONTINUE;
         }
-        newHref || logger.warn('Failed to fix spec link: ' + oldHref);
+        if (!newHref) logger.warn(`Failed to fix spec link ${oldHref}`);
         node.properties.href = '#' + newHref;
       }
     });
@@ -99,7 +99,7 @@ export default function () {
       'astro:config:setup': ({ updateConfig, logger }) => {
         updateConfig({
           markdown: {
-            rehypePlugins: [[specLinks, { logger: logger }]],
+            rehypePlugins: [[specLinks, { logger }]],
           },
         });
       },
