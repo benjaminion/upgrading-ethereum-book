@@ -4467,7 +4467,7 @@ Every validator on the beacon chain has at least one key pair, the "signing key"
 
 The secret key is supposed to be uniformly randomly generated in the range $[1,r)$. [EIP-2333](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2333.md) defines a standard way to do this based on the [`KeyGen`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3) method of the draft IRTF BLS signatures standard. It's not compulsory to use this method &ndash; no-one will ever know if you don't &ndash; but you'd be ill-advised not to. In practice, many stakers generate their keys with the [`eth2.0-deposit-cli`](https://github.com/ethereum/eth2.0-deposit-cli) tool created by the Ethereum Foundation. Operationally, key pairs are often stored in password-protected [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) keystore files.
 
-The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](https://hackmd.io/@benjaminion/bls12-381#Point-compression) serialised form as a string of 48 bytes.
+The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a point on the $G_1$ curve, which is represented in-protocol in its [compressed](/part2/building_blocks/bls12-381/#point-compression) serialised form as a string of 48 bytes.
 
 <a id="img_bls_setup"></a>
 <figure class="diagram" style="width:50%">
@@ -7881,7 +7881,7 @@ Specifically, `ForkDigest` is the first four bytes of the hash tree root of the 
 
 #### BLSPubkey
 
-BLS (Boneh-Lynn-Shacham) is the digital signature scheme used by Eth2. It has some [very nice properties](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion), in particular the ability to aggregate signatures. This means that many validators can sign the same message (for example, that they support block X), and these signatures can all be efficiently aggregated into a single signature for verification. The ability to do this efficiently makes Eth2 practical as a protocol. Several other protocols have adopted or will adopt BLS, such as Zcash, Chia, Dfinity and Algorand. We are using the BLS signature scheme based on the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) (Barreto-Lynn-Scott) elliptic curve.
+BLS (Boneh-Lynn-Shacham) is the digital signature scheme used by Eth2. It has some [very nice properties](https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105?u=benjaminion), in particular the ability to aggregate signatures. This means that many validators can sign the same message (for example, that they support block X), and these signatures can all be efficiently aggregated into a single signature for verification. The ability to do this efficiently makes Eth2 practical as a protocol. Several other protocols have adopted or will adopt BLS, such as Zcash, Chia, Dfinity and Algorand. We are using the BLS signature scheme based on the [BLS12-381](/part2/building_blocks/bls12-381/) (Barreto-Lynn-Scott) elliptic curve.
 
 The `BLSPubkey` type holds a validator's public key, or the aggregation of several validators' public keys. This is used to verify messages that are claimed to have come from that validator or group of validators.
 
@@ -7891,7 +7891,7 @@ See the section on [BLS signatures](/part2/building_blocks/signatures/) in part&
 
 #### `BLSSignature`
 
-As above, we are using BLS signatures over the [BLS12-381](https://hackmd.io/@benjaminion/bls12-381) elliptic curve in order to sign messages between participants. As with all digital signature schemes, this guarantees both the identity of the sender and the integrity of the contents of any message.
+As above, we are using BLS signatures over the [BLS12-381](/part2/building_blocks/bls12-381/) elliptic curve in order to sign messages between participants. As with all digital signature schemes, this guarantees both the identity of the sender and the integrity of the contents of any message.
 
 In Ethereum&nbsp;2.0, BLS signatures are elliptic curve points from the BLS12-381 $G_2$ group, thus are 96 bytes long when compressed.
 
@@ -7929,7 +7929,6 @@ At the maximum rate of 16 withdrawals per slot, a `uint64` will take 438 billion
 
   - A [primer on Merkle roots](https://www.mycryptopedia.com/merkle-tree-merkle-root-explained/).
     - See also [Wikipedia on Merkle Trees](https://en.wikipedia.org/wiki/Merkle_tree).
-  - I have written an [intro to the BLS12-381 elliptic curve](https://hackmd.io/@benjaminion/bls12-381) elsewhere.
 
 ### Constants <!-- /part3/config/constants/ -->
 
@@ -9990,7 +9989,7 @@ An [IndexedAttestation](/part3/containers/dependencies/#indexedattestation) pass
  3. The indices of the validators are sorted. (It is not clear to me why this is required. It's used in the duplicate check here, but that could just be replaced by checking the set size.)
  4. Its aggregated signature verifies against the aggregated public keys of the listed validators.
 
-Verifying the signature uses the magic of [aggregated BLS signatures](https://hackmd.io/@benjaminion/bls12-381#Aggregation). The indexed attestation contains a BLS signature that is supposed to be the combined individual signatures of each of the validators listed in the attestation. This is verified by passing it to `bls.FastAggregateVerify()` along with the list of public keys from the same validators. The verification succeeds only if exactly the same set of validators signed the message (`signing_root`) as appear in the list of public keys. Note that [`get_domain()`](/part3/helper/accessors/#def_get_domain) mixes in the fork version, so that attestations are not valid across forks.
+Verifying the signature uses the magic of [aggregated BLS signatures](/part2/building_blocks/signatures/#aggregation). The indexed attestation contains a BLS signature that is supposed to be the combined individual signatures of each of the validators listed in the attestation. This is verified by passing it to `bls.FastAggregateVerify()` along with the list of public keys from the same validators. The verification succeeds only if exactly the same set of validators signed the message (`signing_root`) as appear in the list of public keys. Note that [`get_domain()`](/part3/helper/accessors/#def_get_domain) mixes in the fork version, so that attestations are not valid across forks.
 
 No check is done here that the `attesting_indices` (which are the global validator indices) are all members of the correct committee for this attestation. In [`process_attestation()`](/part3/transition/block/#def_process_attestation) they must be, by construction. In [`process_attester_slashing()`](/part3/transition/block/#def_process_attester_slashing) it doesn't matter: _any_ validator signing conflicting attestations is liable to be slashed.
 
@@ -12716,7 +12715,7 @@ The `apply_deposit()` function was [factored out](https://github.com/ethereum/co
 
 [^fn-eip-6110]: [EIP-6110](https://eips.ethereum.org/EIPS/eip-6110) is a potential future upgrade that would allow deposits to be processed more or less instantly, rather than having to go through the [Eth1 follow distance](/part3/config/configuration/#eth1_follow_distance) and [Eth1 voting period](/part3/config/preset/#epochs_per_eth1_voting_period) as they do now.
 
-Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks). Note that [`compute_domain()`](/part3/helper/misc/#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors/#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain upgrades (such as Phase&nbsp;0, Altair, and Bellatrix), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
+Deposits are signed with the private key of the depositing validator, and the corresponding public key is included in the deposit data. This constitutes a "proof of possession" of the private key, and prevents nastiness like the [rogue key attack](/part2/building_blocks/signatures/#proof-of-possession). Note that [`compute_domain()`](/part3/helper/misc/#def_compute_domain) is used directly here when validating the deposit's signature, rather than the more usual [`get_domain()`](/part3/helper/accessors/#def_get_domain) wrapper. This is because deposit messages are valid across beacon chain upgrades (such as Phase&nbsp;0, Altair, and Bellatrix), so we don't want to mix the fork version into the domain. In addition, deposits can be made before `genesis_validators_root` is known.
 
 The `if pubkey not in validator_pubkeys` test distinguishes new deposits from top-up deposits. When the public key associated with the deposit is not present in the existing validator set, a new validator record is created. When the public key is already present, the balance of the existing validator record is topped up. A validator's public key is its unique identity. (Its validator index is also unique for now, but that [might change](https://eips.ethereum.org/EIPS/eip-6914) in future.)
 
