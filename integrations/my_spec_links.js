@@ -57,7 +57,10 @@ function specLinks({ logger }) {
       if (isTargetElement(node)) {
         const oldSlug = node.properties.id;
         const newSlug = slugger.slug(oldSlug);
-        node.properties.id = newSlug;
+        if (newSlug !== oldSlug) {
+          node.properties.id = newSlug;
+          logger.debug(`Rewrote slug #${oldSlug} to #${newSlug}`);
+        }
         if (isNewPage(node)) {
           page = node.children[node.children.length - 1].value.trim();
           map[page] = newSlug;
@@ -74,7 +77,7 @@ function specLinks({ logger }) {
       }
     });
 
-    logger.debug(`Rewriting ${links.length} internal links`);
+    logger.debug(`Rewriting ${links.length} internal links in total`);
 
     links.forEach(({ node, page }) => {
       const oldHref = node.properties.href;
@@ -83,6 +86,9 @@ function specLinks({ logger }) {
         : map[oldHref];
       if (newHref) {
         node.properties.href = '#' + newHref;
+        if (!oldHref.endsWith(newHref)) {
+          logger.debug(`Rewrote href ${oldHref} to #${newHref}`);
+        }
       } else {
         logger.warn(`Failed to fix spec link ${oldHref}`);
       }
