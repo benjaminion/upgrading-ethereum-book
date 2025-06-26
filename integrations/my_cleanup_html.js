@@ -21,6 +21,12 @@ function cleanupHtml() {
         return CONTINUE;
       }
 
+      // Huge numbers of newlines weirdly get inserted before tables - no idea why
+      if (node.type === 'text' && node.value.match(/^\n\n+$/) !== null) {
+        node.value = '\n';
+        return CONTINUE;
+      }
+
       // Remove all comments
       if (node.type === 'comment') {
         parent.children.splice(index, 1);
