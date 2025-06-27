@@ -54,7 +54,7 @@ function getChunks(tree, chunkTypes, exclude) {
     for (let idx = 0; idx < chunkTypes.length; idx++) {
       const type = chunkTypes[idx];
       if (matches(type.query, node)) {
-        const text = getText(node, exclude);
+        const text = getText(node, exclude).trim();
         if (text !== '') {
           const tagName = node.tagName.toLowerCase();
           let id = node.properties?.id;
