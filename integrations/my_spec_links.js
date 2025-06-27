@@ -63,6 +63,9 @@ function specLinks({ logger }) {
         }
         if (isNewPage(node)) {
           page = node.children[node.children.length - 1].value.trim();
+          if (page.endsWith('*')) {
+            page = page.slice(0, -1);
+          }
           map[page] = newSlug;
         }
         if (page) {
