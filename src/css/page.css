@@ -369,7 +369,7 @@ section.footnotes {
 /*** Summary boxes ***/
 div.summary {
   width: 80%;
-  margin: 1ex auto;
+  margin: 1ex auto 4ex auto;
   padding: 1ex 1em;
   border: double #999 3.5px;
 }
