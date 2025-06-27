@@ -4423,7 +4423,7 @@ This signature aggregation capability was the main breakthrough that prompted us
 
 #### BLS Digital Signatures
 
-Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](/part2/building_blocks/bls12-381/) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](https://medium.com/@VitalikButerin/exploring-elliptic-curve-pairings-c73c1864e627)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, it is the pairing property of BLS signatures that allows us to aggregate signatures, thus making the whole consensus protocol practical.
+Digital signatures in the blockchain world are usually based on elliptic curve groups. For signing users' transactions, Ethereum uses [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signatures with the [secp256k1](https://en.bitcoin.it/wiki/Secp256k1) elliptic curve. However, the beacon chain protocol uses [BLS](https://en.wikipedia.org/wiki/BLS_digital_signature) signatures with the [BLS12-381](/part2/building_blocks/bls12-381/) elliptic curve[^fn-bls-bls]. Although similar in usage, ECDSA and BLS signatures are mathematically quite different, with the latter relying on a special property of certain elliptic curves called "[pairing](/part2/building_blocks/bls12-381/#pairings)". Although ECDSA signatures are [much faster](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-1.1) than BLS signatures, the pairing property allows BLS signatures to be aggregated, making the whole beacon chain consensus protocol practical.
 
 [^fn-bls-bls]: There is a curious naming collision here. The BLS trio of "BLS signatures" are Boneh, Lynn, and Shacham, whereas those of the "BLS12-381" elliptic curve are Barreto, Lynn, and Scott. Ben Lynn is the only common name between the two.
 
@@ -4440,9 +4440,9 @@ There are four component pieces of data within the BLS digital signature process
 3. The _message_. We'll look later at the kinds of messages used in the Eth2 protocol and how they are constructed. For now, the message is just a string of bytes.
 4. The _signature_, which is the output of the signing process. The signature is created by combining the message with the secret key. Given a message, a signature for that message, and a public key, we can verify that the validator with that public key signed exactly that message. In other words, no-one else could have signed that message, and the message has not been changed since signing.
 
-More mathematically, things look like this. We use two subgroups of the [BLS12-381 elliptic curve](/part2/building_blocks/bls12-381/): $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a 77 digit prime number. The (arbitrarily chosen) generator of $G_1$ is $g_1$, and of $G_2$, $g_2$.
+More mathematically, things look like this. We use two subgroups of the [BLS12-381 elliptic curve](/part2/building_blocks/bls12-381/): $G_1$ defined over a base field $F_q$, and $G_2$ defined over the field extension $F_{q^2}$. The order of both the subgroups is $r$, a 77 digit prime number. The (arbitrarily chosen) generators of subgroups $G_1$ and $G_2$ are the points $g_1$ and $g_2$ respectively.
 
-1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, very small values of $sk$ would be hopelessly insecure).
+1. The secret key, $sk$, is a number between $1$ and $r$ (technically the range includes $1$, but not $r$. However, using very small values of $sk$ would be hopelessly insecure).
 2. The public key, $pk$, is $[sk]g_1$ where the square brackets represent scalar multiplication of the elliptic curve group point. The public key is therefore a member of the $G_1$ group.
 3. The message, $m$ is a sequence of bytes. During the signing process this will be mapped to some point $H(m)$ that is a member of the $G_2$ group.
 4. The signature, $\sigma$, is also a member of the $G_2$ group, namely $[sk]H(m)$.
@@ -4513,7 +4513,7 @@ A validator applies its secret key to a message to generate a unique digital sig
 
 To verify a signature we need to know the public key of the validator that signed it. Every validator's public key is stored in the beacon state and can be simply looked up via the validator's index which, by design, is always available by some means whenever it's required.
 
-Signature verification can be treated as a black-box: we send the message, the public key, and the signature to the verifier; if after some cryptographic magic the signature matches the public key and the message then we declare it valid. Otherwise, either the signature is corrupt, the incorrect secret key was used, or the message is not what was signed.
+Signature verification can be treated as a black-box: we send the message, the public key, and the signature to the verifier; if after some cryptographic magic the signature matches both the public key and the message then we declare it valid. Otherwise, either the signature is corrupt, the incorrect secret key was used, or the message is not what was signed.
 
 More formally, signatures are verified using elliptic curve pairings.
 
@@ -4573,7 +4573,7 @@ In the following we will only consider aggregation of signatures over the same m
 
 [^fn-aggregation-terminology]: A note on terminology. The [original paper](https://eprint.iacr.org/2018/483.pdf) describing this scheme uses the term "multi-signature" when combining signatures over the same message, and "aggregate signature" when combining signatures over distinct messages. In Eth2 we only do the former, and just call it aggregation.
 
-The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like the normal addition of numbers that we are familiar with, but the operation is completely analogous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, thus the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
+The process is conceptually very simple: we simply "add up" the signatures. The exact operations are not like the normal addition of numbers that we are familiar with, but the operation is completely analogous. Addition of points on the elliptic curve is the group operation for the $G_2$ group, and each signature is a point in this group, so the result is also a point in the group.  An aggregated signature is mathematically indistinguishable from a non-aggregated signature, and has the same 96 byte size.
 
 <a id="img_bls_signature_aggregation"></a>
 <figure class="diagram" style="width:60%">
@@ -4589,7 +4589,7 @@ Aggregation of signatures is simply group addition in the $G_2$ group.
 
 ##### Aggregating public keys
 
-To verify an aggregate signature, we need an aggregate public key. As long as we know exactly which validators signed the original message, this is equally easy to construct. Once again we simply "add up" the public keys of the signers. This time the addition is the group operation of the $G_1$ elliptic curve group, and the result will also be a member of the $G_1$ group, so it is mathematically indistinguishable from a non-aggregated public key, and has the same 48 byte size.
+To verify an aggregate signature, we need an aggregate public key. As long as we know exactly which validators signed the original message, this is equally easy to construct. Once again, we simply "add up" the public keys of the signers. This time the addition is the group operation of the $G_1$ elliptic curve group, and the result will also be a member of the $G_1$ group, so it is mathematically indistinguishable from a non-aggregated public key, and has the same 48 byte size.
 
 <a id="img_bls_pubkey_aggregation"></a>
 <figure class="diagram" style="width:60%">
@@ -4853,9 +4853,9 @@ Three EIPs are intended to govern the generation and storage of keys in practice
 
 </div>
 
-This chapter is an edited and updated version of my original [homage to curve BLS12-381](https://hackmd.io/@benjaminion/bls12-381). It is not required reading &ndash; it's fine to treat the elliptic curve implementation as a black box &ndash; but I've included it for those who enjoy digging deeper. While curve BLS12-281 is the main focus, much of what follows covers broader background material on elliptic curves and pairings in general. As a non-mathematician[^fn-non-mathematician], all of this was very mysterious when I first encountered it; it has taken me quite a while to feel that I have some grasp of what's going on.
+This chapter is a revised and updated version of my original [homage to curve BLS12-381](https://hackmd.io/@benjaminion/bls12-381). It is not required reading &ndash; it's fine to treat the elliptic curve implementation as a black box &ndash; but I've included it for those who enjoy digging deeper. While curve BLS12-281 is the main focus, much of what follows covers broader background material on elliptic curves and pairings in general. As a non-mathematician[^fn-non-mathematician], all of this was very mysterious when I first encountered it; it has taken me quite a while to feel that I have some grasp of what's going on.
 
-[^fn-non-mathematician]: Many, many years ago I studied mathematics at both undergraduate and graduate levels, but I diligently shirked anything that looked like pure maths, such as group theory. I regret this now.
+[^fn-non-mathematician]: While I did study mathematics many, many years ago, I diligently shirked anything, such as group theory, that smelt like pure maths. I regret this now.
 
 #### Introduction
 
@@ -4868,9 +4868,11 @@ Pairing-friendly elliptic curves are curves with both a favourable embedding deg
 Some good reading if you want to learn more about pairing-based cryptography:
 
   - Vitalik has a great general introduction to [elliptic curve pairings](https://web.archive.org/web/20231102064237/https://vitalik.ca/general/2017/01/14/exploring_ecp.html).
-  - Alin Tomescu gives an entertaining review of the history of the development of pairing based cryptography and some of its applications in a blog post, [Pairings or bilinear maps](https://alinush.github.io/pairings).
+  - Alin Tomescu gives an entertaining review of the history of the development of pairing based cryptography and some of its applications in a blog post, [Pairings or bilinear maps](https://alinush.github.io/pairings)[^fn-mathematicians-in-jail].
   - The [NIST report](https://pmc.ncbi.nlm.nih.gov/articles/PMC4730686/pdf/jres.120.002.pdf) on pairing-based cryptography is quite readable. I recommend Section 2 and the Appendix.
   - Also good background is the [draft IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html) for pairing-friendly curves.
+
+[^fn-mathematicians-in-jail]: Do click through to the [short clip](https://www.youtube.com/watch?v=1RwkqZ6JNeo) of Dan Boneh explaining why all mathematicians should spend time in jail.
 
 If you really want to _understand_ this stuff then [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) is unsurpassed. It turns out to be a lot less scary than it looks if you work through it carefully, studying the examples as you go.
 
@@ -4900,7 +4902,7 @@ All in all, I don't recall any significant debate about the adoption of curve BL
 
 ##### History
 
-Curve BLS12-381 was [designed](https://electriccoin.co/blog/new-snark-curve/) by [Sean Bowe](https://twitter.com/ebfull) in early 2017 as the foundation for an upgrade to the Zcash protocol. It is both pairing-friendly (making it efficient for digital signatures) and effective for constructing ZK-SNARKs.
+Curve BLS12-381 was [designed](https://web.archive.org/web/20190605200224/https://electriccoin.co/blog/new-snark-curve/) by [Sean Bowe](https://twitter.com/ebfull) in early 2017 as the foundation for an upgrade to the Zcash protocol. It is both pairing-friendly (making it efficient for digital signatures) and effective for constructing ZK-SNARKs.
 
 Ethereum 2.0 was a fairly early adopter of the curve. A number of other blockchains (Zcash, Chia, Dfinity, Filecoin, Algorand) also use BLS12-381, and several cryptographic libraries support it. The main library used by Ethereum clients is [Blst](https://github.com/supranational/blst), which was commissioned by the Ethereum Foundation for this purpose; other libraries that implement the curve are [Gnark](https://github.com/Consensys/gnark-crypto), [Noble](https://github.com/paulmillr/noble-curves), [Herumi/mcl](https://github.com/herumi/mcl), and [Constantine](https://github.com/mratsim/constantine).
 
@@ -5050,7 +5052,7 @@ Elliptic curve pairings are usually denoted $e(\cdot,\cdot)$ (they take a pair o
 
 The property of pairings that we are most interested in is that they are _bilinear_. That is, $e(P,Q)$ is linear in both its arguments.
 
-We are familiar with bilinearity if we can multiply integers: let $f(a,b) \equiv a \times b$, then ${f(a_1 + a_2, b)} = {f(a_1, b) + f(a_2, b)}$, and ${f(a, b_1 + b_2)} = {f(a, b_1) + f(a, b_2)}$ - multiplication is linear in both its arguments.
+Anyone who can do multiplication is familiar with bilinearity : let $f(a,b) \equiv a \times b$, then ${f(a_1 + a_2, b)} = {f(a_1, b) + f(a_2, b)}$, and ${f(a, b_1 + b_2)} = {f(a, b_1) + f(a, b_2)}$ - multiplication is linear in both its arguments.
 
 We could construct a similar bilinear function for elliptic curve points by multiplying the discrete logarithms of the two input points. If $g$ is a generator of an elliptic curve group, then a point $P$ is, by definition, a multiple of that generator, $P=[p]g$, and $p$ is said to be the discrete logarithm of $P$[^dl-rant]. So, given points $P=[p]g$ and $Q=[q]g$, we could find $p$ and $q$ and define $e(P,Q) = [pq]g$ - this boils down to integer multiplication and is therefore bilinear. The flaw with this, however, is that taking discrete logarithms on our elliptic curve is assumed to be very, very expensive by design. It basically requires brute-force calculation with a cost proportional to the curve order, which is what keeps our signature scheme secure. This is why the pairing operation needs its second property: it must be _efficiently_ computable.
 
@@ -5123,7 +5125,7 @@ I've listed the prime factors of the curve orders in the [reference section](#bl
 
 It's not all bad news when it comes to the cofactors, though. It turns out that multiplying by the group's cofactor is a straightforward way to map any arbitrary point on the elliptic curve into the respective subgroup, $G_1$ or $G_2$[^fn13]. This is important when doing "hash to curve" operations and the like: we first make a point on the curve, and then we map it into the appropriate group by multiplying by the cofactor, so-called [cofactor clearing](#cofactor-clearing).
 
-[^fn13]: This is easy to see. The subgroup $G$ has order $r$, and its cofactor is $h$, such that $hr = n$, the order of the whole elliptic curve group. Consider an arbitrary element $P$ of the elliptic curve group. We have $\mathcal{O} = [n]P = [r] ([h]P)$. Thus, $[h]P\in G$. While not specific to BLS12-381, here is an [excellent article](https://loup-vaillant.fr/tutorials/cofactor) about cofactor clearing.
+[^fn13]: This is easy to see. The subgroup $G$ has order $r$, and its cofactor is $h$, such that $hr = n$, the order of the whole elliptic curve group. Consider an arbitrary element $P$ of the elliptic curve group. We have $\mathcal{O} = [n]P = [r] ([h]P)$. Thus, $[h]P\in G$. Alternatively, for every subgroup that is not $G$, $h$ is a multiple of its order, so multiplying by $h$ "kills" all components of $P$ that are not in $G$. While not specific to BLS12-381, here is an [excellent article](https://loup-vaillant.fr/tutorials/cofactor) about cofactor clearing.
 
 ##### Roots of unity
 
@@ -5147,7 +5149,7 @@ Now it's time to introduce the other BLS: Boneh, Lynn and Shacham. (The L is the
 
 BLS signatures were introduced [back in 2001](https://www.iacr.org/archive/asiacrypt2001/22480516.pdf), a little before the [BLS curve family](https://eprint.iacr.org/2002/088.pdf) was published in 2002. Pleasingly, they go hand-in-hand. (BLS signatures can use other curves; BLS curves have uses other than signatures. But it's nice when they come together.)
 
-The BLS signature scheme is described briefly below. See the [BLS Signatures](/part2/building_blocks/signatures/) chapter for a fuller exploration of how we have implemented them in Ethereum 2. You can find a pretty concise but lucid description of the BLS signature scheme in the [draft IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-bls-signature-05.html). See also the [GitHub repo](https://github.com/kwantam/draft-irtf-cfrg-bls-signature).
+The BLS signature scheme is described briefly below. See the [BLS Signatures](/part2/building_blocks/signatures/) chapter for a fuller exploration of how we have implemented them in Ethereum 2. You can find a pretty concise but lucid description of the BLS signature scheme in the [draft IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-bls-signature-05.html).
 
 ###### Private and public keys
 
@@ -5328,7 +5330,7 @@ The [Standard Projective coordinate](https://en.wikibooks.org/wiki/Cryptography/
 
 These are also called homogeneous projective coordinates because the curve equation takes on the homogeneous form $Y^2Z=X^3+4Z^3$. Points become straight lines through the origin in $(X, Y, Z)$ space, with the Affine point being the intersection of the line with the plane $Z=1$. Figure 2.10 in [Pairings for Beginners](https://www.craigcostello.com.au/s/PairingsForBeginners.pdf) gives a nice illustration.
 
-Standard Projective coordinates are used by the [Apache Milagro](https://milagro.apache.org/) BLS12-381 library, and also by the [noble-curves](https://github.com/paulmillr/noble-curves/tree/main) BLS12-381 implementation.
+Standard Projective coordinates are used by the [Apache Milagro](https://milagro.apache.org/) BLS12-381 library, and also by the [noble-curves](https://github.com/paulmillr/noble-curves/tree/main) implementation.
 
 ###### Jacobian coordinates
 
@@ -5398,15 +5400,15 @@ There are _lots_ of references linked in the above, and I'm not going to repeat 
 
 Useful reference material:
 
-  - [The original](https://electriccoin.co/blog/new-snark-curve/) BLS12-381 announcement
+  - [The original](https://web.archive.org/web/20190605200224/https://electriccoin.co/blog/new-snark-curve/) BLS12-381 announcement
   - [Concise](https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md) description of the parameters and serialisation
   - Draft [IETF standard](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#name-bls-curves-for-the-128-bit-)
 
-In general, implementations of pairing libraries tend to be highly optimised and/or very generic (supporting many curves) which makes them quite hard to learn from. The [Noble BLS12-381](https://github.com/paulmillr/noble-bls12-381) library in JavaScript/TypeScript by Paul Miller is definitely among the easier to follow.
+In general, implementations of pairing libraries tend to be highly optimised and/or very generic (supporting many curves) which makes them quite hard to learn from. The [Noble BLS12-381](https://github.com/paulmillr/noble-bls12-381) library in JavaScript/TypeScript by Paul Miller is among the easier to follow.
 
 The [`blsh`](https://github.com/one-hundred-proof/blsh) REPL (a wrapper around the BLST library) is excellent for exploring the curve itself. See the [grammar](https://github.com/one-hundred-proof/blsh/blob/main/src/blsh.pest) for the full functionality - the `info` command alone is worth it. You can [manually verify](https://x.com/1_00_proof/status/1930535556049424817) BLS signatures if you like.
 
-Finally, a couple of fun and interesting reads:
+Finally, a couple of random but fun and interesting reads:
 
   - This white paper on [Curve9769](https://github.com/pornin/curve9767/raw/master/doc/curve9767.pdf) is not directly relevant to BLS12-381, but is a well-written and wonderful exploration of the joys and pains of designing and implementing an elliptic curve (not a pairing-friendly one in this case).
   - [Pairings are not dead, just resting](https://ecc2017.cs.ru.nl/slides/ecc2017-aranha.pdf). A great overview presentation. Some BLS12-381 things.
