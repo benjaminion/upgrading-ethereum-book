@@ -21,6 +21,7 @@ src/md/annotated.md
 tmp/
 test*
 *.pdf
+*.bkp
 
 # IntelliJ configs
 .idea/
