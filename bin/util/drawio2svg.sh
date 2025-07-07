@@ -17,11 +17,20 @@ if [[ $drawio_file != *.drawio ]]; then
   exit 1
 fi
 
+drawio_opts="-b 10 --svg-theme light"
+
 root=$(basename -s '.drawio' $drawio_file)
 names=$(grep -oP '<diagram[^>]*name="\K[^"]+' $drawio_file)
 
+# If there is only one tab, we don't need to rename or page count
+if [[ $(echo $names | wc -w) == 1 ]]; then
+  drawio -x $drawio_opts -o $root.svg $drawio_file
+  exit 0
+fi
+
+# Loop over the diagrams and convert them individually
 n=1
 for name in $names; do
-  drawio -x -b 10 -p $n --svg-theme light -o $root-$name.svg $drawio_file
+  drawio -x -p $n $drawio_opts -o $root-$name.svg $drawio_file
   ((n++))
 done
