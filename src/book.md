@@ -5125,7 +5125,7 @@ I've listed the prime factors of the curve orders in the [reference section](#bl
 
 It's not all bad news when it comes to the cofactors, though. It turns out that multiplying by the group's cofactor is a straightforward way to map any arbitrary point on the elliptic curve into the respective subgroup, $G_1$ or $G_2$[^fn13]. This is important when doing "hash to curve" operations and the like: we first make a point on the curve, and then we map it into the appropriate group by multiplying by the cofactor, so-called [cofactor clearing](#cofactor-clearing).
 
-[^fn13]: This is easy to see. The subgroup $G$ has order $r$, and its cofactor is $h$, such that $hr = n$, the order of the whole elliptic curve group. Consider an arbitrary element $P$ of the elliptic curve group. We have $\mathcal{O} = [n]P = [r] ([h]P)$. Thus, $[h]P\in G$. While not specific to BLS12-381, here is an [excellent article](https://loup-vaillant.fr/tutorials/cofactor) about cofactor clearing.
+[^fn13]: This is easy to see. The subgroup $G$ has order $r$, and its cofactor is $h$, such that $hr = n$, the order of the whole elliptic curve group. Consider an arbitrary element $P$ of the elliptic curve group. We have $\mathcal{O} = [n]P = [r] ([h]P)$. Thus, $[h]P\in G$. Alternatively, for every subgroup that is not $G$, $h$ is a multiple of its order, so multiplying by $h$ "kills" all components of $P$ that are not in $G$. While not specific to BLS12-381, here is an [excellent article](https://loup-vaillant.fr/tutorials/cofactor) about cofactor clearing.
 
 ##### Roots of unity
 
@@ -5340,9 +5340,9 @@ The [sample code](https://github.com/algorand/bls_sigs_ref/tree/master/python-im
 
 Note that, in both schemes, the easiest way to import the Affine point $(x, y)$ is to map it to $(x, y, 1)$.
 
-##### BLS12-381 Reference
+#### BLS12-381 Reference
 
-###### General
+##### General
 
 | Parameter | &nbsp; | Equation | Value | Comments |
 | ---- | - | ---- | ---------------- | ---- |
@@ -5350,7 +5350,7 @@ Note that, in both schemes, the easiest way to import the Affine point $(x, y)$ 
 | Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)}^2\allowbreak {({\tt x}^4-{\tt x}^2+1)}\allowbreak +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
 | Subgroup size: $\vert G_1\vert$, $\vert G_2\vert$, $\vert G_T\vert$ | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
 
-###### Curve E(F_q)
+##### Curve E(F_q)
 
 |||
 | - | ----- |
@@ -5363,7 +5363,7 @@ The product of the factors of the group order, excluding $r$, are (by definition
 
 Observe that the number of points on curve $E$, its order, $|E(F_q)|$, is (in some sense) very close to the field modulus, $q$. This is a consequence of the [Hasse bound](https://en.wikipedia.org/wiki/Hasse%27s_theorem_on_elliptic_curves).
 
-###### Subgroup G_1
+##### Subgroup G_1
 
 |||
 | - | ------- |
@@ -5373,7 +5373,7 @@ Observe that the number of points on curve $E$, its order, $|E(F_q)|$, is (in so
 
 The $G_1$ cofactor is the factorisation of the curve order, $|E(F_q)|$, excluding the $r$ term.
 
-###### Curve E'(F_q^2)
+##### Curve E'(F_q^2)
 
 |||
 | - | ----- |
@@ -5384,7 +5384,7 @@ The $G_1$ cofactor is the factorisation of the curve order, $|E(F_q)|$, excludin
 
 The order of curve $E'$, $|E'(F_{q^2})|$, is close to the square of the field modulus, $q^2$.
 
-###### Subgroup G_2
+##### Subgroup G_2
 
 |||
 | - | ------- |
@@ -5394,7 +5394,7 @@ The order of curve $E'$, $|E'(F_{q^2})|$, is close to the square of the field mo
 
 The $G_2$ cofactor is the factorisation of the curve order, $|E'(F_{q^2})|$, excluding the $r$ term.
 
-##### Resources and further reading
+#### Resources and further reading
 
 There are _lots_ of references linked in the above, and I'm not going to repeat many here. I'll just pick out a few particularly useful or interesting things.
 
