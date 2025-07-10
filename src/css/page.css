@@ -368,15 +368,14 @@ a.anchor svg path {
 }
 
 /* Fix up chart axes and labels */
-figure.chart svg path[class$="Text"],
-figure.chart svg g[class*="Axis"] g[class$="tick"] path
+figure.chart svg path[class$="Text"]
 {
-  fill: var(--foreground);
+  fill: currentColor;
 }
 
-figure.chart svg path[class*="Axis"]
+figure.chart svg path[class*="Axis"][stroke="#000"]
 {
-  stroke: var(--foreground);
+  stroke: currentColor!important;
 }
 
 /* Diagrams now come with light and dark mode built-in */
