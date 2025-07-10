@@ -1,6 +1,7 @@
 :root {
+  --color-scheme: dark;
   --background: #111;
-  --foreground: #eee;
+  --foreground: #fff;
   --link-colour: #9cf;
   --fn-tt-foreground: #eee;
   --fn-tt-background: #333;

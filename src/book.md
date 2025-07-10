@@ -205,7 +205,7 @@ These treacherous generals exhibit what we've come to call "Byzantine behaviour"
 <a id="img_consensus_messages"></a>
 <figure class="diagram" style="width: 50%">
 
-![A picture of a node with messages coming in](md/images/diagrams/consensus_messages.svg)
+![A picture of a node with messages coming in](images/diagrams/consensus-messages.svg)
 
 <figcaption>
 
@@ -255,7 +255,7 @@ Except for the special Genesis block, every block builds on and points to a pare
 <a id="img_consensus_block_chain"></a>
 <figure class="diagram" style="width: 90%">
 
-![A picture of a linear chain of blocks](md/images/diagrams/consensus_block_chain.svg)
+![A picture of a linear chain of blocks](images/diagrams/consensus-block_chain.svg)
 
 <figcaption>
 
@@ -277,7 +277,7 @@ Our neat diagram of a nice linear chain will for the most part reflect what we s
 <a id="img_consensus_block_tree"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram of a block tree](md/images/diagrams/consensus_block_tree.svg)
+![A diagram of a block tree](images/diagrams/consensus-block_tree.svg)
 
 <figcaption>
 
@@ -313,7 +313,7 @@ Given a block tree and some decision criteria based on a node's local view of th
 <a id="img_consensus_block_tree_resolved"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram of a block chain as a subset of the block tree](md/images/diagrams/consensus_block_tree_resolved.svg)
+![A diagram of a block chain as a subset of the block tree](images/diagrams/consensus-block_tree_resolved.svg)
 
 <figcaption>
 
@@ -348,10 +348,10 @@ In any case, running the fork choice rule on the updated block tree might indica
 
 In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
-<a id="img_consensus_reversion_1"></a>
+<a id="img_consensus_reversion_0"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain prior to a reversion](md/images/diagrams/consensus_reversion_1.svg)
+![A diagram of a blockchain prior to a reversion](images/diagrams/consensus-reversion-0.svg)
 
 <figcaption>
 
@@ -366,10 +366,10 @@ Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed fr
 
 After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. After doing this, the node will have completed the reorganisation of its chain.
 
-<a id="img_consensus_reversion_2"></a>
+<a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain after a reversion](md/images/diagrams/consensus_reversion_2.svg)
+![A diagram of a blockchain after a reversion](images/diagrams/consensus-reversion-1.svg)
 
 <figcaption>
 
@@ -415,7 +415,7 @@ It is easy to demonstrate the CAP theorem in our blockchain context. Imagine tha
 <a id="img_consensus_partition"></a>
 <figure class="diagram" style="width: 50%">
 
-![A diagram of a network partition](md/images/diagrams/consensus_partition.svg)
+![A diagram of a network partition](images/diagrams/consensus-partition.svg)
 
 <figcaption>
 
@@ -449,7 +449,7 @@ Safety in Ethereum&nbsp;2 is called "finality", and is delivered by the Casper F
 <a id="img_consensus_finality"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram showing a finalised portion of chain and a forkful portion](md/images/diagrams/consensus_finality.svg)
+![A diagram showing a finalised portion of chain and a forkful portion](images/diagrams/consensus-finality.svg)
 
 <figcaption>
 
@@ -658,10 +658,10 @@ We would like to keep $\omega$ small to allow the broadest possible participatio
 
 This is a classic scalability trilemma. Personally, I don't find these pictures of triangles very intuitive, but they have become the canonical way to represent the trade-offs.
 
-<a id="img_scalability_trilemma"></a>
+<a id="img_incentives_scalability_trilemma"></a>
 <figure class="diagram" style="width: 60%">
 
-![A version of the scalability trilemma](md/images/diagrams/scalability_trilemma.svg)
+![A version of the scalability trilemma](images/diagrams/incentives-scalability_trilemma.svg)
 
 <figcaption>
 
@@ -815,7 +815,7 @@ The following chart illustrates the behaviour.
 <a id="img_hysteresis"></a>
 <figure class="chart">
 
-![A graph illustrating actual balance versus effective balance](md/images/charts/hysteresis.svg)
+![A graph illustrating actual balance versus effective balance](images/charts/hysteresis.svg)
 
 <figcaption>
 
@@ -914,7 +914,7 @@ We can graph the maximum issuance as a function of the number of validators. It'
 <a id="img_issuance_curve"></a>
 <figure class="chart">
 
-![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](md/images/charts/issuance_curve.svg)
+![A graph of maximum annual protocol issuance on the beacon chain as a function of the number of active validators](images/charts/issuance_curve.svg)
 
 <figcaption>
 
@@ -945,7 +945,7 @@ Graphing this give us an inverse square root curve.
 <a id="img_rewards_curve"></a>
 <figure class="chart">
 
-![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](md/images/charts/rewards_curve.svg)
+![A graph of the expected annual percentage rewards for stakers as a function of the number of active validators](images/charts/rewards_curve.svg)
 
 <figcaption>
 
@@ -1012,10 +1012,10 @@ The first of these, making attestations, happens regularly every epoch and accou
 
 However, validators are selected at random to propose blocks or participate in sync committees, so there is a natural variance to the latter two rewards. Over the long run, the expected proportion of rewards earned for each activity breaks down as per the following chart.
 
-<a id="img_weights"></a>
+<a id="img_incentives_weights"></a>
 <figure class="diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each activity](md/images/diagrams/weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each activity](images/diagrams/incentives-weights.svg)
 
 <figcaption>
 
@@ -1043,10 +1043,10 @@ Rewards are newly created Ether that is simply added to validators' balances on 
 
 There are three relevant milestones in a validator's lifecycle: its activation epoch, its exit epoch, and its withdrawable epoch. Eligibility for rewards, penalties and slashing vary based on these.
 
-<a id="img_rewards_eligibility"></a>
+<a id="img_incentives_rewards_eligibility"></a>
 <figure class="diagram" style="width:80%">
 
-![A timeline of the eligibility of validators for rewards](md/images/diagrams/rewards_eligibility.svg)
+![A timeline of the eligibility of validators for rewards](images/diagrams/incentives-rewards_eligibility.svg)
 
 <figcaption>
 
@@ -1125,7 +1125,7 @@ The choice of distance for including the source vote is interesting. It is chose
 <a id="img_reward_timeliness"></a>
 <figure class="chart">
 
-![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](md/images/charts/reward_timeliness.svg)
+![A graph of the net reward for a completely correct attestation as it gets older plotted against an exponential curve for comparison](images/charts/reward_timeliness.svg)
 
 <figcaption>
 
@@ -1212,10 +1212,10 @@ This factor works out to be $\frac{8}{56} = \frac{1}{7}$ which means that $\frac
 
 In the following charts, I have separated out the validator rewards from the proposer rewards, and we can see that they have exactly the same division among the duties. The chart on the right should probably be one seventh of the size of the one on the left for true accuracy.
 
-<a id="img_reward_split"></a>
+<a id="img_incentives_reward_split"></a>
 <figure class="diagram">
 
-![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](md/images/diagrams/reward_split.svg)
+![Piecharts showing that proposer and validator rewards are allocated in the same proportions for duties](images/diagrams/incentives-reward_split.svg)
 
 <figcaption>
 
@@ -1271,7 +1271,7 @@ The following chart shows the expected distribution of rewards for 300,000 valid
 <a id="img_reward_variance"></a>
 <figure class="chart">
 
-![A bar chart of the distribution of rewards for 300,000 validators with 32 ETH staked](md/images/charts/reward_variance.svg)
+![A bar chart of the distribution of rewards for 300,000 validators with 32 ETH staked](images/charts/reward_variance.svg)
 
 <figcaption>
 
@@ -1478,10 +1478,10 @@ To improve this, the Altair upgrade introduced individual validator inactivity s
 
 Graphically, the flow-chart looks like this.
 
-<a id="img_inactivity_scores_flow"></a>
+<a id="img_incentives_inactivity_scores_flow"></a>
 <figure class="diagram">
 
-![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
 
 <figcaption>
 
@@ -1509,7 +1509,7 @@ The following graph illustrates some scenarios. We have an inactivity leak that 
 <a id="img_inactivity_scores"></a>
 <figure class="chart">
 
-![A graph illustrating inactivity score scenarios](md/images/charts/inactivity_scores.svg)
+![A graph illustrating inactivity score scenarios](images/charts/inactivity_scores.svg)
 
 <figcaption>
 
@@ -1544,7 +1544,7 @@ This penalty is applied at each epoch, so (for constant $B_i$) the total penalty
 <a id="img_inactivity_balances"></a>
 <figure class="chart">
 
-![A graph showing the effect of the inactivity leak in five different scenarios](md/images/charts/inactivity_balances.svg)
+![A graph showing the effect of the inactivity leak in five different scenarios](images/charts/inactivity_balances.svg)
 
 <figcaption>
 
@@ -1861,7 +1861,7 @@ More mathematically, things look like this. We use two subgroups of the BLS12-38
 <a id="img_bls_key"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing how we will depict the various components in the diagrams below](md/images/diagrams/bls_key.svg)
+![Diagram showing how we will depict the various components in the diagrams below](images/diagrams/bls-key.svg)
 
 <figcaption>
 
@@ -1883,7 +1883,7 @@ The secret key, $sk$ is a 32 byte unsigned integer. The public key, $pk$, is a p
 <a id="img_bls_setup"></a>
 <figure class="diagram" style="width:50%">
 
-![Diagram of the generation of the public key](md/images/diagrams/bls_setup.svg)
+![Diagram of the generation of the public key](images/diagrams/bls-setup.svg)
 
 <figcaption>
 
@@ -1911,7 +1911,7 @@ Evidently the signature $\sigma$ is also a member of the $G_2$ group, and it ser
 <a id="img_bls_signing"></a>
 <figure class="diagram" style="width:65%">
 
-![Diagram of signing a message](md/images/diagrams/bls_signing.svg)
+![Diagram of signing a message](images/diagrams/bls-signing.svg)
 
 <figcaption>
 
@@ -1962,7 +1962,7 @@ Note that elliptic curves supporting such a pairing function are very rare. Such
 <a id="img_bls_verifying"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram of verifying a signature](md/images/diagrams/bls_verifying.svg)
+![Diagram of verifying a signature](images/diagrams/bls-verifying.svg)
 
 <figcaption>
 
@@ -1994,7 +1994,7 @@ The process is conceptually very simple: we simply "add up" the signatures. The 
 <a id="img_bls_signature_aggregation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing aggregation of signatures](md/images/diagrams/bls_signature_aggregation.svg)
+![Diagram showing aggregation of signatures](images/diagrams/bls-signature_aggregation.svg)
 
 <figcaption>
 
@@ -2010,7 +2010,7 @@ To verify an aggregate signature, we need an aggregate public key. As long as we
 <a id="img_bls_pubkey_aggregation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of public key aggregation](md/images/diagrams/bls_pubkey_aggregation.svg)
+![Diagram of public key aggregation](images/diagrams/bls-pubkey_aggregation.svg)
 
 <figcaption>
 
@@ -2026,7 +2026,7 @@ Since aggregate signatures are indistinguishable from normal signatures, and agg
 <a id="img_bls_aggregate_verify"></a>
 <figure class="diagram" style="width:70%">
 
-![Diagram of verification of an aggregate signature](md/images/diagrams/bls_aggregate_verify.svg)
+![Diagram of verification of an aggregate signature](images/diagrams/bls-aggregate_verify.svg)
 
 <figcaption>
 
@@ -2083,7 +2083,7 @@ This diagram illustrates the full flow from signing, through aggregating, to ver
 <a id="img_bls_aggregation"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing the end-to-end aggregate signature workflow](md/images/diagrams/bls_aggregation.svg)
+![Diagram showing the end-to-end aggregate signature workflow](images/diagrams/bls-aggregation.svg)
 
 <figcaption>
 
@@ -2332,7 +2332,7 @@ We can think of a RANDAO as being like a deck of cards that's passed round the t
 <a id="img_randomness_shuffle"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating repeated shuffling of a deck of cards](md/images/diagrams/randomness_shuffle.svg)
+![Diagram illustrating repeated shuffling of a deck of cards](images/diagrams/randomness-shuffle.svg)
 
 <figcaption>
 
@@ -2414,7 +2414,7 @@ Second, the hash of the signature is mixed in to the beacon state's RANDAO using
 <a id="img_randomness_reveal"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating updating the RANDAO](md/images/diagrams/randomness_reveal.svg)
+![Diagram illustrating updating the RANDAO](images/diagrams/randomness-reveal.svg)
 
 <figcaption>
 
@@ -2446,7 +2446,7 @@ To prevent this, we assume a maximum feasible lookahead that an attacker might a
 <a id="img_randomness_lookahead"></a>
 <figure class="diagram" style="width:90%">
 
-![Diagram showing min and max lookahead](md/images/diagrams/randomness_lookahead.svg)
+![Diagram showing min and max lookahead](images/diagrams/randomness-lookahead.svg)
 
 <figcaption>
 
@@ -2468,7 +2468,7 @@ The RANDAO value for an epoch is set at the end of the previous epoch, and duty 
 <a id="img_randomness_assignments"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating calculation of duties based on the RANDAO](md/images/diagrams/randomness_assignments.svg)
+![Diagram illustrating calculation of duties based on the RANDAO](images/diagrams/randomness-assignments.svg)
 
 <figcaption>
 
@@ -2482,7 +2482,7 @@ Thus, when a validator happens to be assigned to propose a block in the last slo
 <a id="img_randomness_biasing"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram illustrating biasing the RANDAO](md/images/diagrams/randomness_biasing.svg)
+![Diagram illustrating biasing the RANDAO](images/diagrams/randomness-biasing.svg)
 
 <figcaption>
 
@@ -2530,7 +2530,7 @@ $$
 <a id="img_randao_tail"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](md/images/charts/randao_tail.svg)
+![Graph of the expected RANDAO tail](images/charts/randao_tail.svg)
 
 <figcaption>
 
@@ -2556,7 +2556,7 @@ Visually, calculating $p^{(1)}_2$ looks like the sum of the values in the shaded
 <a id="img_randomness_tail_probabilities"></a>
 <figure class="diagram" style="width:40%">
 
-![Matrix of tail length probabilities](md/images/diagrams/randomness_tail_probabilities.svg)
+![Matrix of tail length probabilities](images/diagrams/randomness-tail_probabilities.svg)
 
 <figcaption>
 
@@ -2580,7 +2580,7 @@ Graphing this for various values of $k$ we get the following. Note that the soli
 <a id="img_randao_extend_0"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected RANDAO tail](md/images/charts/randao_extend_0.svg)
+![Graph of the expected RANDAO tail](images/charts/randao_extend_0.svg)
 
 <figcaption>
 
@@ -2598,7 +2598,7 @@ To investigate this, consider the following graph. Here, for each $k$ line we ha
 <a id="img_randao_extend_1"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the expected change in RANDAO tail](md/images/charts/randao_extend_1.svg)
+![Graph of the expected change in RANDAO tail](images/charts/randao_extend_1.svg)
 
 <figcaption>
 
@@ -2614,7 +2614,7 @@ For completeness, we shouldn't only look at expectations, but also at probabilit
 <a id="img_randao_extend_2"></a>
 <figure class="chart" style="width:100%">
 
-![Graph of the probability that my tail will shrink](md/images/charts/randao_extend_2.svg)
+![Graph of the probability that my tail will shrink](images/charts/randao_extend_2.svg)
 
 <figcaption>
 
@@ -2725,7 +2725,7 @@ Note that the $q_{j+1}q_j$ element appears in both outcomes, but must be include
 <a id="img_randomness_propose_probabilities"></a>
 <figure class="diagram" style="width:40%">
 
-![Matrix of proposal number probabilities](md/images/diagrams/randomness_propose_probabilities.svg)
+![Matrix of proposal number probabilities](images/diagrams/randomness-propose_probabilities.svg)
 
 <figcaption>
 
@@ -2743,7 +2743,7 @@ $$
 <a id="img_randao_proposals"></a>
 <figure class="chart" style="width:100%">
 
-![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](md/images/charts/randao_proposals.svg)
+![Graph showing the expected number of proposals per epoch when biasing and not biasing the RANDAO](images/charts/randao_proposals.svg)
 
 <figcaption>
 
@@ -2757,7 +2757,7 @@ The maximum percentage gain in block proposals that I can acquire is shown in th
 <a id="img_randao_proposals_percent"></a>
 <figure class="chart" style="width:100%">
 
-![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](md/images/charts/randao_proposals_percent.svg)
+![Graph showing the percentage increase in proposals per epoch when biasing the RANDAO](images/charts/randao_proposals_percent.svg)
 
 <figcaption>
 
@@ -2926,7 +2926,7 @@ With this pivot, we then pick the mirror index $m_1$ halfway between $p$ and $0$
 <a id="img_shuffling_0"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the pivot and the first mirror index](md/images/diagrams/shuffling_0.svg)
+![A diagram showing the pivot and the first mirror index](images/diagrams/shuffling-0.svg)
 
 <figcaption>
 
@@ -2948,7 +2948,7 @@ We make the same swap-or-not decision for each index between $m_1$ and $p$.
 <a id="img_shuffling_1"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing swapping or not from the first mirror up to the pivot](md/images/diagrams/shuffling_1.svg)
+![A diagram showing swapping or not from the first mirror up to the pivot](images/diagrams/shuffling-1.svg)
 
 <figcaption>
 
@@ -2966,7 +2966,7 @@ After considering all the indices $i$ from $m_1$ to $p$, mirroring in $m_1$, we 
 <a id="img_shuffling_2"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the second mirror index](md/images/diagrams/shuffling_2.svg)
+![A diagram showing the second mirror index](images/diagrams/shuffling-2.svg)
 
 <figcaption>
 
@@ -2982,7 +2982,7 @@ Finally, we repeat the swap-or-not process, considering all the points $j$ from 
 <a id="img_shuffling_3"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing swapping or not from the pivot to the second mirror](md/images/diagrams/shuffling_3.svg)
+![A diagram showing swapping or not from the pivot to the second mirror](images/diagrams/shuffling-3.svg)
 
 <figcaption>
 
@@ -3000,7 +3000,7 @@ The next round begins by incrementing (or decrementing for a reverse shuffle) th
 <a id="img_shuffling_4"></a>
 <figure class="diagram" style="width:80%">
 
-![A diagram showing the whole process running from one mirror to the other in a single round](md/images/diagrams/shuffling_4.svg)
+![A diagram showing the whole process running from one mirror to the other in a single round](images/diagrams/shuffling-4.svg)
 
 <figcaption>
 
@@ -3099,7 +3099,7 @@ The composition of the committees for an epoch is fully determined at the start 
 <a id="img_committees_random"></a>
 <figure class="diagram" style="width: 80%">
 
-![Diagram showing circles and triangles randomly divided into committees](md/images/diagrams/committees_random.svg)
+![Diagram showing circles and triangles randomly divided into committees](images/diagrams/committees-random.svg)
 
 <figcaption>
 
@@ -3113,7 +3113,7 @@ We assign validators to committees randomly in order to defend against a minorit
 <a id="img_committees_organised"></a>
 <figure class="diagram" style="width: 80%">
 
-![Diagram showing circles and triangles divided into committees under the influence of an attacker](md/images/diagrams/committees_organised.svg)
+![Diagram showing circles and triangles divided into committees under the influence of an attacker](images/diagrams/committees-organised.svg)
 
 <figcaption>
 
@@ -3137,7 +3137,7 @@ Clearly, the first goal is not achievable if there are fewer than `SLOTS_PER_EPO
 <a id="img_committees_all"></a>
 <figure class="diagram" style="width: 90%">
 
-![A diagram showing N committees at each slot and 32 slots per epoch](md/images/diagrams/committees_all.svg)
+![A diagram showing N committees at each slot and 32 slots per epoch](images/diagrams/committees-all.svg)
 
 <figcaption>
 
@@ -3218,7 +3218,7 @@ The length of the vector returned will be either `n // (32 * N)` or `1 + n // (3
 <a id="img_committees_selection"></a>
 <figure class="diagram" style="width: 95%">
 
-![A diagram showing how the validator set is sliced up into committees](md/images/diagrams/committees_selection.svg)
+![A diagram showing how the validator set is sliced up into committees](images/diagrams/committees-selection.svg)
 
 <figcaption>
 
@@ -3320,7 +3320,7 @@ This section is concerned with steps 2 and 4: how the aggregators are selected f
 <a id="img_aggregators"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram of the workflow of aggregating attestations from beacon committees](md/images/diagrams/aggregators.svg)
+![A diagram of the workflow of aggregating attestations from beacon committees](images/diagrams/aggregators.svg)
 
 <figcaption>
 
@@ -3378,7 +3378,7 @@ The probability of having zero aggregators is ${(1 - \frac{16}{N})}^N$. For the 
 <a id="img_committee_aggregators"></a>
 <figure class="chart">
 
-![A bar chart showing the probability of different numbers of aggregators in a committee of 256](md/images/charts/committee_aggregators.svg)
+![A bar chart showing the probability of different numbers of aggregators in a committee of 256](images/charts/committee_aggregators.svg)
 
 <figcaption>
 
@@ -3638,10 +3638,10 @@ As an example, this bitlist with three elements is encoded into a single byte. T
 '08'
 ```
 
-<a id="img_bitlist"></a>
+<a id="img_ssz_bitlist"></a>
 <figure class="diagram" style="width: 60%">
 
-![A diagram showing how the bitlist sentinel works](md/images/diagrams/bitlist.svg)
+![A diagram showing how the bitlist sentinel works](images/diagrams/ssz-bitlist.svg)
 
 <figcaption>
 
@@ -3727,7 +3727,7 @@ In Part&nbsp;1, instead of directly encoding the variable size list in place, it
 <a id="img_ssz_examples_baz"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of the serialisation of the Baz container](md/images/diagrams/ssz_examples_Baz.svg)
+![Diagram of the serialisation of the Baz container](images/diagrams/ssz-examples_Baz.svg)
 
 <figcaption>
 
@@ -3900,7 +3900,7 @@ All the remaining items are fixed size, and are encoded in-place, including recu
 <a id="img_ssz_examples_indexedattestation"></a>
 <figure class="diagram" style="width:72%">
 
-![Diagram of the serialisation of the IndexedAttestation container](md/images/diagrams/ssz_examples_IndexedAttestation.svg)
+![Diagram of the serialisation of the IndexedAttestation container](images/diagrams/ssz-examples_IndexedAttestation.svg)
 
 <figcaption>
 
@@ -3951,7 +3951,7 @@ Another thing to note is that, since `attestation_1` and `attestation_2` are ide
 <a id="img_ssz_examples_attesterslashing"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram of the serialisation of the AttesterSlashing container](md/images/diagrams/ssz_examples_AttesterSlashing.svg)
+![Diagram of the serialisation of the AttesterSlashing container](images/diagrams/ssz-examples_AttesterSlashing.svg)
 
 <figcaption>
 
@@ -4052,7 +4052,7 @@ In the following diagram, the leaves are our four blobs of data, $A$, $B$, $C$, 
 <a id="img_merkleization_tree"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram of a Merkle tree](md/images/diagrams/merkleization_tree.svg)
+![Diagram of a Merkle tree](images/diagrams/merkleization-tree.svg)
 
 <figcaption>
 
@@ -4234,7 +4234,7 @@ A container's hash tree root is the Merkleization of the list of hash tree roots
 <a id="img_merkleization_indexedattestation"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation.svg)
+![Diagram showing how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation.svg)
 
 <figcaption>
 
@@ -4292,7 +4292,7 @@ In diagram form the hash tree root calculation for the list looks like this.
 <a id="img_merkleization_attestingindices"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a List type](md/images/diagrams/merkleization_AttestingIndices.svg)
+![Diagram showing how to calculate the hash tree root of a List type](images/diagrams/merkleization-AttestingIndices.svg)
 
 <figcaption>
 
@@ -4361,7 +4361,7 @@ assert(a.data.hash_tree_root() == merkleize_chunks(
 <a id="img_merkleization_attestationdata"></a>
 <figure class="diagram" style="width:80%">
 
-![Diagram showing how to calculate the hash tree root of an AttestationData type](md/images/diagrams/merkleization_AttestationData.svg)
+![Diagram showing how to calculate the hash tree root of an AttestationData type](images/diagrams/merkleization-AttestationData.svg)
 
 <figcaption>
 
@@ -4382,7 +4382,7 @@ assert(a.signature.hash_tree_root() ==
 <a id="img_merkleization_signature"></a>
 <figure class="diagram" style="width:60%">
 
-![Diagram showing how to calculate the hash tree root of a Signature type](md/images/diagrams/merkleization_Signature.svg)
+![Diagram showing how to calculate the hash tree root of a Signature type](images/diagrams/merkleization-Signature.svg)
 
 <figcaption>
 
@@ -4400,7 +4400,7 @@ Assembling all these parts we can illustrate in both diagram form and code form 
 <a id="img_merkleization_indexedattestation_all"></a>
 <figure class="diagram" style="width:100%">
 
-![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](md/images/diagrams/merkleization_IndexedAttestation_all.svg)
+![Diagram showing the full picture of how to calculate the hash tree root of an IndexedAttestation type](images/diagrams/merkleization-IndexedAttestation_all.svg)
 
 <figcaption>
 
@@ -4884,10 +4884,10 @@ On a long-term average, a validator can expect to earn a total amount of [`get_b
 
 The apportioning of rewards was overhauled in the Altair upgrade to better reflect the importance of each activity within the protocol. The total reward amount remains the same, but sync committee rewards were added, and the relative weights were adjusted. Previously, the weights corresponded to 16 for correct source, 16 for correct target, 16 for correct head, 14 for inclusion (equivalent to correct source), and 2 for block proposals. The factor of four increase in the proposer reward addressed a long-standing [spec bug](https://github.com/ethereum/consensus-specs/issues/2152#issuecomment-747465241).
 
-<a id="img_weights"></a>
+<a id="img_incentives_weights"></a>
 <figure class="diagram" style="width:50%">
 
-![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](md/images/diagrams/weights.svg)
+![A piechart of the proportion of a validator's total reward derived from each of the micro-rewards](images/diagrams/incentives-weights.svg)
 
 <figcaption>
 
@@ -7964,14 +7964,14 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
-<a id="img_k_finality"></a>
+<a id="img_consensus_2_finality"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram of the four k-finality scenarios](md/images/diagrams/k_finality.svg)
+![A diagram of the four 2-finality scenarios](images/diagrams/consensus-2-finality.svg)
 
 <figcaption>
 
-The four k-finality scenarios. Checkpoint numbers are along the bottom.
+The four 2-finality scenarios. Checkpoint numbers are along the bottom.
 
 </figcaption>
 </figure>
@@ -8015,10 +8015,10 @@ With Altair, each validator has an individual inactivity score in the beacon sta
   - When _not_ in an inactivity leak
     - decrease all validators' scores by [`INACTIVITY_SCORE_RECOVERY_RATE`](/part3/config/configuration/#inactivity_score_recovery_rate).
 
-<a id="img_inactivity_scores_flow"></a>
+<a id="img_incentives_inactivity_scores_flow"></a>
 <figure class="diagram">
 
-![Flowchart showing how inactivity score updates are calculated](md/images/diagrams/inactivity_scores_flow.svg)
+![Flowchart showing how inactivity score updates are calculated](images/diagrams/incentives-inactivity_scores_flow.svg)
 
 <figcaption>
 
