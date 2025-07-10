@@ -133,13 +133,11 @@ Append a `*` to the path:
 
 ## Images
 
-All images are SVG, and text elements are replaced by paths for maximum compatibility: it seems that a lot of applications have trouble with embedded fonts.
+All images are in SVG format and get embedded directly into the HTML pages so that they can be responsive to light and dark mode. I have spent absurd amounts of time making this work, so please enjoy.
 
 ### Diagrams
 
-Diagrams have been created in [drawio.com](https://www.drawio.com/) and exported to SVG with the following options:
-  - Border width: 10 (some of the sketched elements go out of bounds)
-  - Text settings: Convert labels to SVG
+Diagrams have been created in [drawio.com](https://www.drawio.com/) desktop application, version 27.0.9. The script in _bin/util/drawio2svg.sh_ converts a drawio file to one or more SVG files.
 
 Source files for all diagrams are in the _src/diagrams_ directory. The font used is the _Gloria Hallelujah_ Google font.
 
