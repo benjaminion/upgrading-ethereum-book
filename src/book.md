@@ -340,10 +340,10 @@ In any case, running the fork choice rule on the updated block tree might indica
 
 In the following diagram, the node has evaluated block $F$ to be the head block, hence its chain comprises blocks $A$, $B$, $D$, $E$, and $F$. The node knows about block $C$, but it does not appear in its view of the chain; it is on a side branch.
 
-<a id="img_consensus_reversion_1"></a>
+<a id="img_consensus_reversion_0"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain prior to a reversion](images/diagrams/consensus-reversion_1.svg)
+![A diagram of a blockchain prior to a reversion](images/diagrams/consensus-reversion-0.svg)
 
 <figcaption>
 
@@ -358,10 +358,10 @@ Blocks $D$, $E$, and $F$ are not ancestors of $G$, so they need to be removed fr
 
 After rewinding to $B$, the node can add blocks $C$ and $G$ to its chain and process them accordingly. After doing this, the node will have completed the reorganisation of its chain.
 
-<a id="img_consensus_reversion_2"></a>
+<a id="img_consensus_reversion_1"></a>
 <figure class="diagram" style="width: 70%">
 
-![A diagram of a blockchain after a reversion](images/diagrams/consensus-reversion_2.svg)
+![A diagram of a blockchain after a reversion](images/diagrams/consensus-reversion-1.svg)
 
 <figcaption>
 
@@ -8361,14 +8361,14 @@ On the beacon chain we are using $2$-finality, since target votes may be include
  3. Checkpoints $C_{n-2}$ and $C_{n-1}$ are justified, and there is a supermajority link from $C_{n-2}$ to $C_n$: finalise $C_{n-2}$.
  4. Checkpoint $C_{n-1}$ is justified, and there is a supermajority link from $C_{n-1}$ to $C_n$: finalise $C_{n-1}$. This is equivalent to $1$-finality applied to the current epoch.
 
-<a id="img_k_finality"></a>
+<a id="img_consensus_2_finality"></a>
 <figure class="diagram" style="width: 80%">
 
-![A diagram of the four k-finality scenarios](images/diagrams/k_finality.svg)
+![A diagram of the four 2-finality scenarios](images/diagrams/consensus-2-finality.svg)
 
 <figcaption>
 
-The four k-finality scenarios. Checkpoint numbers are along the bottom.
+The four 2-finality scenarios. Checkpoint numbers are along the bottom.
 
 </figcaption>
 </figure>

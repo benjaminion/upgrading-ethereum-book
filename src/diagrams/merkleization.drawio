@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-12-21T12:54:28.028Z" agent="5.0 (X11)" etag="3_-3NIJq1Yug3MlIpJOf" version="20.7.4" type="github" pages="6">
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9" pages="6">
   <diagram id="_kiuPmwyJj4kBi8NxYxS" name="tree">
     <mxGraphModel dx="2074" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -71,7 +71,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="oQio6w9FTqy0y1JQYb8L" name="IndexedAttestation">
-    <mxGraphModel dx="2074" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="Fd8uQplwkJwQJHsW57Jq-0" />
         <mxCell id="Fd8uQplwkJwQJHsW57Jq-1" parent="Fd8uQplwkJwQJHsW57Jq-0" />
@@ -531,7 +531,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="sBeIiljd5fq1MqVG8TIA" name="IndexedAttestation_all">
-    <mxGraphModel dx="2074" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="EI5LFa18qx79L4KTmC3c-0" />
         <mxCell id="EI5LFa18qx79L4KTmC3c-1" parent="EI5LFa18qx79L4KTmC3c-0" />
@@ -960,8 +960,8 @@
         <mxCell id="R-II2A4LHFq83cX2PQ0V-63" value="&lt;div&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 14px&quot; face=&quot;Gloria Hallelujah&quot;&gt;AttestationData&lt;/font&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;sketch=1;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
           <mxGeometry x="105" y="82" width="205" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="R-II2A4LHFq83cX2PQ0V-65" value="&lt;p style=&quot;line-height: 1.6&quot;&gt;&lt;font style=&quot;font-size: 16px&quot;&gt;R(X) = hash tree root of X&lt;br&gt;S(X) = SSZ serialisation of X&lt;br&gt;&lt;/font&gt;&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
-          <mxGeometry x="80" y="746" width="249" height="60" as="geometry" />
+        <mxCell id="R-II2A4LHFq83cX2PQ0V-65" value="&lt;p style=&quot;line-height: 1.6&quot;&gt;&lt;font style=&quot;font-size: 16px&quot;&gt;R(X) = hash tree root of X&lt;br&gt;&lt;/font&gt;&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
+          <mxGeometry x="79" y="746" width="249" height="34" as="geometry" />
         </mxCell>
         <mxCell id="R-II2A4LHFq83cX2PQ0V-66" value="" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;fillColor=none;" parent="EI5LFa18qx79L4KTmC3c-1" vertex="1">
           <mxGeometry x="841" y="760" width="35" height="36" as="geometry" />
@@ -990,6 +990,9 @@
         </mxCell>
         <mxCell id="CCiwSGmsVsifGLuDMq5F-5" value="Merkleize" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=14;perimeter=none;" parent="CCiwSGmsVsifGLuDMq5F-4" connectable="0" vertex="1">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tiyj8suvdayDOOCR5xrn-0" value="&lt;p style=&quot;line-height: 1.6&quot;&gt;&lt;font style=&quot;font-size: 16px&quot;&gt;S(X) = SSZ serialisation of X&lt;br&gt;&lt;/font&gt;&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=16;" vertex="1" parent="EI5LFa18qx79L4KTmC3c-1">
+          <mxGeometry x="79" y="778" width="249" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

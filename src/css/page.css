@@ -176,7 +176,6 @@ a.anchor svg {
   height: 16px;
   opacity: 0;
   transition: opacity 0.3s ease;
-
 }
 
 h2:hover svg, h3:hover svg, h4:hover svg, h5:hover svg, h6:hover svg  {
@@ -189,7 +188,6 @@ figure {
   text-align: center;
   padding: 0;
   margin: 3ex auto;
-  font-style: italic;
 }
 
 figcaption {
@@ -299,6 +297,7 @@ div.section-header h1, div.section-header h2 {
   display:inline;
   font-size: 0.9em;
 }
+
 div.section-header h1::after {
   content: " | ";
 }
@@ -321,19 +320,6 @@ details p:first-of-type {
 }
 
 /*** Code prettifier ***/
-
-pre.language-text {
-  background-color: inherit;
-  color: inherit;
-}
-
-code.language-text {
-  color: inherit;
-}
-
-div.gatsby-highlight {
-  margin: 1ex 0 3ex 0;
-}
 
 pre[class^="language-"] {
   padding: 1ex 1em;
@@ -374,54 +360,44 @@ div.summary {
   border: double #999 3.5px;
 }
 
-/*** SVG stuff - needed for dark mode support. Here be dragons. ***/
+/*** SVG stuff - dark mode support ***/
 
-svg path, svg g, svg use {
-  transition: stroke var(--transition),
-              fill var(--transition);
-}
-
+/* Heading anchors */
 a.anchor svg path {
   fill:  var(--foreground);
 }
 
-figure svg path {
-  stroke: var(--foreground);
-  fill: none;
-}
-
-/* Correct weight for axes and labels in charts */
+/* Fix up chart axes and labels */
 figure.chart svg path[class$="Text"],
-figure.chart svg g[class*="Axis"] g[class$="tick"] path {
-  fill: var(--foreground)!important;
-  stroke: none!important;
-}
-
-/* The order of these two matters. The first makes sure our dashed lines are not fat,
-   the second that other elements are not messed up */
-figure.diagram svg path[d] {
-  stroke: none!important;
-  fill:var(--foreground)!important;
-}
-
-figure.diagram svg path[stroke] {
-  stroke: var(--foreground)!important;
-  fill: none!important;
-}
-
-/* Some elements need a fill... */
-figure.diagram svg path[fill] {
-  fill: var(--background)!important;
-}
-
-/* ...and some don't. */
-figure.diagram svg path[fill=none] {
-  fill: none!important;
-}
-
-/* Make Firefox show text in diagrams */
-figure.diagram svg use {
+figure.chart svg g[class*="Axis"] g[class$="tick"] path
+{
   fill: var(--foreground);
+}
+
+figure.chart svg path[class*="Axis"]
+{
+  stroke: var(--foreground);
+}
+
+/* Diagrams now come with light and dark mode built-in */
+figure.diagram svg {
+  color-scheme: var(--color-scheme)!important;
+}
+
+/* Dark/light mode transitions */
+figure svg path {
+  transition: stroke var(--transition),
+              fill var(--transition);
+}
+
+figure.diagram svg foreignObject div,
+figure.diagram svg rect,
+figure.diagram svg text,
+figure.diagram svg span
+{
+  transition: color var(--transition),
+              background-color var(--transition),
+              fill var(--transition);
 }
 
 /* Always display my avatar as positive */
