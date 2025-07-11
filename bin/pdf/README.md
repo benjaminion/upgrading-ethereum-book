@@ -48,10 +48,11 @@ Ideally we would like to do everything with SVGs alone, but the command-line ver
 
 Instead, we now maintain SVG versions (in _src/images/diagrams/_) for the HTML build, and PDF versions (in _src/images/diagrams\_pdf/_) for the PDF build. These are manually maintained by running the _drawio2image.sh_ utility as required - we could automate and cache and all that jazz, but for now that seems too much bother.
 
-Note that, in the SVG for charts, all text is converted to paths, so they import to pandoc no problem. I miss being able to do that with drawio.
+Note that, for charts, all text is converted to SVG paths, so they import to pandoc no problem.
 
 ### Significant known issues
 
+- A couple of the PDF images are slightly over-cropped.
 - Intermittent: sometimes pages with diagrams overflow off the bottom.
   - May be fixed in newer versions of xetex; seems ok in XeTeX 3.141592653-2.6-0.999993
 - Footnotes can vanish.
