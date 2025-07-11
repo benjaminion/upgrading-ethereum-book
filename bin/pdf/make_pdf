@@ -31,29 +31,30 @@ cd $srcdir
 
 echo "Converting $srcdir/$name.md to ./$name.pdf with version $UE_GIT_BRANCH"
 
-pandoc \
-    $name.md \
-    --output $outdir/$name.pdf \
-    --from markdown \
-    --metadata title-meta:"Upgrading Ethereum - ${UE_GIT_BRANCH^} Edition" \
-    --metadata author-meta:'Ben Edgington' \
-    --metadata lang:en-GB \
-    --lua-filter $path/filters/pagebreaks.lua \
-    --lua-filter $path/filters/links.lua \
-    --lua-filter $path/filters/figures.lua \
-    --lua-filter $path/filters/summaries.lua \
-    --lua-filter $path/filters/linebreaks.lua \
-    --lua-filter $path/filters/codeblocks.lua \
-    --variable documentclass:book \
-    --variable classoption:oneside \
-    --variable linkcolor:violet \
-    --variable geometry:a4paper \
-    --variable geometry:margin=2.54cm \
-    --variable block-headings \
-    --variable monofont:'DejaVu Sans Mono' \
-    --include-before-body $path/inc/title-page.tex \
-    --include-in-header $path/inc/header.tex \
-    --toc \
-    --toc-depth 3 \
-    --no-highlight \
-    --pdf-engine xelatex
+cat $name.md | \
+    sed 's|\(images/diagrams\)/\([^)]*\)\.svg|\1_pdf/\2.pdf|g' | \
+    pandoc \
+        --output $outdir/$name.pdf \
+        --from markdown \
+        --metadata title-meta:"Upgrading Ethereum - ${UE_GIT_BRANCH^} Edition" \
+        --metadata author-meta:'Ben Edgington' \
+        --metadata lang:en-GB \
+        --lua-filter $path/filters/pagebreaks.lua \
+        --lua-filter $path/filters/links.lua \
+        --lua-filter $path/filters/figures.lua \
+        --lua-filter $path/filters/summaries.lua \
+        --lua-filter $path/filters/linebreaks.lua \
+        --lua-filter $path/filters/codeblocks.lua \
+        --variable documentclass:book \
+        --variable classoption:oneside \
+        --variable linkcolor:violet \
+        --variable geometry:a4paper \
+        --variable geometry:margin=2.54cm \
+        --variable block-headings \
+        --variable monofont:'DejaVu Sans Mono' \
+        --include-before-body $path/inc/title-page.tex \
+        --include-in-header $path/inc/header.tex \
+        --toc \
+        --toc-depth 3 \
+        --no-highlight \
+        --pdf-engine xelatex

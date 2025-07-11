@@ -20,7 +20,7 @@ src/md/annotated.md
 # Junk
 tmp/
 test*
-*.pdf
+/*.pdf
 *.bkp
 
 # IntelliJ configs

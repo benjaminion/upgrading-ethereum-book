@@ -38,6 +38,18 @@ The generated PDF will be written to your current directory as _book.pdf_.
 
 - To get two-sided output, omit the `-variable classoption:oneside` parameter.
 
+### Diagrams
+
+I've had to wrestle a bit with diagram handling.
+
+I am now using [drawio-desktop](https://github.com/jgraph/drawio-desktop) to create diagrams - this simplifies the workflow over using the web version. The script in _bin/util/drawio2image.sh_ can convert the _.drawio_ files to SVG or PDF.
+
+Ideally we would like to do everything with SVGs alone, but the command-line version of drawio-desktop seems to be incapable of outputting SVGs that librsvg2 (used by pandoc) can render with the correct Google font. It is possible to export to SVG via the drawio GUI and embed the fonts, but that is cumbersome and results in huge files for the HTML version. (The background to the issue is that drawio uses `<foreignObject>` elements for text handling - web browsers understand this, but librsvg2 does not.)
+
+Instead, we now maintain SVG versions (in _src/images/diagrams/_) for the HTML build, and PDF versions (in _src/images/diagrams\_pdf/_) for the PDF build. These are manually maintained by running the _drawio2image.sh_ utility as required - we could automate and cache and all that jazz, but for now that seems too much bother.
+
+Note that, in the SVG for charts, all text is converted to paths, so they import to pandoc no problem. I miss being able to do that with drawio.
+
 ### Significant known issues
 
 - Intermittent: sometimes pages with diagrams overflow off the bottom.
