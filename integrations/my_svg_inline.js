@@ -59,6 +59,7 @@ const plugins = [
     name: 'addAttributesToSVGElement',
     params: { attribute: { role: 'img' } },
   },
+  'removeRasterImages',
 ];
 
 const addTitleSettings = {
