@@ -32,6 +32,7 @@ echo
 echo "*** Building site..."
 
 npm run clean
+rm -f .svg_cache/*.svg
 npm run build
 was_it_ok $? "npm run build"
 
