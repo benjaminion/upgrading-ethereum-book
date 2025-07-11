@@ -336,12 +336,18 @@
     </mxGraphModel>
   </diagram>
   <diagram name="lookahead" id="q5iYeYxDNEsRrHaKuetX">
-    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1713" dy="1087" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="qMGTfqW7NC3uwpry6LCC-0" />
         <mxCell id="qMGTfqW7NC3uwpry6LCC-1" parent="qMGTfqW7NC3uwpry6LCC-0" />
         <mxCell id="qMGTfqW7NC3uwpry6LCC-25" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="82" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-0" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="qMGTfqW7NC3uwpry6LCC-25" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="qMGTfqW7NC3uwpry6LCC-26" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="qMGTfqW7NC3uwpry6LCC-25" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -361,23 +367,23 @@
         <mxCell id="qMGTfqW7NC3uwpry6LCC-31" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="qMGTfqW7NC3uwpry6LCC-25" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
         </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-0" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="qMGTfqW7NC3uwpry6LCC-25" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="80" y="80" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-1" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;End of&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px; font-family: &amp;quot;Gloria Hallelujah&amp;quot;; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Epoch N&lt;/span&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="qMGTfqW7NC3uwpry6LCC-25" vertex="1">
           <mxGeometry x="-3" y="-72" width="80" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qMGTfqW7NC3uwpry6LCC-40" value="" style="endArrow=classic;html=1;rounded=1;sketch=1;fontSize=18;" parent="qMGTfqW7NC3uwpry6LCC-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="236" y="243" as="sourcePoint" />
-            <mxPoint x="283" y="243" as="targetPoint" />
+            <mxPoint x="225" y="243" as="sourcePoint" />
+            <mxPoint x="272" y="243" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-12" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="283" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-19" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;dashed=1;" parent="zWVsQeZAL-qWRTTaB1xE-12" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-13" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-12" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -397,17 +403,17 @@
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-18" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-12" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
         </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-19" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="zWVsQeZAL-qWRTTaB1xE-12" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="80" y="80" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-20" value="Epoch N + 1" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="zWVsQeZAL-qWRTTaB1xE-12" vertex="1">
           <mxGeometry x="-88" y="-75" width="130" height="60" as="geometry" />
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-21" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="483" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-28" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="zWVsQeZAL-qWRTTaB1xE-21" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-22" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-21" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -427,17 +433,17 @@
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-27" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-21" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
         </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-28" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="zWVsQeZAL-qWRTTaB1xE-21" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="80" y="80" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-29" value="Epoch N + 2" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="zWVsQeZAL-qWRTTaB1xE-21" vertex="1">
           <mxGeometry x="-88" y="-75" width="130" height="60" as="geometry" />
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-30" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="681" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-37" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="zWVsQeZAL-qWRTTaB1xE-30" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-31" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-30" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -457,29 +463,29 @@
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-36" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-30" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
         </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-37" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="zWVsQeZAL-qWRTTaB1xE-30" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="80" y="80" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-38" value="&lt;div style=&quot;font-size: 18px&quot; align=&quot;right&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Epoch &lt;/font&gt;N + 3&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="zWVsQeZAL-qWRTTaB1xE-30" vertex="1">
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-38" value="Epoch N + 3" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="zWVsQeZAL-qWRTTaB1xE-30" vertex="1">
           <mxGeometry x="-87" y="-74" width="130" height="60" as="geometry" />
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-39" value="" style="endArrow=classic;html=1;rounded=1;sketch=1;fontSize=18;" parent="qMGTfqW7NC3uwpry6LCC-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="446" y="247" as="sourcePoint" />
-            <mxPoint x="493" y="247" as="targetPoint" />
+            <mxPoint x="425" y="244" as="sourcePoint" />
+            <mxPoint x="472" y="244" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-40" value="" style="endArrow=classic;html=1;rounded=1;sketch=1;fontSize=18;" parent="qMGTfqW7NC3uwpry6LCC-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="634" y="251.5" as="sourcePoint" />
-            <mxPoint x="681" y="251.5" as="targetPoint" />
+            <mxPoint x="623" y="244" as="sourcePoint" />
+            <mxPoint x="670" y="244" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-41" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="882" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-48" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="zWVsQeZAL-qWRTTaB1xE-41" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="78" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-42" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-41" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -499,17 +505,17 @@
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-47" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-41" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
         </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-48" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="zWVsQeZAL-qWRTTaB1xE-41" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="78" y="80" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-49" value="Epoch N + 4" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="zWVsQeZAL-qWRTTaB1xE-41" vertex="1">
           <mxGeometry x="-88" y="-74" width="130" height="60" as="geometry" />
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-50" value="" style="group" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1" connectable="0">
           <mxGeometry x="1083" y="227" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="zWVsQeZAL-qWRTTaB1xE-57" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="zWVsQeZAL-qWRTTaB1xE-50" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="-60" as="sourcePoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-51" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-50" vertex="1">
           <mxGeometry y="16.66666666666663" width="137.51479289940826" height="33.33333333333333" as="geometry" />
@@ -528,12 +534,6 @@
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-56" value="&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 15px&quot; face=&quot;Gloria Hallelujah&quot;&gt;RANDAO&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;sketch=1;fillStyle=solid;strokeWidth=1;fillColor=default;size=50;flipH=1;" parent="zWVsQeZAL-qWRTTaB1xE-50" vertex="1">
           <mxGeometry x="2.485207100591696" width="137.51479289940826" height="33.33333333333333" as="geometry" />
-        </mxCell>
-        <mxCell id="zWVsQeZAL-qWRTTaB1xE-57" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="zWVsQeZAL-qWRTTaB1xE-50" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="80" y="-60" as="sourcePoint" />
-            <mxPoint x="80" y="80" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-58" value="Epoch N + 5" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="zWVsQeZAL-qWRTTaB1xE-50" vertex="1">
           <mxGeometry x="-88" y="-74" width="130" height="60" as="geometry" />
@@ -576,15 +576,27 @@
         <mxCell id="zWVsQeZAL-qWRTTaB1xE-65" value="MAX_SEED_LOOKAHEAD" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="qMGTfqW7NC3uwpry6LCC-1" vertex="1">
           <mxGeometry x="642" y="371" width="240" height="30" as="geometry" />
         </mxCell>
+        <mxCell id="3OSPcZtFjyx9732uob2b-0" value="" style="endArrow=classic;html=1;rounded=1;sketch=1;fontSize=18;" edge="1" parent="qMGTfqW7NC3uwpry6LCC-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="821" y="244.5" as="sourcePoint" />
+            <mxPoint x="868" y="244.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3OSPcZtFjyx9732uob2b-1" value="" style="endArrow=classic;html=1;rounded=1;sketch=1;fontSize=18;" edge="1" parent="qMGTfqW7NC3uwpry6LCC-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1025" y="244" as="sourcePoint" />
+            <mxPoint x="1072" y="244" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram name="assignments" id="J6UfZ9x_tjTnBra0YhFz">
-    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1004" dy="637" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="-OaIqKQ1XXxw7gQaKjo3-0" />
         <mxCell id="-OaIqKQ1XXxw7gQaKjo3-1" parent="-OaIqKQ1XXxw7gQaKjo3-0" />
-        <mxCell id="gEZV4y1GaaZU7hTQDK18-1" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="-OaIqKQ1XXxw7gQaKjo3-1" edge="1">
+        <mxCell id="gEZV4y1GaaZU7hTQDK18-1" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="-OaIqKQ1XXxw7gQaKjo3-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="662" y="80" as="sourcePoint" />
             <mxPoint x="662" y="240" as="targetPoint" />
@@ -738,11 +750,11 @@
     </mxGraphModel>
   </diagram>
   <diagram name="biasing" id="zNCZAXDOVUM5ArkgnnUi">
-    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1456" dy="924" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="Br0F9SQlvXlEajWeKsqW-0" />
         <mxCell id="Br0F9SQlvXlEajWeKsqW-1" parent="Br0F9SQlvXlEajWeKsqW-0" />
-        <mxCell id="Br0F9SQlvXlEajWeKsqW-2" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" parent="Br0F9SQlvXlEajWeKsqW-1" edge="1">
+        <mxCell id="Br0F9SQlvXlEajWeKsqW-2" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;sketch=1;curveFitting=1;jiggle=2;" parent="Br0F9SQlvXlEajWeKsqW-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="663" y="60" as="sourcePoint" />
             <mxPoint x="663" y="260" as="targetPoint" />
@@ -851,7 +863,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="Br0F9SQlvXlEajWeKsqW-42" value="&lt;div style=&quot;font-size: 18px&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Don&#39;t shuffle&lt;/font&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1">
+        <mxCell id="Br0F9SQlvXlEajWeKsqW-42" value="Don&#39;t shuffle" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1">
           <mxGeometry x="445" y="213" width="158" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Br0F9SQlvXlEajWeKsqW-43" value="?" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1">
@@ -862,9 +874,6 @@
         </mxCell>
         <mxCell id="Br0F9SQlvXlEajWeKsqW-46" value="Calculate future duties B" style="text;strokeColor=default;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;sketch=1;spacing=1;spacingLeft=8;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1">
           <mxGeometry x="784" y="185" width="260" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="Br0F9SQlvXlEajWeKsqW-48" value="&lt;div style=&quot;font-size: 18px&quot; align=&quot;left&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Gloria+Hallelujah&quot; style=&quot;font-size: 18px&quot; face=&quot;Gloria Hallelujah&quot;&gt;Calculate future duties A&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=default;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;sketch=1;spacing=1;spacingLeft=8;" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1">
-          <mxGeometry x="784" y="95" width="260" height="40" as="geometry" />
         </mxCell>
         <mxCell id="wIYx_dvhhTnfDGI9V4dH-0" value="" style="group" parent="Br0F9SQlvXlEajWeKsqW-1" vertex="1" connectable="0">
           <mxGeometry x="590" y="180" width="140" height="50" as="geometry" />
@@ -904,6 +913,9 @@
             <mxPoint x="543" y="110" as="sourcePoint" />
             <mxPoint x="590" y="110" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="TnrFBmMqyFkMuPKooO6Z-0" value="Calculate future duties A" style="text;strokeColor=default;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;sketch=1;spacing=1;spacingLeft=8;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=18;" vertex="1" parent="Br0F9SQlvXlEajWeKsqW-1">
+          <mxGeometry x="784" y="90" width="260" height="40" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
