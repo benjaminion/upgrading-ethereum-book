@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9" pages="4">
   <diagram id="mV1_y1TgIiT8SUzMyo_5" name="bitlist">
-    <mxGraphModel dx="2074" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1186" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="oOPBUce-xuUafamgtmF2-0" />
         <mxCell id="oOPBUce-xuUafamgtmF2-1" parent="oOPBUce-xuUafamgtmF2-0" />
@@ -92,7 +92,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="oOPBUce-xuUafamgtmF2-21" value="Padding" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="oOPBUce-xuUafamgtmF2-1" vertex="1">
-          <mxGeometry x="210" y="191" width="60" height="30" as="geometry" />
+          <mxGeometry x="210" y="182" width="60" height="48" as="geometry" />
         </mxCell>
         <mxCell id="oOPBUce-xuUafamgtmF2-22" value="Sentinel" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="oOPBUce-xuUafamgtmF2-1" vertex="1">
           <mxGeometry x="410.5" y="191" width="60" height="30" as="geometry" />
