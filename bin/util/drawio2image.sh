@@ -54,10 +54,11 @@ if [[ $(echo $names | wc -w) == 1 ]]; then
 fi
 
 # Loop over the diagrams and convert them individually
-n=1
+n=0
 for name in $names; do
+  ((n++))
   if [ "$page" != "" ] && [ "$page" != "$name" ]; then
-    continue
+      continue
   fi
   echo "$drawio_file[$name] -> $root-$name.$ext"
   $drawio $drawio_opts -x -p $n -o $root-$name.$ext $drawio_file >/dev/null 2>$errors
@@ -65,5 +66,4 @@ for name in $names; do
     cat $errors
     exit 1
   fi
-  ((n++))
 done
