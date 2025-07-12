@@ -1353,7 +1353,7 @@ Once evidence of breaking one of the commandments has been found, it is easy to 
 
 [^fn-proto-surround-vote]: See Protolambda's [`eth2-surround`](https://github.com/protolambda/eth2-surround) GitHub repo for some analysis of the challenges of finding surround votes.
 
-[^fn-slasher-implementations]: Slashing detection software has been created by the [Lighthouse team](https://lighthouse-book.sigmaprime.io/slasher.html) and the [Prysm team](https://docs.prylabs.network/docs/prysm-usage/slasher).
+[^fn-slasher-implementations]: Slashing detection software has been created by the [Lighthouse team](https://lighthouse-book.sigmaprime.io/advanced_slasher.html) and the [Prysm team](https://prysm.offchainlabs.com/docs/configure-prysm/slasher/).
 
 The protocol as it is presented in the Casper FFG paper assumes that, on proof of having violated a slashing condition, "the validator's entire deposit is taken away". We have implemented [a variation of this](/part2/incentives/slashing/#the-correlation-penalty) for Eth2 that scales the proportion of a validator's stake that is forfeit in proportion to total amount of stake slashed in a given period. If $\frac{1}{3}$ of all stake violated slashing conditions within a 36 day window, then the whole stake would be forfeit, as in the classic Casper FFG protocol. But if there were very few other slashings in the window, then almost no stake would be forfeit. This nicety does not change the Casper FFG guarantees in practice, at least since the [Bellatrix upgrade](/part4/history/bellatrix/) to the beacon chain gave the [`PROPORTIONAL_SLASHING_MULTIPLIER`](/part3/config/preset/#proportional_slashing_multiplier) constant its final value.
 
@@ -1442,7 +1442,7 @@ In this way, slashing puts a price on attacking the chain, and a huge (and calcu
 
 > Basically, if a block is finalized, then that block is part of the chain, and it is very, very expensive to cause that to change.
 
-[^fn-current-cost-of-attack]: As I write (in July 2023), there is 21.6 million ETH staked on the beacon chain, so a finality reversion would result in at least 7.2 million ETH being slashed. This amounts to \$13.7 billion of economic security against reversion, at current prices.
+[^fn-current-cost-of-attack]: As of July 2025, there is 35.7 million ETH staked on the beacon chain, so a finality reversion would result in at least 11.9 million ETH being slashed. This amounts to over \$35 billion of economic security against reversion, at the prevailing price.
 
 We call this "economic finality". It is not finality enforced by software; it is finality enforced by the cost of an attack. Validators' stakes are a "good behaviour bond" that can be taken away from them if it is ever proved that they broke the protocol's rules. Validators have unique identities in the form of their secret keys that they use to sign all their messages, so it is possible to hold individual validators to account, and punish them very specifically.
 
@@ -1456,7 +1456,7 @@ In a blog post, [On Settlement Finality](https://blog.ethereum.org/2016/05/09/on
 
 > We can't guarantee that "X will never be reverted", but we _can_ guarantee the slightly weaker claim that "either X will never be reverted or a large group of validators will voluntarily destroy millions of dollars of their own capital".
 
-Faced with a greater than one-third attacker and an asynchronous network, it's not useful for validators simply to refuse to finalise conflicting checkpoints in-protocol. Attacks that can finalise conflicting checkpoints depend on partitioning the set of honest validators so that they don't see each other's votes, and don't know what the other side has finalised. Under the treat of such powerful attacks, economic finality is a powerful safety guarantee. The ultimate remedy in the event of conflicting finality is manual intervention. As Vitalik observes in the same post, "the user community around an on-chain asset is quite free to simply apply common sense to determine which fork was not an attack and actually represents the result of the transactions that were originally agreed upon as finalized".
+Faced with a greater than one-third attacker and an asynchronous network, it's not useful for validators simply to refuse to finalise conflicting checkpoints in-protocol. Attacks that can finalise conflicting checkpoints depend on partitioning the set of honest validators so that they don't see each other's votes, and don't know what the other side has finalised. Under the threat of such powerful attacks, economic finality is a powerful safety guarantee. The ultimate remedy in the event of conflicting finality is manual intervention. As Vitalik observes in the same post, "the user community around an on-chain asset is quite free to simply apply common sense to determine which fork was not an attack and actually represents the result of the transactions that were originally agreed upon as finalized".
 
 ##### Plausible liveness
 
