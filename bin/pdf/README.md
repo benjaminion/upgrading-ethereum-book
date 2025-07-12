@@ -52,7 +52,6 @@ Note that, for charts, all text is converted to SVG paths, so they import to pan
 
 ### Significant known issues
 
-- A couple of the PDF images are slightly over-cropped.
 - Intermittent: sometimes pages with diagrams overflow off the bottom.
   - May be fixed in newer versions of xetex; seems ok in XeTeX 3.141592653-2.6-0.999993
 - Footnotes can vanish.
