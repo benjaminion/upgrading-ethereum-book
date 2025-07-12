@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9" pages="5">
   <diagram id="tqCFLl0A-Law9fGavUvA" name="scalability_trilemma">
-    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="706" dy="632" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-0" />
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-1" parent="8TJE4RRf8oA7ZbTnIAyT-0" />
@@ -8,13 +8,13 @@
           <mxGeometry x="249" y="145" width="330" height="440" as="geometry" />
         </mxCell>
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-3" value="Participation (high n)" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="8TJE4RRf8oA7ZbTnIAyT-1" vertex="1">
-          <mxGeometry x="346" y="157" width="136" height="30" as="geometry" />
+          <mxGeometry x="346" y="144" width="136" height="56" as="geometry" />
         </mxCell>
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-4" value="Low overhead (low w)" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="8TJE4RRf8oA7ZbTnIAyT-1" vertex="1">
-          <mxGeometry x="596" y="527" width="124" height="30" as="geometry" />
+          <mxGeometry x="596" y="494" width="124" height="96" as="geometry" />
         </mxCell>
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-5" value="Fast finality (low f)" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="8TJE4RRf8oA7ZbTnIAyT-1" vertex="1">
-          <mxGeometry x="116" y="527" width="104" height="30" as="geometry" />
+          <mxGeometry x="116" y="494" width="104" height="96" as="geometry" />
         </mxCell>
         <mxCell id="8TJE4RRf8oA7ZbTnIAyT-6" value="" style="group;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="8TJE4RRf8oA7ZbTnIAyT-1" vertex="1" connectable="0">
           <mxGeometry x="414" y="320" width="60" height="50" as="geometry" />
@@ -38,13 +38,10 @@
     </mxGraphModel>
   </diagram>
   <diagram id="JJC0Kog0ir4RuhiCyfWr" name="weights">
-    <mxGraphModel dx="1235" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="818" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="D4HkDNJ_emZeFU57lI15-1" value="" style="ellipse;whiteSpace=wrap;aspect=fixed;sketch=1;fillStyle=solid;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="200" y="90" width="480" height="480" as="geometry" />
-        </mxCell>
         <mxCell id="D4HkDNJ_emZeFU57lI15-3" value="" style="endArrow=none;rounded=0;sketch=1;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="440" y="330" as="sourcePoint" />
@@ -102,6 +99,12 @@
         </mxCell>
         <mxCell id="YEQ89O4KJ75Ul0dXMHsq-1" value="3.1%" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;fontFamily=Gloria Hallelujah;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DGloria%2BHallelujah;fontSize=20;" parent="1" vertex="1">
           <mxGeometry x="280" y="200" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="zJYxZ2KCkgF5N0zCu70z-10" value="" style="ellipse;whiteSpace=wrap;aspect=fixed;sketch=1;fillStyle=solid;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="90" width="480" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="zJYxZ2KCkgF5N0zCu70z-11" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="190" y="84" width="500" height="492" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
