@@ -24,7 +24,7 @@
     "valid": "node --input-type=module -e 'import validateHtml from \"./bin/util/validate.js\"; validateHtml(\"dist/part2/building_blocks/ssz/index.html\")'"
   },
   "dependencies": {
-    "astro": "^5.12.8",
+    "astro": "^5.13.2",
     "hast-util-select": "^6.0.4",
     "hast-util-to-string": "^3.0.1",
     "loader-utils": "^3.3.1",
