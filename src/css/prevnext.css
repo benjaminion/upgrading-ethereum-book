@@ -29,7 +29,7 @@
 }
 
 @media screen and (max-width: 1200px) {
-  prevnext span.contents {
+  .prevnext span.contents {
     display: flex;
     justify-content: center;
   }
