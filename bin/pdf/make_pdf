@@ -56,5 +56,5 @@ cat $name.md | \
         --include-in-header $path/inc/header.tex \
         --toc \
         --toc-depth 3 \
-        --no-highlight \
+        --syntax-highlighting none \
         --pdf-engine xelatex
