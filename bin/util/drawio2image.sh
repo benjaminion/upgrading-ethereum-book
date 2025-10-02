@@ -6,7 +6,7 @@
 # make an SVG filename that includes the drawio basename and the diagram's tab name.
 # The SVG files are written to the current working directory.
 
-# Note that (as of 27.0.9 anyway) this doesn't work, and neither does --disable-update
+# Note that (as of 28.1.2 anyway) this doesn't work, and neither does --disable-update
 export DRAWIO_DISABLE_UPDATE=true
 drawio=/usr/bin/drawio
 
