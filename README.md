@@ -137,7 +137,7 @@ All images are in SVG format and get embedded directly into the HTML pages so th
 
 ### Diagrams
 
-Diagrams have been created in [drawio.com](https://www.drawio.com/) desktop application, version 27.0.9. The script in _bin/util/drawio2svg.sh_ converts a drawio file to one or more SVG files.
+Diagrams have been created in [drawio.com](https://www.drawio.com/) desktop application, [version 28.1.2](https://github.com/jgraph/drawio-desktop/releases/tag/v28.1.2). The script in _bin/util/drawio2svg.sh_ converts a drawio file to one or more SVG files.
 
 Source files for all diagrams are in the _src/diagrams_ directory. The font used is the _Gloria Hallelujah_ Google font.
 
