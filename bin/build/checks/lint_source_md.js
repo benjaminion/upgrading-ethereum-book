@@ -65,6 +65,9 @@ export default async function (file) {
 
       // descriptive-link-text - we like using "here" from time to time
       MD059: false,
+
+      // table-column-style - our tables are a bit bespoke
+      MD060: false,
     },
   };
 
