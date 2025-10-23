@@ -538,27 +538,27 @@ TODO
 
 TODO
 
-### The Deposit Contract <!-- /part2/deposits/contract/* -->
+### The Deposit Contract
 
 TODO
 
-### Deposit Receipts <!-- /part2/deposits/receipts/* -->
+### Deposit Receipts
 
 TODO
 
-### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting/* -->
+### Eth1 Voting and Follow Distance
 
 TODO
 
-### Merkle Proofs <!-- /part2/deposits/merkleproofs/* -->
+### Merkle Proofs
 
 TODO
 
-### Deposit Processing <!-- /part2/deposits/processing/* -->
+### Deposit Processing
 
 TODO
 
-### Withdrawal Credentials <!-- /part2/deposits/credentials/* -->
+### Withdrawal Credentials
 
 TODO
 
@@ -601,7 +601,7 @@ Much of the material in the following sections is also covered in the more recen
 
 #### Introduction
 
-A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract/) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
+A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/#the-deposit-contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
 In Ethereum&nbsp;2 the stake has three key roles.
 
@@ -6796,7 +6796,7 @@ This is the classic algorithm for [verifying a Merkle branch](https://blog.ether
 
 In this way we prove that we know that `leaf` is the value at position `index` in the list of leaves, and that we know the whole structure of the rest of the tree, as summarised in `branch`.
 
-We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/contract/). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
+We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/#the-deposit-contract). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
 
 |||
 |-|-|
