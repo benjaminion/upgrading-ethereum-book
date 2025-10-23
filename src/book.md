@@ -4980,8 +4980,6 @@ These withdrawal credential prefixes are not yet significant in the core beacon 
 
 The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
 
-See the [Withdrawals](/part5/withdrawals/) section for discussion on what the mechanism might look like.
-
 ##### `BLS_WITHDRAWAL_PREFIX`
 
 The beacon chain launched with only BLS-style withdrawal credentials available, so all early stakers used this. The `0x00` prefix on the credential distinguishes this type from the others: it replaces the first byte of the hash of the BLS public key that corresponds to the BLS private key of the staker.
