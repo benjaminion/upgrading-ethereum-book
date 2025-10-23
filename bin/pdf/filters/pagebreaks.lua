@@ -15,7 +15,7 @@ local function is_new_page(header)
 end
 
 local function should_insert_break(header)
-   return is_new_page(header) and header.level <= 2
+   return is_new_page(header)
 end
 
 function Header (header)
