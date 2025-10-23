@@ -89,23 +89,23 @@ Thank you to the many GitCoin grant supporters who donated in support of the ori
 
 TODO
 
-### Why Ethereum 2.0? <!-- /part1/introduction/whyeth2/* -->
+### Why Ethereum 2.0?
 
 TODO
 
-### The Cathedral and the Bazaar <!-- /part1/introduction/catb/* -->
+### The Cathedral and the Bazaar
 
 TODO
 
-### A Brief History of Ethereum's Future <!-- /part1/introduction/history/* -->
+### A Brief History of Ethereum's Future
 
 TODO
 
-### Who's who <!-- /part1/introduction/who/* -->
+### Who's who
 
 TODO
 
-### Outline of the Book <!-- /part1/introduction/outline/* -->
+### Outline of the Book
 
 TODO
 
@@ -115,11 +115,11 @@ TODO
 
 TODO
 
-### Design Goals <!-- /part1/goals/design/* -->
+### Design Goals
 
 TODO
 
-### Attacks and Defences <!-- /part1/goals/attacks/* -->
+### Attacks and Defences
 
 TODO
 
@@ -129,11 +129,11 @@ TODO
 
 TODO
 
-### The Specifications <!-- /part1/making/specs/* -->
+### The Specifications
 
 TODO
 
-### The Implementations <!-- /part1/making/implementations/* -->
+### The Implementations
 
 TODO
 
@@ -149,19 +149,19 @@ TODO: Intro
 
 TODO
 
-### Terminology <!-- /part2/beacon/terms/* -->
+### Terminology
 
 TODO
 
-### Design Overview <!-- /part2/beacon/overview/* -->
+### Design Overview
 
 TODO
 
-### Architecture of a Node <!-- /part2/beacon/arch/* -->
+### Architecture of a Node
 
 TODO
 
-### Genesis <!-- /part2/beacon/genesis/* -->
+### Genesis
 
 TODO
 
@@ -1993,19 +1993,19 @@ TODO
 
 TODO
 
-### Proposing <!-- /part2/slot/proposing/* -->
+### Proposing
 
 TODO
 
-### Attesting <!-- /part2/slot/attesting/* -->
+### Attesting
 
 TODO
 
-### Aggregating <!-- /part2/slot/aggregating/* -->
+### Aggregating
 
 TODO
 
-### Sync Committee Participation <!-- /part2/slot/sync/* -->
+### Sync Committee Participation
 
 TODO
 
@@ -2015,15 +2015,15 @@ TODO
 
 TODO
 
-### Applying Rewards and Penalties <!-- /part2/epoch/rewards/* -->
+### Applying Rewards and Penalties
 
 TODO
 
-### Justification and Finalisation <!-- /part2/epoch/finality/* -->
+### Justification and Finalisation
 
 TODO
 
-### Other State Updates <!-- /part2/epoch/updates/* -->
+### Other State Updates
 
 TODO
 
@@ -7674,23 +7674,23 @@ TODO
 
 TODO
 
-### Discovery <!-- /part2/networking/discovery/* -->
+### Discovery
 
 TODO
 
-### Gossip <!-- /part2/networking/gossip/* -->
+### Gossip
 
 TODO
 
-### RPC <!-- /part2/networking/rpc/* -->
+### RPC
 
 TODO
 
-### Syncing <!-- /part2/networking/syncing/* -->
+### Syncing
 
 TODO
 
-### Message Types <!-- /part2/networking/messages/* -->
+### Message Types
 
 TODO
 
@@ -7700,23 +7700,23 @@ TODO
 
 TODO
 
-### Protoarray <!-- /part2/implementation/protoarray/* -->
+### Protoarray
 
 TODO
 
-### SSZ backing tree <!-- /part2/implementation/backing_tree/* -->
+### SSZ backing tree
 
 TODO
 
-### Batch signature verification <!-- /part2/implementation/batch_verification/* -->
+### Batch signature verification
 
 TODO
 
-### Slashing protection <!-- /part2/implementation/anti_slash/* -->
+### Slashing protection
 
 TODO
 
-### Checkpoint sync <!-- /part2/implementation/checkpoint_sync/* -->
+### Checkpoint sync
 
 TODO
 
@@ -15052,7 +15052,7 @@ TODO
 
 TODO
 
-### Fork Digest <!-- /part4/forks/digest/* -->
+### Fork Digest
 
 TODO
 
@@ -15224,7 +15224,7 @@ An early stage discussion around the potential scope of the Electra upgrade is t
 
 TODO
 
-### History <!-- /part4/merge/history/* -->
+### History
 
 TODO
 
@@ -15232,120 +15232,19 @@ TODO
 
 TODO
 
-### Architecture <!-- /part4/merge/architecture/* -->
+### Architecture
 
 TODO
 
-### Transition <!-- /part4/merge/transition/* -->
+### Transition
 
 TODO
 
-### Engine API <!-- /part4/merge/api/* -->
+### Engine API
 
 TODO
 
-### Optimistic sync <!-- /part4/merge/optimistic-sync/* -->
-
-TODO
-
-# Part 5: Future <!-- /part5/ -->
-
-## Introduction <!-- /part5/introduction/* -->
-
-TODO
-
-## Withdrawals <!-- /part5/withdrawals/* -->
-
-TODO
-
-## Data Availability Sampling <!-- /part5/das/* -->
-
-TODO
-
-### Proto-Danksharding <!-- /part5/das/proto/* -->
-
-TODO
-
-### Full Danksharding <!-- /part5/das/danksharding/* -->
-
-TODO
-
-## Distributed Validator Technology <!-- /part5/dvt/* -->
-
-### Introduction
-
-TODO
-
-### Multi-party Compute <!-- /part5/dvt/mpc/* -->
-
-TODO
-
-### Consensus <!-- /part5/dvt/consensus/* -->
-
-TODO
-
-## Light Clients <!-- /part5/light_clients/* -->
-
-### Introduction
-
-TODO
-
-### Syncing <!-- /part5/light_clients/syncing/* -->
-
-TODO
-
-### Protocol <!-- /part5/light_clients/protocol/* -->
-
-TODO
-
-## Active Research Topics <!-- /part5/research/* -->
-
-### Introduction
-
-TODO
-
-### Proofs of Custody <!-- /part5/research/custody/* -->
-
-TODO
-
-### Builder / proposer split <!-- /part5/research/builders_proposers/* -->
-
-TODO
-
-### Consensus changes <!-- /part5/research/consensus/* -->
-
-TODO
-
-### Single slot finality <!-- /part5/research/single_slot_finality/* -->
-
-TODO
-
-References:
-
-  - [Paths toward single-slot finality](https://notes.ethereum.org/@vbuterin/single_slot_finality)
-  - [A simple Single Slot Finality protocol](https://ethresear.ch/t/a-simple-single-slot-finality-protocol/14920?u=benjaminion)
-
-### Verkle trees <!-- /part5/research/verkle_trees/* -->
-
-TODO
-
-### Statelessness <!-- /part5/research/statelessness/* -->
-
-TODO
-
-### Single Secret Leader Election <!-- /part5/research/ssle/* -->
-
-TODO
-
-### Verifiable Delay Function <!-- /part5/research/vdf/* -->
-
-TODO
-
-### Post-quantum crypto <!-- /part5/research/post-quantum/* -->
-
-TODO
-
-### S[NT]ARK-friendly state transitions <!-- /part5/research/snark/* -->
+### Optimistic sync
 
 TODO
 
@@ -15357,15 +15256,15 @@ TODO
 
 TODO
 
-### Ways to Stake <!-- /appendices/staking/ways/* -->
+### Ways to Stake
 
 TODO
 
-### Client Diversity <!-- /appendices/staking/diversity/* -->
+### Client Diversity
 
 TODO
 
-### FAQ <!-- /appendices/staking/faq/* -->
+### FAQ
 
 TODO
 
@@ -15375,17 +15274,17 @@ TODO
 
 TODO
 
-### Resources <!-- /appendices/core-dev/resources/* -->
+### Resources
 
 TODO
 
-## Reference <!-- /appendices/reference/ -->
+## Reference
 
 TODO
 
-### Running the spec <!-- /appendices/running/ -->
+## Running the spec <!-- /appendices/running/ -->
 
-#### Introduction
+### Introduction
 
 Being written in Python, the spec itself is executable. This is wonderful for generating test cases and there is a whole [infrastructure](https://github.com/ethereum/consensus-specs/tree/dev/tests/generators) in the specs repo for doing just that.
 
@@ -15415,7 +15314,7 @@ import json
 print(json.dumps(type_bounds))
 ```
 
-#### Set up
+### Set up
 
 In the below, if you are using Ubuntu you might need to run `sudo apt install python3-pip` first. If not, then you probably need to use `python` rather than `python3`.
 
@@ -15435,7 +15334,7 @@ Successfully installed...
 
 All being well, this will create a directory for each of the spec versions under `tests/core/pyspec/eth2spec/`: `altair`, `bellatrix`, `capella` and so on. Each directory contains the complete executable specification for that version, built automatically from the markdown source. There's a `mainnet` version for each one, and a `minimal` version that runs with lower resource requirements. All this magic is performed by the scripts in `pysetup`.
 
-#### Run
+### Run
 
 Finally, we can simply run the Python script from above. Copy it into a file called `sizes.py` and run it as follows.
 
@@ -15619,13 +15518,9 @@ Values are bytes. Don't be alarmed that the maximum size of `BeaconState` turns 
 
 </details>
 
-#### See also
+### See also
 
 Hsiao-Wei Wang gave a [Lightning Talk](https://archive.devcon.org/archive/watch/6/how-to-use-executable-consensus-pyspec/) on the consensus Pyspec at Devcon VI. She swiftly covers how it is structured, how to run it, and how to build test cases. The [presentation slides](https://docs.google.com/presentation/d/10HdtwTaFdTVLaiIGQJClyCs8AzrPXS20i78LZnPXHyo/edit?usp=sharing) are available.
-
-### Sizes of containers <!-- /appendices/reference/sizes/* -->
-
-TODO
 
 ## Glossary <!-- /appendices/reference/glossary/* -->
 

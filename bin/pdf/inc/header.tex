@@ -159,3 +159,16 @@
 % Used by linebreaks.lua to split long hexadecimal strings
 
 \usepackage{seqsplit}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% More control over page headings
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % Clear default headers and footers
+\renewcommand{\headrulewidth}{0.4pt}
+\makeatletter
+\fancyhead[L]{\leftmark}                                 % The part name
+\fancyhead[R]{\nouppercase{\if@mainmatter\rightmark\fi}} % The chapter name
+\fancyfoot[C]{\thepage}                                  % The page number
+\makeatother
