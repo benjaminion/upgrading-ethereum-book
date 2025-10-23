@@ -71,23 +71,23 @@ Finally, to circle back to ConsenSys: working daily with such brilliant, talente
 
 TODO
 
-### Why Ethereum 2.0? <!-- /part1/introduction/whyeth2/* -->
+### Why Ethereum 2.0?
 
 TODO
 
-### The Cathedral and the Bazaar <!-- /part1/introduction/catb/* -->
+### The Cathedral and the Bazaar
 
 TODO
 
-### A Brief History of Ethereum's Future <!-- /part1/introduction/history/* -->
+### A Brief History of Ethereum's Future
 
 TODO
 
-### Who's who <!-- /part1/introduction/who/* -->
+### Who's who
 
 TODO
 
-### Outline of the Book <!-- /part1/introduction/outline/* -->
+### Outline of the Book
 
 TODO
 
@@ -97,11 +97,11 @@ TODO
 
 TODO
 
-### Design Goals <!-- /part1/goals/design/* -->
+### Design Goals
 
 TODO
 
-### Attacks and Defences <!-- /part1/goals/attacks/* -->
+### Attacks and Defences
 
 TODO
 
@@ -111,11 +111,11 @@ TODO
 
 TODO
 
-### The Specifications <!-- /part1/making/specs/* -->
+### The Specifications
 
 TODO
 
-### The Implementations <!-- /part1/making/implementations/* -->
+### The Implementations
 
 TODO
 
@@ -131,19 +131,19 @@ TODO: Intro
 
 TODO
 
-### Terminology <!-- /part2/beacon/terms/* -->
+### Terminology
 
 TODO
 
-### Design Overview <!-- /part2/beacon/overview/* -->
+### Design Overview
 
 TODO
 
-### Architecture of a Node <!-- /part2/beacon/arch/* -->
+### Architecture of a Node
 
 TODO
 
-### Genesis <!-- /part2/beacon/genesis/* -->
+### Genesis
 
 TODO
 
@@ -500,19 +500,19 @@ TODO
 
 TODO
 
-### Proposing <!-- /part2/slot/proposing/* -->
+### Proposing
 
 TODO
 
-### Attesting <!-- /part2/slot/attesting/* -->
+### Attesting
 
 TODO
 
-### Aggregating <!-- /part2/slot/aggregating/* -->
+### Aggregating
 
 TODO
 
-### Sync Committee Participation <!-- /part2/slot/sync/* -->
+### Sync Committee Participation
 
 TODO
 
@@ -522,15 +522,15 @@ TODO
 
 TODO
 
-### Applying Rewards and Penalties <!-- /part2/epoch/rewards/* -->
+### Applying Rewards and Penalties
 
 TODO
 
-### Justification and Finalisation <!-- /part2/epoch/finality/* -->
+### Justification and Finalisation
 
 TODO
 
-### Other State Updates <!-- /part2/epoch/updates/* -->
+### Other State Updates
 
 TODO
 
@@ -546,27 +546,27 @@ TODO
 
 TODO
 
-### The Deposit Contract <!-- /part2/deposits/contract/* -->
+### The Deposit Contract
 
 TODO
 
-### Deposit Receipts <!-- /part2/deposits/receipts/* -->
+### Deposit Receipts
 
 TODO
 
-### Eth1 Voting and Follow Distance <!-- /part2/deposits/voting/* -->
+### Eth1 Voting and Follow Distance
 
 TODO
 
-### Merkle Proofs <!-- /part2/deposits/merkleproofs/* -->
+### Merkle Proofs
 
 TODO
 
-### Deposit Processing <!-- /part2/deposits/processing/* -->
+### Deposit Processing
 
 TODO
 
-### Withdrawal Credentials <!-- /part2/deposits/credentials/* -->
+### Withdrawal Credentials
 
 TODO
 
@@ -613,7 +613,7 @@ Much of the material in the following sections is also covered in the more recen
 
 #### Introduction
 
-A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/contract/) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
+A stake is the deposit that a full participant of the Ethereum&nbsp;2 protocol must lock up. The stake is lodged permanently in the [deposit contract](/part2/deposits/#the-deposit-contract) on the Ethereum chain, and reflected in a balance in the validator's record on the beacon chain. The stake entitles a validator to propose blocks, to attest to blocks and checkpoints, and to participate in sync committees, all in return for rewards that accrue to its beacon chain balance.
 
 In Ethereum&nbsp;2 the stake has three key roles.
 
@@ -4542,11 +4542,11 @@ TODO
 
 TODO
 
-### Hard Forks <!-- /part2/upgrades/forks/* -->
+### Hard Forks
 
 TODO
 
-### Fork Digest <!-- /part2/upgrades/fork_digest/* -->
+### Fork Digest
 
 TODO
 
@@ -4556,23 +4556,23 @@ TODO
 
 TODO
 
-### Discovery <!-- /part2/networking/discovery/* -->
+### Discovery
 
 TODO
 
-### Gossip <!-- /part2/networking/gossip/* -->
+### Gossip
 
 TODO
 
-### RPC <!-- /part2/networking/rpc/* -->
+### RPC
 
 TODO
 
-### Syncing <!-- /part2/networking/syncing/* -->
+### Syncing
 
 TODO
 
-### Message Types <!-- /part2/networking/messages/* -->
+### Message Types
 
 TODO
 
@@ -4582,23 +4582,23 @@ TODO
 
 TODO
 
-### Protoarray <!-- /part2/implementation/protoarray/* -->
+### Protoarray
 
 TODO
 
-### SSZ backing tree <!-- /part2/implementation/backing_tree/* -->
+### SSZ backing tree
 
 TODO
 
-### Batch signature verification <!-- /part2/implementation/batch_verification/* -->
+### Batch signature verification
 
 TODO
 
-### Slashing protection <!-- /part2/implementation/anti_slash/* -->
+### Slashing protection
 
 TODO
 
-### Checkpoint sync <!-- /part2/implementation/checkpoint_sync/* -->
+### Checkpoint sync
 
 TODO
 
@@ -4912,8 +4912,6 @@ Two ways to specify the withdrawal credentials are currently available, versione
 These withdrawal credential prefixes are not yet significant in the core beacon chain spec, but will become significant when withdrawals are enabled in a future upgrade. The withdrawal credentials data is not consensus-critical, and future withdrawal credential types can be added without a hard fork. There are [suggestions](https://ethresear.ch/t/withdrawal-credential-rotation-from-bls-to-eth1/8722?u=benjaminion) as to how existing credentials might be changed between methods which would be consensus critical.
 
 The presence of these prefixes in the spec indicates a "social consensus" among the dev teams and protocol designers that we will in future support these methods for making withdrawals.
-
-See the [Withdrawals](/part4/withdrawals/) section for discussion on what the mechanism might look like.
 
 ##### `BLS_WITHDRAWAL_PREFIX`
 
@@ -6553,7 +6551,7 @@ This is the classic algorithm for [verifying a Merkle branch](https://blog.ether
 
 In this way we prove that we know that `leaf` is the value at position `index` in the list of leaves, and that we know the whole structure of the rest of the tree, as summarised in `branch`.
 
-We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/contract/). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
+We use this function in [`process_deposit()`](/part3/transition/block/#def_process_deposit) to check whether the deposit data we've received is correct or not. Based on the deposit data they have seen, Eth2 clients build a replica of the Merkle tree of deposits in the [deposit contract](/part2/deposits/#the-deposit-contract). The proposer of the block that includes the deposit constructs the Merkle proof using its view of the deposit contract, and all other nodes use `is_valid_merkle_branch()` to check that their view matches the proposer's. It is a consensus failure if there is a mismatch, perhaps due to one client considering a deposit valid while another considers it invalid for some reason.
 
 |||
 |-|-|
@@ -9180,109 +9178,19 @@ TODO
 
 TODO
 
-### Architecture <!-- /part4/the_merge/architecture/* -->
+### Architecture
 
 TODO
 
-### Engine API <!-- /part4/the_merge/api/* -->
+### Engine API
 
 TODO
 
-### Optimistic Sync <!-- /part4/the_merge/sync/* -->
+### Optimistic Sync
 
 TODO
 
-### The Transition <!-- /part4/the_merge/transition/* -->
-
-TODO
-
-## Withdrawals <!-- /part4/withdrawals/* -->
-
-TODO
-
-## Data Availability Sampling <!-- /part4/das/* -->
-
-TODO
-
-### Proto-Danksharding <!-- /part4/das/proto/* -->
-
-TODO
-
-### Full Danksharding <!-- /part4/das/danksharding/* -->
-
-TODO
-
-## Distributed Validator Technology <!-- /part4/dvt/* -->
-
-### Introduction
-
-TODO
-
-### Multi-party Compute <!-- /part4/dvt/mpc/* -->
-
-TODO
-
-### Consensus <!-- /part4/dvt/consensus/* -->
-
-TODO
-
-## Light Clients <!-- /part4/light_clients/* -->
-
-### Introduction
-
-TODO
-
-### Syncing <!-- /part4/light_clients/syncing/* -->
-
-TODO
-
-### Protocol <!-- /part4/light_clients/protocol/* -->
-
-TODO
-
-## Active Research Topics <!-- /part4/research/* -->
-
-### Introduction
-
-TODO
-
-### Proofs of Custody <!-- /part4/research/custody/* -->
-
-TODO
-
-### Builder / proposer split <!-- /part4/research/builders_proposers/* -->
-
-TODO
-
-### Consensus changes <!-- /part4/research/consensus/* -->
-
-TODO
-
-### Single slot finality <!-- /part4/research/single_slot_finality/* -->
-
-TODO
-
-### Verkle trees <!-- /part4/research/verkle_trees/* -->
-
-TODO
-
-### Statelessness <!-- /part4/research/statelessness/* -->
-
-TODO
-
-### Single Secret Leader Election <!-- /part4/research/ssle/* -->
-
-TODO
-
-### Verifiable Delay Function <!-- /part4/research/vdf/* -->
-
-TODO
-
-### Post-quantum crypto <!-- /part4/research/post-quantum/* -->
-
-TODO
-
-### S[NT]ARK-friendly state transitions <!-- /part4/research/snark/* -->
+### The Transition
 
 TODO
 
@@ -9294,15 +9202,15 @@ TODO
 
 TODO
 
-### Ways to Stake <!-- /appendices/staking/ways/* -->
+### Ways to Stake
 
 TODO
 
-### Client Diversity <!-- /appendices/staking/diversity/* -->
+### Client Diversity
 
 TODO
 
-### FAQ <!-- /appendices/staking/faq/* -->
+### FAQ
 
 TODO
 
@@ -9312,7 +9220,7 @@ TODO
 
 TODO
 
-### Resources <!-- /appendices/core-dev/resources/* -->
+### Resources
 
 TODO
 
@@ -9320,9 +9228,9 @@ TODO
 
 TODO
 
-### Running the spec <!-- /appendices/running/ -->
+## Running the spec <!-- /appendices/running/ -->
 
-#### Introduction
+### Introduction
 
 Being written in Python, the spec itself is executable. This is wonderful for generating test cases and there is a whole [infrastructure](https://github.com/ethereum/consensus-specs/tree/dev/tests/generators) in the specs repo for doing just that.
 
@@ -9352,7 +9260,7 @@ import json
 print(json.dumps(type_bounds))
 ```
 
-#### Set up
+### Set up
 
 We have a bunch of hoops to jump through to get things installed for the first time. The below works well for me on Linux, but I haven't tested extensive variations. Just use the commands prefixed with `>`, I've included some of the output so you can check whether things are on the right lines.
 
@@ -9383,7 +9291,7 @@ running pyspec
 ...
 ```
 
-#### Run
+### Run
 
 Finally we can simply run the Python script from above. Copy it into a file called `sizes.py` and run it as follows.
 
@@ -9522,10 +9430,6 @@ Values are bytes. Don't be too alarmed that the maximum size of `BeaconState` tu
   }
 }
 ```
-
-### Sizes of containers <!-- /appendices/reference/sizes/* -->
-
-TODO
 
 ## Glossary <!-- /appendices/reference/glossary/* -->
 
