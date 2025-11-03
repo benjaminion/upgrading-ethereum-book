@@ -21,7 +21,6 @@
 
 use strict;
 use warnings;
-use Fcntl qw(SEEK_SET);
 
 $\ = "\n"; # set output record separator
 
@@ -34,7 +33,6 @@ my @lines = <>;
 my $domainMatch = qr/(localhost|eth2book.info|upgrading-ethereum.info)/;
 my $newPagePath = qr/^(#{1,3} ).* <!-- ([^*]+)\*? -->$/;
 my $pagePath;
-my $inCode;
 
 my %anchors = (
     '/contents/' => 1,
@@ -43,8 +41,11 @@ my %anchors = (
 my %fns;
 
 # First pass: build lists of anchors and footnotes
-$inCode = 0;
+my $inCode = 0;
+my $line = 0;
 foreach (@lines) {
+
+    $line++;
 
     $inCode = 1 - $inCode if /^```/;
     next if $inCode;
@@ -52,7 +53,7 @@ foreach (@lines) {
     # Add pages
     if (/$newPagePath/) {
         $pagePath = $2;
-        $pagePath =~ /\/$/ or print "Page missing trailing /: $pagePath, line $.";
+        $pagePath =~ /\/$/ or print "Page missing trailing /: $pagePath, line $line";
         $anchors{$pagePath} = 1;
     }
 
@@ -71,13 +72,16 @@ foreach (@lines) {
     }
 
     # Add footnote definitions
-    $fns{$1} = $. if /^\[\^(.+?)\]:/;
+    $fns{$1} = $line if /^\[\^(.+?)\]:/;
 }
 
 $inCode and die "Error: unbalanced code block markers!";
 
 # Second pass: check anchors and footnotes exist
+$line = 0;
 foreach (@lines) {
+
+    $line++;
 
     /^```/ and $inCode = 1 - $inCode;
     next if $inCode;
@@ -87,7 +91,7 @@ foreach (@lines) {
     # Footnote references
     while (/.\[\^(.+?)\]/g) {
         my $fn = $1;
-        exists($fns{$fn}) and delete $fns{$fn} or print "Missing footnote: $fn, line $.";
+        exists($fns{$fn}) and delete $fns{$fn} or print "Missing footnote: $fn, line $line";
     }
 
     while (/(!{0,1})\[.+?\]\((.*?)\)/g) {
@@ -97,26 +101,26 @@ foreach (@lines) {
 
         if ($isImg) {
             unless(-e $filePath . $link) {
-                print "Image file $link not found in $filePath: line $.";
+                print "Image file $link not found in $filePath: line $line";
             }
         } else {
             if ($link =~ /^\/\.\./) {
                 if (!($link =~ /^...\/(latest|altair|bellatrix|capella|deneb)/)) {
-                    print "Link to non-existent book version, line $.: $link";
+                    print "Link to non-existent book version, line $line: $link";
                 }
             } elsif ($link =~ /^([#\/])/) {
                 my $anchor = ($1 eq '#') ? $pagePath . $link : $link;
                 unless (exists($anchors{$anchor})) {
-                    print "Anchor not found, line $.: $link";
+                    print "Anchor not found, line $line: $link";
                 }
             } elsif ($link eq '') {
-                print "Empty link, line $.";
+                print "Empty link, line $line";
             } elsif ($link =~ $domainMatch) {
-                print "Link to $1, line $."
+                print "Link to $1, line $line"
             } elsif ($link =~ /^http:/) {
-                print "HTTP link, line $.";
+                print "HTTP link, line $line";
             } elsif (not $link =~ /^https:\/\//) {
-                print "Suspicious link, line $.: $link";
+                print "Suspicious link, line $line: $link";
             }
         }
     }
