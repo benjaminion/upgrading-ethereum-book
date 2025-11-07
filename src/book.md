@@ -2482,8 +2482,8 @@ A deposit comprises the following items.
   - The `deposit_data_root` is basically a form of checksum. See below for how it is verified.
   - Finally, a `msg.value`. The message value is the amount of Ether (denominated in Wei, which are $10^{-18}$ ETH) that was sent with the transaction. This will normally be 32&nbsp;ETH for a new validator, but can be more or less. It must be,
     - at least one ETH,
-    - a whole number of ETH, and
-    - less than $2^{64}$ Gwei[^fn-gwei], which is 18.4 Billion ETH.
+    - a whole number of Gwei[^fn-gwei], and
+    - less than $2^{64}$ Gwei, which is 18.4 Billion ETH.
 
 The very last condition is formally to avoid overflowing a consensus layer `uint64`, but seems kind of redundant in practice.
 
