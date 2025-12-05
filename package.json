@@ -24,11 +24,11 @@
     "valid": "node --input-type=module -e 'import validateHtml from \"./bin/util/validate.js\"; validateHtml(\"dist/part2/building_blocks/ssz/index.html\")'"
   },
   "dependencies": {
-    "astro": "^5.16.3",
+    "astro": "^5.16.4",
     "hast-util-select": "^6.0.4",
     "hast-util-to-string": "^3.0.1",
     "loader-utils": "^3.3.1",
-    "markdownlint": "^0.39.0",
+    "markdownlint": "^0.40.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "svgo": "^4.0.0-rc.4"
