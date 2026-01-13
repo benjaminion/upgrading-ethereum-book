@@ -834,8 +834,8 @@ The hysteresis levels are controlled by the [hysteresis parameters](/part3/confi
 
 These are applied at the end of each epoch during [effective balance updates](/part3/transition/epoch/#effective-balances-updates). Every validator in the state (whether active or not) has its effective balance updated as follows:
 
-  - If actual balance is less than effective balance minus 0.25 ( `=` `HYSTERESIS_DOWNWARD_MULTIPLIER` `/` `HYSTERESIS_QUOTIENT`) increments (ETH), then reduce the effective balance by an increment.
-  - If actual balance is more than effective balance plus 1.25 ( `=` `HYSTERESIS_UPWARD_MULTIPLIER` `/` `HYSTERESIS_QUOTIENT`) increments (ETH), then increase the effective balance by an increment.
+  - If actual balance is less than effective balance minus 0.25 (`=` `HYSTERESIS_DOWNWARD_MULTIPLIER` `/` `HYSTERESIS_QUOTIENT`) increments (ETH), then reduce the effective balance by a whole number of increments.
+  - If actual balance is more than effective balance plus 1.25 (`=` `HYSTERESIS_UPWARD_MULTIPLIER` `/` `HYSTERESIS_QUOTIENT`) increments (ETH), then increase the effective balance by a whole number of increments.
 
 The effect of the hysteresis is that the effective balance cannot change more often than it takes for a validator's actual balance to change by 0.5 ETH, which would normally take several weeks or months.
 
