@@ -3642,7 +3642,7 @@ Target votes are always useful, but we only want to track attestations pertainin
 
 [^fn-eip7045-notes]: [EIP-7045](https://eips.ethereum.org/EIPS/eip-7045) proposes to change this in the [Deneb upgrade](/part4/history/deneb/) to accept and reward target votes for the whole of the current and previous epochs. Danny Ryan made an insightful presentation on the reasons for changing this, and a defence of why the changes remain fair to validators, in the [PEEPanEIP 114 session](https://www.youtube.com/watch?v=Z4tMgrreCN8).
 
-The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt{\tt SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.[^fn-five-slots]
+The choice of distance for including the source vote is interesting. It is chosen to be $\lfloor \sqrt\mathtt{SLOTS\_PER\_EPOCH} \rfloor = \lfloor \sqrt{32} \rfloor = 5$, which is the geometric mean of 1 and 32, the head and target values. It's a somewhat arbitrary choice, but is intended to put a fully correct attestation on an exponentially decreasing curve with respect to timeliness: each step down in (net) reward happens after an exponentially increasing number of slots.[^fn-five-slots]
 
 <a id="img_reward_timeliness"></a>
 <figure class="chart">
@@ -4058,7 +4058,7 @@ The penalty for validator $i$ is calculated as
 
 $$
 \begin{split}
-s_{i}B_{i} / (\tt{INACTIVITY\_SCORE\_BIAS} \times \tt{INACTIVITY\_PENALTY\_QUOTIENT\_BELLATRIX}) \\
+s_{i}B_{i} / (\mathtt{INACTIVITY\_SCORE\_BIAS} \times \mathtt{INACTIVITY\_PENALTY\_QUOTIENT\_BELLATRIX}) \\
 = \frac{s_{i}B_{i}}{4 \times 16{,}777{,}216}
 \end{split}
 $$
@@ -4925,22 +4925,22 @@ The basic equation of the BLS12-381 curve is $y^2=x^3+4$.[^fn-bls12381-refs]
 
 [^fn-bls12381-refs]: This [now deleted page](https://github.com/zkcrypto/pairing/blob/34aa52b0f7bef705917252ea63e5a13fa01af551/src/bls12_381/README.md) is the reference for much of this section. Lots of curve data is also in the [IETF specification](https://www.ietf.org/archive/id/draft-irtf-cfrg-pairing-friendly-curves-11.html#name-bls-curves-for-the-128-bit-).
 
-The key parameters for a BLS curve are set using a single parameter $\tt x$ (different from the $x$ in the curve equation!) that can be selected to give the curve nice properties for implementation. BLS12-381 is derived from the $k\equiv0\,\text{(mod 6)}$ case of Construction 6.6 in the [taxonomy](https://eprint.iacr.org/2006/372.pdf).
+The key parameters for a BLS curve are set using a single parameter $\mathtt{x}$ (different from the $x$ in the curve equation!) that can be selected to give the curve nice properties for implementation. BLS12-381 is derived from the $k\equiv0\,\text{(mod 6)}$ case of Construction 6.6 in the [taxonomy](https://eprint.iacr.org/2006/372.pdf).
 
 Specific design goals for BLS12-381 are:
 
-  - $\tt x$ has "low hamming weight", meaning that it has very few bits set to 1. This is particularly important for the efficiency of the algorithm that calculates pairings (the Miller loop).
+  - $\mathtt{x}$ has "low hamming weight", meaning that it has very few bits set to 1. This is particularly important for the efficiency of the algorithm that calculates pairings (the Miller loop).
   - The field modulus $q$ mentioned above is prime and has 383 bits or fewer, which makes 64-bit or 32-bit arithmetic on it more efficient.
   - The order $r$ of the subgroups we use is prime and has 255 bits or fewer, which is good for the same reason as above.
   - The security target is 128 bits - see [below](#security-level).
-  - To support ZK-SNARK schemes, we want to have a large power of two [root of unity](#roots-of-unity) in the field $F_r$. This means we want $2^n$ to be a factor of $r-1$, for some biggish $n$. Making $\tt x$ a multiple of $2^\frac{n}{2}$ will achieve this. This property is key to being able to use fast Fourier transforms for interesting things like polynomial multiplication.
+  - To support ZK-SNARK schemes, we want to have a large power of two [root of unity](#roots-of-unity) in the field $F_r$. This means we want $2^n$ to be a factor of $r-1$, for some biggish $n$. Making $\mathtt{x}$ a multiple of $2^\frac{n}{2}$ will achieve this. This property is key to being able to use fast Fourier transforms for interesting things like polynomial multiplication.
 
-The value ${\tt x}=$&nbsp;`-0xd201000000010000` (hexadecimal, note that it is negative) gives the largest $q$ and the lowest Hamming weight meeting these criteria. With this $\tt x$ value we have,
+The value $\mathtt{x}=$&nbsp;`-0xd201000000010000` (hexadecimal, note that it is negative) gives the largest $q$ and the lowest Hamming weight meeting these criteria. With this $\mathtt{x}$ value we have,
 
 | Parameter | &nbsp; | Equation | Value | Comments |
 | ---- | - | ---- | ---------------- | ---- |
-| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)}^2\allowbreak {({\tt x}^4-{\tt x}^2+1)}\allowbreak +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
-| Subgroup size | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
+| Field modulus | $q$ | $\frac{1}{3}{(\mathtt{x}-1)}^2\allowbreak {(\mathtt{x}^4-\mathtt{x}^2+1)}\allowbreak +\mathtt{x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Subgroup size | $r$ | ${(\mathtt{x}^4-\mathtt{x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
 
 ##### Field extensions
 
@@ -4954,7 +4954,7 @@ Let's construct $F_{q^2}$, the quadratic extension of $F_q$. In $F_{q^2}$ we wil
 
 Adding two elements is easy: ${(a, b) + (c, d)} = {a + bx + c + dx} = {(a+c) + (b+d)x} = {(a+c, b+d)}$. We just need to be sure to reduce $a+c$ and $b+d$ modulo $q$.
 
-What about multiplying? ${(a, b) \times (c, d)} = {(a + bx)(c + dx)} = {ac + (ad+bc)x+ bdx^2} = {\tt ???}$. Oops - what are we supposed to do with the $x^2$ that's appeared?
+What about multiplying? ${(a, b) \times (c, d)} = {(a + bx)(c + dx)} = {ac + (ad+bc)x+ bdx^2} = \mathtt{???}$. Oops - what are we supposed to do with the $x^2$ that's appeared?
 
 We need a rule for reducing polynomials so that they have a degree less than two. In this example we're going to take ${x^2 + 1} = 0$ as our rule, but we could make other choices. There are only two rules about our rule[^fn-efmr],
 
@@ -5346,9 +5346,9 @@ Note that, in both schemes, the easiest way to import the Affine point $(x, y)$ 
 
 | Parameter | &nbsp; | Equation | Value | Comments |
 | ---- | - | ---- | ---------------- | ---- |
-| Curve parameter| ${\tt x}$ | &nbsp; | `-0xd201000000010000` | |
-| Field modulus | $q$ | $\frac{1}{3}{({\tt x}-1)}^2\allowbreak {({\tt x}^4-{\tt x}^2+1)}\allowbreak +{\tt x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
-| Subgroup size: $\vert G_1\vert$, $\vert G_2\vert$, $\vert G_T\vert$ | $r$ | ${({\tt x}^4-{\tt x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
+| Curve parameter| $\mathtt{x}$ | &nbsp; | `-0xd201000000010000` | |
+| Field modulus | $q$ | $\frac{1}{3}{(\mathtt{x}-1)}^2\allowbreak {(\mathtt{x}^4-\mathtt{x}^2+1)}\allowbreak +\mathtt{x}$ | Hex: <span class="wrap">`0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab`</span><br/>Dec: <span class="wrap">4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787</span> | 381 bits, prime |
+| Subgroup size: $\vert G_1\vert$, $\vert G_2\vert$, $\vert G_T\vert$ | $r$ | ${(\mathtt{x}^4-\mathtt{x}^2+1)}$ | Hex: <span class="wrap">`0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`</span><br/>Dec: <span class="wrap">52435875175126190479447740508185965837690552500527637822603658699938581184513</span> | 255 bits,  prime |
 
 ##### Curve E(F_q)
 
